@@ -1,10 +1,13 @@
 import { Vector } from "./types";
 
 class Camera {
+    pos: Vector;
     width: number;
     height: number;
-    pos: Vector;
 
-    static init()
-    constructor()
+    constructor(pos: Vector, width: number, height: number) {
+        this.pos = pos;
+        this.width = width;
+        this.height = height;
+    }
 }

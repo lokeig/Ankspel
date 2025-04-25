@@ -1,21 +1,27 @@
+import { GameObject } from "./gameobject";
 import { SpriteSheet } from "./sprite";
-import { Vector } from "./types";
+import { Vector, vectorMul } from "./types";
 
 type tileType = "GRASS" | "ICE" | "STONE"
 
-export class Tile {
-    pos: Vector;
-    spriteSheet: SpriteSheet;
+export class Tile extends GameObject {
     type: tileType;
 
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType){
-        this.pos = pos;
-        this.spriteSheet = sprite;
+    constructor(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType, drawSize: number){
+        super(pos, width, height, sprite, drawSize);
+
         this.type = type;
     }
 
     getType(): string {
         return this.type;
+    }
+
+    update(){
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        this.sprite.draw(ctx, 1, 1, this.pos, this.drawSize, false);
     }
 }
 
@@ -36,13 +42,32 @@ export class Grid {
         return this.tiles.get(this.key(pos));
     }
 
+    getGridPos(pos: Vector): Vector {
+        return { x: Math.floor(pos.x / this.tileSize), y: Math.floor(pos.y / this.tileSize) }
+    }
+
+    getWorldPos(gridPos: Vector): Vector {
+        return { x: gridPos.x * this.tileSize, y: gridPos.y * this.tileSize } 
+    }
+
+    snap(pos: Vector): Vector {
+        return this.getWorldPos(this.getGridPos(pos));
+    }
+
+    getNearbyTiles(object: GameObject): Tile[] {
+            return [];
+    }
+
     isBlock(pos: Vector): boolean {
         return this.tiles.get(this.key(pos)) !== undefined
     }
+    setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
+        const size = this.tileSize;
 
-    setTile(pos: Vector, sprite: SpriteSheet, type: tileType) {
-        const value = new Tile(pos, sprite, type)
-        this.tiles.set(this.key(pos), value);
+        const pos = this.getWorldPos(gridPos);
+        const value = new Tile(pos, size, size, sprite, type, size)
+
+        this.tiles.set(this.key(gridPos), value);
     }
 
     setArea(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType) {
@@ -57,8 +82,7 @@ export class Grid {
 
     draw(ctx: CanvasRenderingContext2D) {
         for (const tile of this.tiles.values()) {
-            const pos: Vector = { x: tile.pos.x * this.tileSize, y: tile.pos.y * this.tileSize } 
-            tile.spriteSheet.draw(ctx, 1, 1, pos, this.tileSize, false);
+            tile.draw(ctx);
         }
     }
 }

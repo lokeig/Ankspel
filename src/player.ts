@@ -2,6 +2,7 @@ import { GameObject } from "./gameobject";
 import { Vector } from "./types";
 import { Input } from "./input"
 import { SpriteSheet, Animation, SpriteAnimator } from "./sprite";
+import { Grid } from "./tile";
 
 enum PlayerState {
     Idle,
@@ -16,7 +17,7 @@ const right = "RIGHT";
 
 
 export class Player extends GameObject {
-    private grounded: boolean = true;
+    grounded: boolean = true;
     private CONTROLS: Record<string, string>;
     private animator: SpriteAnimator;
     private state: PlayerState = PlayerState.Idle;
@@ -37,12 +38,9 @@ export class Player extends GameObject {
     }
 
     update(deltaTime: number): void {
-            //Gravity
-        if (!this.grounded) this.velocity.y += 1200 * deltaTime;
-
             //Player movement
         if (Input.isKeyPressed(this.CONTROLS.JUMP) && this.grounded) {
-            this.velocity.y = -500;
+            this.velocity.y = -250;
             this.grounded = false;
         }
 
@@ -58,9 +56,6 @@ export class Player extends GameObject {
         this.animator.update(deltaTime);
 
         this.animate();
-
-        this.pos.x += this.velocity.x * deltaTime;
-        this.pos.y += this.velocity.y * deltaTime;
     };
     
     
