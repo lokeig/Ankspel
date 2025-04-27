@@ -2,21 +2,20 @@ import { Vector } from "./types";
 
 export class SpriteSheet {
     image: HTMLImageElement = new Image;
-    frameWidth: number;
-    frameHeight: number;
+    frameSize: number;
+
   
-    constructor(imageSrc: string, frameWidth: number, frameHeight: number) {
+    constructor(imageSrc: string, frameSize: number) {
         this.image.src = imageSrc;
-        this.frameWidth = frameWidth;
-        this.frameHeight = frameHeight;
+        this.frameSize = frameSize
     }
   
     getFrame(row: number, col: number): { sx: number, sy: number, sw: number, sh: number } {
         return {
-            sx: col * this.frameWidth,
-            sy: row * this.frameHeight,
-            sw: this.frameWidth,
-            sh: this.frameHeight,
+            sx: col * this.frameSize,
+            sy: row * this.frameSize,
+            sw: this.frameSize,
+            sh: this.frameSize,
         };
     }
 

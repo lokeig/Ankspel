@@ -2,10 +2,10 @@ import { Vector } from "./types";
 import { SpriteSheet } from "./sprite";
 
 export abstract class GameObject {
-    pos: Vector;
-    width: number;
-    height: number;
-    velocity: Vector = { x: 0, y: 0 };
+    protected pos: Vector;
+    protected width: number;
+    protected height: number;
+    protected velocity: Vector = { x: 0, y: 0 };
     protected sprite: SpriteSheet;
     protected drawSize: number;
 
@@ -42,9 +42,7 @@ export abstract class GameObject {
             this.pos.x + this.width > block.pos.x   &&
             this.pos.y < block.pos.y + block.height &&
             this.pos.y + this.height > block.pos.y
-        );    }
-    setPos(newPos: Vector): void {
-        this.pos = newPos;
+        );    
     }
 
     getWidth(): number {

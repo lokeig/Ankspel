@@ -1,11 +1,15 @@
 import { GameObject } from "./gameobject";
 import { SpriteSheet } from "./sprite";
-import { Vector, vectorMul } from "./types";
+import { Vector } from "./types";
 
 type tileType = "GRASS" | "ICE" | "STONE"
 
 export class Tile extends GameObject {
     type: tileType;
+
+    private drawRow: number = 0;
+    private drawCol: number = 0;
+    private spriteIndex: number = 0;
 
     constructor(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType, drawSize: number){
         super(pos, width, height, sprite, drawSize);
@@ -20,57 +24,137 @@ export class Tile extends GameObject {
     update(){
     }
 
+    updateRowCol(){
+        this.getNeighbours();
+        const spriteLookup: Record<number, [number, number]> = {
+            0:  [5, 0],    
+            1:  [5, 4],   
+            2:  [4, 0],   
+            3:  [7, 2],
+            4:  [6, 1],  
+            5:  [6, 2],  
+            6:  [6, 3],  
+            7:  [6, 5],
+            8:  [4, 5],   
+            9:  [7, 4], 
+            10: [4, 4],  
+            11: [7, 1],   
+            12: [6, 4],  
+            13: [5, 5],   
+            14: [4, 2],   
+            15: [5, 2],   
+        };
+        const lookup = spriteLookup[this.spriteIndex];
+        this.drawRow = lookup ? lookup[0] : 0;
+        this.drawCol = lookup ? lookup[1] : 0;
+    }
+
     draw(ctx: CanvasRenderingContext2D) {
-        this.sprite.draw(ctx, 1, 1, this.pos, this.drawSize, false);
+        this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
+    }
+
+    tileEqual(tile: Tile | undefined){
+        if (!tile) return false;
+        return this.sprite.image.src === tile.sprite.image.src
+    }
+
+    getNeighbours() {
+        const x = Grid.getGridPos(this.pos).x;
+        const y = Grid.getGridPos(this.pos).y;
+
+        this.spriteIndex = 0;
+
+        const top   = this.tileEqual(Grid.getCell({ x: x, y: y - 1 }));
+        const right = this.tileEqual(Grid.getCell({ x: x + 1, y: y }));
+        const bot   = this.tileEqual(Grid.getCell({ x: x, y: y + 1 }));
+        const left  = this.tileEqual(Grid.getCell({ x: x - 1, y: y }));
+
+        // Cardinal
+        if (top)   this.spriteIndex += 1;
+        if (right) this.spriteIndex += 2;
+        if (bot)   this.spriteIndex += 4;
+        if (left)  this.spriteIndex += 8;
+
+        // Diagonal
+        const topRight = this.tileEqual(Grid.getCell({ x: x + 1, y: y - 1 })); 
+        const topLeft  = this.tileEqual(Grid.getCell({ x: x - 1, y: y - 1 })); 
+        const botRight = this.tileEqual(Grid.getCell({ x: x + 1, y: y + 1 })); 
+        const botLeft  = this.tileEqual(Grid.getCell({ x: x - 1, y: y + 1 })); 
+
+
+        if (right && topRight) this.spriteIndex += 16;
+        if (left  && topLeft ) this.spriteIndex += 32;
+        if (right && bot && botRight ) this.spriteIndex += 32;
+        if (left  && bot && botLeft )  this.spriteIndex += 32;
+
+
     }
 }
 
 export class Grid {
-    tileSize: number;
-    tiles: Map<string, Tile>;
+    static tileSize: number;
+    static tiles: Map<string, Tile>
 
-    constructor(tileSize: number) {
-        this.tileSize = tileSize;
-        this.tiles = new Map();
+    static init(size: number) {
+        this.tileSize = size;
+        this.tiles = new Map<string, Tile>();
     }
 
-    private key(pos: Vector): string {
-        return `${pos.x},${pos.y}`;
-    }
-
-    getCell(pos: Vector): Tile | undefined{
-        return this.tiles.get(this.key(pos));
-    }
-
-    getGridPos(pos: Vector): Vector {
+    static getGridPos(pos: Vector): Vector {
         return { x: Math.floor(pos.x / this.tileSize), y: Math.floor(pos.y / this.tileSize) }
     }
 
-    getWorldPos(gridPos: Vector): Vector {
+    static getWorldPos(gridPos: Vector): Vector {
         return { x: gridPos.x * this.tileSize, y: gridPos.y * this.tileSize } 
     }
 
-    snap(pos: Vector): Vector {
+    static snap(pos: Vector): Vector {
         return this.getWorldPos(this.getGridPos(pos));
     }
 
-    getNearbyTiles(object: GameObject): Tile[] {
-            return [];
+    static getNearbyTiles(object: GameObject): Set<Tile> {        
+
+        const pos =    object.getPos();
+        const width =  object.getWidth();
+        const height = object.getHeight();
+
+        const nearbyTiles: Set<Tile> = new Set();
+
+        let posX = pos.x - this.tileSize;
+        let posY = pos.y - this.tileSize;
+        while (posX < pos.x + width + this.tileSize) {
+            posY = pos.y - this.tileSize;
+            while (posY < pos.y + height + this.tileSize) {
+                const gridPos = this.getGridPos({ x: posX, y: posY });
+                if (this.isBlock(gridPos)) nearbyTiles.add(this.getCell(gridPos)!);
+                posY += this.tileSize;
+            }
+            posX += this.tileSize;
+        }
+        return nearbyTiles;
     }
 
-    isBlock(pos: Vector): boolean {
+    static key(pos: Vector): string {
+        return `${pos.x},${pos.y}`;
+    }
+
+    static isBlock(pos: Vector): boolean {
         return this.tiles.get(this.key(pos)) !== undefined
     }
-    setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
-        const size = this.tileSize;
 
+    static getCell(pos: Vector): Tile | undefined{
+        return this.tiles.get(this.key(pos));
+    }
+    
+    static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
+        const size = this.tileSize;
         const pos = this.getWorldPos(gridPos);
         const value = new Tile(pos, size, size, sprite, type, size)
 
         this.tiles.set(this.key(gridPos), value);
     }
 
-    setArea(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType) {
+    static setArea(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType) {
         for (let i = 0; i < width; i++) {
             const posX = pos.x + i;
             for (let j = 0; j < height; j++) {
@@ -80,9 +164,10 @@ export class Grid {
         }
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    static draw(ctx: CanvasRenderingContext2D) {
         for (const tile of this.tiles.values()) {
             tile.draw(ctx);
+            tile.updateRowCol();
         }
     }
 }
