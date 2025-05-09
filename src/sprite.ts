@@ -42,7 +42,8 @@ export class SpriteSheet {
 export type Animation = {
     frames: number,
     row: number,
-    fps: number
+    fps: number,
+    repeat: boolean
 }
 
 export class SpriteAnimator {
@@ -61,7 +62,13 @@ export class SpriteAnimator {
         const frameDuration = 1 / this.animation.fps;
         if (this.timer > frameDuration) {
             const framesToAdvance = Math.floor(this.timer / frameDuration);
-            this.currentFrame = (this.currentFrame + framesToAdvance) % this.animation.frames;
+            const nextFrame = this.currentFrame + framesToAdvance;
+            if (!this.animation.repeat && nextFrame > this.animation.frames - 1) {
+                this.currentFrame = this.animation.frames - 1;
+            } else {
+                this.currentFrame = nextFrame % this.animation.frames;
+            }
+        
             this.timer %= frameDuration;
         } 
     }
@@ -73,7 +80,8 @@ export class SpriteAnimator {
     animEqual(anim1: Animation, anim2: Animation){
         return anim1.fps    === anim2.fps    &&
                anim1.frames === anim2.frames &&
-               anim1.row    === anim2.row
+               anim1.row    === anim2.row    &&
+               anim1.repeat === anim2.repeat
     }
 
     setAnimation(animation: Animation) {

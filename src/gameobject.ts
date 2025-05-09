@@ -2,19 +2,14 @@ import { Vector } from "./types";
 import { SpriteSheet } from "./sprite";
 
 export abstract class GameObject {
-    protected pos: Vector;
-    protected width: number;
-    protected height: number;
-    protected velocity: Vector = { x: 0, y: 0 };
-    protected sprite: SpriteSheet;
-    protected drawSize: number;
-
-    constructor(pos: Vector, width: number, height: number, sprite: SpriteSheet, drawSize: number) {
+    public pos: Vector;
+    public width: number;
+    public height: number;
+ 
+    constructor(pos: Vector, width: number, height: number) {
         this.pos = pos;
         this.width = width;
         this.height = height;
-        this.sprite = sprite;
-        this.drawSize = drawSize;
     }
 
     getCenter(): Vector {

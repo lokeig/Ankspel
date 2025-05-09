@@ -1,4 +1,5 @@
 import { Game } from './game';
+import { Controls } from './types';
 
 
 const IMAGES = {
@@ -6,10 +7,11 @@ const IMAGES = {
     tileIce: '/assets/tileIce.png'
 };
 
-const CONTROLS = {
-    JUMP: " ", // SPACEBAR
-    LEFT: "a",
-    RIGHT: "d",
+const controls: Controls = {
+    jump: " ", // SPACEBAR
+    left: "a",
+    right: "d",
+    down: "s"
 };
 
-new Game("gameCanvas", IMAGES, CONTROLS);
+new Game("gameCanvas", IMAGES, controls);

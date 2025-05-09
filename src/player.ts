@@ -1,141 +1,69 @@
-import { GameObject } from "./gameobject";
-import { Vector } from "./types";
-import { Input } from "./input"
+import { Controls, Vector } from "./types";
 import { SpriteSheet, Animation, SpriteAnimator } from "./sprite";
-import { Tile, Grid } from "./tile";
+import { State, PlayerStateMachine } from "./state";
 
-type PlayerState = (
-    "Idle"    |
-    "Walking" |
-    "Jumping" |
-    "Falling"
-);
+export class Player {
 
-type Direction = "Left" | "Right";
-
-export class Player extends GameObject {
-    private grounded: boolean = true;
-    private CONTROLS: Record<string, string>;
     private animator: SpriteAnimator;
-    private state: PlayerState = "Idle";
-    private direction: Direction = "Left";
-
-    private jumpAmount = 8;
-    private speed = 70;
+    public readonly stateMachine: PlayerStateMachine;
 
     private animations: Record<string, Animation> = {
-        idle: { row: 0, frames: 1, fps: 8 },     
-        walk: { row: 1, frames: 5, fps: 8 },     
-        jump: { row: 2, frames: 2, fps: 4 },      
+        idle:   { row: 0, frames: 1, fps: 8, repeat: true },     
+        walk:   { row: 1, frames: 6, fps: 8, repeat: true },     
+        crouch: { row: 2, frames: 1, fps: 8, repeat: true },     
+        flap:   { row: 3, frames: 1, fps: 8, repeat: true },
+        jump:   { row: 4, frames: 1, fps: 8, repeat: false},
+        fall:   { row: 5, frames: 1, fps: 8, repeat: false},
+        slide:  { row: 6, frames: 1, fps: 8, repeat: true }      
     };
 
-    constructor(pos: Vector, sprite: SpriteSheet, CONTROLS: Record<string, string>) {
-        const width = 35;
-        const height = 68;
-        const drawSize = 96;
-        super(pos, width, height, sprite, drawSize);
+    private pos: Vector;
+    private drawSize: number;
+
+    constructor(pos: Vector, sprite: SpriteSheet, controls: Controls) {        
+        this.stateMachine = new PlayerStateMachine(pos, controls);
+        this.pos = pos;
+        this.drawSize = 96;
 
         this.animator = new SpriteAnimator(sprite, this.animations.idle);
-        this.CONTROLS = CONTROLS;
     }
 
-    private latestDirection = "Left";
     update(deltaTime: number): void {
-
-        this.state = "Idle"
-        const nearbyTiles = Grid.getNearbyTiles(this);
-
-            // Jumping
-        if (Input.isKeyJustPressed(this.CONTROLS.JUMP) && this.grounded) {
-            this.velocity.y = -this.jumpAmount;
-        }
-
-            // Walking
-        const walkLeft = Input.isKeyPressed(this.CONTROLS.LEFT);
-        const walkRight = Input.isKeyPressed(this.CONTROLS.RIGHT);
-
-        if (walkLeft)  this.direction = "Left";
-        if (walkRight) this.direction = "Right";
-
-        if (walkLeft && walkRight) {
-            this.direction = this.latestDirection === "Left" ? this.direction = "Right" : this.direction = "Left";
-        } else this.latestDirection = this.direction;
-        
-        if (walkLeft || walkRight) {
-            this.state = "Walking";
-            const direction = this.direction === "Right" ? 1 : -1;
-            this.velocity.x += this.speed * direction * deltaTime;
-        }
-            // Gravity
-        this.velocity.y += 15 * deltaTime;
-        this.pos.y += this.velocity.y;
-        this.verticalCollision(nearbyTiles);
-
-            // Friction
-        this.velocity.x *= 0.8;
-        this.pos.x += this.velocity.x;
-        this.horizontalCollision(nearbyTiles);
-
-            // Sprite update
+        this.pos = this.stateMachine.pos;
+        this.stateMachine.update(deltaTime);
         this.animator.update(deltaTime);
         this.animate();
     };
 
-    verticalCollision(tiles: Set<Tile>) {
-        this.grounded = false;
-
-        const corners = this.getCorners();
-        
-        for (const tile of tiles.values()) {
-            if (this.collision(tile)) {
-                if(this.velocity.y > 0) {
-                    this.pos.y = Grid.snap(corners.BL).y - this.height;
-                    this.grounded = true;
-                } else {
-                    this.pos.y = Grid.snap(corners.TL).y + Grid.tileSize;
-                }
-                this.velocity.y = 0;
-                break;
-            }
-        }
-    }
-    
-    horizontalCollision(tiles: Set<Tile>) {
-        const corners = this.getCorners();
-
-        for (const tile of tiles.values()) {
-            if (this.collision(tile)) {
-                if (this.velocity.x < 0) {
-                    this.pos.x = Grid.snap(corners.BL).x + Grid.tileSize;
-                } else {
-                    this.pos.x = Grid.snap(corners.BR).x - this.width;
-                }
-                this.velocity.x = 0;
-                break;
-            }
-        }
-    }
-    
-    getState(): PlayerState {
-        return this.state;
-    }
-    
     
     animate() {
-        if (this.state === "Idle")    { this.animator.setAnimation(this.animations.idle) }
-        if (this.state === "Walking") { this.animator.setAnimation(this.animations.walk) }
-        if (this.state === "Jumping") { this.animator.setAnimation(this.animations.jump) }
+        const state = this.stateMachine.getState();
+        if      (state === State.Idle)   {this.animator.setAnimation(this.animations.idle)}
+        else if (state === State.Flap)   {this.animator.setAnimation(this.animations.flap)}
+        else if (state === State.Move)   {this.animator.setAnimation(this.animations.walk)}
+        else if (state === State.Crouch) {this.animator.setAnimation(this.animations.crouch)}
+        else if (state === State.Slide)  {this.animator.setAnimation(this.animations.slide)}
+        else if (state === State.Jump)   {
+            if (this.stateMachine.velocity.y < 0) this.animator.setAnimation(this.animations.jump);
+                else                              this.animator.setAnimation(this.animations.fall);
+        }
+
     }
 
 
     draw(ctx: CanvasRenderingContext2D): void {
+        const width = this.stateMachine.width;
+        const height = this.stateMachine.height;
+        const x = this.pos.x;
+        const y = this.pos.y;
+
         ctx.fillStyle = "blue";
-        ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+        ctx.fillRect(x, y, width, height);
 
-        const flip = this.direction === "Left";
+        const flip = this.stateMachine.direction === "left";
 
-        const xPos = this.getCenter().x - (this.drawSize / 2);
-        const yPos = this.pos.y + (this.height - this.drawSize);
+        const xPos = this.pos.x + ((width - this.drawSize) / 2)
+        const yPos = this.pos.y + (height - this.drawSize);
 
         this.animator.draw(ctx, {x: xPos, y: yPos}, this.drawSize, flip);
     };
