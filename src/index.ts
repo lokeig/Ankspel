@@ -2,9 +2,10 @@ import { Game } from './game';
 import { Controls } from './types';
 
 
-const IMAGES = {
+export const images = {
     playerImage: '/assets/player.png',
-    tileIce: '/assets/tileIce.png'
+    tileIce: '/assets/tileIce.png',
+    background: '/assets/rainbow.jpg',
 };
 
 const controls: Controls = {
@@ -14,4 +15,4 @@ const controls: Controls = {
     down: "s"
 };
 
-new Game("gameCanvas", IMAGES, controls);
+new Game("gameCanvas", controls);

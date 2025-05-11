@@ -9,3 +9,17 @@ export type Controls = {
     jump: string,
     down: string
 }
+
+export type Neighbours = {
+    left: boolean,
+    right: boolean,
+    top: boolean,
+    bot: boolean,
+    topLeft: boolean,
+    topRight: boolean,
+    botLeft: boolean,
+    botRight: boolean
+}
+
+
+export type Direction = keyof Neighbours;

@@ -1,5 +1,4 @@
 import { Vector } from "./types";
-import { SpriteSheet } from "./sprite";
 
 export abstract class GameObject {
     public pos: Vector;
@@ -39,15 +38,4 @@ export abstract class GameObject {
             this.pos.y + this.height > block.pos.y
         );    
     }
-
-    getWidth(): number {
-        return this.width;
-    }
-
-    getHeight(): number {
-        return this.height;
-    }
-
-    abstract update(deltaTime: number): void;
-    abstract draw(ctx: CanvasRenderingContext2D, deltaTime: number): void;
 }

@@ -1,6 +1,7 @@
 import { Controls, Vector } from "./types";
 import { SpriteSheet, Animation, SpriteAnimator } from "./sprite";
-import { State, PlayerStateMachine } from "./state";
+import { PlayerStateMachine } from "./State/playerStateMachine";
+import { State } from "./State/playerState";
 
 export class Player {
 
@@ -23,14 +24,14 @@ export class Player {
     constructor(pos: Vector, sprite: SpriteSheet, controls: Controls) {        
         this.stateMachine = new PlayerStateMachine(pos, controls);
         this.pos = pos;
-        this.drawSize = 96;
+        this.drawSize = 64;
 
         this.animator = new SpriteAnimator(sprite, this.animations.idle);
     }
 
     update(deltaTime: number): void {
-        this.pos = this.stateMachine.pos;
         this.stateMachine.update(deltaTime);
+        this.pos = this.stateMachine.pos;
         this.animator.update(deltaTime);
         this.animate();
     };
