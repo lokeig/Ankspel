@@ -25,7 +25,6 @@ export class Game {
         Grid.setArea({ x: 9,  y: 11 }, 2,  4,  iceSprite, "ICE");
         Grid.setArea({ x: 9,  y: 5  }, 2,  4,  iceSprite, "ICE");
 
-        Grid.setArea({ x: 5,  y: 5  }, 2,  1    ,  iceSprite, "ICE");
         Grid.setArea({ x: 15, y: 7}, 3, 3, iceSprite, "ICE");
         Grid.setTile({ x: 15, y: 6}, iceSprite, "ICE");
 

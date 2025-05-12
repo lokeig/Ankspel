@@ -21,14 +21,16 @@ export class Grid {
     }
 
     static shift(gridPos: Vector, direction: Direction): Vector {
-        if (direction === "left")     return  { x: gridPos.x - 1, y: gridPos.y };
-        if (direction === "right")    return  { x: gridPos.x + 1, y: gridPos.y };
-        if (direction === "top")      return  { x: gridPos.x, y: gridPos.y - 1 };
-        if (direction === "bot")      return  { x: gridPos.x, y: gridPos.y + 1 };
-        if (direction === "topLeft")  return  { x: gridPos.x - 1, y: gridPos.y - 1 };
-        if (direction === "topRight") return  { x: gridPos.x + 1, y: gridPos.y - 1 }
-        if (direction === "botLeft")  return  { x: gridPos.x - 1, y: gridPos.y + 1 };
-                                      return  { x: gridPos.x + 1, y: gridPos.y + 1 }
+        switch (direction) {
+            case "left":     return  { x: gridPos.x - 1, y: gridPos.y };
+            case "right":    return  { x: gridPos.x + 1, y: gridPos.y };
+            case "top":      return  { x: gridPos.x, y: gridPos.y - 1 };
+            case "bot":      return  { x: gridPos.x, y: gridPos.y + 1 };
+            case "topLeft":  return  { x: gridPos.x - 1, y: gridPos.y - 1 };
+            case "topRight": return  { x: gridPos.x + 1, y: gridPos.y - 1 };
+            case "botLeft":  return  { x: gridPos.x - 1, y: gridPos.y + 1 };
+            case "botRight": return  { x: gridPos.x + 1, y: gridPos.y + 1 };
+        }
     }
 
 

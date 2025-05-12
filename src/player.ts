@@ -10,7 +10,7 @@ export class Player {
 
     private animations: Record<string, Animation> = {
         idle:   { row: 0, frames: 1, fps: 8, repeat: true },     
-        walk:   { row: 1, frames: 6, fps: 8, repeat: true },     
+        move:   { row: 1, frames: 6, fps: 8, repeat: true },     
         crouch: { row: 2, frames: 1, fps: 8, repeat: true },     
         flap:   { row: 3, frames: 1, fps: 8, repeat: true },
         jump:   { row: 4, frames: 1, fps: 8, repeat: false},
@@ -38,17 +38,20 @@ export class Player {
 
     
     animate() {
-        const state = this.stateMachine.getState();
-        if      (state === State.Idle)   {this.animator.setAnimation(this.animations.idle)}
-        else if (state === State.Flap)   {this.animator.setAnimation(this.animations.flap)}
-        else if (state === State.Move)   {this.animator.setAnimation(this.animations.walk)}
-        else if (state === State.Crouch) {this.animator.setAnimation(this.animations.crouch)}
-        else if (state === State.Slide)  {this.animator.setAnimation(this.animations.slide)}
-        else if (state === State.Jump)   {
-            if (this.stateMachine.velocity.y < 0) this.animator.setAnimation(this.animations.jump);
-                else                              this.animator.setAnimation(this.animations.fall);
+        switch (this.stateMachine.getState()) {
+            case State.Idle: this.animator.setAnimation(this.animations.idle); break;
+            case State.Flap: this.animator.setAnimation(this.animations.flap); break;
+            case State.Move: this.animator.setAnimation(this.animations.move); break;
+            case State.Crouch: this.animator.setAnimation(this.animations.crouch); break;
+            case State.Slide: this.animator.setAnimation(this.animations.slide); break;
+            case State.Jump:
+                if (this.stateMachine.velocity.y < 0) {
+                    this.animator.setAnimation(this.animations.jump);
+                } else {
+                    this.animator.setAnimation(this.animations.fall);
+                }
+                break;
         }
-
     }
 
 
