@@ -27,13 +27,13 @@ export class PlayerStateCrouch extends PlayerState {
 
             this.platformIgnoreTime.reset();
 
-            if (this.stateMachine.blockAboveIdle()) {
+            if (this.stateMachine.idleCollision()) {
                 const directionMultiplier = this.stateMachine.direction === "right" ? 1 : -1
                 this.stateMachine.velocity.x += 5 * directionMultiplier;
                 this.stateMachine.jumpEnabled = false;
             }
 
-            if (this.stateMachine.onPlatform) {
+            if (this.stateMachine.onPlatform()) {
                 this.stateMachine.jumpEnabled = false;
             }
         }
@@ -42,7 +42,7 @@ export class PlayerStateCrouch extends PlayerState {
     }
 
     public stateChange(): State {
-        if (Input.isKeyPressed(this.stateMachine.controls.down) || this.stateMachine.blockAboveIdle()) return State.None 
+        if (Input.isKeyPressed(this.stateMachine.controls.down) || this.stateMachine.idleCollision()) return State.None 
         if (this.stateMachine.grounded) return State.Idle
         return State.Jump;
     }

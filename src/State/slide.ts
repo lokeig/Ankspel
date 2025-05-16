@@ -2,7 +2,7 @@ import { Input } from "../input";
 import { Cooldown } from "./cooldown";
 import { PlayerState, State } from "./playerState";
 
-const slideHeight = 30;
+const slideHeight = 25;
 export class PlayerStateSlide extends PlayerState {
 
     private prevFriction: number = this.stateMachine.friction;
@@ -13,7 +13,7 @@ export class PlayerStateSlide extends PlayerState {
         this.platformIgnoreTime.setToReady();
 
         this.stateMachine.allowMove = false;
-        this.stateMachine.friction *= 0.5;
+        this.stateMachine.friction *= 0.3;
         this.stateMachine.height = slideHeight;
         this.stateMachine.pos.y += this.stateMachine.idleHeight - this.stateMachine.height;
     }
@@ -26,13 +26,13 @@ export class PlayerStateSlide extends PlayerState {
 
             this.platformIgnoreTime.reset();
 
-            if (this.stateMachine.blockAboveIdle()) {
+            if (this.stateMachine.idleCollision() && this.stateMachine.grounded) {
                 const directionMultiplier = this.stateMachine.direction === "right" ? 1 : -1
-                this.stateMachine.velocity.x += 5 * directionMultiplier;
+                this.stateMachine.velocity.x = 5 * directionMultiplier;
                 this.stateMachine.jumpEnabled = false;
             }
 
-            if (this.stateMachine.onPlatform) {
+            if (this.stateMachine.onPlatform()) {
                 this.stateMachine.jumpEnabled = false;
             }
         }
@@ -41,7 +41,7 @@ export class PlayerStateSlide extends PlayerState {
     }
 
     public stateChange(): State {
-        if (Input.isKeyPressed(this.stateMachine.controls.down) || this.stateMachine.blockAboveIdle()) return State.None 
+        if (Input.isKeyPressed(this.stateMachine.controls.down) || this.stateMachine.idleCollision()) return State.None 
         if (this.stateMachine.grounded) return State.Idle
         return State.Jump;
     }

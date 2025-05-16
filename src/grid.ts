@@ -1,15 +1,17 @@
 import { GameObject } from "./gameobject";
+import { Prop } from "./prop";
 import { SpriteSheet } from "./sprite";
 import { GridObject, Tile, tileType } from "./tile";
 import { Direction, Neighbours, Vector } from "./types";
 
 export class Grid {
-    static tileSize: number;
-    static tiles: Map<string, GridObject>
 
+    static tileSize: number;
+    static tiles = new Map<string, GridObject>();
+    static props = new Map<string, Array<Prop>>;
+    
     static init(size: number) {
         this.tileSize = size;
-        this.tiles = new Map<string, GridObject>();
     }
 
     static getGridPos(pos: Vector): Vector {
