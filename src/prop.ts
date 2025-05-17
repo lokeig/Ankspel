@@ -1,9 +1,9 @@
-import { PhysicsObject } from "./physicsObject";
+import { DynamicObject } from "./dynamicObject";
 import { SpriteSheet } from "./sprite";
 import { Vector } from "./types";
 
 
-export class Prop extends PhysicsObject {
+export class Prop extends DynamicObject {
     private drawSize;
     private spriteSheet: SpriteSheet;
 
@@ -29,8 +29,4 @@ export class Prop extends PhysicsObject {
     draw(ctx: CanvasRenderingContext2D) {
         this.spriteSheet.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
     }
-}
-
-export function createStone(pos: Vector) {
-    return 
 }

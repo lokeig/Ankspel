@@ -3,7 +3,7 @@ import { Vector } from "./types";
 import { Grid } from "./grid";
 
 
-export abstract class PhysicsObject extends GameObject {
+export abstract class DynamicObject extends GameObject {
 
     protected nearbyTiles = Grid.getNearbyTiles(this);
     public velocity: Vector = { x: 0, y: 0 };
@@ -11,12 +11,8 @@ export abstract class PhysicsObject extends GameObject {
     public friction: number = 0.8;
     public gravity: number = 27;
     public ignoreGravity: boolean = false;
-    
-    constructor(pos: Vector, width: number, height: number) {
-        super(pos, width, height);
-    }
+    public ignorePlatforms: boolean = false;
 
-    public ignorePlatforms = false;
     public tileCollision(horizontalCheck: boolean): boolean {
         for (const tile of this.nearbyTiles.values()) {
             if (this.collision(tile)) {
@@ -24,7 +20,7 @@ export abstract class PhysicsObject extends GameObject {
                     const belowPlatform = this.pos.y + this.height - (this.velocity.y) > tile.pos.y;
                     if (this.ignorePlatforms || belowPlatform || horizontalCheck) continue; 
                 }
-            return true;
+                return true;
             }
         }
         return false;
@@ -36,8 +32,7 @@ export abstract class PhysicsObject extends GameObject {
             if (this.velocity.y > 0) {
                 this.pos = Grid.snap(this, "bot");
                 this.grounded = true;
-            }
-            else {
+            } else {
                 this.pos = Grid.snap(this, "top");
             }
             this.velocity.y = 0;
@@ -47,9 +42,8 @@ export abstract class PhysicsObject extends GameObject {
     handleHorizontalCollision() {
         if (this.tileCollision(true)) {
             if (this.velocity.x > 0) {
-                this.pos = Grid.snap(this, "right")
-            }
-            else {
+                this.pos = Grid.snap(this, "right");
+            } else {
                 this.pos = Grid.snap(this, "left");
             }
             this.velocity.x = 0;

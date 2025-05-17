@@ -1,7 +1,6 @@
 import { Controls, Vector } from "../types";
-import { Grid } from "../grid";
 import { Input } from "../input";
-import { PhysicsObject } from "../physicsObject";
+import { DynamicObject } from "../dynamicObject";
 
 import { PlayerState, State } from "./playerState";
 import { PlayerStateIdle } from "./idle";
@@ -12,12 +11,13 @@ import { PlayerStateSlide } from "./slide";
 import { PlayerStateFlap } from "./flap";
 import { Cooldown } from "./cooldown";
 
-export class PlayerStateMachine extends PhysicsObject {
+export class PlayerStateMachine extends DynamicObject {
 
     public controls: Controls;
     private currentState: State = State.Idle;
     private states: Map<State, PlayerState> = new Map();
     public readonly idleHeight: number;    
+    public jumpJustPressed: boolean = false;
 
     // Moving
     public movespeed: number = 40;
@@ -25,7 +25,6 @@ export class PlayerStateMachine extends PhysicsObject {
     public direction: "left" | "right";
     private lastDirection: "left" | "right" = "left";
     public allowMove: boolean = true;
-
 
     // Jumping
     public jumpEnabled: boolean = true;
@@ -36,9 +35,7 @@ export class PlayerStateMachine extends PhysicsObject {
     private jumpMaxTime: number = 0.2;
     private coyoteTime = new Cooldown(0.08);
     public ignoreGravity: boolean = false;
-    public jumpJustPressed: boolean = false;
-
-
+    
 
     constructor(pos: Vector, controls: Controls) {
         const idleWidth = 18;
@@ -67,11 +64,11 @@ export class PlayerStateMachine extends PhysicsObject {
         
         this.currentState = newState;
         this.states.get(this.currentState)!.stateEntered();
-        
     }
 
     public update(deltaTime: number): void {
-        if (this.grounded) this.coyoteTime.reset();
+        if (this.grounded) 
+            this.coyoteTime.reset();
 
         this.jumpJustPressed = Input.isKeyJustPressed(this.controls.jump);
 
@@ -91,7 +88,7 @@ export class PlayerStateMachine extends PhysicsObject {
         this.coyoteTime.update(deltaTime);    
     }
 
-    public handleJump(deltaTime: number): void {
+    private handleJump(deltaTime: number): void {
         if (this.jumpEnabled && this.jumpJustPressed && !this.coyoteTime.isReady() && !this.isJumping) {
             this.isJumping = true;
             this.velocity.y = -this.minJump;
@@ -108,7 +105,7 @@ export class PlayerStateMachine extends PhysicsObject {
         }
     }
 
-    public move(deltaTime: number): void {
+    private move(deltaTime: number): void {
         const left =  Input.isKeyPressed(this.controls.left);
         const right = Input.isKeyPressed(this.controls.right);
 
@@ -159,9 +156,7 @@ export class PlayerStateMachine extends PhysicsObject {
 
         this.pos.y = prevPosY;
 
-        if (noCollisions) return false;
-        return allPlatforms;
-
+        return !noCollisions && allPlatforms
     }
 }
 

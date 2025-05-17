@@ -26,7 +26,7 @@ export abstract class GameObject {
             TL: this.pos,
             BL: { x: this.pos.x, y: this.pos.y + this.height },
             TR: { x: this.pos.x + this.width, y: this.pos.y },
-            BR: { x: this.pos.x + this.width, y: this.pos.y + this.height },
+            BR: { x: this.pos.x + this.width, y: this.pos.y + this.height }
         };
     }
 

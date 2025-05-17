@@ -1,9 +1,10 @@
 import { GameObject } from "./gameobject";
-import { Grid } from "./grid";
 import { SpriteSheet } from "./sprite";
 import { Direction, Neighbours, Vector } from "./types";
 
-export type tileType = "GRASS" | "ICE" | "STONE"
+export enum tileType {
+    Grass, Ice, Stone
+}
 
 const spriteLookup: Record<number, [number, number]> = {
     0:  [5, 0],    
@@ -60,6 +61,7 @@ export abstract class GridObject extends GameObject {
 
     protected drawRow: number = 0;
     protected drawCol: number = 0;
+    protected drawSize: number;
 
     protected spriteIndex: number = 0;
     public neighbours: Neighbours = { left: false, right: false, top: false, bot: false, topLeft: false, topRight: false, botRight: false, botLeft: false }
@@ -67,16 +69,16 @@ export abstract class GridObject extends GameObject {
 
     public platform: boolean;
 
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, platform = false){
+    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false){
         super(pos, width, height);
         this.sprite = sprite;
         this.type = type;
+        this.drawSize = drawSize;
         this.platform = platform;
     }
 
     tileEqual(obj: GridObject | undefined){
-        if (!obj) return false;
-        return this.type === obj.type;
+        return obj && this.type === obj.type;
     }
 
     setNeighbour(direction: Direction, value: boolean) {
@@ -84,14 +86,19 @@ export abstract class GridObject extends GameObject {
         this.update();
     }
 
-    public blipLeft:  Blip | undefined = undefined;
-    public blipRight: Blip | undefined = undefined;
+    public lipLeft:  GridObject | undefined = undefined;
+    public lipRight: GridObject | undefined = undefined;
 
     draw(ctx: CanvasRenderingContext2D): void {
-        const size = Math.max(this.height, this.width);
-        this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, size, false);
-        if (this.blipLeft)  this.sprite.draw(ctx, 7, 6, { x: this.blipLeft.pos.x - (this.width - this.blipLeft.width), y: this.blipLeft.pos.y },  size, false);
-        if (this.blipRight) this.sprite.draw(ctx, 7, 7, this.blipRight.pos, size, false)
+        this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
+        
+        if (this.lipLeft)  {
+            const drawOffsetX = this.lipLeft.pos.x - (this.width - this.lipLeft.width)
+            this.sprite.draw(ctx, 7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
+        }
+        if (this.lipRight) {
+            this.sprite.draw(ctx, 7, 7, this.lipRight.pos, this.drawSize, false);
+        }
     }
 
     abstract update(): void;
@@ -100,9 +107,9 @@ export abstract class GridObject extends GameObject {
 export class Tile extends GridObject{
     private size: number;
 
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, size: number, platform = false){
-        super(pos, sprite, type, size, size, platform);
-        this.size = size;
+    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false){
+        super(pos, sprite, type, width, height, drawSize, platform);
+        this.size = Math.max(width, height);
     }
 
     update(){
@@ -127,31 +134,38 @@ export class Tile extends GridObject{
         if (right && bot && botRight)  this.spriteIndex += 64;
         if (left  && bot && botLeft)   this.spriteIndex += 128;
 
-        let hasBlipLeft  = false;
-        let hasBlipRight = false;
+        let hasLipLeft  = false;
+        let hasLipRight = false;
         if (!top) {
-            if (!left) hasBlipLeft = true;
-            if (!right) hasBlipRight = true;
+            if (!left) {
+                hasLipLeft = true;
+            }
+            if (!right) {
+                hasLipRight = true;
+            }
         }
         if (top && bot) {
-            if (botRight && right && !topRight && !left)  hasBlipLeft  = true;
-            if (botLeft  && left  && !topLeft  && !right) hasBlipRight = true;
+            if (botRight && right && !topRight && !left)  {
+                hasLipLeft  = true;
+            }
+            if (botLeft  && left  && !topLeft  && !right) {
+                hasLipRight = true;
+            }
         }
 
         const width = Math.floor(this.size / 4)
-        if (hasBlipLeft) this.blipLeft   = new Blip({x: this.pos.x - width, y: this.pos.y}, this.sprite, this.type, width, this.height) 
-            else this.blipLeft = undefined;
-        if (hasBlipRight) this.blipRight = new Blip({x: this.pos.x + Grid.tileSize, y: this.pos.y}, this.sprite, this.type, width, this.height)
-            else this.blipRight = undefined;
+
+        if (hasLipLeft) {
+            this.lipLeft = new Tile({ x: this.pos.x - width, y: this.pos.y }, this.sprite, this.type, width, this.height, this.drawSize, true) 
+        } else {
+            this.lipLeft = undefined;
+        }
+
+        if (hasLipRight) {
+            this.lipRight = new Tile({ x: this.pos.x + this.width, y: this.pos.y }, this.sprite, this.type, width, this.height, this.drawSize, true)
+        } else { 
+            this.lipRight = undefined; 
+        }
     }
-}
-
-
-export class Blip extends GridObject {
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number){
-        super(pos, sprite, type, width, height, true);
-    }
-
-    update() { }
 }
 

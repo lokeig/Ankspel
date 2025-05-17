@@ -1,5 +1,4 @@
 import { GameObject } from "./gameobject";
-import { Prop } from "./prop";
 import { SpriteSheet } from "./sprite";
 import { GridObject, Tile, tileType } from "./tile";
 import { Direction, Neighbours, Vector } from "./types";
@@ -8,7 +7,6 @@ export class Grid {
 
     static tileSize: number;
     static tiles = new Map<string, GridObject>();
-    static props = new Map<string, Array<Prop>>;
     
     static init(size: number) {
         this.tileSize = size;
@@ -76,10 +74,10 @@ export class Grid {
             while (posY < pos.y + height + this.tileSize * 2) {
                 const gridPos = this.getGridPos({ x: posX, y: posY });
                 if (this.isBlock(gridPos)) {
-                    const tile = this.getCell(gridPos)!;
+                    const tile = this.getTile(gridPos)!;
                     nearbyTiles.push(tile)
-                    if (tile.blipLeft)  nearbyTiles.push(tile.blipLeft);
-                    if (tile.blipRight) nearbyTiles.push(tile.blipRight);
+                    if (tile.lipLeft)  nearbyTiles.push(tile.lipLeft);
+                    if (tile.lipRight) nearbyTiles.push(tile.lipRight);
                 }
                 posY += this.tileSize;
             }
@@ -96,54 +94,49 @@ export class Grid {
         return this.tiles.get(this.key(pos)) !== undefined;
     }
 
-    static getCell(pos: Vector): GridObject | undefined{
+    static getTile(pos: Vector): GridObject | undefined{
         return this.tiles.get(this.key(pos));
     }
     
     static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
         const size = this.tileSize;
         const pos = this.getWorldPos(gridPos);
-        const value = new Tile(pos, sprite, type, size);
+        const value = new Tile(pos, sprite, type, size, size, size);
         this.tiles.set(this.key(gridPos), value);
 
         value.neighbours = this.getNeighbours(gridPos);
         value.update();
 
-        for (const [key, hasNeighbour] of Object.entries(value.neighbours) as [Direction, boolean][]) {
-            const tile = this.getCell(this.shift(this.getGridPos(value.pos), key));
+        for (const [key, _] of Object.entries(value.neighbours) as [Direction, boolean][]) {
+            const tile = this.getTile(this.shift(this.getGridPos(value.pos), key));
             if (!tile) continue;
-
-            if (key === "left"     && hasNeighbour) tile.setNeighbour("right", true)
-            if (key === "right"    && hasNeighbour) tile.setNeighbour("left", true)
-            if (key === "top"      && hasNeighbour) tile.setNeighbour("bot", true)
-            if (key === "bot"      && hasNeighbour) tile.setNeighbour("top", true)
-            if (key === "topLeft"  && hasNeighbour) tile.setNeighbour("botRight", true)
-            if (key === "topRight" && hasNeighbour) tile.setNeighbour("botLeft", true)
-            if (key === "botLeft"  && hasNeighbour) tile.setNeighbour("topRight", true)
-            if (key === "botRight" && hasNeighbour) tile.setNeighbour("topLeft", true)
+            
+            switch (key) {
+                case "left"     : tile.setNeighbour("right", true);    break;
+                case "right"    : tile.setNeighbour("left", true);     break;
+                case "top"      : tile.setNeighbour("bot", true);      break;
+                case "bot"      : tile.setNeighbour("top", true);      break;
+                case "topLeft"  : tile.setNeighbour("botRight", true); break;
+                case "topRight" : tile.setNeighbour("botLeft", true);  break;
+                case "botLeft"  : tile.setNeighbour("topRight", true); break;
+                case "botRight" : tile.setNeighbour("topLeft", true);  break;
+            }
         }
     }
 
     static getNeighbours(gridPos: Vector): Neighbours {
-        const tile = this.getCell(gridPos);
-
-        const neighbours: Neighbours = { left: false, right: false, top: false, bot: false, topLeft: false, topRight: false, botRight: false, botLeft: false }
+        const tile = this.getTile(gridPos);
+        const neighbours: Neighbours = { 
+            left: false, right: false, top: false, bot: false, topLeft: false, topRight: false, botRight: false, botLeft: false 
+        }
         if (!tile) return neighbours;
        
         for (const [key, _] of Object.entries(neighbours) as [Direction, boolean][]) {
-            if (tile.tileEqual(this.getCell(this.shift(gridPos, key)))) neighbours[key] = true;
-        }
-        return neighbours;
-    }
-
-    static setArea(pos: Vector, width: number, height: number, sprite: SpriteSheet, type: tileType) {
-        for (let i = 0; i < width; i++) {
-            const posX = pos.x + i;
-            for (let j = 0; j < height; j++) {
-                const posY = pos.y + j;
-                this.setTile({x: posX, y: posY}, sprite, type);
+            if (tile.tileEqual(this.getTile(this.shift(gridPos, key)))) {
+                neighbours[key] = true;
             }
         }
+        return neighbours;
     }
 
     static draw(ctx: CanvasRenderingContext2D) {

@@ -1,12 +1,14 @@
 import { Controls, Vector } from "./types";
 import { SpriteSheet, Animation, SpriteAnimator } from "./sprite";
 import { PlayerStateMachine } from "./State/playerStateMachine";
-import { State } from "./State/playerState";
+import { PlayerState, State } from "./State/playerState";
 
 export class Player {
 
     private animator: SpriteAnimator;
-    public readonly stateMachine: PlayerStateMachine;
+    private stateMachine: PlayerStateMachine;
+    private currentState: State = State.Idle;
+    private states: Map<State, PlayerState> = new Map();
 
     private animations: Record<string, Animation> = {
         idle:   { row: 0, frames: 1, fps: 8, repeat: true },     
@@ -49,8 +51,7 @@ export class Player {
                     this.animator.setAnimation(this.animations.jump);
                 } else {
                     this.animator.setAnimation(this.animations.fall);
-                }
-                break;
+                } break;
         }
     }
 

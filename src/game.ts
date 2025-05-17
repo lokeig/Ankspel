@@ -1,9 +1,10 @@
 import { Player } from './player.ts';
 import { Input } from './input.ts';
 import { SpriteSheet } from "./sprite";
-import { Controls } from './types.ts';
+import { Controls, Vector } from './types.ts';
 import { Grid } from './grid.ts';
 import { images } from './index.ts';
+import { tileType } from './tile.ts';
 
 export class Game {
     canvas: HTMLCanvasElement;
@@ -16,22 +17,19 @@ export class Game {
         this.ctx = this.canvas.getContext('2d')!;
 
         Grid.init(32);
+        Input.init();
 
-        const iceSprite = new SpriteSheet(images.tileIce, 16);
+        this.fillArea({ x: 5,  y: 14 }, 25, 2, tileType.Ice);
+        this.fillArea({ x: 23, y: 5  }, 6,  8, tileType.Ice);
+        this.fillArea({ x: 3,  y: 8  }, 2,  8, tileType.Ice);
+        this.fillArea({ x: 9,  y: 11 }, 2,  4, tileType.Ice);
+        this.fillArea({ x: 9,  y: 5  }, 2,  4, tileType.Ice);
+        this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
 
-        Grid.setArea({ x: 5,  y: 14 }, 25, 2,  iceSprite, "ICE");
-        Grid.setArea({ x: 23, y: 5  }, 6,  8,  iceSprite, "ICE");
-        Grid.setArea({ x: 3,  y: 8  }, 2,  8,  iceSprite, "ICE");
-        Grid.setArea({ x: 9,  y: 11 }, 2,  4,  iceSprite, "ICE");
-        Grid.setArea({ x: 9,  y: 5  }, 2,  4,  iceSprite, "ICE");
-
-        Grid.setArea({ x: 15, y: 7}, 3, 3, iceSprite, "ICE");
-        Grid.setTile({ x: 15, y: 6}, iceSprite, "ICE");
+        this.createTile({ x: 15, y: 6}, tileType.Ice);
 
         this.player = new Player({ x: 500, y: 350 }, new SpriteSheet(images.playerImage, 32), controls);
 
-
-        Input.init();
         requestAnimationFrame(this.gameLoop);
     }
 
@@ -43,6 +41,22 @@ export class Game {
         this.draw()
 
         requestAnimationFrame(this.gameLoop);
+    }
+
+    createTile(pos: Vector, type: tileType): void {
+        const imgSrc = `/assets/tile${tileType[type]}.png`;
+        Grid.setTile(pos, new SpriteSheet(imgSrc, 16), type);
+    }
+
+
+    fillArea(pos: Vector, width: number, height: number, type: tileType) {
+        for (let i = 0; i < width; i++) {
+            const posX = pos.x + i;
+            for (let j = 0; j < height; j++) {
+                const posY = pos.y + j;
+                this.createTile({x: posX, y: posY}, type);
+            }
+        }
     }
 
     update(deltaTime: number) {
