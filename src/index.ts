@@ -6,6 +6,7 @@ export const images = {
     playerImage: '/assets/player.png',
     tileIce: '/assets/tileIce.png',
     background: '/assets/rainbow.jpg',
+    prop: '/assets/props.png'
 };
 
 const controls: Controls = {

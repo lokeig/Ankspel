@@ -21,5 +21,12 @@ export type Neighbours = {
     botRight: boolean
 }
 
-
 export type Direction = keyof Neighbours;
+
+export enum PlayerState {
+    Standing,
+    Flying,
+    Slide,
+    Crouch,
+    Flap
+}

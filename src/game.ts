@@ -1,16 +1,17 @@
-import { Player } from './player.ts';
+import { Player } from './Player/player.ts';
 import { Input } from './input.ts';
 import { SpriteSheet } from "./sprite";
 import { Controls, Vector } from './types.ts';
 import { Grid } from './grid.ts';
 import { images } from './index.ts';
 import { tileType } from './tile.ts';
+import { Prop } from './prop.ts';
 
 export class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     player: Player;
-
+    prop: Prop;
     constructor(canvasID: string, controls: Controls) {
 
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
@@ -25,6 +26,8 @@ export class Game {
         this.fillArea({ x: 9,  y: 11 }, 2,  4, tileType.Ice);
         this.fillArea({ x: 9,  y: 5  }, 2,  4, tileType.Ice);
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
+
+        this.prop = new Prop({x: 250, y: 2}, 16, 16, new SpriteSheet(images.prop, 16), 32)
 
         this.createTile({ x: 15, y: 6}, tileType.Ice);
 
@@ -61,6 +64,7 @@ export class Game {
 
     update(deltaTime: number) {
         this.player.update(deltaTime);
+        this.prop.update(deltaTime);
     }
     
     
@@ -68,6 +72,7 @@ export class Game {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.imageSmoothingEnabled = false;
         this.player.draw(this.ctx);
+        this.prop.draw(this.ctx);
         Grid.draw(this.ctx);
     }
 }

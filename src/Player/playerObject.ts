@@ -1,21 +1,10 @@
-import { Controls, Vector } from "../types";
-import { Input } from "../input";
 import { DynamicObject } from "../dynamicObject";
+import { Input } from "../input";
+import { Cooldown } from "../cooldown";
+import { Controls, Vector } from "../types";
 
-import { PlayerState, State } from "./playerState";
-import { PlayerStateIdle } from "./idle";
-import { PlayerStateMove } from "./move";
-import { PlayerStateJump } from "./jump";
-import { PlayerStateCrouch } from "./crouch";
-import { PlayerStateSlide } from "./slide";
-import { PlayerStateFlap } from "./flap";
-import { Cooldown } from "./cooldown";
-
-export class PlayerStateMachine extends DynamicObject {
-
+export class PlayerObject extends DynamicObject {
     public controls: Controls;
-    private currentState: State = State.Idle;
-    private states: Map<State, PlayerState> = new Map();
     public readonly idleHeight: number;    
     public jumpJustPressed: boolean = false;
 
@@ -43,53 +32,31 @@ export class PlayerStateMachine extends DynamicObject {
         super(pos, idleWidth, idleHeight)
         this.idleHeight = idleHeight;
 
-        this.states.set(State.Idle, new PlayerStateIdle(this));
-        this.states.set(State.Move, new PlayerStateMove(this));
-        this.states.set(State.Jump, new PlayerStateJump(this));
-        this.states.set(State.Crouch, new PlayerStateCrouch(this));
-        this.states.set(State.Slide, new PlayerStateSlide(this));
-        this.states.set(State.Flap, new PlayerStateFlap(this));
-
         this.controls = controls;
 
         this.direction = "left";
     }
 
-    public getState(): State {
-        return this.currentState;
-    }
-
-    public changeState(newState: State): void {
-        this.states.get(this.currentState)!.stateExited();
-        
-        this.currentState = newState;
-        this.states.get(this.currentState)!.stateEntered();
-    }
-
     public update(deltaTime: number): void {
-        if (this.grounded) 
-            this.coyoteTime.reset();
-
         this.jumpJustPressed = Input.isKeyJustPressed(this.controls.jump);
 
-        const state = this.states.get(this.currentState)!;
-        state.stateUpdate(deltaTime);
-        
-        const nextState = state.stateChange();
-        if (nextState !== State.None) {
-            this.changeState(nextState);
+        if (this.grounded) {
+            this.coyoteTime.reset();
         }
 
+        if (this.allowMove) {
+            this.move(deltaTime);
+        }
 
-        if (this.allowMove) this.move(deltaTime);
         this.handleJump(deltaTime);
         this.updatePosition(deltaTime);        
-        
         this.coyoteTime.update(deltaTime);    
     }
 
     private handleJump(deltaTime: number): void {
+
         if (this.jumpEnabled && this.jumpJustPressed && !this.coyoteTime.isReady() && !this.isJumping) {
+            console.log("JUMPUPDATE")
             this.isJumping = true;
             this.velocity.y = -this.minJump;
             this.jumpTime = 0;
@@ -159,5 +126,3 @@ export class PlayerStateMachine extends DynamicObject {
         return !noCollisions && allPlatforms
     }
 }
-
-
