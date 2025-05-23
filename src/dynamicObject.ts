@@ -8,20 +8,28 @@ export abstract class DynamicObject extends GameObject {
     protected nearbyTiles = Grid.getNearbyTiles(this);
     public velocity: Vector = { x: 0, y: 0 };
     public grounded: boolean = false;
-    public friction: number = 0.8;
+    public friction: number = 10;
     public gravity: number = 27;
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 
     public tileCollision(horizontalCheck: boolean): boolean {
         for (const tile of this.nearbyTiles.values()) {
-            if (this.collision(tile)) {
-                if (tile.platform) {
-                    const belowPlatform = this.pos.y + this.height - (this.velocity.y) > tile.pos.y;
-                    if (this.ignorePlatforms || belowPlatform || horizontalCheck) continue; 
-                }
+            if (!this.collision(tile)) {
+                continue;
+            }
+
+            if (!tile.platform) {
                 return true;
             }
+            
+            const bottomPosY = Math.floor(this.pos.y + this.height - this.velocity.y);
+            const belowPlatform = bottomPosY > tile.pos.y;
+            if (horizontalCheck || belowPlatform || this.ignorePlatforms) {
+                continue;
+            }
+
+            return true;
         }
         return false;
     }

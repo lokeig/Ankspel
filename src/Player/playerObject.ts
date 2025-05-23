@@ -1,30 +1,20 @@
 import { DynamicObject } from "../dynamicObject";
-import { Input } from "../input";
-import { Cooldown } from "../cooldown";
-import { Controls, Vector } from "../types";
+import { Controls, Direction, Vector } from "../types";
+import { PlayerJump } from "./playerJump";
+import { PlayerMove } from "./playerMove";
 
 export class PlayerObject extends DynamicObject {
+
     public controls: Controls;
     public readonly idleHeight: number;    
-    public jumpJustPressed: boolean = false;
 
-    // Moving
-    public movespeed: number = 40;
-    public friction: number = 10;
-    public direction: "left" | "right";
-    private lastDirection: "left" | "right" = "left";
-    public allowMove: boolean = true;
+    private playerMove = new PlayerMove();
+    private playerJump = new PlayerJump();
 
-    // Jumping
     public jumpEnabled: boolean = true;
-    public isJumping: boolean = false;
-    private minJump: number = 6;
-    private jumpForce: number = 27;
-    private jumpTime: number = 0;
-    private jumpMaxTime: number = 0.2;
-    private coyoteTime = new Cooldown(0.08);
-    public ignoreGravity: boolean = false;
-    
+    public moveEnabled: boolean = true;
+
+    public direction: Direction;
 
     constructor(pos: Vector, controls: Controls) {
         const idleWidth = 18;
@@ -33,62 +23,29 @@ export class PlayerObject extends DynamicObject {
         this.idleHeight = idleHeight;
 
         this.controls = controls;
-
-        this.direction = "left";
+        this.direction = "left"
     }
+
 
     public update(deltaTime: number): void {
-        this.jumpJustPressed = Input.isKeyJustPressed(this.controls.jump);
-
         if (this.grounded) {
-            this.coyoteTime.reset();
+            this.playerJump.resetCoyote();
         }
 
-        if (this.allowMove) {
-            this.move(deltaTime);
+        if (this.moveEnabled) {
+            this.velocity.x = this.playerMove.getVelocity(deltaTime, this.velocity.x, this.controls);
+            this.direction = this.playerMove.getDirection();
         }
 
-        this.handleJump(deltaTime);
-        this.updatePosition(deltaTime);        
-        this.coyoteTime.update(deltaTime);    
+        if (this.jumpEnabled) {
+            this.velocity.y = this.playerJump.getVelocity(deltaTime, this.velocity.y, this.controls)
+        }
+
+        this.updatePosition(deltaTime);
     }
 
-    private handleJump(deltaTime: number): void {
 
-        if (this.jumpEnabled && this.jumpJustPressed && !this.coyoteTime.isReady() && !this.isJumping) {
-            console.log("JUMPUPDATE")
-            this.isJumping = true;
-            this.velocity.y = -this.minJump;
-            this.jumpTime = 0;
-        }
-
-        if (!Input.isKeyPressed(this.controls.jump) || (this.jumpTime > this.jumpMaxTime)) {
-            this.isJumping = false;
-        }
-
-        if (Input.isKeyPressed(this.controls.jump) && this.isJumping) {
-            this.velocity.y -= this.jumpForce * deltaTime
-            this.jumpTime += deltaTime;
-        }
-    }
-
-    private move(deltaTime: number): void {
-        const left =  Input.isKeyPressed(this.controls.left);
-        const right = Input.isKeyPressed(this.controls.right);
-
-        if (left && right) {
-            this.direction = this.lastDirection === "left" ? "right" : "left";
-        } else {
-            if (left)  this.direction = "left";
-            if (right) this.direction = "right";
-
-            this.lastDirection = this.direction;
-        }
-        const directionMultiplier = Number(right) - Number(left);
-        this.velocity.x += this.movespeed * directionMultiplier * deltaTime
-    }
-
-    idleCollision(): boolean {
+    public idleCollision(): boolean {
         const prevHeight = this.height;
         const prevY = this.pos.y;
 
@@ -103,7 +60,7 @@ export class PlayerObject extends DynamicObject {
         return returnValue;
     }
 
-    onPlatform(): boolean {
+    public onPlatform(): boolean {
         if (!this.grounded) return false;
 
         let allPlatforms = true;
@@ -124,5 +81,9 @@ export class PlayerObject extends DynamicObject {
         this.pos.y = prevPosY;
 
         return !noCollisions && allPlatforms
+    }
+
+    public jumpReady(): boolean {
+        return this.playerJump.jumpReady();
     }
 }

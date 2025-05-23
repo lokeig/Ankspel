@@ -7,10 +7,6 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
 
     private flapSpeed: number = 2;
 
-    public stateEntered(object: PlayerObject): void {
-        object.allowMove = true;
-    }
-
     public stateUpdate(deltaTime: number, playerObject: PlayerObject): void {
         if (playerObject.velocity.y > this.flapSpeed) {
             playerObject.ignoreGravity = true;
@@ -20,7 +16,7 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
 
     public stateChange(playerObject: PlayerObject): PlayerState {
 
-        if (Input.isKeyPressed(playerObject.controls.down)) {
+        if (Input.keyDown(playerObject.controls.down)) {
             return PlayerState.Crouch;
         }
 
@@ -28,7 +24,7 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
             return PlayerState.Standing;
         }
 
-        if (Input.isKeyPressed(playerObject.controls.jump)) {
+        if (Input.keyDown(playerObject.controls.jump)) {
             return PlayerState.Flap
         }
 

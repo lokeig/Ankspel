@@ -24,38 +24,35 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
     public stateEntered(playerObject: PlayerObject): void {
         this.platformIgnoreTime.setToReady();
 
-        playerObject.allowMove = false;
+        playerObject.moveEnabled = false;
         playerObject.height = this.newHeight;
         playerObject.pos.y += playerObject.idleHeight - playerObject.height;
     }
 
     public stateUpdate(deltaTime: number, playerObject: PlayerObject): void {    
 
-        playerObject.jumpEnabled = false;
-
-        if (playerObject.jumpJustPressed) { 
+        playerObject.jumpEnabled = true;
+        
+        if (Input.keyPress(playerObject.controls.jump)) { 
             this.platformIgnoreTime.reset();
             
-            if (playerObject.grounded && playerObject.idleCollision()) {
-                const directionMultiplier = playerObject.direction === "right" ? 1 : -1
-                playerObject.velocity.x = 5 * directionMultiplier;
-                playerObject.jumpEnabled = false;
-            }
-
             if (playerObject.onPlatform()) {
                 playerObject.jumpEnabled = false;
             }
+
+            if (playerObject.grounded && playerObject.idleCollision()) {
+                const directionMultiplier = playerObject.direction === "right" ? 1 : -1
+                playerObject.velocity.x = 7 * directionMultiplier;
+                playerObject.jumpEnabled = false;
+            }
         }
-
-        playerObject.jumpEnabled = true;
-
 
         playerObject.ignorePlatforms = !this.platformIgnoreTime.isReady();
         this.platformIgnoreTime.update(deltaTime);
     }
 
     public stateChange(playerObject: PlayerObject): PlayerState {
-        if (Input.isKeyPressed(playerObject.controls.down) || playerObject.idleCollision()) {
+        if (Input.keyDown(playerObject.controls.down) || playerObject.idleCollision()) {
             return this.crouch ? PlayerState.Crouch : PlayerState.Slide; 
         }
         if (playerObject.grounded) {
@@ -67,6 +64,10 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
     public stateExited(playerObject: PlayerObject): void {
         playerObject.pos.y -= playerObject.idleHeight - playerObject.height;
         playerObject.height = playerObject.idleHeight;
+        
         playerObject.ignorePlatforms = false;
+
+        playerObject.jumpEnabled = true;
+        playerObject.moveEnabled = true;
     }
 }

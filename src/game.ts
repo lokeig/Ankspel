@@ -6,12 +6,14 @@ import { Grid } from './grid.ts';
 import { images } from './index.ts';
 import { tileType } from './tile.ts';
 import { Prop } from './prop.ts';
+// import { Prop } from './prop.ts';
 
 export class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     player: Player;
-    prop: Prop;
+    prop = new Prop({ x: 150, y: 5}, 32, 32, new SpriteSheet(images.prop, 16), 32);
+
     constructor(canvasID: string, controls: Controls) {
 
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
@@ -27,7 +29,6 @@ export class Game {
         this.fillArea({ x: 9,  y: 5  }, 2,  4, tileType.Ice);
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
 
-        this.prop = new Prop({x: 250, y: 2}, 16, 16, new SpriteSheet(images.prop, 16), 32)
 
         this.createTile({ x: 15, y: 6}, tileType.Ice);
 
@@ -41,8 +42,9 @@ export class Game {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         this.update(deltaTime);
-        this.draw()
-
+        this.prop.update(deltaTime);
+        this.draw();
+        Input.update();
         requestAnimationFrame(this.gameLoop);
     }
 
@@ -64,7 +66,6 @@ export class Game {
 
     update(deltaTime: number) {
         this.player.update(deltaTime);
-        this.prop.update(deltaTime);
     }
     
     

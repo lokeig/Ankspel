@@ -41,8 +41,8 @@ export class Player {
     }
 
     update(deltaTime: number): void {
-        this.playerObject.update(deltaTime);
         this.stateMachine.update(deltaTime);
+        this.playerObject.update(deltaTime);
         this.animator.update(deltaTime);
         this.animate();
     };
@@ -51,8 +51,8 @@ export class Player {
     animate() {
         switch (this.stateMachine.getState()) {
             case PlayerState.Standing: {
-                const left = Input.isKeyPressed(this.playerObject.controls.left);
-                const right = Input.isKeyPressed(this.playerObject.controls.right);
+                const left = Input.keyDown(this.playerObject.controls.left);
+                const right = Input.keyDown(this.playerObject.controls.right);
                 if ((left || right) && !(left && right)) {
                     this.animator.setAnimation(this.animations.walk);
                 } else {
@@ -79,7 +79,6 @@ export class Player {
         const x = this.playerObject.pos.x;
         const y = this.playerObject.pos.y;
 
-        //DEBUGGING
         ctx.fillStyle = "blue";
         ctx.fillRect(x, y, width, height);
 
