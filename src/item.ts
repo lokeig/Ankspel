@@ -1,58 +1,56 @@
 import { DynamicObject } from "./dynamicObject";
+import { PlayerObject } from "./Player/playerObject";
 import { SpriteSheet } from "./sprite";
-import { StateMachine } from "./stateMachine";
-import { Vector } from "./types";
+import { Direction, Vector } from "./types";
 
-
-export class itemObject extends DynamicObject {
-    public pickedup: boolean = false;
-
-    update(deltaTime: number) {
-        if (!this.pickedup) {
-            this.updatePosition(deltaTime);
-        }
-    }
+export enum ThrowType {
+    drop,
+    upwards,
+    light,
+    hard,
+    hardDiagonal
 }
 
-export enum itemState {
-    Loaded,
-    Empty
-}
+export abstract class Item extends DynamicObject{
 
-export abstract class Item {
-    private drawSize;
-    private spriteSheet: SpriteSheet;
+    protected drawSize;
+    protected spriteSheet: SpriteSheet;
 
     public collidable: boolean = false;
-    
-    private itemObject: itemObject;
-    private stateMachine: StateMachine<itemState, itemObject>;
+    public owner: PlayerObject | undefined; // Spawner eventually
 
-    private drawCol: number = 0;
-    private drawRow: number = 0;
-
+    protected drawCol: number = 0;
+    protected drawRow: number = 0;
 
     constructor(pos: Vector, width: number, height: number, spriteSheet: SpriteSheet, drawSize: number) {
-        this.itemObject = new itemObject(pos, width, height);
-        this.stateMachine = new StateMachine(itemState.Loaded, this.itemObject);
-
+        super(pos, width, height);
         this.spriteSheet = spriteSheet;
         this.drawSize = drawSize;
-
-        // this.drawCol = drawCol;
-        // this.drawRow = drawRow;
     }
 
-    update(deltaTime: number) {     
-        //this.stateMachine.update(deltaTime);
-        this.itemObject.update(deltaTime);
+    abstract interact(): void;
+    abstract itemUpdate(deltaTime: number): void;
+    update(deltaTime: number): void {
+        if (this.owner) {
+            this.pos.x += this.owner.velocity.x;
+            this.pos.y += this.owner.velocity.y;
+            this.direction = this.owner.direction;
+        } else {
+            this.physicsPositionUpdate(deltaTime)
+        }
+        this.itemUpdate(deltaTime);
     }
 
+    throw(throwType: ThrowType) {
+
+    }
 
     draw(ctx: CanvasRenderingContext2D) {
-        const xPos = this.itemObject.pos.x + ((this.itemObject.width - this.drawSize) / 2)
-        const yPos = this.itemObject.pos.y + (this.itemObject.height - this.drawSize);
+        const xPos = this.pos.x + ((this.width - this.drawSize) / 2);
+        const yPos = this.pos.y + (this.height - this.drawSize);
 
-        this.spriteSheet.draw(ctx, this.drawRow, this.drawCol, {x: xPos, y: yPos}, this.drawSize, false);
+        const flip = this.direction === "left";
+
+        this.spriteSheet.draw(ctx, this.drawRow, this.drawCol, {x: xPos, y: yPos}, this.drawSize, flip);
     }
 }

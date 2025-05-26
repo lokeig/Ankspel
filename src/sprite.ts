@@ -28,8 +28,8 @@ export class SpriteSheet {
             ctx.scale(-1, 1);
             ctx.translate(-pos.x - size / 2, -pos.y); 
         }
-        ctx.drawImage(
-        this.image,
+        ctx.drawImage(    
+            this.image,
             sx, sy,
             sw, sh,
             pos.x, pos.y,

@@ -1,5 +1,6 @@
 import { DynamicObject } from "../dynamicObject";
-import { Controls, Direction, Vector } from "../types";
+import { Item } from "../item";
+import { Controls, Vector } from "../types";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
 
@@ -14,7 +15,7 @@ export class PlayerObject extends DynamicObject {
     public jumpEnabled: boolean = true;
     public moveEnabled: boolean = true;
 
-    public direction: Direction;
+    public holding: Item | undefined;
 
     constructor(pos: Vector, controls: Controls) {
         const idleWidth = 18;
@@ -41,7 +42,7 @@ export class PlayerObject extends DynamicObject {
             this.velocity.y = this.playerJump.getVelocity(deltaTime, this.velocity.y, this.controls)
         }
 
-        this.updatePosition(deltaTime);
+        this.physicsPositionUpdate(deltaTime);
     }
 
 
@@ -52,7 +53,7 @@ export class PlayerObject extends DynamicObject {
         this.height = this.idleHeight;
         this.pos.y -= this.idleHeight - prevHeight;
         
-        const returnValue = this.tileCollision(false)
+        const returnValue = this.tileCollision()
 
         this.pos.y = prevY;
         this.height = prevHeight;
@@ -61,7 +62,9 @@ export class PlayerObject extends DynamicObject {
     }
 
     public onPlatform(): boolean {
-        if (!this.grounded) return false;
+        if (!this.grounded) {
+            return false;
+        }
 
         let allPlatforms = true;
         let noCollisions = true;

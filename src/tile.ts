@@ -1,6 +1,6 @@
-import { GameObject } from "./gameobject";
+import { StaticObject } from "./staticObject";
 import { SpriteSheet } from "./sprite";
-import { Direction, Neighbours, Vector } from "./types";
+import { Vector } from "./types";
 
 export enum tileType {
     Grass, Ice, Stone
@@ -56,73 +56,19 @@ const spriteLookup: Record<number, [number, number]> = {
     255: [1, 3]
 };
 
-export abstract class GridObject extends GameObject {
-    public type: tileType;
-
-    protected drawRow: number = 0;
-    protected drawCol: number = 0;
-    protected drawSize: number;
-
-    protected spriteIndex: number = 0;
-    public neighbours: Neighbours = { left: false, right: false, top: false, bot: false, topLeft: false, topRight: false, botRight: false, botLeft: false }
-    protected sprite: SpriteSheet;
-
-    public platform: boolean;
-
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false){
-        super(pos, width, height);
-        this.sprite = sprite;
-        this.type = type;
-        this.drawSize = drawSize;
-        this.platform = platform;
-    }
-
-    tileEqual(obj: GridObject | undefined){
-        return obj && this.type === obj.type;
-    }
-
-    setNeighbour(direction: Direction, value: boolean) {
-        this.neighbours[direction] = value;
-        this.update();
-    }
-
-    public lipLeft:  GridObject | undefined = undefined;
-    public lipRight: GridObject | undefined = undefined;
-
-    draw(ctx: CanvasRenderingContext2D): void {
-        this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
-        
-        if (this.lipLeft)  {
-            const drawOffsetX = this.lipLeft.pos.x - (this.width - this.lipLeft.width)
-            this.sprite.draw(ctx, 7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
-        }
-        if (this.lipRight) {
-            this.sprite.draw(ctx, 7, 7, this.lipRight.pos, this.drawSize, false);
-        }
-    }
-
-    abstract update(): void;
-}
-
-export class Tile extends GridObject{
+export class Tile extends StaticObject{
     private size: number;
 
     constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false){
         super(pos, sprite, type, width, height, drawSize, platform);
         this.size = Math.max(width, height);
-    }
-
-    update(){
-        this.setSpriteIndex();
-        const lookup = spriteLookup[this.spriteIndex];
-        this.drawRow = lookup ? lookup[0] : 3;
-        this.drawCol = lookup ? lookup[1] : 3;
+        this.spriteLookup = spriteLookup;
     }
 
     setSpriteIndex() { 
         this.spriteIndex = 0;
 
-        const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.neighbours
+        const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.neighbours;
 
         if (top)   this.spriteIndex += 1;
         if (right) this.spriteIndex += 2;
@@ -133,6 +79,11 @@ export class Tile extends GridObject{
         if (left  && top && topLeft)   this.spriteIndex += 32;
         if (right && bot && botRight)  this.spriteIndex += 64;
         if (left  && bot && botLeft)   this.spriteIndex += 128;
+    }
+
+    setLip() {
+
+        const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.neighbours;
 
         let hasLipLeft  = false;
         let hasLipRight = false;
