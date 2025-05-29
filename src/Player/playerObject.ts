@@ -1,5 +1,6 @@
 import { DynamicObject } from "../dynamicObject";
 import { Item } from "../item";
+import { StaticObject } from "../staticObject";
 import { Controls, Vector } from "../types";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
@@ -45,6 +46,17 @@ export class PlayerObject extends DynamicObject {
         this.physicsPositionUpdate(deltaTime);
     }
 
+    public handleVerticalCollision(tile: StaticObject) {
+        if (this.velocity.y > 0) {
+            this.grounded = true;
+            this.pos.y = tile.pos.y - this.height;
+        } else {
+            this.pos.y = tile.pos.y + tile.height;
+            this.playerJump.isJumping = false;
+        }
+        this.velocity.y = 0;
+    }
+
 
     public idleCollision(): boolean {
         const prevHeight = this.height;
@@ -53,7 +65,7 @@ export class PlayerObject extends DynamicObject {
         this.height = this.idleHeight;
         this.pos.y -= this.idleHeight - prevHeight;
         
-        const returnValue = this.tileCollision()
+        const returnValue = this.tileCollision(true)
 
         this.pos.y = prevY;
         this.height = prevHeight;

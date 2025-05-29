@@ -23,7 +23,7 @@ export class Player {
         slide:  { row: 6, frames: 1, fps: 8, repeat: true }      
     };
 
-    private playerObject: PlayerObject;
+    public playerObject: PlayerObject;
     private stateMachine: StateMachine<PlayerState, PlayerObject>;
 
     constructor(pos: Vector, sprite: SpriteSheet, controls: Controls) {    

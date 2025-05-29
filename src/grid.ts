@@ -1,25 +1,30 @@
 import { ItemHandler } from "./itemHandler";
-import { TileManager } from "./tileManager";
+import { TileHandler } from "./tileHandler";
+import { PlayerHandler } from "./playerHandler";
 
 export class Grid {
 
-    public static tileManager: TileManager;
-    public static itemManager: ItemHandler;
+    public static tileHandler: TileHandler;
+    public static itemHandler: ItemHandler;
+    public static playerHandler: PlayerHandler;
 
     public static gridSize: number;
     
     static init(size: number) {
         this.gridSize = size;
-        this.tileManager = new TileManager(size);
-        this.itemManager = new ItemHandler(size);
+        this.tileHandler = new TileHandler(size);
+        this.itemHandler = new ItemHandler(size);
+        this.playerHandler = new PlayerHandler(size);
     }
 
     static update(deltaTime: number) {
-        this.itemManager.update(deltaTime);
+        this.itemHandler.update(deltaTime, this.tileHandler);
+        this.playerHandler.update(deltaTime, this.tileHandler, this.itemHandler)
     }
 
     static draw(ctx: CanvasRenderingContext2D) {
-        this.tileManager.draw(ctx);
-        this.itemManager.draw(ctx);
+        this.tileHandler.draw(ctx);
+        this.itemHandler.draw(ctx);
+        this.playerHandler.draw(ctx);
     }
 }

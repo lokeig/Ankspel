@@ -1,10 +1,9 @@
-import { GameObject } from "./gameobject";
 import { StaticObject } from "./staticObject";
 import { SpriteSheet } from "./sprite";
 import { Tile, tileType } from "./tile";
 import { Direction, getReverseDirection, Neighbours, Vector } from "./types";
 
-export class TileManager {
+export class TileHandler {
 
     private gridSize: number;
     private tiles = new Map<string, StaticObject>();

@@ -10,7 +10,6 @@ import { images } from './images.ts';
 export class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    player: Player;
 
     constructor(canvasID: string, controls: Controls) {
 
@@ -30,9 +29,9 @@ export class Game {
         this.createTile({ x: 15, y: 6}, tileType.Ice);
 
         const shotgun = new Shotgun({ x: 150, y: 0 }, new SpriteSheet(images.shotgun, 32));
-        Grid.itemManager.addItem(shotgun);
+        Grid.itemHandler.addItem(shotgun);
 
-        this.player = new Player({ x: 500, y: 350 }, new SpriteSheet(images.playerImage, 32), controls);
+        Grid.playerHandler.addPlayer({ x: 13, y: 11 }, controls, images.playerImage);
 
         requestAnimationFrame(this.gameLoop);
     }
@@ -44,6 +43,7 @@ export class Game {
 
         this.update(deltaTime);
         this.draw();
+
         Input.update();
 
         requestAnimationFrame(this.gameLoop);
@@ -51,7 +51,7 @@ export class Game {
 
     createTile(pos: Vector, type: tileType): void {
         const imgSrc = `/assets/tile${tileType[type]}.png`;
-        Grid.tileManager.setTile(pos, new SpriteSheet(imgSrc, 16), type);
+        Grid.tileHandler.setTile(pos, new SpriteSheet(imgSrc, 16), type);
     }
 
 
@@ -66,7 +66,6 @@ export class Game {
     }
 
     update(deltaTime: number) {
-        this.player.update(deltaTime);
         Grid.update(deltaTime);
     }
     
@@ -84,7 +83,6 @@ export class Game {
         // const scaleFactor = 1;
         // this.ctx.scale(scaleFactor, scaleFactor);
 
-        this.player.draw(this.ctx);
         Grid.draw(this.ctx);
 
         this.ctx.restore();
