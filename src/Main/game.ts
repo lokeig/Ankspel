@@ -1,17 +1,28 @@
-import { Player } from './Player/player.ts';
-import { Input } from './input.ts';
-import { SpriteSheet } from "./sprite";
-import { Controls, Vector } from './types.ts';
-import { Grid } from './grid.ts';
-import { tileType } from './tile.ts';
-import { Shotgun } from './weapon.ts';
-import { images } from './images.ts';
+import { images } from "./images";
+import { Input } from "./Status/Common/input";
+import { SpriteSheet } from "./Status/Common/sprite";
+import { Controls, Vector } from "./Status/Common/types";
+import { Grid } from "./Status/Grid/grid";
+import { tileType } from "./Status/StaticObjects/tile";
+
+
+const controls: Controls = {
+    jump: " ", // SPACEBAR
+
+    left: "a",
+    right: "d",
+    down: "s",
+    up: "w",
+
+    shoot: "r",
+    pickup: "e",
+};
 
 export class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
 
-    constructor(canvasID: string, controls: Controls) {
+    constructor(canvasID: string) {
 
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
@@ -28,8 +39,8 @@ export class Game {
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
         this.createTile({ x: 15, y: 6}, tileType.Ice);
 
-        const shotgun = new Shotgun({ x: 150, y: 0 }, new SpriteSheet(images.shotgun, 32));
-        Grid.itemHandler.addItem(shotgun);
+        Grid.itemHandler.addShotgun({ x: 10, y: 2 }, images.shotgun)
+        Grid.itemHandler.addShotgun({ x: 20, y: 2 }, images.shotgun)
 
         Grid.playerHandler.addPlayer({ x: 13, y: 11 }, controls, images.playerImage);
 

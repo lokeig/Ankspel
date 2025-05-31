@@ -1,9 +1,10 @@
-import { Input } from "../input";
-import { Controls, Direction } from "../types";
+import { Input } from "../../../Common/input";
+import { Direction, Controls, getReverseDirection } from "../../../Common/types";
+
 
 export class PlayerMove {
 
-    public movespeed: number = 40;
+    public movespeed: number = 44;
 
     private direction: Direction = "left";
     private lastDirection: Direction = "left";
@@ -17,7 +18,7 @@ export class PlayerMove {
         const directionMultiplier = Number(right) - Number(left);
 
         if (left && right) {
-            this.direction = this.flipDirection(this.lastDirection);
+            this.direction = getReverseDirection(this.lastDirection);
         } else {
             if (left) {
                 this.direction = "left";
@@ -30,14 +31,6 @@ export class PlayerMove {
 
         currentVelocityX += this.movespeed * directionMultiplier * deltaTime;
         return currentVelocityX;
-    }
-
-    private flipDirection(direction: Direction): Direction {
-        if (direction === "left") {
-            return "right";
-        } else {
-            return "left";
-        }
     }
 
     public getDirection(): Direction {

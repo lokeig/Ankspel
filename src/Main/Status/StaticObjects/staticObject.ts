@@ -1,7 +1,9 @@
-import { GameObject } from "./gameobject";
-import { SpriteSheet } from "./sprite";
+import { GameObject } from "../Common/ObjectTypes/gameObject";
+import { SpriteSheet } from "../Common/sprite";
+import { Neighbours, Vector, Direction } from "../Common/types";
 import { tileType } from "./tile";
-import { Direction, Neighbours, Vector } from "./types";
+
+
 
 export abstract class StaticObject extends GameObject {
     public type: tileType;
@@ -12,13 +14,15 @@ export abstract class StaticObject extends GameObject {
     protected spriteLookup: Record<number, [number, number]> = {};
 
     protected spriteIndex: number = 0;
-    public neighbours: Neighbours = { left: false, right: false, top: false, bot: false, 
-                                      topLeft: false, topRight: false, botRight: false, botLeft: false }
+    public neighbours: Neighbours = {
+        left: false, right: false, top: false, bot: false,
+        topLeft: false, topRight: false, botRight: false, botLeft: false
+    }
     protected sprite: SpriteSheet;
 
     public platform: boolean;
 
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false){
+    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false) {
         super(pos, width, height);
         this.sprite = sprite;
         this.type = type;
@@ -26,7 +30,7 @@ export abstract class StaticObject extends GameObject {
         this.platform = platform;
     }
 
-    tileEqual(obj: StaticObject | undefined){
+    tileEqual(obj: StaticObject | undefined) {
         return obj && this.type === obj.type;
     }
 
@@ -35,13 +39,13 @@ export abstract class StaticObject extends GameObject {
         this.update();
     }
 
-    public lipLeft:  StaticObject | undefined = undefined;
+    public lipLeft: StaticObject | undefined = undefined;
     public lipRight: StaticObject | undefined = undefined;
 
     draw(ctx: CanvasRenderingContext2D): void {
         this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
-        
-        if (this.lipLeft)  {
+
+        if (this.lipLeft) {
             const drawOffsetX = this.lipLeft.pos.x - (this.width - this.lipLeft.width)
             this.sprite.draw(ctx, 7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
         }
@@ -54,7 +58,7 @@ export abstract class StaticObject extends GameObject {
 
     abstract setLip(): void;
 
-    update(){
+    update() {
         this.setSpriteIndex();
         this.setLip();
         const lookup = this.spriteLookup[this.spriteIndex];

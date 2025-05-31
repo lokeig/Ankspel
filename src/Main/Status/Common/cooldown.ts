@@ -16,4 +16,8 @@ export class Cooldown {
     setToReady() {
         this.timeCounted = this.cooldownTime;
     }
+
+    getPercentageReady(): number {
+        return this.timeCounted / this.cooldownTime;
+    }
 }

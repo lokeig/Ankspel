@@ -1,29 +1,26 @@
-import { Input } from "../../input";
-import { PlayerState } from "../../types"
-import { StateInterface } from "../../stateMachine";
-import { PlayerObject } from "../playerObject";
-import { Cooldown } from "../../cooldown";
+import { Cooldown } from "../../../Common/cooldown";
+import { Input } from "../../../Common/input";
+import { StateInterface } from "../../../Common/stateMachine";
+import { PlayerState } from "../../../Common/types";
+import { PlayerObject } from "../PlayerObject/playerObject";
+
 
 export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
 
     private platformIgnoreTime = new Cooldown(0.15);
     private newHeight: number;
-    private frictionIncrease: number;
     private crouch: boolean;
 
     constructor(crouch: boolean = false) {
         super();
         this.crouch = crouch;
 
-        this.newHeight = 30;
-        if (crouch) {
-            this.newHeight = 15;
-        }
-        this.frictionIncrease = 1.2;
+        this.newHeight = 20;
     }
     public stateEntered(playerObject: PlayerObject): void {
         this.platformIgnoreTime.setToReady();
 
+        playerObject.friction = playerObject.slideFriction;
         playerObject.moveEnabled = false;
         playerObject.height = this.newHeight;
         playerObject.pos.y += playerObject.idleHeight - playerObject.height;
@@ -41,8 +38,7 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
             }
 
             if (playerObject.grounded && playerObject.idleCollision()) {
-                const directionMultiplier = playerObject.direction === "right" ? 1 : -1
-                playerObject.velocity.x = 7 * directionMultiplier;
+                playerObject.velocity.x = 7 * playerObject.getDirectionMultiplier();
                 playerObject.jumpEnabled = false;
             }
         }
@@ -53,7 +49,10 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
 
     public stateChange(playerObject: PlayerObject): PlayerState {
         if (Input.keyDown(playerObject.controls.down) || playerObject.idleCollision()) {
-            return this.crouch ? PlayerState.Crouch : PlayerState.Slide; 
+            if (this.crouch && (!playerObject.grounded || Math.abs(playerObject.velocity.x) < 3 || playerObject.idleCollision())) {
+                return PlayerState.Crouch;
+            }
+            return PlayerState.Slide;
         }
         if (playerObject.grounded) {
             return PlayerState.Standing;
@@ -69,5 +68,7 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
 
         playerObject.jumpEnabled = true;
         playerObject.moveEnabled = true;
+
+        playerObject.friction = playerObject.standardFriction;
     }
 }

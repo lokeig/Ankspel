@@ -1,6 +1,7 @@
+import { SpriteSheet } from "../Common/sprite";
+import { Vector } from "../Common/types";
 import { StaticObject } from "./staticObject";
-import { SpriteSheet } from "./sprite";
-import { Vector } from "./types";
+
 
 export enum tileType {
     Grass, Ice, Stone

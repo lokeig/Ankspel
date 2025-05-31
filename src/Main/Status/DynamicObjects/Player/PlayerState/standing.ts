@@ -1,7 +1,8 @@
-import { Input } from "../../input";
-import { PlayerState } from "../../types"
-import { StateInterface } from "../../stateMachine";
-import { PlayerObject } from "../playerObject";
+import { Input } from "../../../Common/input";
+import { StateInterface } from "../../../Common/stateMachine";
+import { PlayerState } from "../../../Common/types";
+import { PlayerObject } from "../PlayerObject/playerObject";
+
 
 export class PlayerStanding extends StateInterface<PlayerState, PlayerObject> {
 

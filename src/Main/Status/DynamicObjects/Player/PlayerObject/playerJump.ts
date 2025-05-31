@@ -1,6 +1,7 @@
-import { Cooldown } from "../cooldown";
-import { Input } from "../input";
-import { Controls } from "../types";
+import { Cooldown } from "../../../Common/cooldown";
+import { Input } from "../../../Common/input";
+import { Controls } from "../../../Common/types";
+
 
 export class PlayerJump {
     public isJumping: boolean = false;

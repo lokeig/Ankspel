@@ -1,7 +1,8 @@
-import { StaticObject } from "./staticObject";
-import { SpriteSheet } from "./sprite";
-import { Tile, tileType } from "./tile";
-import { Direction, getReverseDirection, Neighbours, Vector } from "./types";
+import { SpriteSheet } from "../Common/sprite";
+import { Vector, Direction, getReverseDirection, Neighbours } from "../Common/types";
+import { StaticObject } from "../StaticObjects/staticObject";
+import { tileType, Tile } from "../StaticObjects/tile";
+
 
 export class TileHandler {
 

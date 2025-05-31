@@ -1,12 +1,13 @@
-import { GameObject } from "./gameobject";
-import { Direction, Vector } from "./types";
-import { StaticObject } from "./staticObject";
-import { Item } from "./item";
+import { GameObject } from "../../Common/ObjectTypes/gameObject";
+import { Vector, Direction } from "../../Common/types";
+import { StaticObject } from "../../StaticObjects/staticObject";
+import { Item } from "../Items/item";
+
+
 
 export abstract class DynamicObject extends GameObject {
 
     public nearbyTiles: Array<StaticObject> = [];
-
     public nearbyItems: Array<Item> = [];
 
     public velocity: Vector = { x: 0, y: 0 };
@@ -40,6 +41,10 @@ export abstract class DynamicObject extends GameObject {
             return true;
         }
         return false;
+    }
+
+    public getDirectionMultiplier(): number {
+        return this.direction === "left" ? -1 : 1;
     }
 
     public handleHorizontalCollision(tile: StaticObject) {
@@ -98,6 +103,7 @@ export abstract class DynamicObject extends GameObject {
         if (!this.ignoreGravity) {
             this.velocity.y += this.gravity * deltaTime;
         }
+
         this.velocity.x *= 1 / (1 + (deltaTime * this.friction));
 
         this.pos.x += this.velocity.x

@@ -8,8 +8,10 @@ export type Controls = {
     right: string,
     jump: string,
     down: string,
+    up: string,
+
     shoot: string,
-    pickup: string
+    pickup: string,    
 }
 
 export type Neighbours = {

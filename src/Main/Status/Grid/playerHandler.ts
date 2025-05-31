@@ -1,11 +1,12 @@
-import { Item } from "./item";
+import { SpriteSheet } from "../Common/sprite";
+import { Vector, Controls } from "../Common/types";
+import { Item } from "../DynamicObjects/Items/item";
+import { Player } from "../DynamicObjects/Player/player";
+import { StaticObject } from "../StaticObjects/staticObject";
 import { ItemHandler } from "./itemHandler";
-import { Player } from "./Player/player";
-import { PlayerObject } from "./Player/playerObject";
-import { SpriteSheet } from "./sprite";
-import { StaticObject } from "./staticObject";
 import { TileHandler } from "./tileHandler";
-import { Controls, Vector } from "./types";
+
+
 
 export class PlayerHandler {
     private players: Map<string, Set<Player>> = new Map();
@@ -72,12 +73,11 @@ export class PlayerHandler {
 
 
                 posY += this.gridSize;
-
-
             }
             posX += this.gridSize;
         }
         player.playerObject.nearbyTiles = nearbyTiles;
+        player.playerObject.nearbyItems = nearbyItems;
     }
 
     private addNearbyTile(tile: StaticObject | undefined, nearbyTiles: Array<StaticObject>) {
@@ -99,6 +99,7 @@ export class PlayerHandler {
         if (!itemArray) {
             return;
         }
+
 
         for (const item of itemArray) {
             nearbyItems.push(item)

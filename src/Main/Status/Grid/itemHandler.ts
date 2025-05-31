@@ -1,6 +1,9 @@
-import { Item } from "./item";
+import { SpriteSheet } from "../Common/sprite";
+import { Vector } from "../Common/types";
+import { Item } from "../DynamicObjects/Items/item";
+import { Shotgun } from "../DynamicObjects/Items/weapon";
 import { TileHandler } from "./tileHandler";
-import { Vector } from "./types";
+
 
 export class ItemHandler {
 
@@ -16,6 +19,12 @@ export class ItemHandler {
 
         for (const [key, itemSet] of this.items.entries()) {
             for (const item of itemSet) {
+
+                if (item.shouldBeDeleted()) {
+                    itemSet.delete(item);
+                    continue;
+                }
+
                 this.setNearby(item, tileHandler);
                 item.update(deltaTime);
 
@@ -50,8 +59,12 @@ export class ItemHandler {
 
     public draw(ctx: CanvasRenderingContext2D) {
         for (const itemArray of this.items.values()) {
+
             for (const item of itemArray) {
-                item.draw(ctx);
+                
+                if (!item.owned) {
+                    item.draw(ctx);
+                }            
             }
         }
     }
@@ -119,5 +132,19 @@ export class ItemHandler {
         } else {
             itemSet.add(item);
         }
+    }
+    addShotgun(gridPos: Vector, imgSrc: string) {
+
+        const itemSet = this.getItems(gridPos);
+
+        const item = new Shotgun(this.getWorldPos(gridPos), new SpriteSheet(imgSrc, 32));
+        item.pos.y += item.height;
+        item.pos.x += (item.width - this.gridSize) / 2;
+
+        if (!itemSet) {
+            this.items.set(this.key(gridPos), new Set());
+        } 
+
+        this.getItems(gridPos)!.add(item);
     }
 }

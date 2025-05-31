@@ -1,17 +1,15 @@
-import { Input } from "../../input";
-import { PlayerState } from "../../types"
-import { StateInterface } from "../../stateMachine";
-import { PlayerObject } from "../playerObject";
+import { Input } from "../../../Common/input";
+import { StateInterface } from "../../../Common/stateMachine";
+import { PlayerState } from "../../../Common/types";
+import { PlayerObject } from "../PlayerObject/playerObject";
+
 
 export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
 
-    private flapSpeed: number = 2;
+    private flapSpeed: number = 1.5;
 
     public stateUpdate(deltaTime: number, playerObject: PlayerObject): void {
-        if (playerObject.velocity.y > this.flapSpeed) {
-            playerObject.ignoreGravity = true;
-            playerObject.velocity.y = this.flapSpeed;
-        }
+        playerObject.velocity.y = Math.min(playerObject.velocity.y, this.flapSpeed);
     }
 
     public stateChange(playerObject: PlayerObject): PlayerState {
@@ -29,9 +27,5 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
         }
 
         return PlayerState.Flying;
-    }
-
-    public stateExited(playerObject: PlayerObject): void {
-        playerObject.ignoreGravity = false;
     }
 }

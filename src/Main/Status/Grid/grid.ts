@@ -23,8 +23,8 @@ export class Grid {
     }
 
     static draw(ctx: CanvasRenderingContext2D) {
-        this.tileHandler.draw(ctx);
         this.itemHandler.draw(ctx);
         this.playerHandler.draw(ctx);
+        this.tileHandler.draw(ctx);
     }
 }

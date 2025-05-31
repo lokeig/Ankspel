@@ -1,13 +1,14 @@
-import { Controls, PlayerState, Vector } from "../types";
-import { SpriteSheet, Animation, SpriteAnimator } from "../sprite";
-import { StateMachine } from "../stateMachine";
-import { PlayerStanding } from "./playerStates/standing";
-import { PlayerFlying } from "./playerStates/flying";
+import { Input } from "../../Common/input";
+import { SpriteAnimator, SpriteSheet, Animation } from "../../Common/sprite";
+import { StateMachine } from "../../Common/stateMachine";
+import { PlayerState, Vector, Controls } from "../../Common/types";
+import { PlayerObject } from "./PlayerObject/playerObject";
+import { PlayerFlap } from "./PlayerState/flap";
+import { PlayerFlying } from "./PlayerState/flying";
+import { PlayerSlide } from "./PlayerState/slide";
+import { PlayerStanding } from "./PlayerState/standing";
 
-import { PlayerObject } from "./playerObject";
-import { Input } from "../input";
-import { PlayerFlap } from "./playerStates/flap";
-import { PlayerSlide } from "./playerStates/slide";
+
 
 export class Player {
 
@@ -20,7 +21,8 @@ export class Player {
         flap:   { row: 3, frames: 1, fps: 8, repeat: true },
         jump:   { row: 4, frames: 1, fps: 8, repeat: false},
         fall:   { row: 5, frames: 1, fps: 8, repeat: false},
-        slide:  { row: 6, frames: 1, fps: 8, repeat: true }      
+        slide:  { row: 6, frames: 1, fps: 8, repeat: true },
+        turn:   { row: 7, frames: 1, fps: 8, repeat: false}
     };
 
     public playerObject: PlayerObject;
@@ -53,7 +55,11 @@ export class Player {
             case PlayerState.Standing: {
                 const left = Input.keyDown(this.playerObject.controls.left);
                 const right = Input.keyDown(this.playerObject.controls.right);
-                if ((left || right) && !(left && right)) {
+                if ((left && this.playerObject.velocity.x > 0.1) || right && this.playerObject.velocity.x < -0.1) {
+                    this.animator.setAnimation(this.animations.turn);
+                    break;
+                }
+                if (Math.abs(this.playerObject.velocity.x) > 0.3) {
                     this.animator.setAnimation(this.animations.walk);
                 } else {
                     this.animator.setAnimation(this.animations.idle)
@@ -73,20 +79,15 @@ export class Player {
 
 
     draw(ctx: CanvasRenderingContext2D): void {
-        
-        const width = this.playerObject.width;
-        const height = this.playerObject.height;
-        const x = this.playerObject.pos.x;
-        const y = this.playerObject.pos.y;
-
-        ctx.fillStyle = "blue";
-        ctx.fillRect(x, y, width, height);
 
         const flip = this.playerObject.direction === "left";
 
-        const drawPosX = x + ((width - this.drawSize) / 2)
-        const drawPosY = y + (height - this.drawSize);
+        const drawPosX = this.playerObject.pos.x + ((this.playerObject.width - this.drawSize) / 2)
+        const drawPosY = this.playerObject.pos.y + (this.playerObject.height - this.drawSize);
 
         this.animator.draw(ctx, {x: drawPosX, y: drawPosY}, this.drawSize, flip);
+        if (this.playerObject.holding) {
+            this.playerObject.holding.draw(ctx);
+        }
     };
 }
