@@ -107,16 +107,16 @@ export class Shotgun extends Item {
         return !this.owned && this.grounded && this.velocity.x < 1 && this.delete;
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw() {
         const flip = this.direction === "left";
 
         const drawPosX = this.pos.x + ((this.width - this.drawSize) / 2);
         const drawPosY = this.pos.y + ((this.height - this.drawSize) / 2);
 
-        this.spriteSheet.draw(ctx, 0, 0, { x: drawPosX, y: drawPosY }, this.drawSize, flip);
+        this.spriteSheet.draw(0, 0, { x: drawPosX, y: drawPosY }, this.drawSize, flip);
 
         // Handle
         const direcMult = flip ? 1 : -1
-        this.spriteSheet.draw(ctx, 1, 0, { x: drawPosX + (this.handleOffset * direcMult), y: drawPosY }, this.drawSize, flip);
+        this.spriteSheet.draw(1, 0, { x: drawPosX + (this.handleOffset * direcMult), y: drawPosY }, this.drawSize, flip);
     }
 }

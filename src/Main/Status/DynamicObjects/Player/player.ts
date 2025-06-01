@@ -78,16 +78,16 @@ export class Player {
     }
 
 
-    draw(ctx: CanvasRenderingContext2D): void {
+    draw(): void {
 
         const flip = this.playerObject.direction === "left";
 
         const drawPosX = this.playerObject.pos.x + ((this.playerObject.width - this.drawSize) / 2)
         const drawPosY = this.playerObject.pos.y + (this.playerObject.height - this.drawSize);
 
-        this.animator.draw(ctx, {x: drawPosX, y: drawPosY}, this.drawSize, flip);
-        if (this.playerObject.holding) {
-            this.playerObject.holding.draw(ctx);
+        this.animator.draw({ x: drawPosX, y: drawPosY }, this.drawSize, flip);
+        if (this.playerObject.playerItemHolder.isHoldingItem()) {
+            this.playerObject.playerItemHolder.holding!.draw();
         }
     };
 }

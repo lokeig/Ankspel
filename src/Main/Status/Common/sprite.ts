@@ -1,12 +1,14 @@
+import { Render } from "../../HMI/render";
+import { DrawInfo } from "../../HMI/renderInterface";
 import { Vector } from "./types";
 
 export class SpriteSheet {
-    image: HTMLImageElement = new Image;
+    imageSrc: string;
     frameSize: number;
 
   
     constructor(imageSrc: string, frameSize: number) {
-        this.image.src = imageSrc;
+        this.imageSrc = imageSrc;
         this.frameSize = frameSize
     }
   
@@ -19,23 +21,19 @@ export class SpriteSheet {
         };
     }
 
-    draw(ctx: CanvasRenderingContext2D, row: number, col: number, pos: Vector, size: number, flip: boolean) {
+    draw(row: number, col: number, pos: Vector, size: number, flip: boolean) {
         const { sx, sy, sw, sh } = this.getFrame(row, col);
-
-        ctx.save();
-        if (flip) {
-            ctx.translate(pos.x + size / 2, pos.y);
-            ctx.scale(-1, 1);
-            ctx.translate(-pos.x - size / 2, -pos.y); 
+        const drawInfo: DrawInfo = {
+            imageSrc: this.imageSrc,
+            sourcePos: { x: sx, y: sy }, 
+            sourceWidth: sw,
+            sourceHeight: sh,
+            drawPos: pos,
+            drawWidth: size,
+            drawHeight: size,
+            flip: flip
         }
-        ctx.drawImage(    
-            this.image,
-            sx, sy,
-            sw, sh,
-            pos.x, pos.y,
-            size, size
-        );
-        ctx.restore();
+        Render.get().draw(drawInfo);
     }
 }
 
@@ -73,8 +71,8 @@ export class SpriteAnimator {
         } 
     }
 
-    draw(ctx: CanvasRenderingContext2D, pos: Vector, size: number, flip: boolean) {
-        this.spriteSheet.draw(ctx, this.animation.row, this.currentFrame, pos, size, flip)
+    draw(pos: Vector, size: number, flip: boolean) {
+        this.spriteSheet.draw(this.animation.row, this.currentFrame, pos, size, flip)
     }
 
     animEqual(anim1: Animation, anim2: Animation){

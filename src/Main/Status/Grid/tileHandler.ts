@@ -62,7 +62,8 @@ export class TileHandler {
     getNeighbours(gridPos: Vector): Neighbours {
         const tile = this.getTile(gridPos);
         const neighbours: Neighbours = { 
-            left: false, right: false, top: false, bot: false, topLeft: false, topRight: false, botRight: false, botLeft: false 
+            left: false, right: false, top: false, bot: false, 
+            topLeft: false, topRight: false, botRight: false, botLeft: false 
         }
         if (!tile) {
             return neighbours;
@@ -76,9 +77,9 @@ export class TileHandler {
         return neighbours;
     }
 
-    draw(ctx: CanvasRenderingContext2D) {
+    draw() {
         for (const tile of this.tiles.values()) {
-            tile.draw(ctx);
+            tile.draw();
         }
     }
 }

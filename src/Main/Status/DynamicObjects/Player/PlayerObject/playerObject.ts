@@ -3,6 +3,7 @@ import { Controls, Vector } from "../../../Common/types";
 import { StaticObject } from "../../../StaticObjects/staticObject";
 import { DynamicObject } from "../../Common/dynamicObject";
 import { Item, ThrowType } from "../../Items/item";
+import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
 
@@ -13,11 +14,10 @@ export class PlayerObject extends DynamicObject {
 
     private playerMove = new PlayerMove();
     private playerJump = new PlayerJump();
+    public playerItemHolder = new PlayerItemHolder();
 
     public jumpEnabled: boolean = true;
     public moveEnabled: boolean = true;
-
-    public holding: Item | undefined;
 
     public readonly standardFriction: number = 10;
     public readonly slideFriction: number = 5;
@@ -55,49 +55,25 @@ export class PlayerObject extends DynamicObject {
         }
 
         if (Input.keyPress(this.controls.pickup)) {
-            if (!this.holding) {
-                this.pickUpItem();
+            if (this.playerItemHolder.isHoldingItem()) {
+                this.playerItemHolder.throwItem(this.controls);
             } else {
-                this.throwItem();
+                const itemToPick = this.getItemPickup();
+                if (itemToPick) {
+                    this.playerItemHolder.pickUp(itemToPick);
+                }
             }
         }
 
-        if (Input.keyPress(this.controls.shoot) && this.holding) {
-            const knockback = this.holding.interact();
-            this.velocity.x -= (knockback.x * this.getDirectionMultiplier());
-            this.velocity.y -= (knockback.y);
+        if (Input.keyDown(this.controls.shoot)) {
+            if (this.playerItemHolder.isHoldingItem()) {
+                console.log("O");
+            }
         }
 
         this.physicsPositionUpdate(deltaTime);
+        this.playerItemHolder.setHoldingPosition(this.getCenter(), this.direction);
 
-        if (this.holding) {
-            this.holding.pos.x = this.pos.x + ((this.width - this.holding.width ) / 2)
-            this.holding.pos.y = this.pos.y + ((this.height - this.holding.height ) / 2)
-            this.holding.direction = this.direction;
-        }
-    }
-
-    public getThrowType(): ThrowType {
-        const left = Input.keyDown(this.controls.left);
-        const right = Input.keyDown(this.controls.right);
-        const up = Input.keyDown(this.controls.up);
-
-        if (Input.keyDown(this.controls.down)) {
-            return ThrowType.drop;
-        }
-
-        if (left || right) {
-            if (up) {
-                return ThrowType.hardDiagonal;
-            }
-            return ThrowType.hard;
-        }
-
-        if (up) {
-            return ThrowType.upwards;
-        }
-
-        return ThrowType.light;
     }
     public handleVerticalCollision(tile: StaticObject) {
         if (this.velocity.y > 0) {
@@ -110,28 +86,13 @@ export class PlayerObject extends DynamicObject {
         this.velocity.y = 0;
     }
 
-
-    public throwItem(): void {
-        if (!this.holding) {
-            return
-        }
-        
-        if (this.holding.tileCollision(true)) {
-            this.holding.pos.x = this.direction === "left" ? this.pos.x - this.holding.width + this.width : this.pos.x;
-        }
-
-        this.holding.throw(this.getThrowType());
-        this.holding = undefined;
-    }
-    
-    public pickUpItem() {
+    public getItemPickup(): Item | null {
         for (const item of this.nearbyItems.values()) {
             if (this.collision(item)) {
-                this.holding = item;
-                item.owned = true;
-                break;
+                return item;
             }
         }
+        return null;
     }
 
 

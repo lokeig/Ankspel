@@ -42,15 +42,15 @@ export abstract class StaticObject extends GameObject {
     public lipLeft: StaticObject | undefined = undefined;
     public lipRight: StaticObject | undefined = undefined;
 
-    draw(ctx: CanvasRenderingContext2D): void {
-        this.sprite.draw(ctx, this.drawRow, this.drawCol, this.pos, this.drawSize, false);
+    draw(): void {
+        this.sprite.draw(this.drawRow, this.drawCol, this.pos, this.drawSize, false);
 
         if (this.lipLeft) {
             const drawOffsetX = this.lipLeft.pos.x - (this.width - this.lipLeft.width)
-            this.sprite.draw(ctx, 7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
+            this.sprite.draw(7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
         }
         if (this.lipRight) {
-            this.sprite.draw(ctx, 7, 7, this.lipRight.pos, this.drawSize, false);
+            this.sprite.draw(7, 7, this.lipRight.pos, this.drawSize, false);
         }
     }
 

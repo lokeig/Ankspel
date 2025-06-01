@@ -22,9 +22,9 @@ export class Grid {
         this.playerHandler.update(deltaTime, this.tileHandler, this.itemHandler)
     }
 
-    static draw(ctx: CanvasRenderingContext2D) {
-        this.itemHandler.draw(ctx);
-        this.playerHandler.draw(ctx);
-        this.tileHandler.draw(ctx);
+    static draw() {
+        this.itemHandler.draw();
+        this.playerHandler.draw();
+        this.tileHandler.draw();
     }
 }

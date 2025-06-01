@@ -74,11 +74,11 @@ export abstract class Item extends DynamicObject{
         return !this.owned && this.grounded && (this.velocity.x < 5) && this.delete;
     }
 
-    public draw(ctx: CanvasRenderingContext2D) {
+    public draw() {
         const xPos = this.pos.x + ((this.width - this.drawSize) / 2);
         const yPos = this.pos.y + (this.height - this.drawSize);
         const flip = this.direction === "left";
 
-        this.spriteSheet.draw(ctx, this.drawRow, this.drawCol, {x: xPos, y: yPos}, this.drawSize, flip);
+        this.spriteSheet.draw(this.drawRow, this.drawCol, {x: xPos, y: yPos}, this.drawSize, flip);
     }
 }

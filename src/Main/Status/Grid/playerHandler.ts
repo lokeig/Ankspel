@@ -1,3 +1,4 @@
+import { Render } from "../../HMI/render";
 import { SpriteSheet } from "../Common/sprite";
 import { Vector, Controls } from "../Common/types";
 import { Item } from "../DynamicObjects/Items/item";
@@ -25,10 +26,10 @@ export class PlayerHandler {
         }
     }
 
-    public draw(ctx: CanvasRenderingContext2D) {
+    public draw() {
         for (const playerArray of this.players.values()) {
             for (const player of playerArray) {
-                player.draw(ctx);
+                player.draw();
             }
         }
     }
@@ -99,7 +100,6 @@ export class PlayerHandler {
         if (!itemArray) {
             return;
         }
-
 
         for (const item of itemArray) {
             nearbyItems.push(item)

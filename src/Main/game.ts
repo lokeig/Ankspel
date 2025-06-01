@@ -1,3 +1,5 @@
+import { CanvasRender } from "./HMI/canvasRender";
+import { Render } from "./HMI/render";
 import { images } from "./images";
 import { Input } from "./Status/Common/input";
 import { SpriteSheet } from "./Status/Common/sprite";
@@ -19,17 +21,10 @@ const controls: Controls = {
 };
 
 export class Game {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-
     constructor(canvasID: string) {
-
-        this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
-        this.ctx = this.canvas.getContext('2d')!;
-        this.ctx.imageSmoothingEnabled = false;
-
         Grid.init(32);
         Input.init();
+        Render.set(new CanvasRender(canvasID))
 
         this.fillArea({ x:  5,  y: 14 }, 25, 2, tileType.Ice);
         this.fillArea({ x: 23, y: 5  }, 6,  8, tileType.Ice);
@@ -37,7 +32,7 @@ export class Game {
         this.fillArea({ x: 9,  y: 11 }, 2,  4, tileType.Ice);
         this.fillArea({ x: 9,  y: 5  }, 2,  4, tileType.Ice);
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
-        this.createTile({ x: 15, y: 6}, tileType.Ice);
+        this.createTile({ x: 15, y: 6 }, tileType.Ice);
 
         Grid.itemHandler.addShotgun({ x: 10, y: 2 }, images.shotgun)
         Grid.itemHandler.addShotgun({ x: 20, y: 2 }, images.shotgun)
@@ -47,15 +42,19 @@ export class Game {
         requestAnimationFrame(this.gameLoop);
     }
 
+    private scaleFactor: number = 1;
     private lastTime = 0;
     gameLoop = (currentTime: number) => {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
         this.update(deltaTime);
-        this.draw();
-
         Input.update();
+
+        this.scaleFactor += deltaTime * 0.1;
+        Render.get().clear();
+        Render.get().setScale(1.5);
+        Grid.draw();
 
         requestAnimationFrame(this.gameLoop);
     }
@@ -78,24 +77,5 @@ export class Game {
 
     update(deltaTime: number) {
         Grid.update(deltaTime);
-    }
-    
-    
-    draw(){
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.ctx.save();
-
-        // this.ctx.translate(0, 0);
-
-        // const angle = 0;
-        // this.ctx.rotate(angle*Math.PI/180);
-
-        // const scaleFactor = 1;
-        // this.ctx.scale(scaleFactor, scaleFactor);
-
-        Grid.draw(this.ctx);
-
-        this.ctx.restore();
     }
 }
