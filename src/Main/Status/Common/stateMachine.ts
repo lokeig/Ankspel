@@ -9,11 +9,9 @@ export class StateMachine<T, S>  {
 
     private currentState: T;
     private states: Map<T, StateInterface<T, S>> = new Map();
-    private object: S;
 
-    constructor(initialState: T, object: S) {
+    constructor(initialState: T) {
         this.currentState = initialState;
-        this.object = object;
     }
 
     public addState(key: T, value: StateInterface<T, S>) {
@@ -24,19 +22,19 @@ export class StateMachine<T, S>  {
         return this.currentState;
     }
 
-    private changeState(newState: T): void {
-        this.states.get(this.currentState)!.stateExited(this.object);
+    private changeState(newState: T, object: S): void {
+        this.states.get(this.currentState)!.stateExited(object);
         this.currentState = newState;
-        this.states.get(this.currentState)!.stateEntered(this.object);
+        this.states.get(this.currentState)!.stateEntered(object);
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number, object: S): void {
         const state = this.states.get(this.currentState)!;
-        state.stateUpdate(deltaTime, this.object);
+        state.stateUpdate(deltaTime, object);
         
-        const nextState = state.stateChange(this.object);
+        const nextState = state.stateChange(object);
         if (nextState !== this.currentState) {
-            this.changeState(nextState);
+            this.changeState(nextState, object);
         }
     }
 }

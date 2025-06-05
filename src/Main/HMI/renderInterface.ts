@@ -18,6 +18,5 @@ export type DrawInfo = {
     drawWidth: number,
     drawHeight: number,
 
-    angle?: number,
     flip: boolean
 }

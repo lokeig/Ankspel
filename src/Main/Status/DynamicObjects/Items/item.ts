@@ -1,7 +1,7 @@
+import { GameObject } from "../../Common/ObjectTypes/gameObject";
 import { SpriteSheet } from "../../Common/sprite";
 import { Vector } from "../../Common/types";
 import { DynamicObject } from "../Common/dynamicObject";
-
 
 export enum ThrowType {
     drop,
@@ -11,7 +11,14 @@ export enum ThrowType {
     hardDiagonal
 }
 
-export abstract class Item extends DynamicObject{
+export enum ItemEffects {
+    disableMovement,
+    knockback,
+    slowdown
+}
+
+
+export abstract class Item {
 
     protected drawSize;
     protected spriteSheet: SpriteSheet;
@@ -25,12 +32,12 @@ export abstract class Item extends DynamicObject{
     public delete: boolean = false;
 
     constructor(pos: Vector, width: number, height: number, spriteSheet: SpriteSheet, drawSize: number) {
-        super(pos, width, height);
         this.spriteSheet = spriteSheet;
         this.drawSize = drawSize;
     }
 
-    abstract interact(): Vector;
+    abstract activate(): void;
+    abstract interact(gameObject: GameObject): void;
     abstract itemUpdate(deltaTime: number): void;
 
     public update(deltaTime: number): void {

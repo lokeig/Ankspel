@@ -1,22 +1,21 @@
 import { Input } from "../../../Common/input";
 import { StateInterface } from "../../../Common/stateMachine";
 import { PlayerState } from "../../../Common/types";
-import { PlayerObject } from "../PlayerObject/playerObject";
+import { PlayerBody } from "../playerBody";
 
+export class PlayerStanding extends StateInterface<PlayerState, PlayerBody> {
 
-export class PlayerStanding extends StateInterface<PlayerState, PlayerObject> {
+    public stateChange(playerBody: PlayerBody): PlayerState {
 
-    public stateChange(playerObject: PlayerObject): PlayerState {
-
-        if (Input.keyDown(playerObject.controls.down)) {
-            if (Math.abs(playerObject.velocity.x) < 3) {
+        if (Input.keyDown(playerBody.controls.down)) {
+            if (Math.abs(playerBody.dynamicObject.velocity.x) < 3) {
                 return PlayerState.Crouch;
             } else {
                 return PlayerState.Slide
             }
         }
 
-        if (!playerObject.grounded) {
+        if (!playerBody.dynamicObject.grounded) {
             return PlayerState.Flying;
         }
 

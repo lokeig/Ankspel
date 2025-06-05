@@ -3,17 +3,16 @@ import { Vector, Direction } from "../../Common/types";
 import { StaticObject } from "../../StaticObjects/staticObject";
 import { Item } from "../Items/item";
 
-
-
-export abstract class DynamicObject extends GameObject {
+export class DynamicObject extends GameObject {
 
     public nearbyTiles: Array<StaticObject> = [];
     public nearbyItems: Array<Item> = [];
-
     public velocity: Vector = { x: 0, y: 0 };
+
     public grounded: boolean = false;
     public friction: number = 10;
     public gravity: number = 27;
+
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
     public direction: Direction = "left";
@@ -31,10 +30,14 @@ export abstract class DynamicObject extends GameObject {
             if (!tile.platform) {
                 return true;
             }
+
+            if (this.ignorePlatforms || horizontalCollision) {
+                continue;
+            }
             
             const bottomPosY = Math.floor(this.pos.y + this.height - this.velocity.y);
             const belowPlatform = bottomPosY > tile.pos.y;
-            if ( belowPlatform || this.ignorePlatforms || horizontalCollision) {
+            if (belowPlatform) {
                 continue;
             }
 
@@ -47,7 +50,18 @@ export abstract class DynamicObject extends GameObject {
         return this.direction === "left" ? -1 : 1;
     }
 
-    public handleHorizontalCollision(tile: StaticObject) {
+    public handleTopCollision(tile: StaticObject) {
+        this.pos.y = tile.pos.y + tile.height;
+        this.velocity.x = 0;
+    }
+
+    public handleBotCollision(tile: StaticObject) {
+        this.pos.x = tile.pos.x + tile.width;
+        this.velocity.x = 0;
+        this.grounded = true;
+    }
+
+    public handleSideCollision(tile: StaticObject) {
         if (this.velocity.x > 0) {
             this.pos.x = tile.pos.x - this.width;
         } else {
@@ -56,17 +70,17 @@ export abstract class DynamicObject extends GameObject {
         this.velocity.x = 0;
     }
 
-    public handleVerticalCollision(tile: StaticObject) {
-        if (this.velocity.y > 0) {
-            this.grounded = true;
-            this.pos.y = tile.pos.y - this.height;
-        } else {
-            this.pos.y = tile.pos.y + tile.height;
+    public getNearbyItem(): Item | null {
+        for (const item of this.nearbyItems.values()) {
+            if (this.collision(item)) {
+                return item;
+            }
         }
-        this.velocity.y = 0;
+        return null;
     }
 
-    public horizontalTileCollision() {
+
+    public getHorizontalTileCollision(): StaticObject | undefined {
         for (const tile of this.nearbyTiles.values()) {
             if (!this.collision(tile)) {
                 continue;
@@ -76,11 +90,11 @@ export abstract class DynamicObject extends GameObject {
                 continue;
             }
             
-            this.handleHorizontalCollision(tile);
+            return tile
         }
     }
 
-    public verticalTileCollision() {
+    public getVerticalTileCollision(): StaticObject | undefined {
         this.grounded = false;
         for (const tile of this.nearbyTiles.values()) {
             if (!this.collision(tile)) {
@@ -95,21 +109,18 @@ export abstract class DynamicObject extends GameObject {
                 }
             }
             
-            this.handleVerticalCollision(tile);
+            return tile;
         }
     }
 
-    physicsPositionUpdate(deltaTime: number) {
+    velocityPhysicsUpdate(deltaTime: number) {
         if (!this.ignoreGravity) {
             this.velocity.y += this.gravity * deltaTime;
         }
 
         this.velocity.x *= 1 / (1 + (deltaTime * this.friction));
 
-        this.pos.x += this.velocity.x
-        this.horizontalTileCollision();
-
-        this.pos.y += this.velocity.y
-        this.verticalTileCollision();
+        this.velocity.x = Math.min(this.velocity.x, 12);
+        this.velocity.y = Math.min(this.velocity.y, 12);
     }
 }

@@ -2,10 +2,9 @@ import { Cooldown } from "../../../Common/cooldown";
 import { Input } from "../../../Common/input";
 import { StateInterface } from "../../../Common/stateMachine";
 import { PlayerState } from "../../../Common/types";
-import { PlayerObject } from "../PlayerObject/playerObject";
+import { PlayerBody } from "../playerBody";
 
-
-export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
+export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
 
     private platformIgnoreTime = new Cooldown(0.15);
     private newHeight: number;
@@ -17,58 +16,58 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerObject> {
 
         this.newHeight = 20;
     }
-    public stateEntered(playerObject: PlayerObject): void {
+    public stateEntered(playerBody: PlayerBody): void {
         this.platformIgnoreTime.setToReady();
 
-        playerObject.friction = playerObject.slideFriction;
-        playerObject.moveEnabled = false;
-        playerObject.height = this.newHeight;
-        playerObject.pos.y += playerObject.idleHeight - playerObject.height;
+        playerBody.dynamicObject.friction = playerBody.slideFriction;
+        playerBody.playerMove.moveEnabled = false;
+        playerBody.dynamicObject.height = this.newHeight;
+        playerBody.dynamicObject.pos.y += playerBody.idleHeight - playerBody.dynamicObject.height;
     }
 
-    public stateUpdate(deltaTime: number, playerObject: PlayerObject): void {    
+    public stateUpdate(deltaTime: number, playerBody: PlayerBody): void {    
 
-        playerObject.jumpEnabled = true;
+        playerBody.playerJump.jumpEnabled = true;
         
-        if (Input.keyPress(playerObject.controls.jump)) { 
+        if (Input.keyPress(playerBody.controls.jump)) { 
             this.platformIgnoreTime.reset();
             
-            if (playerObject.onPlatform()) {
-                playerObject.jumpEnabled = false;
+            if (playerBody.onPlatform()) {
+                playerBody.playerJump.jumpEnabled = false;
             }
 
-            if (playerObject.grounded && playerObject.idleCollision()) {
-                playerObject.velocity.x = 7 * playerObject.getDirectionMultiplier();
-                playerObject.jumpEnabled = false;
+            if (playerBody.dynamicObject.grounded && playerBody.idleCollision()) {
+                playerBody.dynamicObject.velocity.x = 7 * playerBody.dynamicObject.getDirectionMultiplier();
+                playerBody.playerJump.jumpEnabled = false;
             }
         }
 
-        playerObject.ignorePlatforms = !this.platformIgnoreTime.isReady();
+        playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isReady();
         this.platformIgnoreTime.update(deltaTime);
     }
 
-    public stateChange(playerObject: PlayerObject): PlayerState {
-        if (Input.keyDown(playerObject.controls.down) || playerObject.idleCollision()) {
-            if (this.crouch && (!playerObject.grounded || Math.abs(playerObject.velocity.x) < 3 || playerObject.idleCollision())) {
+    public stateChange(playerBody: PlayerBody): PlayerState {
+        if (Input.keyDown(playerBody.controls.down) || playerBody.idleCollision()) {
+            if (this.crouch && (!playerBody.dynamicObject.grounded || Math.abs(playerBody.dynamicObject.velocity.x) < 3 || playerBody.idleCollision())) {
                 return PlayerState.Crouch;
             }
             return PlayerState.Slide;
         }
-        if (playerObject.grounded) {
+        if (playerBody.dynamicObject.grounded) {
             return PlayerState.Standing;
         }
         return PlayerState.Flying;
     }
 
-    public stateExited(playerObject: PlayerObject): void {
-        playerObject.pos.y -= playerObject.idleHeight - playerObject.height;
-        playerObject.height = playerObject.idleHeight;
+    public stateExited(playerBody: PlayerBody): void {
+        playerBody.dynamicObject.pos.y -= playerBody.idleHeight - playerBody.dynamicObject.height;
+        playerBody.dynamicObject.height = playerBody.idleHeight;
         
-        playerObject.ignorePlatforms = false;
+        playerBody.dynamicObject.ignorePlatforms = false;
+        playerBody.dynamicObject.friction = playerBody.standardFriction;
 
-        playerObject.jumpEnabled = true;
-        playerObject.moveEnabled = true;
+        playerBody.playerJump.jumpEnabled = true;
+        playerBody.playerMove.moveEnabled = true;
 
-        playerObject.friction = playerObject.standardFriction;
     }
 }

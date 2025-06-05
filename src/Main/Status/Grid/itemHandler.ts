@@ -57,13 +57,13 @@ export class ItemHandler {
         }
     }
 
-    public draw(ctx: CanvasRenderingContext2D) {
+    public draw() {
         for (const itemArray of this.items.values()) {
 
             for (const item of itemArray) {
                 
                 if (!item.owned) {
-                    item.draw(ctx);
+                    item.draw();
                 }            
             }
         }

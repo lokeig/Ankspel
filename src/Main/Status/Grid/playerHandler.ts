@@ -1,13 +1,9 @@
-import { Render } from "../../HMI/render";
-import { SpriteSheet } from "../Common/sprite";
 import { Vector, Controls } from "../Common/types";
 import { Item } from "../DynamicObjects/Items/item";
 import { Player } from "../DynamicObjects/Player/player";
 import { StaticObject } from "../StaticObjects/staticObject";
 import { ItemHandler } from "./itemHandler";
 import { TileHandler } from "./tileHandler";
-
-
 
 export class PlayerHandler {
     private players: Map<string, Set<Player>> = new Map();
@@ -25,15 +21,6 @@ export class PlayerHandler {
             }
         }
     }
-
-    public draw() {
-        for (const playerArray of this.players.values()) {
-            for (const player of playerArray) {
-                player.draw();
-            }
-        }
-    }
-
 
     private getGridPos(pos: Vector): Vector {
         return { x: Math.floor(pos.x / this.gridSize), y: Math.floor(pos.y / this.gridSize) }
@@ -56,13 +43,13 @@ export class PlayerHandler {
         const nearbyItems: Array<Item> = [];
 
         const gridOffset = this.gridSize * 2;
-        let posX = player.playerObject.pos.x - gridOffset;
-        let posY = player.playerObject.pos.y - gridOffset;
+        let posX = player.playerBody.dynamicObject.pos.x - gridOffset;
+        let posY = player.playerBody.dynamicObject.pos.y - gridOffset;
 
-        while (posX < player.playerObject.pos.x + player.playerObject.width + gridOffset) {
-            posY = player.playerObject.pos.y - gridOffset;
+        while (posX < player.playerBody.dynamicObject.pos.x + player.playerBody.dynamicObject.width + gridOffset) {
+            posY = player.playerBody.dynamicObject.pos.y - gridOffset;
 
-            while (posY < player.playerObject.pos.y + player.playerObject.height + gridOffset) {
+            while (posY < player.playerBody.dynamicObject.pos.y + player.playerBody.dynamicObject.height + gridOffset) {
 
                 const gridPos = this.getGridPos({ x: posX, y: posY });
 
@@ -77,8 +64,8 @@ export class PlayerHandler {
             }
             posX += this.gridSize;
         }
-        player.playerObject.nearbyTiles = nearbyTiles;
-        player.playerObject.nearbyItems = nearbyItems;
+        player.playerBody.dynamicObject.nearbyTiles = nearbyTiles;
+        player.playerBody.dynamicObject.nearbyItems = nearbyItems;
     }
 
     private addNearbyTile(tile: StaticObject | undefined, nearbyTiles: Array<StaticObject>) {
@@ -106,13 +93,13 @@ export class PlayerHandler {
         }
     }
 
-    addPlayer(gridPos: Vector, controls: Controls, imgSrc: string) {
+    addPlayer(gridPos: Vector, controls: Controls) {
 
         const playerSet = this.getPlayers(gridPos);
 
-        const player = new Player(this.getWorldPos(gridPos), new SpriteSheet(imgSrc, 32), controls);
-        player.playerObject.pos.y += player.playerObject.height;
-        player.playerObject.pos.x += (player.playerObject.width - this.gridSize) / 2;
+        const player = new Player(this.getWorldPos(gridPos), controls);
+        player.playerBody.dynamicObject.pos.y += player.playerBody.dynamicObject.height;
+        player.playerBody.dynamicObject.pos.x += (player.playerBody.dynamicObject.width - this.gridSize) / 2;
 
         if (!playerSet) {
             this.players.set(this.key(gridPos), new Set());

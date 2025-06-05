@@ -1,28 +1,27 @@
 import { Input } from "../../../Common/input";
 import { StateInterface } from "../../../Common/stateMachine";
 import { PlayerState } from "../../../Common/types";
-import { PlayerObject } from "../PlayerObject/playerObject";
+import { PlayerBody } from "../playerBody";
 
-
-export class PlayerFlap extends StateInterface<PlayerState, PlayerObject>{
+export class PlayerFlap extends StateInterface<PlayerState, PlayerBody>{
 
     private flapSpeed: number = 1.5;
 
-    public stateUpdate(deltaTime: number, playerObject: PlayerObject): void {
-        playerObject.velocity.y = Math.min(playerObject.velocity.y, this.flapSpeed);
+    public stateUpdate(deltaTime: number, playerBody: PlayerBody): void {
+        playerBody.dynamicObject.velocity.y = Math.min(playerBody.dynamicObject.velocity.y, this.flapSpeed);
     }
 
-    public stateChange(playerObject: PlayerObject): PlayerState {
+    public stateChange(playerBody: PlayerBody): PlayerState {
 
-        if (Input.keyDown(playerObject.controls.down)) {
+        if (Input.keyDown(playerBody.controls.down)) {
             return PlayerState.Crouch;
         }
 
-        if (playerObject.grounded) {
+        if (playerBody.dynamicObject.grounded) {
             return PlayerState.Standing;
         }
 
-        if (Input.keyDown(playerObject.controls.jump)) {
+        if (Input.keyDown(playerBody.controls.jump)) {
             return PlayerState.Flap
         }
 

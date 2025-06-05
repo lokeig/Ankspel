@@ -24,7 +24,6 @@ export class Grid {
 
     static draw() {
         this.itemHandler.draw();
-        this.playerHandler.draw();
         this.tileHandler.draw();
     }
 }
