@@ -4,14 +4,16 @@ import { DynamicObject } from "../Common/dynamicObject";
 import { Item, ThrowType } from "../Items/item";
 
 export class PlayerItemHolder {
-    holding: Item | null = null;
+    public holding: Item | null = null;
+    public nearbyItems: Array<Item> = [];
+    private lastHeldItem: Item | null = null;
 
     public update(deltaTime: number, playerObject: DynamicObject, controls: Controls) {
 
         // Pickup or throw item
         if (Input.keyPress(controls.pickup)) {
             if (!this.holding) {
-                this.holding = playerObject.getNearbyItem();
+                this.holding = this.getNearbyItem(playerObject);
             } else {
                 this.holding.throw(this.getThrowType(controls));
                 this.holding = null;
@@ -19,19 +21,11 @@ export class PlayerItemHolder {
         }
 
         // Interact with item
-        if (this.holding && Input.keyPress(controls.shoot)) {
-            this.holding.interact(deltaTime, playerObject);
-        }
+        // if (this.holding && Input.keyPress(controls.shoot)) {
+        //     this.holding.interact(deltaTime);
+        // }
 
-        // Update holding item position
-        if (this.holding) {
-            this.holding.pos = playerObject.getCenter();
-            this.holding.pos.y -= this.holding.height / 2
-            this.holding.direction = playerObject.direction;
-            if (playerObject.direction === "left") {
-                this.holding.pos.x -= this.holding.width;
-            }
-        }
+        this.setHoldingPosition(playerObject);
     }
 
     public getThrowType(controls: Controls): ThrowType {
@@ -57,14 +51,41 @@ export class PlayerItemHolder {
         return ThrowType.light;
     }
 
-    public setHoldingPosition(pos: Vector, direction: Direction): void {
+    public setHoldingPosition(playerObject: DynamicObject) {
         if (!this.holding) {
-            return
+            return 
         }
-        this.holding.pos.x = direction === "right" ? pos.x : pos.x - this.holding.width;
-        this.holding.pos.y = pos.y;
+        this.holding.dynamicObject.pos = playerObject.getCenter();
+        this.holding.dynamicObject.pos.y -= this.holding.dynamicObject.height / 2
+        this.holding.dynamicObject.direction = playerObject.direction;
+        if (playerObject.direction === "left") {
+            this.holding.dynamicObject.pos.x -= this.holding.dynamicObject.width;
+        }
         
+    }
 
-        this.holding.direction = direction;
+    public getNearbyItem(playerObject: DynamicObject): Item | null {
+        let fallbackItem: Item | null = null;
+
+        for (const item of this.nearbyItems.values()) {
+            if (!playerObject.collision(item.getIncreasedHitbox(3))) {
+                continue
+            } 
+            
+            if (item === this.lastHeldItem) {
+                fallbackItem = this.lastHeldItem;
+                continue;
+            }
+
+            item.owned = true;
+            this.lastHeldItem = item;
+            return item;
+        }
+
+        if (fallbackItem) {
+            fallbackItem.owned = true;
+            this.lastHeldItem = fallbackItem;
+        }
+        return fallbackItem;
     }
 }

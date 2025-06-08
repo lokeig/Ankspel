@@ -1,6 +1,6 @@
 import { Vector } from "../types";
 
-export abstract class GameObject {
+export class GameObject {
     public pos: Vector;
     public width: number;
     public height: number;

@@ -5,6 +5,9 @@ import { Input } from "./Status/Common/input";
 import { SpriteSheet } from "./Status/Common/sprite";
 import { Controls, Vector } from "./Status/Common/types";
 import { Grid } from "./Status/Grid/grid";
+import { ItemHandler } from "./Status/Grid/itemHandler";
+import { PlayerHandler } from "./Status/Grid/playerHandler";
+import { TileHandler } from "./Status/Grid/tileHandler";
 import { tileType } from "./Status/StaticObjects/tile";
 
 
@@ -34,10 +37,10 @@ export class Game {
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
         this.createTile({ x: 15, y: 6 }, tileType.Ice);
 
-        Grid.itemHandler.addShotgun({ x: 10, y: 2 }, images.shotgun)
-        Grid.itemHandler.addShotgun({ x: 20, y: 2 }, images.shotgun)
+        ItemHandler.addShotgun({ x: 10, y: 2 }, images.shotgun);
+        ItemHandler.addShotgun({ x: 20, y: 2 }, images.shotgun);
 
-        Grid.playerHandler.addPlayer({ x: 13, y: 11 }, controls, images.playerImage);
+        PlayerHandler.addPlayer({ x: 15, y: 11 }, controls);
 
         requestAnimationFrame(this.gameLoop);
     }
@@ -53,7 +56,7 @@ export class Game {
 
         this.scaleFactor += deltaTime * 0.1;
         Render.get().clear();
-        Render.get().setScale(1.5);
+        Render.get().setScale(1.2);
         Grid.draw();
 
         requestAnimationFrame(this.gameLoop);
@@ -61,7 +64,7 @@ export class Game {
 
     createTile(pos: Vector, type: tileType): void {
         const imgSrc = `/assets/tile${tileType[type]}.png`;
-        Grid.tileHandler.setTile(pos, new SpriteSheet(imgSrc, 16), type);
+        TileHandler.setTile(pos, new SpriteSheet(imgSrc, 16), type);
     }
 
 

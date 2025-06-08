@@ -31,4 +31,8 @@ export class Player {
         this.playerBody.update(deltaTime);
         this.playerBody.setAnimation(this.stateMachine.getState());
     };
+
+    draw() {
+        this.playerBody.draw();
+    }
 }

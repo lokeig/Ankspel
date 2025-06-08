@@ -2,19 +2,20 @@ import { SpriteSheet } from "../Common/sprite";
 import { Vector } from "../Common/types";
 import { Item } from "../DynamicObjects/Items/item";
 import { Shotgun } from "../DynamicObjects/Items/weapon";
+import { CollisionObject, StaticObject } from "../StaticObjects/staticObject";
 import { TileHandler } from "./tileHandler";
 
 
 export class ItemHandler {
 
-    private items: Map<string, Set<Item>> = new Map();
-    private gridSize: number;
+    private static items: Map<string, Set<Item>> = new Map();
+    private static gridSize: number;
 
-    constructor(gridSize: number) {
+    static init(gridSize: number) {
         this.gridSize = gridSize;
     }
 
-    public update(deltaTime: number, tileHandler: TileHandler) {
+    public static update(deltaTime: number) {
         const movedItems: Map<string, Set<Item>> = new Map();
 
         for (const [key, itemSet] of this.items.entries()) {
@@ -25,10 +26,10 @@ export class ItemHandler {
                     continue;
                 }
 
-                this.setNearby(item, tileHandler);
+                this.setNearby(item);
                 item.update(deltaTime);
 
-                const newKey = this.key(this.getGridPos(item.pos));
+                const newKey = this.key(this.getGridPos(item.dynamicObject.pos));
 
                 if (key !== newKey) {
 
@@ -57,7 +58,7 @@ export class ItemHandler {
         }
     }
 
-    public draw() {
+    public static draw() {
         for (const itemArray of this.items.values()) {
 
             for (const item of itemArray) {
@@ -69,77 +70,75 @@ export class ItemHandler {
         }
     }
 
-    getGridPos(pos: Vector): Vector {
+    private static getGridPos(pos: Vector): Vector {
         return { x: Math.floor(pos.x / this.gridSize), y: Math.floor(pos.y / this.gridSize) }
     }
 
-    getWorldPos(gridPos: Vector): Vector {
+    private static getWorldPos(gridPos: Vector): Vector {
         return { x: gridPos.x * this.gridSize, y: gridPos.y * this.gridSize } 
     }
 
-    key(pos: Vector): string {
+    private static key(pos: Vector): string {
         return `${pos.x},${pos.y}`;
     }
 
-    getItems(pos: Vector): Set<Item> | undefined{
+    public static getItems(pos: Vector): Set<Item> | undefined{
         return this.items.get(this.key(pos));
     }
     
 
-    setNearby(item: Item, tileHandler: TileHandler): void {        
-        const nearbyTiles = [];
-        
-        const gridOffset = this.gridSize * 2;
-        let posX = item.pos.x - gridOffset;
-        let posY = item.pos.y - gridOffset;
-
-        while (posX < item.pos.x + item.width + gridOffset) {
-            posY = item.pos.y - gridOffset;
-
-            while (posY < item.pos.y + item.height + gridOffset) {
-
-                const gridPos = this.getGridPos({ x: posX, y: posY });
-                const tile = tileHandler.getTile(gridPos);
-
-                posY += this.gridSize;
-
-                if (!tile) {
-                    continue;
-                }
-
-                nearbyTiles.push(tile)
-
-                if (tile.lipLeft)  {
-                    nearbyTiles.push(tile.lipLeft);
-                }
-                if (tile.lipRight) {
-                    nearbyTiles.push(tile.lipRight);
-                }
+    private static setNearby(item: Item): void {
+        const nearbyCollidable: CollisionObject[] = [];
+    
+        const body = item.dynamicObject;
+        const startX = body.pos.x - this.gridSize * 2;
+        const endX = body.pos.x + body.width + this.gridSize * 2;
+        const startY = body.pos.y - this.gridSize * 2;
+        const endY = body.pos.y + body.height + this.gridSize * 2;
+    
+        for (let x = startX; x < endX; x += this.gridSize) {
+            for (let y = startY; y < endY; y += this.gridSize) {
+                const gridPos = this.getGridPos({ x, y });
+    
+                this.processTile(TileHandler.getTile(gridPos), nearbyCollidable);
+                this.processItems(item, this.getItems(gridPos), nearbyCollidable);
             }
-            posX += this.gridSize;
         }
-        item.nearbyTiles = nearbyTiles;
+    
+        body.collidableObjects = nearbyCollidable;
     }
 
-    addItem(item: Item) {
-        const gridPos = this.getGridPos(item.pos);
-        const itemSet = this.getItems(gridPos);
-        
-        if (!itemSet) {
-            const newSet: Set<Item> = new Set();
-            newSet.add(item);
-            this.items.set(this.key(gridPos), newSet);
-        } else {
-            itemSet.add(item);
+    private static processTile(tile: StaticObject | undefined, accumulatedCollidable: Array<CollisionObject>): void {
+        if (!tile) return;
+    
+        accumulatedCollidable.push({ gameObject: tile, platform: tile.platform });
+    
+        if (tile.lipLeft) {
+            accumulatedCollidable.push({ gameObject: tile.lipLeft, platform: true });
+        }
+    
+        if (tile.lipRight) {
+            accumulatedCollidable.push({ gameObject: tile.lipRight, platform: true });
         }
     }
-    addShotgun(gridPos: Vector, imgSrc: string) {
+
+    private static processItems(comparingItem: Item, itemArray: Set<Item> | undefined,  accumulatedCollidable: Array<CollisionObject>): void {
+        if (!itemArray) return;
+    
+        for (const item of itemArray.values()) {
+            if (item.collidable && item !== comparingItem) {
+                accumulatedCollidable.push({ gameObject: item.dynamicObject, platform: true });
+            } 
+        }
+    }
+
+    static addShotgun(gridPos: Vector, imgSrc: string) {
 
         const itemSet = this.getItems(gridPos);
 
         const item = new Shotgun(this.getWorldPos(gridPos), new SpriteSheet(imgSrc, 32));
-        item.pos.y += item.height;
-        item.pos.x += (item.width - this.gridSize) / 2;
+        item.dynamicObject.pos.y += item.dynamicObject.height;
+        item.dynamicObject.pos.x += (item.dynamicObject.width - this.gridSize) / 2;
 
         if (!itemSet) {
             this.items.set(this.key(gridPos), new Set());

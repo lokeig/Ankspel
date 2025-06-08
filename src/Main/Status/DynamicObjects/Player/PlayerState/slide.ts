@@ -9,17 +9,16 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
     private platformIgnoreTime = new Cooldown(0.15);
     private newHeight: number;
     private crouch: boolean;
+    private frictionIgnoreTime = new Cooldown(0.15);
 
     constructor(crouch: boolean = false) {
         super();
         this.crouch = crouch;
-
         this.newHeight = 20;
     }
     public stateEntered(playerBody: PlayerBody): void {
         this.platformIgnoreTime.setToReady();
-
-        playerBody.dynamicObject.friction = playerBody.slideFriction;
+        this.frictionIgnoreTime.reset();
         playerBody.playerMove.moveEnabled = false;
         playerBody.dynamicObject.height = this.newHeight;
         playerBody.dynamicObject.pos.y += playerBody.idleHeight - playerBody.dynamicObject.height;
@@ -28,7 +27,6 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
     public stateUpdate(deltaTime: number, playerBody: PlayerBody): void {    
 
         playerBody.playerJump.jumpEnabled = true;
-        
         if (Input.keyPress(playerBody.controls.jump)) { 
             this.platformIgnoreTime.reset();
             
@@ -43,7 +41,9 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
         }
 
         playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isReady();
+        playerBody.dynamicObject.ignoreFriction = !this.frictionIgnoreTime.isReady();
         this.platformIgnoreTime.update(deltaTime);
+        this.frictionIgnoreTime.update(deltaTime);
     }
 
     public stateChange(playerBody: PlayerBody): PlayerState {
@@ -64,7 +64,7 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
         playerBody.dynamicObject.height = playerBody.idleHeight;
         
         playerBody.dynamicObject.ignorePlatforms = false;
-        playerBody.dynamicObject.friction = playerBody.standardFriction;
+        playerBody.dynamicObject.ignoreFriction = false;
 
         playerBody.playerJump.jumpEnabled = true;
         playerBody.playerMove.moveEnabled = true;

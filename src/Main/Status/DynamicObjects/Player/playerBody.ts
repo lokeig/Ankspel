@@ -1,6 +1,8 @@
+
 import { Input } from "../../Common/input";
 import { SpriteAnimator, Animation, SpriteSheet } from "../../Common/sprite";
 import { Controls, PlayerState, Vector } from "../../Common/types";
+
 import { DynamicObject } from "../Common/dynamicObject";
 import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
@@ -41,13 +43,11 @@ export class PlayerBody {
     update(deltaTime: number) {
         this.updatePlayerBody(deltaTime);
         this.animator.update(deltaTime);
-        this.draw();
     }
 
     updatePlayerBody(deltaTime: number) {
         this.playerJump.update(deltaTime, this.dynamicObject, this.controls);
         this.playerMove.update(deltaTime, this.dynamicObject, this.controls);
-        this.playerItem.update(deltaTime, this.dynamicObject, this.controls);
 
         this.dynamicObject.velocityPhysicsUpdate(deltaTime);
 
@@ -69,6 +69,8 @@ export class PlayerBody {
                 this.playerJump.isJumping = false;
             }
         }
+
+        this.playerItem.update(deltaTime, this.dynamicObject, this.controls);
     }
 
     public onPlatform(): boolean {
@@ -82,10 +84,10 @@ export class PlayerBody {
         const prevPosY = this.dynamicObject.pos.y;
         this.dynamicObject.pos.y += 5;
 
-        for (const tile of this.dynamicObject.nearbyTiles.values()) {
-            if (this.dynamicObject.collision(tile)) {
+        for (const collidable of this.dynamicObject.collidableObjects.values()) {
+            if (this.dynamicObject.collision(collidable.gameObject)) {
                 noCollisions = false;
-                if (!tile.platform) {
+                if (!collidable.platform) {
                     allPlatforms = false;
                 }
             }
@@ -103,12 +105,12 @@ export class PlayerBody {
         this.dynamicObject.height = this.idleHeight;
         this.dynamicObject.pos.y -= this.idleHeight - prevHeight;
         
-        const returnValue = this.dynamicObject.tileCollision(true)
+        const returnValue = this.dynamicObject.getHorizontalTileCollision();
 
         this.dynamicObject.pos.y = prevY;
         this.dynamicObject.height = prevHeight;
 
-        return returnValue;
+        return returnValue !== undefined;
     }
 
     setAnimation(state: PlayerState) {
@@ -139,12 +141,11 @@ export class PlayerBody {
     }
 
     draw(): void {
-
         const flip = this.dynamicObject.direction === "left";
 
         const drawPosX = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2)
         const drawPosY = this.dynamicObject.pos.y + (this.dynamicObject.height - this.drawSize);
-
+        
         this.animator.draw({ x: drawPosX, y: drawPosY }, this.drawSize, flip);
         if (this.playerItem.holding) {
             this.playerItem.holding.draw();

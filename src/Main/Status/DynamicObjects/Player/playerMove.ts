@@ -4,10 +4,9 @@ import { DynamicObject } from "../Common/dynamicObject";
 
 export class PlayerMove {
 
-    public moveEnabled: boolean = false;
+    public moveEnabled: boolean = true;
     public movespeed: number = 44;
     private lastDirection: Direction = "left"; 
-    public velocityBuildUp: number = 0;
 
     public update(deltaTime: number, playerObject: DynamicObject, controls: Controls): void {
         if (this.moveEnabled) {

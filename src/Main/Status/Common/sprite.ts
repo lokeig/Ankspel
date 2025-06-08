@@ -1,5 +1,6 @@
 import { Render } from "../../HMI/render";
 import { DrawInfo } from "../../HMI/renderInterface";
+import { images } from "../../images";
 import { Vector } from "./types";
 
 export class SpriteSheet {
@@ -21,7 +22,8 @@ export class SpriteSheet {
         };
     }
 
-    draw(row: number, col: number, pos: Vector, size: number, flip: boolean) {
+    draw(row: number, col: number, pos: Vector, size: number, flip: boolean, source?: string | undefined) {
+
         const { sx, sy, sw, sh } = this.getFrame(row, col);
         const drawInfo: DrawInfo = {
             imageSrc: this.imageSrc,
@@ -33,6 +35,7 @@ export class SpriteSheet {
             drawHeight: size,
             flip: flip
         }
+
         Render.get().draw(drawInfo);
     }
 }
@@ -72,7 +75,7 @@ export class SpriteAnimator {
     }
 
     draw(pos: Vector, size: number, flip: boolean) {
-        this.spriteSheet.draw(this.animation.row, this.currentFrame, pos, size, flip)
+        this.spriteSheet.draw(this.animation.row, this.currentFrame, pos, size, flip, "PLAYERANMIMATOR")
     }
 
     animEqual(anim1: Animation, anim2: Animation){

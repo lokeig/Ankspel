@@ -3,7 +3,10 @@ import { SpriteSheet } from "../Common/sprite";
 import { Neighbours, Vector, Direction } from "../Common/types";
 import { tileType } from "./tile";
 
-
+export type CollisionObject = {
+    gameObject: GameObject,
+    platform: boolean
+}
 
 export abstract class StaticObject extends GameObject {
     public type: tileType;
@@ -39,8 +42,8 @@ export abstract class StaticObject extends GameObject {
         this.update();
     }
 
-    public lipLeft: StaticObject | undefined = undefined;
-    public lipRight: StaticObject | undefined = undefined;
+    public lipLeft: GameObject | undefined = undefined;
+    public lipRight: GameObject | undefined = undefined;
 
     draw(): void {
         this.sprite.draw(this.drawRow, this.drawCol, this.pos, this.drawSize, false);

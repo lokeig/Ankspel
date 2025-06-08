@@ -6,26 +6,26 @@ import { tileType, Tile } from "../StaticObjects/tile";
 
 export class TileHandler {
 
-    private gridSize: number;
-    private tiles = new Map<string, StaticObject>();
+    private static gridSize: number;
+    private static tiles = new Map<string, StaticObject>();
 
-    constructor(gridSize: number) {
+    static init(gridSize: number) {
         this.gridSize = gridSize;
     }
 
-    getWorldPos(gridPos: Vector): Vector {
+    static getWorldPos(gridPos: Vector): Vector {
         return { x: gridPos.x * this.gridSize, y: gridPos.y * this.gridSize } 
     }
 
-    key(pos: Vector): string {
+    static key(pos: Vector): string {
         return `${pos.x},${pos.y}`;
     }
 
-    getTile(pos: Vector): StaticObject | undefined{
+    static getTile(pos: Vector): StaticObject | undefined{
         return this.tiles.get(this.key(pos));
     }
     
-    setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
+    static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
         const size = this.gridSize;
         const pos = this.getWorldPos(gridPos);
         const value = new Tile(pos, sprite, type, size, size, size);
@@ -46,7 +46,7 @@ export class TileHandler {
         }
     }
 
-    shift(gridPos: Vector, direction: Direction): Vector {
+   static shift(gridPos: Vector, direction: Direction): Vector {
         switch (direction) {
             case "left":     return  { x: gridPos.x - 1, y: gridPos.y };
             case "right":    return  { x: gridPos.x + 1, y: gridPos.y };
@@ -59,7 +59,7 @@ export class TileHandler {
         }
     }
 
-    getNeighbours(gridPos: Vector): Neighbours {
+    static getNeighbours(gridPos: Vector): Neighbours {
         const tile = this.getTile(gridPos);
         const neighbours: Neighbours = { 
             left: false, right: false, top: false, bot: false, 
@@ -77,7 +77,7 @@ export class TileHandler {
         return neighbours;
     }
 
-    draw() {
+    static draw() {
         for (const tile of this.tiles.values()) {
             tile.draw();
         }

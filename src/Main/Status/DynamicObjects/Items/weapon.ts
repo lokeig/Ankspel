@@ -1,3 +1,4 @@
+import { images } from "../../../images";
 import { Cooldown } from "../../Common/cooldown";
 import { SpriteSheet } from "../../Common/sprite";
 import { Vector } from "../../Common/types";
@@ -16,7 +17,7 @@ export class Shotgun extends Item {
     private bulletSpeed: number = 5;
     private knockbackAmount: number = 0;
     private reloadTime = new Cooldown(0.2);
-
+    
     private ammo: number = 2;
 
     private handleOffset: number = 0;
@@ -28,11 +29,11 @@ export class Shotgun extends Item {
 
     private currentState: ShotgunState = ShotgunState.loaded; 
 
-    constructor(pos: Vector, spriteSheet: SpriteSheet){
-        super(pos, 54, 15, spriteSheet, 64)
-
+    constructor(pos: Vector){
+        super(pos, 54, 15, new SpriteSheet(images.shotgun, 32), 64)
         this.drawCol = 0;
         this.drawRow = 0;
+        this.collidable = true;
     }
 
     public interact(): Vector {
@@ -103,15 +104,11 @@ export class Shotgun extends Item {
         return { x: 0, y: 0 };
     }
 
-    public shouldBeDeleted(): boolean {
-        return !this.owned && this.grounded && this.velocity.x < 1 && this.delete;
-    }
-
     draw() {
-        const flip = this.direction === "left";
+        const flip = this.dynamicObject.direction === "left";
 
-        const drawPosX = this.pos.x + ((this.width - this.drawSize) / 2);
-        const drawPosY = this.pos.y + ((this.height - this.drawSize) / 2);
+        const drawPosX = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2);
+        const drawPosY = this.dynamicObject.pos.y + ((this.dynamicObject.height - this.drawSize) / 2);
 
         this.spriteSheet.draw(0, 0, { x: drawPosX, y: drawPosY }, this.drawSize, flip);
 
