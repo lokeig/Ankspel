@@ -1,5 +1,5 @@
 import { Vector, Controls } from "../Common/types";
-import { Item } from "../DynamicObjects/Items/item";
+import { ItemInterface } from "../DynamicObjects/Items/item";
 import { Player } from "../DynamicObjects/Player/player";
 import { CollisionObject, StaticObject } from "../StaticObjects/staticObject";
 import { ItemHandler } from "./itemHandler";
@@ -69,7 +69,7 @@ export class PlayerHandler {
 
     private static setNearby(player: Player): void {
         const nearbyCollidable: CollisionObject[] = [];
-        const nearbyItems: Item[] = [];
+        const nearbyItems: ItemInterface[] = [];
     
         const body = player.playerBody.dynamicObject;
         const startX = body.pos.x - this.gridSize * 2;
@@ -104,12 +104,17 @@ export class PlayerHandler {
         }
     }
 
-    private static processItems(itemArray: Set<Item> | undefined,  accumulatedCollidable: Array<CollisionObject>, accumulatedItems: Array<Item>): void {
-        if (!itemArray) return;
+    private static processItems(itemArray: Set<ItemInterface> | undefined,  accumulatedCollidable: Array<CollisionObject>, accumulatedItems: Array<ItemInterface>): void {
+        if (!itemArray) {
+            return
+        }
     
         for (const item of itemArray.values()) {
-            if (item.collidable) {
-                accumulatedCollidable.push({ gameObject: item.dynamicObject, platform: true });
+            if (item.itemLogic.owned) {
+                continue;
+            }
+            if (item.itemLogic.collidable) {
+                accumulatedCollidable.push({ gameObject: item.itemLogic.dynamicObject, platform: true });
             } 
             accumulatedItems.push(item);
         }

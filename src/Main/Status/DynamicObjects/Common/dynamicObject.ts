@@ -1,5 +1,6 @@
 import { GameObject } from "../../Common/ObjectTypes/gameObject";
 import { Vector, Direction } from "../../Common/types";
+import { TileHandler } from "../../Grid/tileHandler";
 import { CollisionObject } from "../../StaticObjects/staticObject";
 
 export class DynamicObject extends GameObject {
@@ -78,6 +79,7 @@ export class DynamicObject extends GameObject {
     }
 
     public velocityPhysicsUpdate(deltaTime: number) {
+
         if (!this.ignoreGravity) {
             this.velocity.y += this.gravity * deltaTime;
         }
@@ -85,8 +87,11 @@ export class DynamicObject extends GameObject {
         if (!this.ignoreFriction) {
             this.velocity.x *= 1 / (1 + (deltaTime * this.friction));
         }
-
-        this.velocity.x = Math.min(this.velocity.x, 12);
-        this.velocity.y = Math.min(this.velocity.y, 12);
+        if (Math.abs(this.velocity.x) < 0.01) {
+            this.velocity.x = 0;
+        }
+        const maxSpeed = TileHandler.gridSize;
+        this.velocity.x = Math.max(Math.min(this.velocity.x, maxSpeed), -maxSpeed);
+        this.velocity.y = Math.max(Math.min(this.velocity.y, maxSpeed), -maxSpeed);
     }
 }

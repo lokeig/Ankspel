@@ -47,3 +47,15 @@ export enum PlayerState {
     Crouch,
     Flap
 }
+
+
+
+export enum SwordState {
+    Parrying,
+    Thrusting
+}
+
+export enum WeaponState {
+    Loaded,
+    Empty
+}

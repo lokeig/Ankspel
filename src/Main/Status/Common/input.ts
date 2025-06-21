@@ -14,6 +14,9 @@ export class Input {
                 this.keysPressed.add(e.key);
             }
             this.keysDown.add(e.key);
+            if (e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                e.preventDefault();
+            }
         });
 
         window.addEventListener('keyup', e => {

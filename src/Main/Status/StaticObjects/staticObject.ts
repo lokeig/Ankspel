@@ -46,19 +46,18 @@ export abstract class StaticObject extends GameObject {
     public lipRight: GameObject | undefined = undefined;
 
     draw(): void {
-        this.sprite.draw(this.drawRow, this.drawCol, this.pos, this.drawSize, false);
+        this.sprite.draw(this.drawRow, this.drawCol, this.pos, this.drawSize, false, 0);
 
         if (this.lipLeft) {
             const drawOffsetX = this.lipLeft.pos.x - (this.width - this.lipLeft.width)
-            this.sprite.draw(7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false);
+            this.sprite.draw(7, 6, { x: drawOffsetX, y: this.lipLeft.pos.y }, this.drawSize, false, 0);
         }
         if (this.lipRight) {
-            this.sprite.draw(7, 7, this.lipRight.pos, this.drawSize, false);
+            this.sprite.draw(7, 7, this.lipRight.pos, this.drawSize, false, 0);
         }
     }
 
     abstract setSpriteIndex(): void;
-
     abstract setLip(): void;
 
     update() {

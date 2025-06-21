@@ -1,28 +1,29 @@
 import { Render } from "../../HMI/render";
 import { DrawInfo } from "../../HMI/renderInterface";
-import { images } from "../../images";
+import { GameObject } from "./ObjectTypes/gameObject";
 import { Vector } from "./types";
 
 export class SpriteSheet {
     imageSrc: string;
-    frameSize: number;
+    frameWidth: number;
+    frameHeight: number;
 
-  
-    constructor(imageSrc: string, frameSize: number) {
+    constructor(imageSrc: string, frameWidth: number, frameHeight: number) {
         this.imageSrc = imageSrc;
-        this.frameSize = frameSize
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
     }
   
     getFrame(row: number, col: number): { sx: number, sy: number, sw: number, sh: number } {
         return {
-            sx: col * this.frameSize,
-            sy: row * this.frameSize,
-            sw: this.frameSize,
-            sh: this.frameSize,
+            sx: col * this.frameWidth,
+            sy: row * this.frameHeight,
+            sw: this.frameWidth,
+            sh: this.frameHeight,
         };
     }
 
-    draw(row: number, col: number, pos: Vector, size: number, flip: boolean, source?: string | undefined) {
+    draw(row: number, col: number, pos: Vector, size: number, flip: boolean, angle: number) {
 
         const { sx, sy, sw, sh } = this.getFrame(row, col);
         const drawInfo: DrawInfo = {
@@ -33,63 +34,72 @@ export class SpriteSheet {
             drawPos: pos,
             drawWidth: size,
             drawHeight: size,
-            flip: flip
-        }
+            flip: flip,
+            angle: angle
+        };
 
         Render.get().draw(drawInfo);
     }
+
+    drawLine(row: number, col: number, pos1: Vector, pos2: Vector, width: number) {
+        const { sx, sy, sw, sh } = this.getFrame(row, col);
+        Render.get().drawLine(this.imageSrc, pos1, pos2, width, new GameObject({ x: sx, y: sy }, sw, sh));
+    }
+}
+
+export type Frame = {
+    row: number,
+    col: number
 }
 
 export type Animation = {
-    frames: number,
-    row: number,
+    frames: Array<Frame>,
     fps: number,
     repeat: boolean
 }
 
 export class SpriteAnimator {
-    spriteSheet: SpriteSheet;
-    animation: Animation;
-    currentFrame: number = 0;
-    timer: number = 0;
+    public spriteSheet: SpriteSheet;
+    private animation: Animation;
+    private currentFrame: number = 0;
+    private timer: number = 0;
 
     constructor(spriteSheet: SpriteSheet, animation: Animation) {
         this.spriteSheet = spriteSheet;
         this.animation = animation;
     }
 
-    update(deltaTime: number) {
+    public update(deltaTime: number) {
         this.timer += deltaTime;
+        const framesAmount = this.animation.frames.length;
         const frameDuration = 1 / this.animation.fps;
         if (this.timer > frameDuration) {
             const framesToAdvance = Math.floor(this.timer / frameDuration);
             const nextFrame = this.currentFrame + framesToAdvance;
-            if (!this.animation.repeat && nextFrame > this.animation.frames - 1) {
-                this.currentFrame = this.animation.frames - 1;
+            if (!this.animation.repeat && nextFrame > framesAmount - 1) {
+                this.currentFrame = framesAmount - 1;
             } else {
-                this.currentFrame = nextFrame % this.animation.frames;
+                this.currentFrame = nextFrame % framesAmount;
+                this.timer %= frameDuration;
             }
-        
-            this.timer %= frameDuration;
         } 
     }
 
-    draw(pos: Vector, size: number, flip: boolean) {
-        this.spriteSheet.draw(this.animation.row, this.currentFrame, pos, size, flip, "PLAYERANMIMATOR")
+    public draw(pos: Vector, size: number, flip: boolean, angle: number) { 
+        const frame = this.animation.frames[this.currentFrame];
+        this.spriteSheet.draw(frame.row, frame.col, pos, size, flip, angle)
     }
 
-    animEqual(anim1: Animation, anim2: Animation){
-        return anim1.fps    === anim2.fps    &&
-               anim1.frames === anim2.frames &&
-               anim1.row    === anim2.row    &&
-               anim1.repeat === anim2.repeat
-    }
-
-    setAnimation(animation: Animation) {
-        if (!this.animEqual(this.animation, animation)) {
+    public setAnimation(animation: Animation) {
+        if (this.animation !== animation) {
             this.animation = animation;
             this.currentFrame = 0;
             this.timer = 0;
         }
+    }
+
+    public reset(): void {
+        this.timer = 0;
+        this.currentFrame = 0;
     }
 }

@@ -1,3 +1,4 @@
+import { GameObject } from "../Status/Common/ObjectTypes/gameObject";
 import { Vector } from "../Status/Common/types";
 import { DrawInfo, RenderIF } from "./renderInterface";
 
@@ -11,6 +12,7 @@ export class CanvasRender implements RenderIF {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
+        this.ctx.fillStyle = "green";
     }
 
     private loadImage(src: string): HTMLImageElement {
@@ -22,7 +24,7 @@ export class CanvasRender implements RenderIF {
         return this.images.get(src)!;
     }
 
-    draw(drawInfo: DrawInfo): void {
+    public draw(drawInfo: DrawInfo): void {
         const img = this.loadImage(drawInfo.imageSrc);
 
         if (!img.complete) {
@@ -33,19 +35,61 @@ export class CanvasRender implements RenderIF {
         this.ctx.save();
 
         if (drawInfo.flip) {
-            const translateAmount = drawInfo.drawPos.x + drawInfo.drawWidth / 2
-            this.ctx.translate(translateAmount, drawInfo.drawPos.y);
+            const translateAmount = Math.floor(drawInfo.drawPos.x + drawInfo.drawWidth / 2)
+            this.ctx.translate(translateAmount, Math.floor(drawInfo.drawPos.y));
             this.ctx.scale(-1, 1);
-            this.ctx.translate(-translateAmount, -drawInfo.drawPos.y); 
+            this.ctx.translate(-translateAmount, - Math.floor(drawInfo.drawPos.y)); 
         }
+
+        this.ctx.translate(Math.floor(drawInfo.drawPos.x + drawInfo.drawWidth / 2), Math.floor(drawInfo.drawPos.y + drawInfo.drawHeight / 2));     
+        this.ctx.rotate(drawInfo.angle);
 
         this.ctx.drawImage(    
             img,
             drawInfo.sourcePos.x, drawInfo.sourcePos.y,
             drawInfo.sourceWidth, drawInfo.sourceHeight,
-            drawInfo.drawPos.x, drawInfo.drawPos.y,
+            -drawInfo.drawWidth / 2, -drawInfo.drawHeight / 2,
             drawInfo.drawWidth, drawInfo.drawHeight
         );
+
+        this.ctx.restore();
+    }
+
+    public drawLine(imageSrc: string, pos1: Vector, pos2: Vector, width: number, sourceRect: GameObject) {
+
+        const img = this.loadImage(imageSrc);
+        if (!img.complete) {
+            img.onload = () => this.drawLine(imageSrc, pos1, pos2, width, sourceRect);
+            return;
+        }
+        const dx = Math.floor(pos2.x - pos1.x);
+        const dy = Math.floor(pos2.y - pos1.y);
+        const length = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx); 
+
+        this.ctx.save();
+        this.ctx.translate(pos1.x, pos1.y);
+        this.ctx.rotate(angle);
+
+        this.ctx.drawImage(
+            img, 
+            sourceRect.pos.x, sourceRect.pos.y, 
+            sourceRect.width, sourceRect.height,
+            0, -width / 2,
+            length, width
+        );
+
+        this.ctx.restore();
+    }
+
+    public drawSquare(x: number, y: number, width: number, height: number, angle: number, color: string) {
+        this.ctx.save();
+
+        this.ctx.fillStyle = color;
+        this.ctx.translate(x + width/2, y + height/2);     
+        this.ctx.rotate(angle);
+
+        this.ctx.fillRect(-width/2, -height/2, width, height); 
 
         this.ctx.restore();
     }

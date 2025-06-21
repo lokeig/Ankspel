@@ -6,7 +6,7 @@ import { tileType, Tile } from "../StaticObjects/tile";
 
 export class TileHandler {
 
-    private static gridSize: number;
+    public static gridSize: number;
     private static tiles = new Map<string, StaticObject>();
 
     static init(gridSize: number) {

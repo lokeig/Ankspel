@@ -1,9 +1,10 @@
 
-import { Input } from "../../Common/input";
+import { rotateForce } from "../../Common/angleHelper";
 import { SpriteAnimator, Animation, SpriteSheet } from "../../Common/sprite";
-import { Controls, PlayerState, Vector } from "../../Common/types";
+import { Controls, Vector } from "../../Common/types";
 
 import { DynamicObject } from "../Common/dynamicObject";
+import { PlayerArm } from "./playerArm";
 import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
@@ -11,17 +12,19 @@ import { PlayerMove } from "./playerMove";
 export class PlayerBody {
 
     public controls: Controls;
-    private drawSize: number = 64; 
+    public drawSize: number = 64; 
     private animator: SpriteAnimator; 
-    private animations: Record<string, Animation> = { 
-        idle:   { row: 0, frames: 1, fps: 8, repeat: true  },     
-        walk:   { row: 1, frames: 6, fps: 8, repeat: true  },     
-        crouch: { row: 2, frames: 1, fps: 8, repeat: true  },     
-        flap:   { row: 3, frames: 1, fps: 8, repeat: true  },
-        jump:   { row: 4, frames: 1, fps: 8, repeat: false },
-        fall:   { row: 5, frames: 1, fps: 8, repeat: false },
-        slide:  { row: 6, frames: 1, fps: 8, repeat: true  },
-        turn:   { row: 7, frames: 1, fps: 8, repeat: false }
+    public rotateSpeed: number = 25;
+    
+    public animations: Record<string, Animation> = { 
+        idle:   { frames: [{ row: 0, col: 0 }], fps: 8, repeat: true },     
+        walk:   { frames: [{ row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }], fps: 8, repeat: true},     
+        crouch: { frames: [{ row: 2, col: 0 }], fps: 8, repeat: true },     
+        flap:   { frames: [{ row: 3, col: 0 }, { row: 3, col: 1 }, { row: 3, col: 2 }, { row: 3, col: 3 }], fps: 16, repeat: true  },
+        jump:   { frames: [{ row: 4, col: 0 }], fps: 8, repeat: true },
+        fall:   { frames: [{ row: 5, col: 0 }], fps: 8, repeat: true },
+        slide:  { frames: [{ row: 6, col: 0 }], fps: 8, repeat: true  },
+        turn:   { frames: [{ row: 7, col: 0 }], fps: 8, repeat: true }
     };
 
     public readonly standardFriction: number = 10;
@@ -33,6 +36,7 @@ export class PlayerBody {
     public playerJump = new PlayerJump();
     public playerMove = new PlayerMove();
     public playerItem = new PlayerItemHolder();
+    public armFront = new PlayerArm(this.animations.idle);
 
     constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
         this.dynamicObject = new DynamicObject(pos, this.standardWidth, this.idleHeight);
@@ -40,15 +44,100 @@ export class PlayerBody {
         this.animator = new SpriteAnimator(spriteSheet, this.animations.idle);
     }
     
-    update(deltaTime: number) {
+    public update(deltaTime: number) {
         this.updatePlayerBody(deltaTime);
         this.animator.update(deltaTime);
+        this.setArmPosition(this.armFront);
+        this.armFront.update(deltaTime);
+        this.setHoldingPosition();
+
     }
 
-    updatePlayerBody(deltaTime: number) {
+    public rotateArmUp(deltaTime: number): void {
+        this.armFront.angle -= deltaTime * this.armFront.rotateSpeed;
+        this.armFront.angle = Math.max(this.armFront.angle, -Math.PI / 2)
+    }
+
+    public rotateArmDown(deltaTime: number): void {
+        this.armFront.angle += deltaTime * this.armFront.rotateSpeed;
+        this.armFront.angle = Math.min(this.armFront.angle, 0);
+    }
+
+    public rotateArm(deltaTime: number): void {
+        if (!this.playerItem.holding) {
+            this.armFront.angle = 0;
+            return;
+        }
+        if (this.itemNoRotationCollision()) {
+            this.rotateArmUp(deltaTime);
+        } else {
+            this.rotateArmDown(deltaTime);
+        }
+    }
+
+    private itemNoRotationCollision(): boolean {
+        if (!this.playerItem.holding) {
+            return false;
+        }
+        const tempItemPos = { x: this.playerItem.holding.itemLogic.dynamicObject.pos.x, y: this.playerItem.holding.itemLogic.dynamicObject.pos.y };
+        this.playerItem.holding.itemLogic.dynamicObject.setCenterToPos(this.armFront.getCenter());
+        this.playerItem.holding.itemLogic.dynamicObject.pos.x += this.playerItem.holding.itemLogic.holdOffset.x * this.dynamicObject.getDirectionMultiplier();
+        this.playerItem.holding.itemLogic.dynamicObject.pos.y += this.playerItem.holding.itemLogic.holdOffset.y;
+        const collision = this.playerItem.holding.itemLogic.dynamicObject.getHorizontalTileCollision();
+        this.playerItem.holding.itemLogic.dynamicObject.pos = tempItemPos;
+        
+        return collision !== undefined;
+    }
+
+    public setHoldingPosition() {
+        if (!this.playerItem.holding) {
+            return;
+        }
+        
+        this.playerItem.holding.itemLogic.dynamicObject.setCenterToPos(this.armFront.getCenter());
+        this.playerItem.holding.itemLogic.dynamicObject.direction = this.dynamicObject.direction;
+        this.playerItem.holding.itemLogic.angle = this.armFront.angle;
+
+        const offset = rotateForce(
+            { x: this.playerItem.holding.itemLogic.holdOffset.x, y: this.playerItem.holding.itemLogic.holdOffset.y }, 
+            this.playerItem.holding.itemLogic.angle
+        );
+        this.playerItem.holding.itemLogic.dynamicObject.pos.x += offset.x * this.dynamicObject.getDirectionMultiplier();
+        this.playerItem.holding.itemLogic.dynamicObject.pos.y += offset.y;
+    }
+
+    public getPixelFactor(): Vector {
+        return { 
+            x: this.drawSize / this.animator.spriteSheet.frameWidth,
+            y: this.drawSize / this.animator.spriteSheet.frameHeight
+        };
+    }
+
+    private setArmPosition(arm: PlayerArm): void {
+        const result = this.getDrawPos();
+        if (this.dynamicObject.direction === "right") {
+            result.x += arm.posOffset.x;
+        } else {
+            result.x += this.drawSize - arm.drawSize - arm.posOffset.x;
+        }
+        result.y += arm.posOffset.y;
+        arm.pos = result;
+    }
+
+    public setArmOffset(arm: PlayerArm, pos: Vector): void {
+        const result = pos;
+        if (this.playerItem.holding) {
+            result.x += this.playerItem.holding.itemLogic.handOffset.x;
+            result.y += this.playerItem.holding.itemLogic.handOffset.y;
+        }
+        arm.posOffset = result;
+    }
+
+    private updatePlayerBody(deltaTime: number): void {
+        
         this.playerJump.update(deltaTime, this.dynamicObject, this.controls);
         this.playerMove.update(deltaTime, this.dynamicObject, this.controls);
-
+                
         this.dynamicObject.velocityPhysicsUpdate(deltaTime);
 
         // Handle Horizontal Collisions
@@ -113,43 +202,28 @@ export class PlayerBody {
         return returnValue !== undefined;
     }
 
-    setAnimation(state: PlayerState) {
-        switch (state) {
-            case PlayerState.Standing: {
-                const left = Input.keyDown(this.controls.left);
-                const right = Input.keyDown(this.controls.right);
-                if ((left && this.dynamicObject.velocity.x > 0.1) || right && this.dynamicObject.velocity.x < -0.1) {
-                    this.animator.setAnimation(this.animations.turn);
-                    break;
-                }
-                if (Math.abs(this.dynamicObject.velocity.x) > 0.3) {
-                    this.animator.setAnimation(this.animations.walk);
-                } else {
-                    this.animator.setAnimation(this.animations.idle)
-                } break;
-            }
-            case PlayerState.Flying:
-                if (this.dynamicObject.velocity.y < 0) {
-                    this.animator.setAnimation(this.animations.jump);
-                } else {
-                    this.animator.setAnimation(this.animations.fall);
-                } break;
-            case PlayerState.Flap: this.animator.setAnimation(this.animations.flap); break;
-            case PlayerState.Crouch: this.animator.setAnimation(this.animations.crouch); break;
-            case PlayerState.Slide: this.animator.setAnimation(this.animations.slide); break;
+    public setAnimation(animation: Animation) {
+        this.animator.setAnimation(animation);
+        this.armFront.setAnimation(animation);
+        if (this.playerItem.holding) {
+            this.armFront.setAnimation(this.armFront.itemAnimation);
         }
     }
 
-    draw(): void {
+    public getDrawPos(): Vector {
+        const x = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2);
+        const y = this.dynamicObject.pos.y + (this.dynamicObject.height - this.drawSize);
+        return { x, y };
+    }
+    
+    public draw(): void {
         const flip = this.dynamicObject.direction === "left";
-
-        const drawPosX = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2)
-        const drawPosY = this.dynamicObject.pos.y + (this.dynamicObject.height - this.drawSize);
         
-        this.animator.draw({ x: drawPosX, y: drawPosY }, this.drawSize, flip);
+        this.animator.draw(this.getDrawPos(), this.drawSize, flip, 0);
         if (this.playerItem.holding) {
             this.playerItem.holding.draw();
         }
+        this.armFront.draw(flip);
     };
 
 }

@@ -1,9 +1,11 @@
 import { CanvasRender } from "./HMI/canvasRender";
 import { Render } from "./HMI/render";
-import { images } from "./images";
 import { Input } from "./Status/Common/input";
 import { SpriteSheet } from "./Status/Common/sprite";
 import { Controls, Vector } from "./Status/Common/types";
+import { Glock } from "./Status/DynamicObjects/Items/glock";
+import { Grenade } from "./Status/DynamicObjects/Items/grenade";
+import { Shotgun } from "./Status/DynamicObjects/Items/shotgun";
 import { Grid } from "./Status/Grid/grid";
 import { ItemHandler } from "./Status/Grid/itemHandler";
 import { PlayerHandler } from "./Status/Grid/playerHandler";
@@ -19,8 +21,8 @@ const controls: Controls = {
     down: "s",
     up: "w",
 
-    shoot: "r",
-    pickup: "e",
+    shoot: "ArrowLeft",
+    pickup: "ArrowUp",
 };
 
 export class Game {
@@ -37,10 +39,13 @@ export class Game {
         this.fillArea({ x: 15, y: 7  }, 3,  3, tileType.Ice);
         this.createTile({ x: 15, y: 6 }, tileType.Ice);
 
-        ItemHandler.addShotgun({ x: 10, y: 2 }, images.shotgun);
-        ItemHandler.addShotgun({ x: 20, y: 2 }, images.shotgun);
+        ItemHandler.addItem({ x: 10, y: 2 }, Shotgun);
+        ItemHandler.addItem({ x: 20, y: 14 }, Shotgun);
+        ItemHandler.addItem({ x: 21, y: 12 }, Glock);
+        ItemHandler.addItem({ x: 19, y: 12 }, Grenade);
 
         PlayerHandler.addPlayer({ x: 15, y: 11 }, controls);
+
 
         requestAnimationFrame(this.gameLoop);
     }
@@ -51,12 +56,15 @@ export class Game {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        this.update(deltaTime);
+        Grid.update(deltaTime);
         Input.update();
 
         this.scaleFactor += deltaTime * 0.1;
+        
+        
         Render.get().clear();
-        Render.get().setScale(1.2);
+        Render.get().drawSquare(0, 0, 2000, 2000, 0, "grey")
+        Render.get().setScale(1);
         Grid.draw();
 
         requestAnimationFrame(this.gameLoop);
@@ -64,7 +72,7 @@ export class Game {
 
     createTile(pos: Vector, type: tileType): void {
         const imgSrc = `/assets/tile${tileType[type]}.png`;
-        TileHandler.setTile(pos, new SpriteSheet(imgSrc, 16), type);
+        TileHandler.setTile(pos, new SpriteSheet(imgSrc, 16, 16), type);
     }
 
 
@@ -76,9 +84,5 @@ export class Game {
                 this.createTile({x: posX, y: posY}, type);
             }
         }
-    }
-
-    update(deltaTime: number) {
-        Grid.update(deltaTime);
     }
 }

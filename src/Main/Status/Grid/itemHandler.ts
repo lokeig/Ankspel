@@ -1,14 +1,15 @@
-import { SpriteSheet } from "../Common/sprite";
 import { Vector } from "../Common/types";
-import { Item } from "../DynamicObjects/Items/item";
-import { Shotgun } from "../DynamicObjects/Items/weapon";
+import { Glock } from "../DynamicObjects/Items/glock";
+import { Grenade } from "../DynamicObjects/Items/grenade";
+import { ItemInterface } from "../DynamicObjects/Items/item";
+import { Shotgun } from "../DynamicObjects/Items/shotgun";
 import { CollisionObject, StaticObject } from "../StaticObjects/staticObject";
 import { TileHandler } from "./tileHandler";
 
 
 export class ItemHandler {
 
-    private static items: Map<string, Set<Item>> = new Map();
+    private static items: Map<string, Set<ItemInterface>> = new Map();
     private static gridSize: number;
 
     static init(gridSize: number) {
@@ -16,7 +17,7 @@ export class ItemHandler {
     }
 
     public static update(deltaTime: number) {
-        const movedItems: Map<string, Set<Item>> = new Map();
+        const movedItems: Map<string, Set<ItemInterface>> = new Map();
 
         for (const [key, itemSet] of this.items.entries()) {
             for (const item of itemSet) {
@@ -29,7 +30,7 @@ export class ItemHandler {
                 this.setNearby(item);
                 item.update(deltaTime);
 
-                const newKey = this.key(this.getGridPos(item.dynamicObject.pos));
+                const newKey = this.key(this.getGridPos(item.itemLogic.dynamicObject.pos));
 
                 if (key !== newKey) {
 
@@ -63,7 +64,7 @@ export class ItemHandler {
 
             for (const item of itemArray) {
                 
-                if (!item.owned) {
+                if (!item.itemLogic.owned) {
                     item.draw();
                 }            
             }
@@ -82,15 +83,15 @@ export class ItemHandler {
         return `${pos.x},${pos.y}`;
     }
 
-    public static getItems(pos: Vector): Set<Item> | undefined{
+    public static getItems(pos: Vector): Set<ItemInterface> | undefined{
         return this.items.get(this.key(pos));
     }
     
 
-    private static setNearby(item: Item): void {
+    private static setNearby(item: ItemInterface): void {
         const nearbyCollidable: CollisionObject[] = [];
     
-        const body = item.dynamicObject;
+        const body = item.itemLogic.dynamicObject;
         const startX = body.pos.x - this.gridSize * 2;
         const endX = body.pos.x + body.width + this.gridSize * 2;
         const startY = body.pos.y - this.gridSize * 2;
@@ -122,28 +123,29 @@ export class ItemHandler {
         }
     }
 
-    private static processItems(comparingItem: Item, itemArray: Set<Item> | undefined,  accumulatedCollidable: Array<CollisionObject>): void {
+    private static processItems(comparingItem: ItemInterface, itemArray: Set<ItemInterface> | undefined,  accumulatedCollidable: Array<CollisionObject>): void {
         if (!itemArray) return;
     
         for (const item of itemArray.values()) {
-            if (item.collidable && item !== comparingItem) {
-                accumulatedCollidable.push({ gameObject: item.dynamicObject, platform: true });
+            if (item.itemLogic.collidable && item !== comparingItem) {
+                accumulatedCollidable.push({ gameObject: item.itemLogic.dynamicObject, platform: true });
             } 
         }
     }
 
-    static addShotgun(gridPos: Vector, imgSrc: string) {
-
+    static addItem(gridPos: Vector, ItemClass: ItemConstructor) {
         const itemSet = this.getItems(gridPos);
 
-        const item = new Shotgun(this.getWorldPos(gridPos), new SpriteSheet(imgSrc, 32));
-        item.dynamicObject.pos.y += item.dynamicObject.height;
-        item.dynamicObject.pos.x += (item.dynamicObject.width - this.gridSize) / 2;
+        const item = new ItemClass(this.getWorldPos(gridPos));
+        item.itemLogic.dynamicObject.pos.y += item.itemLogic.dynamicObject.height;
+        item.itemLogic.dynamicObject.pos.x += (item.itemLogic.dynamicObject.width - this.gridSize) / 2;
 
         if (!itemSet) {
             this.items.set(this.key(gridPos), new Set());
-        } 
+        }
 
         this.getItems(gridPos)!.add(item);
     }
 }
+
+type ItemConstructor = new (pos: Vector) => ItemInterface;

@@ -1,7 +1,10 @@
+import { normalizeAngle } from "../../Common/angleHelper";
+import { lerpAngle, LerpValue } from "../../Common/lerp";
 import { GameObject } from "../../Common/ObjectTypes/gameObject";
-import { SpriteSheet } from "../../Common/sprite";
 import { Vector } from "../../Common/types";
 import { DynamicObject } from "../Common/dynamicObject";
+import { ExplosiveInfo } from "./explosiveInfo";
+import { FirearmInfo } from "./firearmInfo";
 
 export enum ThrowType {
     drop,
@@ -11,74 +14,97 @@ export enum ThrowType {
     hardDiagonal
 }
 
-export class ItemEffects {
-    private knockback: Vector = { x: 0, y: 0 };
-    private disableMovement: boolean = false;
-    private slowness: number = 0;
+export enum ItemType {
+    fireArm,
+    mine,
+    explosive,
+    prop
+}
 
-    public setKnockback(vector: Vector) {
-        this.knockback = this.knockback;
-    }
-
-    public setDisableMovement(bool: boolean) {
-        this.disableMovement = bool;
-    }
-
-    public setSlowness(amount: number) {
-        this.slowness = amount;
-    }
-
-    public getKnockback(): Vector {
-        return this.knockback;
-    }
-
-    public getDisableMovement(): boolean {
-        return this.disableMovement;
-    }
-
-    public getSlowness(): number {
-        return this.slowness;
-    }
+export interface ItemInterface {
+    update(deltaTime: number): void,
+    draw(): void,
+    shouldBeDeleted(): boolean,
+    interact(): void,
+    itemLogic: ItemLogic;
 }
 
 
-export abstract class Item {
+export class ItemLogic {
+    public itemType!: ItemType;
+    private firearmInfo!: FirearmInfo;
+    private explosiveInfo!: ExplosiveInfo;
 
-    protected drawSize;
-    protected spriteSheet: SpriteSheet;
-    protected drawCol: number = 0;
-    protected drawRow: number = 0;
+    public dynamicObject: DynamicObject;
 
-    protected handOffset: Vector = { x: 0, y: 0 };
-    protected holdOffset: Vector = { x: 0, y: 0 };
-    protected pipeOffset: Vector = { x: 0, y: 0 };
-
+    public handOffset: Vector = { x: 0, y: 0 };
+    public holdOffset: Vector = { x: 0, y: 0 };
+    private hitboxOffset: Vector = { x: 0, y: 0 };
     public collidable: boolean = false;
     public owned: boolean = false;
 
-    public delete: boolean = false;
-    public dynamicObject: DynamicObject;
+    public angle: number = 0;
+    public personalAngle: number = 0;
+    public rotateSpeed: number = 0;
+    private rotateLerp = new LerpValue(15, lerpAngle);
 
-    constructor(pos: Vector, width: number, height: number, spriteSheet: SpriteSheet, drawSize: number) {
-        this.spriteSheet = spriteSheet;
-        this.drawSize = drawSize;
+    constructor(pos: Vector, width: number, height: number) {
         this.dynamicObject = new DynamicObject(pos, width, height);
     }
 
-    abstract activate(): void;
-    abstract interact(gameObject: GameObject): void;
-    abstract itemUpdate(deltaTime: number): void;
-
-    public update(deltaTime: number): void {
-        this.dynamicObject.friction = this.dynamicObject.grounded ? 5 : 1;
-        if (!this.owned) {
-            this.updateItemPhysics(deltaTime)
-        }
-        this.itemUpdate(deltaTime);
+    public setFirearmInfo(firearmInfo: FirearmInfo) {
+        this.itemType = ItemType.fireArm;
+        this.firearmInfo = firearmInfo;
     }
 
-    updateItemPhysics(deltaTime: number) {
+    public getFirearmInfo(): FirearmInfo {
+        return this.firearmInfo;
+    }
 
+    public setExplosiveInfo(explosiveInfo: ExplosiveInfo) {
+        this.itemType = ItemType.explosive;
+        this.explosiveInfo = explosiveInfo;
+    }
+
+    public getExplosiveInfo(): ExplosiveInfo {
+        return this.explosiveInfo;
+    }
+
+    public setHitboxOffset(offset: Vector) {
+        this.hitboxOffset = offset;
+    }
+
+    public getType(): ItemType {
+        return this.itemType;
+    }
+    
+    private updateAngle(deltaTime: number): void {
+        const normalized = normalizeAngle(this.angle);
+        if (this.dynamicObject.grounded && normalized !== 0 && normalized !== -Math.PI) {
+            this.rotateSpeed = 0;
+            if (!this.rotateLerp.isActive()) {
+                const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
+
+                this.rotateLerp.startLerp(normalized, target);
+            }
+        }
+        if (this.rotateLerp.isActive()) {
+            this.angle = this.rotateLerp.update(deltaTime);
+        }
+
+        this.angle += this.rotateSpeed * deltaTime;
+    }    
+
+    public update(deltaTime: number): void {
+        if (!this.owned) {
+            this.updateItemPhysics(deltaTime);
+        }
+    }
+
+    public updateItemPhysics(deltaTime: number) {
+        this.dynamicObject.friction = this.dynamicObject.grounded ? 5 : 1;
+
+        this.updateAngle(deltaTime);
         this.dynamicObject.velocityPhysicsUpdate(deltaTime);
 
         // Handle Horizontal Collisions
@@ -86,6 +112,7 @@ export abstract class Item {
         const horizontalCollidingTile = this.dynamicObject.getHorizontalTileCollision();
         if (horizontalCollidingTile) {
             this.dynamicObject.handleSideCollision(horizontalCollidingTile);
+            this.rotateSpeed *= 0.5;
         }
 
         // Handle Vertical Collisions
@@ -100,54 +127,22 @@ export abstract class Item {
         }
     }
 
-    public throw(throwType: ThrowType) {
-        this.dynamicObject.grounded = false;
-        this.owned = false;
-        const direcMult = this.dynamicObject.getDirectionMultiplier();
-
-        switch (throwType) {
-            case(ThrowType.light): {
-                this.dynamicObject.velocity = { x: 3.5 * direcMult, y: -3.5 };
-                break;
-            }
-            case(ThrowType.hard): {
-                this.dynamicObject.velocity = { x: 15 * direcMult, y: -5 };
-                break;
-            }
-            case(ThrowType.hardDiagonal): {
-                this.dynamicObject.velocity = { x: 15 * direcMult, y: -10 };
-                break;
-            }
-            case(ThrowType.drop): {
-                this.dynamicObject.velocity = { x: 0 * direcMult, y: 0 };
-                break;
-            }
-            case(ThrowType.upwards): {
-                this.dynamicObject.velocity = { x: 0 * direcMult, y: -10 };
-                break;
-            }
-        }
+    public getPickupHitbox(): GameObject {
+        return this.dynamicObject.getScaled(this.hitboxOffset.x, this.hitboxOffset.y);
     }
 
-    public getIncreasedHitbox(offset: number) {
-        const pos = {
-            x: this.dynamicObject.pos.x - (offset / 2),
-            y: this.dynamicObject.pos.y - (offset / 2)
+    public getDrawpos(drawSize: number): Vector {
+        return {
+            x: this.dynamicObject.pos.x + ((this.dynamicObject.width - drawSize) / 2),
+            y: this.dynamicObject.pos.y + ((this.dynamicObject.height - drawSize) / 2)
         };
-        const width = this.dynamicObject.width + offset;
-        const height = this.dynamicObject.height + offset;
-        return new GameObject(pos, width, height);
     }
 
-    public shouldBeDeleted(): boolean {
-        return !this.owned && this.dynamicObject.grounded && (this.dynamicObject.velocity.x < 5) && this.delete;
+    public isFlip(): boolean {
+        return this.dynamicObject.direction === "left";
     }
 
-    public draw() {
-        const xPos = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2);
-        const yPos = this.dynamicObject.pos.y + (this.dynamicObject.height - this.drawSize);
-        const flip = this.dynamicObject.direction === "left";
-
-        this.spriteSheet.draw(this.drawRow, this.drawCol, {x: xPos, y: yPos}, this.drawSize, flip);
+    public deletable(): boolean {
+        return !this.owned && this.dynamicObject.grounded && Math.abs(this.dynamicObject.velocity.x) < 0.3;; 
     }
 }

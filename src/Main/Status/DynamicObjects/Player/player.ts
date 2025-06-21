@@ -15,7 +15,7 @@ export class Player {
     private stateMachine: StateMachine<PlayerState, PlayerBody>;
 
     constructor(pos: Vector, controls: Controls) {    
-        const sprite = new SpriteSheet(images.playerImage, 32);
+        const sprite = new SpriteSheet(images.playerImage, 32, 32);
         this.playerBody = new PlayerBody(pos, sprite, controls);  
         this.stateMachine = new StateMachine(PlayerState.Standing);
 
@@ -29,7 +29,6 @@ export class Player {
     update(deltaTime: number): void {
         this.stateMachine.update(deltaTime, this.playerBody);
         this.playerBody.update(deltaTime);
-        this.playerBody.setAnimation(this.stateMachine.getState());
     };
 
     draw() {

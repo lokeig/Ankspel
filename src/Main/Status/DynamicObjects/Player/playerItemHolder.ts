@@ -1,12 +1,13 @@
 import { Input } from "../../Common/input";
-import { Controls, Vector, Direction } from "../../Common/types";
+import { Controls } from "../../Common/types";
 import { DynamicObject } from "../Common/dynamicObject";
-import { Item, ThrowType } from "../Items/item";
+import { ItemInterface, ItemLogic, ItemType, ThrowType } from "../Items/item";
 
 export class PlayerItemHolder {
-    public holding: Item | null = null;
-    public nearbyItems: Array<Item> = [];
-    private lastHeldItem: Item | null = null;
+    public holding: ItemInterface | null = null;
+    public nearbyItems: Array<ItemInterface> = [];
+    private lastHeldItem: ItemInterface | null = null;
+    public forcedThrowType: null | ThrowType = null;
 
     public update(deltaTime: number, playerObject: DynamicObject, controls: Controls) {
 
@@ -15,20 +16,55 @@ export class PlayerItemHolder {
             if (!this.holding) {
                 this.holding = this.getNearbyItem(playerObject);
             } else {
-                this.holding.throw(this.getThrowType(controls));
-                this.holding = null;
+                this.throw(this.getThrowType(controls), this.holding.itemLogic);
             }
         }
-
         // Interact with item
-        // if (this.holding && Input.keyPress(controls.shoot)) {
-        //     this.holding.interact(deltaTime);
-        // }
+        if (this.holding && Input.keyPress(controls.shoot)) {
+            this.holding.interact();
+            switch (this.holding.itemLogic.getType()) {
+                case (ItemType.fireArm): {
+                    const knockback = this.holding.itemLogic.getFirearmInfo().getKnockback(this.holding.itemLogic.angle, this.holding.itemLogic.isFlip());
+                    playerObject.velocity.x -= knockback.x;
+                    playerObject.velocity.y -= knockback.y;
+                    break;
+                }
+                case (ItemType.explosive): {
 
-        this.setHoldingPosition(playerObject);
+                }
+            }
+        }
+    }
+    
+    public getNearbyItem(playerObject: DynamicObject): ItemInterface | null {
+        let fallbackItem: ItemInterface | null = null;
+        
+        for (const item of this.nearbyItems.values()) {
+            if (!playerObject.collision(item.itemLogic.getPickupHitbox())) {
+                continue
+            } 
+            
+            if (item === this.lastHeldItem) {
+                fallbackItem = this.lastHeldItem;
+                continue;
+            }
+            
+            item.itemLogic.owned = true;
+            this.lastHeldItem = item;
+            return item;
+        }
+        
+        if (fallbackItem) {
+            fallbackItem.itemLogic.owned = true;
+            this.lastHeldItem = fallbackItem;
+        }
+        return fallbackItem;
     }
 
     public getThrowType(controls: Controls): ThrowType {
+        if (this.forcedThrowType !== null) {
+            return this.forcedThrowType;
+        }
         const left = Input.keyDown(controls.left);
         const right = Input.keyDown(controls.right);
         const up = Input.keyDown(controls.up);
@@ -51,41 +87,38 @@ export class PlayerItemHolder {
         return ThrowType.light;
     }
 
-    public setHoldingPosition(playerObject: DynamicObject) {
-        if (!this.holding) {
-            return 
-        }
-        this.holding.dynamicObject.pos = playerObject.getCenter();
-        this.holding.dynamicObject.pos.y -= this.holding.dynamicObject.height / 2
-        this.holding.dynamicObject.direction = playerObject.direction;
-        if (playerObject.direction === "left") {
-            this.holding.dynamicObject.pos.x -= this.holding.dynamicObject.width;
-        }
+    public throw(throwType: ThrowType, itemLogic: ItemLogic) {
+        this.holding = null;
+        itemLogic.dynamicObject.grounded = false;
+        itemLogic.owned = false;
+        const direcMult = itemLogic.dynamicObject.getDirectionMultiplier();
         
-    }
-
-    public getNearbyItem(playerObject: DynamicObject): Item | null {
-        let fallbackItem: Item | null = null;
-
-        for (const item of this.nearbyItems.values()) {
-            if (!playerObject.collision(item.getIncreasedHitbox(3))) {
-                continue
-            } 
-            
-            if (item === this.lastHeldItem) {
-                fallbackItem = this.lastHeldItem;
-                continue;
+        switch (throwType) {
+            case(ThrowType.light): {
+                itemLogic.dynamicObject.velocity = { x: 3.5 * direcMult, y: -3.5 };
+                itemLogic.rotateSpeed = 10;
+                break;
             }
-
-            item.owned = true;
-            this.lastHeldItem = item;
-            return item;
+            case(ThrowType.hard): {
+                itemLogic.dynamicObject.velocity = { x: 15 * direcMult, y: -5 };
+                itemLogic.rotateSpeed = 15;
+                break;
+            }
+            case(ThrowType.hardDiagonal): {
+                itemLogic.dynamicObject.velocity = { x: 15 * direcMult, y: -10 };
+                itemLogic.rotateSpeed = 15;
+                break;
+            }
+            case(ThrowType.drop): {
+                itemLogic.dynamicObject.velocity = { x: 0 * direcMult, y: 0 };
+                itemLogic.rotateSpeed = 5;
+                break;
+            }
+            case(ThrowType.upwards): {
+                itemLogic.dynamicObject.velocity = { x: 0 * direcMult, y: -10 };
+                itemLogic.rotateSpeed = 8;
+                break;
+            }
         }
-
-        if (fallbackItem) {
-            fallbackItem.owned = true;
-            this.lastHeldItem = fallbackItem;
-        }
-        return fallbackItem;
     }
 }

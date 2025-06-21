@@ -1,12 +1,11 @@
 import { Input } from "../../Common/input";
-import { Controls, Direction, getReverseDirection } from "../../Common/types";
+import { Controls } from "../../Common/types";
 import { DynamicObject } from "../Common/dynamicObject";
 
 export class PlayerMove {
 
     public moveEnabled: boolean = true;
-    public movespeed: number = 44;
-    private lastDirection: Direction = "left"; 
+    public movespeed: number = 50;
 
     public update(deltaTime: number, playerObject: DynamicObject, controls: Controls): void {
         if (this.moveEnabled) {
@@ -18,9 +17,14 @@ export class PlayerMove {
         const left  = Input.keyDown(controls.left);
         const right = Input.keyDown(controls.right);
         const directionMultiplier = Number(right) - Number(left);
-
+    
         if (left && right) {
-            playerObject.direction = getReverseDirection(this.lastDirection);
+            if (Input.keyPress(controls.left)) {
+                playerObject.direction = "left"
+            }
+            if (Input.keyPress(controls.right)) {
+                playerObject.direction = "right"
+            }
         } else {
             if (left) {
                 playerObject.direction = "left";
@@ -28,9 +32,14 @@ export class PlayerMove {
             if (right) {
                 playerObject.direction = "right";
             }
-            this.lastDirection = playerObject.direction;
         }
 
         playerObject.velocity.x += this.movespeed * directionMultiplier * deltaTime;
+    }
+
+    public willTurn(dynamicObject: DynamicObject, controls: Controls): boolean {
+        const willTurnLeft  = Input.keyPress(controls.left)  && dynamicObject.direction === "right";
+        const willTurnRight = Input.keyPress(controls.right) && dynamicObject.direction === "left";
+        return (willTurnLeft || willTurnRight) && this.moveEnabled;
     }
 }
