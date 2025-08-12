@@ -3,17 +3,13 @@ import { TileHandler } from "./tileHandler";
 import { PlayerHandler } from "./playerHandler";
 import { ProjectileHandler } from "./projectileHandler";
 import { ParticleHandler } from "./particleHandler";
+import { GridHelper } from "./gridHelper";
 
 export class Grid {
 
-    public static gridSize: number;
     
     static init(size: number) {
-        this.gridSize = size;
-        TileHandler.init(size);
-        ItemHandler.init(size);
-        PlayerHandler.init(size);
-        ProjectileHandler.init(size);
+        GridHelper.gridSize = size;
     }
 
     static update(deltaTime: number) {

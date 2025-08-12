@@ -6,10 +6,9 @@ import { PlayerBody } from "../playerBody";
 export class PlayerStanding extends StateInterface<PlayerState, PlayerBody> {
 
     private setArmOffset(object: PlayerBody): void {
-        const pixelFactor = object.getPixelFactor();
         const armOffset = { 
-            x: 5  * pixelFactor.x,
-            y: 14 * pixelFactor.y
+            x: 10,
+            y: 28
         };
         object.setArmOffset(object.armFront, armOffset);
     }
@@ -45,7 +44,7 @@ export class PlayerStanding extends StateInterface<PlayerState, PlayerBody> {
         }
 
         if (!playerBody.dynamicObject.grounded) {
-            return PlayerState.Flying;
+            return PlayerState.Jump;
         }
 
         return PlayerState.Standing;

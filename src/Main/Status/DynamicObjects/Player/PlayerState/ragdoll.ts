@@ -2,27 +2,11 @@ import { Input } from "../../../Common/input";
 import { StateInterface } from "../../../Common/stateMachine";
 import { PlayerState } from "../../../Common/types";
 import { PlayerBody } from "../playerBody";
-import { PlayerMove } from "../playerMove";
 
-export class PlayerFlying extends StateInterface<PlayerState, PlayerBody> {
-
-    private setArmOffset(object: PlayerBody): void {
-        const pixelFactor = object.getPixelFactor();
-        const armOffset = { 
-            x: 5  * pixelFactor.x,
-            y: 14 * pixelFactor.y
-        };
-        object.setArmOffset(object.armFront, armOffset);
-    }
+export class PlayerRagdoll extends StateInterface<PlayerState, PlayerBody> {
 
     public stateUpdate(deltaTime: number, object: PlayerBody): void {
-        if (object.dynamicObject.velocity.y < 0) {
-            object.setAnimation(object.animations.jump);
-        } else {
-            object.setAnimation(object.animations.fall);
-        }
-        this.setArmOffset(object);
-        object.rotateArm(deltaTime);
+
     }
     
     public stateChange(playerBody: PlayerBody): PlayerState {
@@ -39,6 +23,6 @@ export class PlayerFlying extends StateInterface<PlayerState, PlayerBody> {
             return PlayerState.Standing;
         }
 
-        return PlayerState.Flying;
+        return PlayerState.Jump;
     }
 }

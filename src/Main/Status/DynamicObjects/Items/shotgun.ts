@@ -3,7 +3,7 @@ import { rotateForce } from "../../Common/angleHelper";
 import { LerpValue, triangleLerp } from "../../Common/lerp";
 import { SpriteSheet } from "../../Common/sprite";
 import { Vector } from "../../Common/types";
-import { ItemLogic, ItemInterface } from "./item";
+import { ItemLogic, ItemInterface } from "./itemLogic";
 import { FirearmInfo } from "./firearmInfo";
 
 enum ShotgunState {
@@ -28,7 +28,6 @@ export class Shotgun implements ItemInterface {
         firearmInfo.bulletAngleVariation =Math.PI / 6;
         firearmInfo.bulletFireAmount =7;
         firearmInfo.bulletLifespan = 0.15;
-        firearmInfo.bulletSpeed = 1500;
         firearmInfo.pipeOffset ={ x: 28, y: -10 };
         this.itemLogic.setFirearmInfo(firearmInfo);
         this.itemLogic.holdOffset = { x: 14, y: -4 };

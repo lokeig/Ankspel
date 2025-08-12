@@ -5,7 +5,8 @@ import { PlayerState, Vector, Controls } from "../../Common/types";
 import { PlayerBody } from "./playerBody";
 
 import { PlayerFlap } from "./PlayerState/flap";
-import { PlayerFlying } from "./PlayerState/flying";
+import { PlayerJump } from "./PlayerState/jump";
+import { PlayerRagdoll } from "./PlayerState/ragdoll";
 import { PlayerSlide } from "./PlayerState/slide";
 import { PlayerStanding } from "./PlayerState/standing";
 
@@ -20,10 +21,11 @@ export class Player {
         this.stateMachine = new StateMachine(PlayerState.Standing);
 
         this.stateMachine.addState(PlayerState.Standing, new PlayerStanding());
-        this.stateMachine.addState(PlayerState.Flying, new PlayerFlying());
+        this.stateMachine.addState(PlayerState.Jump, new PlayerJump());
         this.stateMachine.addState(PlayerState.Flap, new PlayerFlap());
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide());
         this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(true));
+        this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll());
     }
 
     update(deltaTime: number): void {

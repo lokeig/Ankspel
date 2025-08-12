@@ -8,10 +8,9 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerBody>{
     private flapSpeed: number = 1.5;
 
     private setArmOffset(object: PlayerBody): void {
-        const pixelFactor = object.getPixelFactor();
         const armOffset = { 
-            x: 5  * pixelFactor.x,
-            y: 14 * pixelFactor.y
+            x: 10,
+            y: 28
         };
         object.setArmOffset(object.armFront, armOffset);
     }
@@ -24,7 +23,7 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerBody>{
             playerBody.armFront.angle = Math.PI / 2;
         }
         if (playerBody.playerItem.holding) {
-            playerBody.rotateArmUp(deltaTime);
+            playerBody.armFront.rotateArmUp(deltaTime);
         } else {
             playerBody.armFront.angle = 0;
         }
@@ -46,6 +45,6 @@ export class PlayerFlap extends StateInterface<PlayerState, PlayerBody>{
             return PlayerState.Flap
         }
 
-        return PlayerState.Flying;
+        return PlayerState.Jump;
     }
 }

@@ -44,10 +44,11 @@ export class CanvasRender implements RenderIF {
         this.ctx.translate(Math.floor(drawInfo.drawPos.x + drawInfo.drawWidth / 2), Math.floor(drawInfo.drawPos.y + drawInfo.drawHeight / 2));     
         this.ctx.rotate(drawInfo.angle);
 
-        this.ctx.drawImage(    
+        const inset = 0.2;
+        this.ctx.drawImage(
             img,
-            drawInfo.sourcePos.x, drawInfo.sourcePos.y,
-            drawInfo.sourceWidth, drawInfo.sourceHeight,
+            Math.floor(drawInfo.sourcePos.x) + inset, Math.floor(drawInfo.sourcePos.y) + inset,
+            Math.floor(drawInfo.sourceWidth) - 2 * inset, Math.floor(drawInfo.sourceHeight) - 2 * inset,
             -drawInfo.drawWidth / 2, -drawInfo.drawHeight / 2,
             drawInfo.drawWidth, drawInfo.drawHeight
         );

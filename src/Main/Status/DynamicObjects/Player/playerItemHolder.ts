@@ -1,7 +1,8 @@
 import { Input } from "../../Common/input";
 import { Controls } from "../../Common/types";
+import { ItemHandler } from "../../Grid/itemHandler";
 import { DynamicObject } from "../Common/dynamicObject";
-import { ItemInterface, ItemLogic, ItemType, ThrowType } from "../Items/item";
+import { ItemInterface, ItemLogic, ItemType, ThrowType } from "../Items/itemLogic";
 
 export class PlayerItemHolder {
     public holding: ItemInterface | null = null;
@@ -10,6 +11,7 @@ export class PlayerItemHolder {
     public forcedThrowType: null | ThrowType = null;
 
     public update(deltaTime: number, playerObject: DynamicObject, controls: Controls) {
+        this.nearbyItems = ItemHandler.getNearby(playerObject.pos, playerObject.width, playerObject.height);
 
         // Pickup or throw item
         if (Input.keyPress(controls.pickup)) {

@@ -1,5 +1,7 @@
 import { images } from "../../../images";
-import { SpriteAnimator, SpriteSheet, Animation } from "../../Common/sprite";
+import { Animation } from "../../Common/animation";
+import { SpriteSheet } from "../../Common/sprite";
+import { SpriteAnimator } from "../../Common/spriteAnimator";
 import { Vector } from "../../Common/types";
 
 
@@ -13,11 +15,10 @@ export class PlayerArm {
     public hidden: boolean = false;
     public rotateSpeed: number = 25;
 
-    public itemAnimation: Animation = {
-        frames: [{row: 8, col: 0}], fps: 8, repeat: false
-    }
+    public itemHoldingAnimation = new Animation();
 
     constructor(animation: Animation) {
+        this.itemHoldingAnimation.addFrame({ row: 8, col: 0 });
         this.animator = new SpriteAnimator(new SpriteSheet(images.playerHands, 16, 16), animation);
     }
     
@@ -40,6 +41,16 @@ export class PlayerArm {
             x: this.pos.x + (this.drawSize / 2),
             y: this.pos.y + (this.drawSize / 2)
         };
+    }
+
+    public rotateArmUp(deltaTime: number): void {
+        this.angle -= deltaTime * this.rotateSpeed;
+        this.angle = Math.max(this.angle, -Math.PI / 2)
+    }
+
+    public rotateArmDown(deltaTime: number): void {
+        this.angle += deltaTime * this.rotateSpeed;
+        this.angle = Math.min(this.angle, 0);
     }
 
     public setAnimation(animation: Animation) {

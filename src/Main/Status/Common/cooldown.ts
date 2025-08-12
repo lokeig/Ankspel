@@ -1,4 +1,4 @@
-export class Cooldown {
+export class Countdown {
     timeCounted: number = 0;
     cooldownTime: number;
     constructor(cooldownTime: number) {
@@ -7,7 +7,7 @@ export class Cooldown {
     update(deltaTime: number) {
         this.timeCounted += deltaTime;
     }
-    isReady(): boolean {
+    isDone(): boolean {
         return this.timeCounted >= this.cooldownTime;
     }
     reset() {

@@ -14,18 +14,25 @@ export abstract class StaticObject extends GameObject {
     protected drawRow: number = 0;
     protected drawCol: number = 0;
     protected drawSize: number;
-    protected spriteLookup: Record<number, [number, number]> = {};
 
-    protected spriteIndex: number = 0;
-    public neighbours: Neighbours = {
-        left: false, right: false, top: false, bot: false,
-        topLeft: false, topRight: false, botRight: false, botLeft: false
-    }
     protected sprite: SpriteSheet;
+    protected spriteLookup: Record<number, [number, number]> = {};
+    protected spriteIndex: number = 0;
+
+    public neighbours: Neighbours = {
+        left: false, 
+        right: false, 
+        top: false, 
+        bot: false,
+        topLeft: false, 
+        topRight: false, 
+        botRight: false,
+        botLeft: false
+    }
 
     public platform: boolean;
 
-    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform = false) {
+    constructor(pos: Vector, sprite: SpriteSheet, type: tileType, width: number, height: number, drawSize: number, platform: boolean = false) {
         super(pos, width, height);
         this.sprite = sprite;
         this.type = type;
@@ -33,11 +40,11 @@ export abstract class StaticObject extends GameObject {
         this.platform = platform;
     }
 
-    tileEqual(obj: StaticObject | undefined) {
+    public tileEqual(obj: StaticObject | undefined) {
         return obj && this.type === obj.type;
     }
 
-    setNeighbour(direction: Direction, value: boolean) {
+    public setNeighbour(direction: Direction, value: boolean) {
         this.neighbours[direction] = value;
         this.update();
     }
@@ -45,7 +52,7 @@ export abstract class StaticObject extends GameObject {
     public lipLeft: GameObject | undefined = undefined;
     public lipRight: GameObject | undefined = undefined;
 
-    draw(): void {
+    public draw(): void {
         this.sprite.draw(this.drawRow, this.drawCol, this.pos, this.drawSize, false, 0);
 
         if (this.lipLeft) {
@@ -60,7 +67,7 @@ export abstract class StaticObject extends GameObject {
     abstract setSpriteIndex(): void;
     abstract setLip(): void;
 
-    update() {
+    public update() {
         this.setSpriteIndex();
         this.setLip();
         const lookup = this.spriteLookup[this.spriteIndex];

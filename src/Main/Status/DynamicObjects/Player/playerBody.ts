@@ -1,6 +1,7 @@
-
 import { rotateForce } from "../../Common/angleHelper";
-import { SpriteAnimator, Animation, SpriteSheet } from "../../Common/sprite";
+import { Animation } from "../../Common/animation";
+import { SpriteSheet } from "../../Common/sprite";
+import { SpriteAnimator } from "../../Common/spriteAnimator";
 import { Controls, Vector } from "../../Common/types";
 
 import { DynamicObject } from "../Common/dynamicObject";
@@ -9,22 +10,22 @@ import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
 
-export class PlayerBody {
+    export class PlayerBody {
 
     public controls: Controls;
     public drawSize: number = 64; 
     private animator: SpriteAnimator; 
     public rotateSpeed: number = 25;
     
-    public animations: Record<string, Animation> = { 
-        idle:   { frames: [{ row: 0, col: 0 }], fps: 8, repeat: true },     
-        walk:   { frames: [{ row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 }, { row: 1, col: 3 }, { row: 1, col: 4 }, { row: 1, col: 5 }], fps: 8, repeat: true},     
-        crouch: { frames: [{ row: 2, col: 0 }], fps: 8, repeat: true },     
-        flap:   { frames: [{ row: 3, col: 0 }, { row: 3, col: 1 }, { row: 3, col: 2 }, { row: 3, col: 3 }], fps: 16, repeat: true  },
-        jump:   { frames: [{ row: 4, col: 0 }], fps: 8, repeat: true },
-        fall:   { frames: [{ row: 5, col: 0 }], fps: 8, repeat: true },
-        slide:  { frames: [{ row: 6, col: 0 }], fps: 8, repeat: true  },
-        turn:   { frames: [{ row: 7, col: 0 }], fps: 8, repeat: true }
+    public animations = { 
+        idle:   new Animation(), 
+        walk:   new Animation(),
+        crouch: new Animation(),
+        flap:   new Animation(),
+        jump:   new Animation(),
+        fall:   new Animation(),
+        slide:  new Animation(),
+        turn:   new Animation()
     };
 
     public readonly standardFriction: number = 10;
@@ -41,37 +42,38 @@ export class PlayerBody {
     constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
         this.dynamicObject = new DynamicObject(pos, this.standardWidth, this.idleHeight);
         this.controls = controls;
+
         this.animator = new SpriteAnimator(spriteSheet, this.animations.idle);
+        this.setUpAnimations();
+    }
+
+    private setUpAnimations() {
+        this.animations.idle.addFrame({ row: 0, col: 0 });
+        this.animations.walk.addRow(1, 6);
+        this.animations.walk.repeat = true;
+        this.animations.crouch.addFrame({ row: 2, col: 0 });
+        this.animations.flap.addRow(3, 4);
+        this.animations.flap.repeat = true;
+        this.animations.flap.fps = 16;
+        this.animations.jump.addFrame({ row: 4, col: 0 });
+        this.animations.fall.addFrame({ row: 5, col: 0 });
+        this.animations.slide.addFrame({ row: 6, col: 0 });
+        this.animations.turn.addFrame({ row: 7, col: 0 });
     }
     
-    public update(deltaTime: number) {
+    public update(deltaTime: number): void {
         this.updatePlayerBody(deltaTime);
         this.animator.update(deltaTime);
         this.setArmPosition(this.armFront);
         this.armFront.update(deltaTime);
         this.setHoldingPosition();
-
-    }
-
-    public rotateArmUp(deltaTime: number): void {
-        this.armFront.angle -= deltaTime * this.armFront.rotateSpeed;
-        this.armFront.angle = Math.max(this.armFront.angle, -Math.PI / 2)
-    }
-
-    public rotateArmDown(deltaTime: number): void {
-        this.armFront.angle += deltaTime * this.armFront.rotateSpeed;
-        this.armFront.angle = Math.min(this.armFront.angle, 0);
     }
 
     public rotateArm(deltaTime: number): void {
-        if (!this.playerItem.holding) {
-            this.armFront.angle = 0;
-            return;
-        }
         if (this.itemNoRotationCollision()) {
-            this.rotateArmUp(deltaTime);
+            this.armFront.rotateArmUp(deltaTime);
         } else {
-            this.rotateArmDown(deltaTime);
+            this.armFront.rotateArmDown(deltaTime);
         }
     }
 
@@ -79,7 +81,8 @@ export class PlayerBody {
         if (!this.playerItem.holding) {
             return false;
         }
-        const tempItemPos = { x: this.playerItem.holding.itemLogic.dynamicObject.pos.x, y: this.playerItem.holding.itemLogic.dynamicObject.pos.y };
+        const tempItemPos = { x: this.playerItem.holding.itemLogic.dynamicObject.pos.x, y: 
+            this.playerItem.holding.itemLogic.dynamicObject.pos.y };
         this.playerItem.holding.itemLogic.dynamicObject.setCenterToPos(this.armFront.getCenter());
         this.playerItem.holding.itemLogic.dynamicObject.pos.x += this.playerItem.holding.itemLogic.holdOffset.x * this.dynamicObject.getDirectionMultiplier();
         this.playerItem.holding.itemLogic.dynamicObject.pos.y += this.playerItem.holding.itemLogic.holdOffset.y;
@@ -106,13 +109,6 @@ export class PlayerBody {
         this.playerItem.holding.itemLogic.dynamicObject.pos.y += offset.y;
     }
 
-    public getPixelFactor(): Vector {
-        return { 
-            x: this.drawSize / this.animator.spriteSheet.frameWidth,
-            y: this.drawSize / this.animator.spriteSheet.frameHeight
-        };
-    }
-
     private setArmPosition(arm: PlayerArm): void {
         const result = this.getDrawPos();
         if (this.dynamicObject.direction === "right") {
@@ -134,31 +130,14 @@ export class PlayerBody {
     }
 
     private updatePlayerBody(deltaTime: number): void {
-        
+        this.dynamicObject.update(deltaTime);
+
+        if (this.dynamicObject.collisions.up) {
+            this.playerJump.isJumping = false;
+        }
+
         this.playerJump.update(deltaTime, this.dynamicObject, this.controls);
         this.playerMove.update(deltaTime, this.dynamicObject, this.controls);
-                
-        this.dynamicObject.velocityPhysicsUpdate(deltaTime);
-
-        // Handle Horizontal Collisions
-        this.dynamicObject.pos.x += this.dynamicObject.velocity.x;
-        const horizontalCollidingTile = this.dynamicObject.getHorizontalTileCollision();
-        if (horizontalCollidingTile) {
-            this.dynamicObject.handleSideCollision(horizontalCollidingTile);
-        }
-
-        // Handle Vertical Collisions
-        this.dynamicObject.pos.y += this.dynamicObject.velocity.y;
-        const verticalCollidingTile = this.dynamicObject.getVerticalTileCollision();
-        if (verticalCollidingTile) {
-            if (this.dynamicObject.velocity.y > 0) {
-                this.dynamicObject.handleBotCollision(verticalCollidingTile);
-            } else {
-                this.dynamicObject.handleTopCollision(verticalCollidingTile);
-                this.playerJump.isJumping = false;
-            }
-        }
-
         this.playerItem.update(deltaTime, this.dynamicObject, this.controls);
     }
 
@@ -206,7 +185,7 @@ export class PlayerBody {
         this.animator.setAnimation(animation);
         this.armFront.setAnimation(animation);
         if (this.playerItem.holding) {
-            this.armFront.setAnimation(this.armFront.itemAnimation);
+            this.armFront.setAnimation(this.armFront.itemHoldingAnimation);
         }
     }
 
@@ -225,5 +204,4 @@ export class PlayerBody {
         }
         this.armFront.draw(flip);
     };
-
 }

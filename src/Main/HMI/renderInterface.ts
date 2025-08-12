@@ -12,7 +12,6 @@ export interface RenderIF {
 
 export type DrawInfo = {
     imageSrc: string,
-
     sourcePos: Vector,
     sourceWidth: number,
     sourceHeight: number,

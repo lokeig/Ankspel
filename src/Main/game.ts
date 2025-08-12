@@ -26,6 +26,8 @@ const controls: Controls = {
 };
 
 export class Game {
+    private lastTime = 0;
+
     constructor(canvasID: string) {
         Grid.init(32);
         Input.init();
@@ -50,20 +52,30 @@ export class Game {
         requestAnimationFrame(this.gameLoop);
     }
 
-    private scaleFactor: number = 1;
-    private lastTime = 0;
     gameLoop = (currentTime: number) => {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
+                
+        const fixedStep = 0.1;
+        const maxIterations = 20;
 
-        Grid.update(deltaTime);
+        let remainingDelta = deltaTime;
+        let iterations = 0;
+
+        while (remainingDelta > 0 && iterations < maxIterations) {
+            
+            const currentDelta = Math.min(fixedStep, remainingDelta);
+            remainingDelta -= currentDelta;
+
+            Grid.update(currentDelta);
+
+            iterations++;
+        }
+
         Input.update();
-
-        this.scaleFactor += deltaTime * 0.1;
-        
-        
+                
         Render.get().clear();
-        Render.get().drawSquare(0, 0, 2000, 2000, 0, "grey")
+        Render.get().drawSquare(0, 0, 2000, 2000, 0, "green")
         Render.get().setScale(1);
         Grid.draw();
 

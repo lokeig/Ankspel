@@ -1,16 +1,16 @@
-import { Cooldown } from "../../../Common/cooldown";
+import { Countdown } from "../../../Common/cooldown";
 import { Input } from "../../../Common/input";
 import { StateInterface } from "../../../Common/stateMachine";
 import { PlayerState } from "../../../Common/types";
-import { ThrowType } from "../../Items/item";
+import { ThrowType } from "../../Items/itemLogic";
 import { PlayerBody } from "../playerBody";
 
 export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
 
-    private platformIgnoreTime = new Cooldown(0.15);
+    private platformIgnoreTime = new Countdown(0.15);
     private newHeight: number;
     private crouch: boolean;
-    private frictionIgnoreTime = new Cooldown(0.2);
+    private frictionIgnoreTime = new Countdown(0.2);
 
     constructor(crouch: boolean = false) {
         super();
@@ -19,17 +19,16 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
     }
 
     private setArmOffset(object: PlayerBody): void {
-        const pixelFactor = object.getPixelFactor();
         if (this.crouch) {
             const armOffset = { 
-                x: 4  * pixelFactor.x,
-                y: 17 * pixelFactor.y
+                x: 8,
+                y: 34
             };
             object.setArmOffset(object.armFront, armOffset);
         } else {
             const armOffset = { 
-                x: 8  * pixelFactor.x,
-                y: 21 * pixelFactor.y
+                x: 16,
+                y: 42
             };
             object.setArmOffset(object.armFront, armOffset);
         }
@@ -60,8 +59,8 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
             }
         }
 
-        playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isReady();
-        playerBody.dynamicObject.ignoreFriction = !this.frictionIgnoreTime.isReady();
+        playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isDone();
+        playerBody.dynamicObject.ignoreFriction = !this.frictionIgnoreTime.isDone();
         this.platformIgnoreTime.update(deltaTime);
         this.frictionIgnoreTime.update(deltaTime);
 
@@ -82,7 +81,7 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
         if (playerBody.dynamicObject.grounded) {
             return PlayerState.Standing;
         }
-        return PlayerState.Flying;
+        return PlayerState.Jump;
     }
 
     public stateExited(playerBody: PlayerBody): void {
@@ -96,6 +95,5 @@ export class PlayerSlide extends StateInterface<PlayerState, PlayerBody> {
         playerBody.playerMove.moveEnabled = true;
 
         playerBody.playerItem.forcedThrowType = null;
-
     }
 }

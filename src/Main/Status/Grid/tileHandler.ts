@@ -1,35 +1,62 @@
 import { SpriteSheet } from "../Common/sprite";
-import { Vector, Direction, getReverseDirection, Neighbours } from "../Common/types";
-import { StaticObject } from "../StaticObjects/staticObject";
+import { Vector, Direction, Neighbours } from "../Common/types";
+import { getReverseDirection } from "../Common/helperFunctions";
+import { CollisionObject, StaticObject } from "../StaticObjects/staticObject";
 import { tileType, Tile } from "../StaticObjects/tile";
-
+import { GridHelper } from "./gridHelper";
 
 export class TileHandler {
 
-    public static gridSize: number;
     private static tiles = new Map<string, StaticObject>();
 
-    static init(gridSize: number) {
-        this.gridSize = gridSize;
+
+    public static getTile(gridPos: Vector): StaticObject | undefined {
+        return this.tiles.get(GridHelper.key(gridPos));
     }
 
-    static getWorldPos(gridPos: Vector): Vector {
-        return { x: gridPos.x * this.gridSize, y: gridPos.y * this.gridSize } 
-    }
+    public static getNearbyTiles(pos: Vector, width: number, height: number): CollisionObject[] {
+        const result: CollisionObject[] = [];
+    
+        const startX = pos.x - GridHelper.gridSize * 2;
+        const endX = pos.x + width + GridHelper.gridSize * 2;
+        const startY = pos.y - GridHelper.gridSize * 2;
+        const endY = pos.y + height + GridHelper.gridSize * 2;
+    
+        for (let x = startX; x < endX; x += GridHelper.gridSize) {
+            for (let y = startY; y < endY; y += GridHelper.gridSize) {
+                const gridPos = GridHelper.getGridPos({ x, y });
+    
+                this.processTile(gridPos, result);
+            }
+        }
 
-    static key(pos: Vector): string {
-        return `${pos.x},${pos.y}`;
-    }
-
-    static getTile(pos: Vector): StaticObject | undefined{
-        return this.tiles.get(this.key(pos));
+        return result;
     }
     
-    static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
-        const size = this.gridSize;
-        const pos = this.getWorldPos(gridPos);
+    private static processTile(gridPos: Vector, accumulatedCollidable: Array<CollisionObject>): void {
+        
+        const tile = this.getTile(gridPos);
+
+        if (!tile) {
+            return;
+        }
+
+        accumulatedCollidable.push({ gameObject: tile, platform: tile.platform });
+    
+        if (tile.lipLeft) {
+            accumulatedCollidable.push({ gameObject: tile.lipLeft, platform: true });
+        }
+    
+        if (tile.lipRight) {
+            accumulatedCollidable.push({ gameObject: tile.lipRight, platform: true });
+        }
+    }
+
+    public static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
+        const size = GridHelper.gridSize;
+        const pos = GridHelper.getWorldPos(gridPos);
         const value = new Tile(pos, sprite, type, size, size, size);
-        this.tiles.set(this.key(gridPos), value);
+        this.tiles.set(GridHelper.key(gridPos), value);
 
         value.neighbours = this.getNeighbours(gridPos);
         value.update();
@@ -46,7 +73,7 @@ export class TileHandler {
         }
     }
 
-   static shift(gridPos: Vector, direction: Direction): Vector {
+    private static shift(gridPos: Vector, direction: Direction): Vector {
         switch (direction) {
             case "left":     return  { x: gridPos.x - 1, y: gridPos.y };
             case "right":    return  { x: gridPos.x + 1, y: gridPos.y };
@@ -59,7 +86,7 @@ export class TileHandler {
         }
     }
 
-    static getNeighbours(gridPos: Vector): Neighbours {
+    private static getNeighbours(gridPos: Vector): Neighbours {
         const tile = this.getTile(gridPos);
         const neighbours: Neighbours = { 
             left: false, right: false, top: false, bot: false, 

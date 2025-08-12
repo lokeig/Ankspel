@@ -27,28 +27,14 @@ export type Neighbours = {
 
 export type Direction = keyof Neighbours;
 
-export function getReverseDirection(direction: Direction) {
-    switch (direction) {
-        case "left"    : return "right";
-        case "right"   : return "left";
-        case "top"     : return "bot";
-        case "bot"     : return "top";
-        case "topLeft" : return "botRight";
-        case "topRight": return "botLeft";
-        case "botLeft" : return "topRight";
-        case "botRight": return "topLeft";
-    }
-}
-
 export enum PlayerState {
     Standing,
-    Flying,
+    Jump,
     Slide,
     Crouch,
-    Flap
+    Flap,
+    Ragdoll
 }
-
-
 
 export enum SwordState {
     Parrying,
@@ -59,3 +45,4 @@ export enum WeaponState {
     Loaded,
     Empty
 }
+

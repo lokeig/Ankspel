@@ -8,15 +8,17 @@ export class FirearmInfo {
     public bulletSize: number = 2;
     public bulletFireAmount: number = 1;
     public bulletAngleVariation: number = 0;
-    public bulletSpeed: number = 1000;
+    public bulletSpeed: number = 2300;
     public pipeOffset: Vector = { x: 0, y: 0 };
-    public bulletLifespan: number = 1;
+    public bulletLifespan: number = 0.2;
     public ammo: number = 10;
 
     public shoot(centerPos: Vector, angle: number, flip: boolean): void {
+        
         if (this.ammo < 1) {
             return;
         }
+
         const direcMult = flip ? -1 : 1;
         this.ammo -= 1;
         const offset = rotateForce(this.pipeOffset, angle);

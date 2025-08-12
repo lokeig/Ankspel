@@ -1,4 +1,4 @@
-import { Cooldown } from "../../Common/cooldown";
+import { Countdown } from "../../Common/cooldown";
 import { Input } from "../../Common/input";
 import { Controls } from "../../Common/types";
 import { DynamicObject } from "../Common/dynamicObject";
@@ -9,8 +9,8 @@ export class PlayerJump {
     private jumpForce: number = 27;
     public jumpEnabled: boolean = true;
 
-    private coyoteTime = new Cooldown(0.08);
-    private maxJumpTime = new Cooldown(0.2);
+    private coyoteTime = new Countdown(0.08);
+    private maxJumpTime = new Countdown(0.2);
 
     public jumpVelocity: number = 0;
 
@@ -22,7 +22,7 @@ export class PlayerJump {
         this.jump(deltaTime, playerObject, controls);
     }
 
-    public jump(deltaTime: number, playerObject: DynamicObject, controls: Controls): void {
+    private jump(deltaTime: number, playerObject: DynamicObject, controls: Controls): void {
         if (Input.keyPress(controls.jump) && this.jumpReady() && this.jumpEnabled) {
             this.isJumping = true;
             playerObject.velocity.y = -this.minJump;
@@ -34,7 +34,7 @@ export class PlayerJump {
             this.maxJumpTime.update(deltaTime);
         }
 
-        if (!Input.keyDown(controls.jump) || this.maxJumpTime.isReady()) {
+        if (!Input.keyDown(controls.jump) || this.maxJumpTime.isDone()) {
             this.isJumping = false;
         }
 
@@ -42,6 +42,6 @@ export class PlayerJump {
     }
 
     public jumpReady(): boolean {
-        return !this.coyoteTime.isReady() && !this.isJumping;
+        return !this.coyoteTime.isDone() && !this.isJumping;
     }
 }
