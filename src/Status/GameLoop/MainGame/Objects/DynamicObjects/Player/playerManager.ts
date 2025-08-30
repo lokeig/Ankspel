@@ -28,10 +28,18 @@ export class PlayerManager {
         return this.players.get(Grid.key(pos));
     }
 
-    public static addPlayer(gridPos: Vector, controls: Controls) {
+    public static setPlayerPos(gridPos: Vector) {
+        for (const playerSet of this.players.values()) {
+            for (const player of playerSet.values()) {
+                player.playerBody.dynamicObject.pos = gridPos;
+            }
+        }
+    }
+
+    public static addPlayer(gridPos: Vector, controls: Controls, id: string) {
         const playerSet = this.getPlayers(gridPos);
 
-        const player = new Player(Grid.getWorldPos(gridPos), controls);
+        const player = new Player(Grid.getWorldPos(gridPos), controls, id);
         player.playerBody.dynamicObject.pos.y += player.playerBody.dynamicObject.height;
         player.playerBody.dynamicObject.pos.x += (player.playerBody.dynamicObject.width - Grid.gridSize) / 2;
 

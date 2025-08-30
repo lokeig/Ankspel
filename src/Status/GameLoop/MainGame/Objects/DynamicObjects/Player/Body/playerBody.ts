@@ -103,7 +103,7 @@ import { PlayerMove } from "./playerMove";
         this.playerItem.holding.itemLogic.dynamicObject.pos.y += offset.y;
     }
 
-    private setArmPosition(): void {
+    public setArmPosition(): void {
         const result = this.getDrawPos();
         if (this.dynamicObject.direction === "right") {
             result.x += this.armFront.posOffset.x;

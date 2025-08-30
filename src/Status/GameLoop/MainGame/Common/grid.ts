@@ -1,7 +1,7 @@
 import { Vector } from "./Types/vector";
 
 export class Grid {
-    public static gridSize: number;
+    public static gridSize: number = 32;
 
     public static updateMapPositions<T>(objects: Map<string, Set<T>>, getPos: (e: T) => Vector) {
         const movedObjects: Map<string, Set<T>> = new Map();

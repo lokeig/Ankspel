@@ -4,7 +4,7 @@ import { Grid } from "../../../Common/grid";
 import { Direction } from "../../../Common/Types/direction";
 import { Vector } from "../../../Common/Types/vector";
 import { TileHandler } from "../../StaticObjects/tileHandler";
-import { CollisionObject } from "../StaticObjects/staticObject";
+import { CollisionObject } from "../../StaticObjects/collisionObject";
 
 
 export class DynamicObject extends GameObject {
@@ -98,7 +98,7 @@ export class DynamicObject extends GameObject {
         }
     }
 
-    private velocityPhysicsUpdate(deltaTime: number) {
+    public velocityPhysicsUpdate(deltaTime: number) {
         if (!this.ignoreGravity) {
             this.velocity.y += this.gravity * deltaTime; 
         }
@@ -121,11 +121,14 @@ export class DynamicObject extends GameObject {
     public update(deltaTime: number) {
         this.setNewCollidableObjects();
         this.velocityPhysicsUpdate(deltaTime);
-        
+        this.updatePositions();
+    }
+
+    public updatePositions() {
         this.collisions.up = false;
         this.collisions.down = false;
         this.collisions.side = false;
-
+        
         this.pos.x += this.velocity.x;
         const horizontalCollidingTile = this.getHorizontalTileCollision();
         if (horizontalCollidingTile) {

@@ -13,6 +13,9 @@ export class TileHandler {
 
     private static tiles = new Map<string, StaticObject>();
 
+    public static clear(): void {
+        this.tiles = new Map;
+    }
 
     public static getTile(gridPos: Vector): StaticObject | undefined {
         return this.tiles.get(Grid.key(gridPos));
@@ -56,9 +59,10 @@ export class TileHandler {
         }
     }
 
-    public static setTile(gridPos: Vector, sprite: SpriteSheet, type: tileType) {
+    public static setTile(gridPos: Vector, type: tileType) {
         const size = Grid.gridSize;
         const pos = Grid.getWorldPos(gridPos);
+        const sprite = new SpriteSheet(`/assets/tile${tileType[type]}.png`, 16, 16);
         const value = new Tile(pos, sprite, type, size, size, size);
         this.tiles.set(Grid.key(gridPos), value);
 

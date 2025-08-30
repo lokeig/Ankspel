@@ -28,8 +28,8 @@ export class Shotgun implements ItemInterface {
         this.itemLogic = new ItemLogic(pos, 30, 15);
         const firearmInfo = new FirearmInfo;
         firearmInfo.ammo = 2 * this.amountOfBulletsPerShot;
-        firearmInfo.bulletAngleVariation =Math.PI / 6;
-        firearmInfo.bulletLifespan = 0.15;
+        firearmInfo.bulletAngleVariation =Math.PI / 12;
+        firearmInfo.bulletLifespan = 0.11;
         firearmInfo.pipeOffset ={ x: 28, y: -10 };
         this.itemLogic.setFirearmInfo(firearmInfo);
         this.itemLogic.holdOffset = { x: 14, y: -4 };

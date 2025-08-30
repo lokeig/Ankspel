@@ -1,9 +1,9 @@
 
-import { Countdown } from "../../../GameLoop/MainGame/Common/cooldown";
-import { Vector } from "../../../GameLoop/MainGame/Common/Types/vector";
-import { Utility } from "../../../GameLoop/MainGame/Common/Utility/utility";
 import { ExplosionParticle } from "./explosionParticle";
 import { ParticleInterface } from "../../Common/particleInterface";
+import { Countdown } from "../../../Common/cooldown";
+import { Vector } from "../../../Common/Types/vector";
+import { Utility } from "../../../Common/Utility/utility";
 
 export class ExplosionVFX implements ParticleInterface {
     

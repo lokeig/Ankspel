@@ -4,49 +4,43 @@ import { PlayerState } from "./playerState";
 import { PlayerBody } from "../Body/playerBody";
 
 
-export class PlayerFlap implements StateInterface<PlayerState>{
+export class PlayerInAir implements StateInterface<PlayerState> {
 
     private playerBody: PlayerBody;
-    private flapSpeed: number = 1.5;
 
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
     }
-
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
         this.playerBody.setArmOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
-        this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
-        this.playerBody.setAnimation(this.playerBody.animations.flap);
-        
-        if (this.playerBody.playerMove.willTurn(this.playerBody.dynamicObject, this.playerBody.controls)) {
-            this.playerBody.armFront.angle = Math.PI / 2;
-        }
-        
-        if (this.playerBody.playerItem.holding) {
-            this.playerBody.armFront.rotateArmUp(deltaTime);
+        if (this.playerBody.dynamicObject.velocity.y < 0) {
+            this.playerBody.setAnimation(this.playerBody.animations.jump);
         } else {
-            this.playerBody.armFront.angle = 0;
+            this.playerBody.setAnimation(this.playerBody.animations.fall);
         }
-
+        this.playerBody.rotateArm(deltaTime);
         this.playerBody.update(deltaTime);
     }
-
+    
     public stateChange(): PlayerState {
+        if (Input.keyPress(this.playerBody.controls.ragdoll)) {
+            return PlayerState.Ragdoll;
+        }
 
         if (Input.keyDown(this.playerBody.controls.down)) {
             return PlayerState.Crouch;
         }
 
-        if (this.playerBody.dynamicObject.grounded) {
-            return PlayerState.Standing;
+        if (Input.keyPress(this.playerBody.controls.jump) && !this.playerBody.playerJump.isJumping) {
+            return PlayerState.Flap
         }
 
-        if (Input.keyDown(this.playerBody.controls.jump)) {
-            return PlayerState.Flap
+        if (this.playerBody.dynamicObject.grounded) {
+            return PlayerState.Standing;
         }
 
         return PlayerState.Jump;
@@ -55,7 +49,7 @@ export class PlayerFlap implements StateInterface<PlayerState>{
     public stateExited(): void {
         
     }
-
+    
     public stateDraw(): void {
         this.playerBody.draw();
     }

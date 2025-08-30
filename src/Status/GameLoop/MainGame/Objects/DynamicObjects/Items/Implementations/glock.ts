@@ -24,7 +24,7 @@ export class Glock implements ItemInterface {
         const firearmInfo = new FirearmInfo();
         firearmInfo.ammo = 9;
         firearmInfo.bulletAngleVariation = Math.PI / 36;
-        firearmInfo.knockback = { x: 8, y: 2 };
+        firearmInfo.knockback = { x: 9, y: 2 };
         firearmInfo.pipeOffset = { x: 4, y: -6 };
         this.itemLogic.setFirearmInfo(firearmInfo);
 
@@ -37,7 +37,6 @@ export class Glock implements ItemInterface {
     update(deltaTime: number): void {
         this.itemLogic.update(deltaTime);
         this.animator.update(deltaTime);
-        //console.log(this.itemLogic.dynamicObject.collidableObjects)
     }
 
     interact(): void {
