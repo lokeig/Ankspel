@@ -1,4 +1,4 @@
-import { ServerMessage } from "../Common/serverMessage";
+import { NewPlayerMessage, ServerMessage } from "../Common/MessageTypes/messageType";
 
 export class PeerConnectionManager {
 
@@ -6,11 +6,13 @@ export class PeerConnectionManager {
     private dataChannel: RTCDataChannel | null = null;
     private pendingCandidates: RTCIceCandidate[] = [];
     private peerId: string;
+    private myID: string;
 
     private messageCallback: (msg: ServerMessage, from: string) => void = () => { };
 
-    constructor(peerId: string, private socket: WebSocket) {
+    constructor(peerId: string, private socket: WebSocket, myID: string) {
         this.peerId = peerId;
+        this.myID = myID;
         this.peerConnection = new RTCPeerConnection({
             iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
         });
@@ -40,7 +42,16 @@ export class PeerConnectionManager {
         if (!this.dataChannel) {
             return;
         }
-        this.dataChannel.onopen = () => console.log(`DataChannel with ${this.peerId} open`);
+        this.dataChannel.onopen = () => {
+            console.log(`DataChannel with ${this.peerId} open`);
+            // const msg: NewPlayerMessage = {
+            //     type: "newPlayer",
+            //     id: this.myID,
+            //     xPos: 15,
+            //     yPos: 3
+            // };
+            // this.dataChannel?.send(JSON.stringify(msg));
+        }
         this.dataChannel.onmessage = e => {
             try {
                 const msg: ServerMessage = JSON.parse(e.data);
@@ -97,7 +108,7 @@ export class PeerConnectionManager {
         }
     }
 
-    sendMessage(msg: ServerMessage) {
+    public sendMessage(msg: ServerMessage) {
         if (this.dataChannel?.readyState === "open") {
             this.dataChannel.send(JSON.stringify(msg));
         }

@@ -22,7 +22,6 @@ export class DynamicObject extends GameObject {
     public direction: Direction = "left";
     public collisions: Record<string, boolean> = {
         up: false,
-        down: false,
         side: false,
     }
 
@@ -126,9 +125,8 @@ export class DynamicObject extends GameObject {
 
     public updatePositions() {
         this.collisions.up = false;
-        this.collisions.down = false;
         this.collisions.side = false;
-        
+
         this.pos.x += this.velocity.x;
         const horizontalCollidingTile = this.getHorizontalTileCollision();
         if (horizontalCollidingTile) {

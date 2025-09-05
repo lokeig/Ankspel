@@ -31,7 +31,7 @@ import { PlayerMove } from "./playerMove";
 
     public readonly standardFriction: number = 10;
     public readonly slideFriction: number = 5;
-    public readonly idleHeight: number = 46;
+    public readonly standardHeight: number = 46;
     public readonly standardWidth: number = 18;    
 
     public dynamicObject: DynamicObject;
@@ -41,7 +41,7 @@ import { PlayerMove } from "./playerMove";
     public armFront = new PlayerArm(this.animations.idle);
 
     constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
-        this.dynamicObject = new DynamicObject(pos, this.standardWidth, this.idleHeight);
+        this.dynamicObject = new DynamicObject(pos, this.standardWidth, this.standardHeight);
         this.controls = controls;
 
         this.animator = new SpriteAnimator(spriteSheet, this.animations.idle);
@@ -150,8 +150,8 @@ import { PlayerMove } from "./playerMove";
         const prevHeight = this.dynamicObject.height;
         const prevY = this.dynamicObject.pos.y;
 
-        this.dynamicObject.height = this.idleHeight;
-        this.dynamicObject.pos.y -= this.idleHeight - prevHeight;
+        this.dynamicObject.height = this.standardHeight;
+        this.dynamicObject.pos.y -= this.standardHeight - prevHeight;
         
         const returnValue = this.dynamicObject.getHorizontalTileCollision();
 

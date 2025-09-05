@@ -1,6 +1,6 @@
 import { PeerConnectionManager } from "./peerConnectionManager";
 import { ServerInterface } from "../Common/serverInterface";
-import { ServerMessage } from "../Common/serverMessage";
+import { ServerMessage } from "../Common/MessageTypes/messageType";
 
 export class MultiPeerServer implements ServerInterface {
     private peers: Record<string, PeerConnectionManager> = {};
@@ -12,10 +12,8 @@ export class MultiPeerServer implements ServerInterface {
         socket.onopen = () => {
             console.log("Connected to signaling server");
 
-            // Notify the server that we're online
             this.socket.send(JSON.stringify({ type: "join" }));
 
-            // Request a list of all currently online peers
             this.socket.send(JSON.stringify({ type: "list-peers" }));
 
         };
@@ -28,9 +26,13 @@ export class MultiPeerServer implements ServerInterface {
     public update(): void {
         this.receivedMessages = [];
     }
-    
+
     public getID() {
         return this.myID;
+    }
+
+    public getPeerIDs(): Array<string> {
+        return Object.keys(this.peers);
     }
 
     private addPeer(peerId: string, isInitiator = false) {
@@ -39,7 +41,7 @@ export class MultiPeerServer implements ServerInterface {
             return;
         }
 
-        const peer = new PeerConnectionManager(peerId, this.socket);
+        const peer = new PeerConnectionManager(peerId, this.socket, this.myID!);
 
         peer.setOnMessage((msg, from) => {
             console.log("Received message from", from, msg);

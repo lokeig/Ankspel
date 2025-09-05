@@ -4,7 +4,7 @@ import { PlayerState } from "./playerState";
 import { PlayerBody } from "../Body/playerBody";
 
 
-export class PlayerFlap implements StateInterface<PlayerState>{
+export class PlayerFlap implements StateInterface<PlayerState> {
 
     private playerBody: PlayerBody;
     private flapSpeed: number = 1.5;
@@ -21,11 +21,11 @@ export class PlayerFlap implements StateInterface<PlayerState>{
     public stateUpdate(deltaTime: number): void {
         this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
         this.playerBody.setAnimation(this.playerBody.animations.flap);
-        
+
         if (this.playerBody.playerMove.willTurn(this.playerBody.dynamicObject, this.playerBody.controls)) {
             this.playerBody.armFront.angle = Math.PI / 2;
         }
-        
+
         if (this.playerBody.playerItem.holding) {
             this.playerBody.armFront.rotateArmUp(deltaTime);
         } else {
@@ -36,6 +36,10 @@ export class PlayerFlap implements StateInterface<PlayerState>{
     }
 
     public stateChange(): PlayerState {
+        
+        if (Input.keyDown(this.playerBody.controls.ragdoll)) {
+            return PlayerState.Ragdoll;
+        }
 
         if (Input.keyDown(this.playerBody.controls.down)) {
             return PlayerState.Crouch;
@@ -53,7 +57,7 @@ export class PlayerFlap implements StateInterface<PlayerState>{
     }
 
     public stateExited(): void {
-        
+
     }
 
     public stateDraw(): void {

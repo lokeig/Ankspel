@@ -27,6 +27,7 @@ export class PlayerInAir implements StateInterface<PlayerState> {
     }
     
     public stateChange(): PlayerState {
+        
         if (Input.keyPress(this.playerBody.controls.ragdoll)) {
             return PlayerState.Ragdoll;
         }

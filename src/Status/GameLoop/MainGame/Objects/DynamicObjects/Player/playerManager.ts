@@ -5,18 +5,17 @@ import { Grid } from "../../../Common/grid";
 
 export class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
+    private static playersID: Map<string, Player> = new Map();
 
     static update(deltaTime: number) {
-
         for (const playerSet of this.players.values()) {
             for (const player of playerSet) {
-
                 player.update(deltaTime);
-
-                if (player.playerBody.playerItem.holding) {
-                    if (player.playerBody.playerItem.holding.shouldBeDeleted()) {
-                        player.playerBody.playerItem.holding = null;
-                    }
+                if (!player.playerBody.playerItem.holding) {
+                    continue;
+                }
+                if (player.playerBody.playerItem.holding.shouldBeDeleted()) {
+                    player.playerBody.playerItem.holding = null;
                 }
             }
         }
@@ -42,11 +41,11 @@ export class PlayerManager {
         const player = new Player(Grid.getWorldPos(gridPos), controls, id);
         player.playerBody.dynamicObject.pos.y += player.playerBody.dynamicObject.height;
         player.playerBody.dynamicObject.pos.x += (player.playerBody.dynamicObject.width - Grid.gridSize) / 2;
-
         if (!playerSet) {
             this.players.set(Grid.key(gridPos), new Set());
         } 
         this.getPlayers(gridPos)!.add(player);
+        this.playersID.set(id, player);
     }
  
     public static draw() {
@@ -55,5 +54,9 @@ export class PlayerManager {
                 player.draw();
             }
         }
+    }
+
+    public static getPlayerFromID(ID: string): Player | undefined {
+        return this.playersID.get(ID);
     }
 }

@@ -21,6 +21,28 @@ export class TileHandler {
         return this.tiles.get(Grid.key(gridPos));
     }
 
+    public static setTile(gridPos: Vector, type: tileType) {
+        const size = Grid.gridSize;
+        const pos = Grid.getWorldPos(gridPos);
+        const sprite = new SpriteSheet(`/assets/tile${tileType[type]}.png`, 16, 16);
+        const value = new Tile(pos, sprite, type, size, size, size);
+        this.tiles.set(Grid.key(gridPos), value);
+
+        value.neighbours = this.getNeighbours(gridPos);
+        value.update();
+
+        for (const [key, _] of Object.entries(value.neighbours) as [Direction, boolean][]) {
+            const neighbourTile = this.shift(gridPos, key);
+            const tile = this.getTile(neighbourTile);
+
+            if (!tile) {
+                continue;
+            }
+            
+            tile.setNeighbour(Utility.Direction.getReverseDirection(key), true)
+        }
+    }
+    
     public static getNearbyTiles(pos: Vector, width: number, height: number): CollisionObject[] {
         const result: CollisionObject[] = [];
     
@@ -59,27 +81,6 @@ export class TileHandler {
         }
     }
 
-    public static setTile(gridPos: Vector, type: tileType) {
-        const size = Grid.gridSize;
-        const pos = Grid.getWorldPos(gridPos);
-        const sprite = new SpriteSheet(`/assets/tile${tileType[type]}.png`, 16, 16);
-        const value = new Tile(pos, sprite, type, size, size, size);
-        this.tiles.set(Grid.key(gridPos), value);
-
-        value.neighbours = this.getNeighbours(gridPos);
-        value.update();
-
-        for (const [key, _] of Object.entries(value.neighbours) as [Direction, boolean][]) {
-            const neighbourTile = this.shift(gridPos, key);
-            const tile = this.getTile(neighbourTile);
-
-            if (!tile) {
-                continue;
-            }
-            
-            tile.setNeighbour(Utility.Direction.getReverseDirection(key), true)
-        }
-    }
 
     private static shift(gridPos: Vector, direction: Direction): Vector {
         switch (direction) {

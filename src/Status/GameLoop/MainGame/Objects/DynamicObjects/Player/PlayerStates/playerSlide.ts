@@ -25,7 +25,7 @@ export class PlayerSlide implements StateInterface<PlayerState> {
         this.frictionIgnoreTime.reset();
         this.playerBody.playerMove.moveEnabled = false;
         this.playerBody.dynamicObject.height = this.newHeight;
-        this.playerBody.dynamicObject.pos.y += this.playerBody.idleHeight - this.playerBody.dynamicObject.height;
+        this.playerBody.dynamicObject.pos.y += this.playerBody.standardHeight - this.playerBody.dynamicObject.height;
         
         this.playerBody.playerItem.forcedThrowType = ThrowType.drop;
 
@@ -67,6 +67,9 @@ export class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
+        if (Input.keyDown(this.playerBody.controls.ragdoll)) {
+            return PlayerState.Ragdoll;
+        }
         if (Input.keyDown(this.playerBody.controls.down) || this.playerBody.idleCollision()) {
             const maxCrouchSpeed = 3;
             const validCrouch = !this.playerBody.dynamicObject.grounded || Math.abs(this.playerBody.dynamicObject.velocity.x) < maxCrouchSpeed || this.playerBody.idleCollision()
@@ -82,8 +85,8 @@ export class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateExited(): void {
-        this.playerBody.dynamicObject.pos.y -= this.playerBody.idleHeight - this.playerBody.dynamicObject.height;
-        this.playerBody.dynamicObject.height = this.playerBody.idleHeight;
+        this.playerBody.dynamicObject.pos.y -= this.playerBody.standardHeight - this.playerBody.dynamicObject.height;
+        this.playerBody.dynamicObject.height = this.playerBody.standardHeight;
         
         this.playerBody.dynamicObject.ignorePlatforms = false;
         this.playerBody.dynamicObject.ignoreFriction = false;

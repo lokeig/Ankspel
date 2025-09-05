@@ -29,6 +29,20 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
         menu: "esc"
     }
 
+    private controls2: Controls = {
+        jump: "q",
+        left: "q",
+        right: "q",
+        down: "q",
+        up: "q",
+
+        shoot: "q",
+        pickup: "q",
+        ragdoll: "q",
+        strafe: "q",
+        menu: "q"
+    }
+
     private startLevel = new Level("starter");
 
     public stateEntered(): void {
@@ -47,18 +61,41 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
         ItemManager.addItem({ x: 19, y: 12 }, Grenade);
 
         const id = GameServer.get().getID()!;
-        console.log("Created Player with ID:", id)
-        PlayerManager.addPlayer({ x: 15, y: 11 }, this.controls, id);
 
+        PlayerManager.addPlayer({ x: 18, y: 5 }, this.controls, id);
 
         this.loadLevel(this.startLevel)
     }
 
     public stateUpdate(deltaTime: number) {
+        
+        const lobby = GameServer.get().getPeerIDs();
+        for (const peerID of lobby) {
+            if (!PlayerManager.getPlayerFromID(peerID)) {
+                PlayerManager.addPlayer({ x: 15, y: 3 }, this.controls2, peerID);
+                console.log("ADDED PLAYER", peerID)
+            }
+        }
+        
+        const messages = GameServer.get().getReceivedMessages();
+        for (const message of messages) {
+            if (message.type === "playerData") {
+                const player = PlayerManager.getPlayerFromID(message.id);
+                if (!player) {
+                    continue;
+                }
+                player.playerBody.dynamicObject.pos = {
+                    x: message.xPos,
+                    y: message.yPos
+                };
+            }
+        }
+
         ItemManager.update(deltaTime);
         PlayerManager.update(deltaTime);
         ProjectileManager.update(deltaTime);
         ParticleHandler.update(deltaTime);
+        GameServer.get().update();
     }
 
     public stateChange(): GameLoopState {

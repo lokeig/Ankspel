@@ -68,6 +68,7 @@ server.on("connection", (socket) => {
             socket
         );
     }
+    
     function listPeers(socket) {
         if (socket && id) {
             socket.send(

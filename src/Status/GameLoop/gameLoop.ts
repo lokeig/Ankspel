@@ -1,22 +1,15 @@
-import { CanvasRender } from "../../HMI/canvasRender";
 import { Render } from "../../HMI/render";
 import { GameLoopState } from "./gameLoopState";
 import { Input } from "./MainGame/Common/input";
 import { StateMachine } from "./MainGame/Common/StateMachine/stateMachine";
 import { InMatchLoop } from "./MainGame/inMatchLoop";
 import { GameServer } from "./Server/Common/server";
-import { MultiPeerServer } from "./Server/RTCWebImplementation/multiPeerServer";
 
 export class GameLoop {
     private lastTime = 0;
     private stateMachine: StateMachine<GameLoopState>;
 
-    constructor(canvasID: string) {
-
-        Input.init();
-        Render.set(new CanvasRender(canvasID));
-        GameServer.set(new MultiPeerServer(new WebSocket("ws://localhost:3000")));
-
+    constructor() {
         const initalState = GameLoopState.inMatch;
         this.stateMachine = new StateMachine(initalState);
 

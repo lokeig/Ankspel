@@ -1,15 +1,20 @@
 import { PlayerState } from "../../../MainGame/Objects/DynamicObjects/Player/PlayerStates/playerState"
 
-export type MessageType = PlayerData | NewPlayer 
+export type ServerMessage =
+    | PlayerDataMessage
+    | NewPlayerMessage;
 
-export type PlayerData = {
-    xPos: number,
-    yPos: number,
-    state: PlayerState
+export type PlayerDataMessage = {
+    type: "playerData";
+    xPos: number;
+    yPos: number;
+    id: string;
+    state: PlayerState;
 }
 
-export type NewPlayer = {
-    id: string,
-    xPos: number,
-    yPos: number
+export type NewPlayerMessage = {
+    type: "newPlayer";
+    id: string;
+    xPos: number;
+    yPos: number;
 }
