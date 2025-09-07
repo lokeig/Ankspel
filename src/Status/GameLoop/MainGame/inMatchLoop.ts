@@ -68,22 +68,16 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
     }
 
     public stateUpdate(deltaTime: number) {
-        
-        const lobby = GameServer.get().getPeerIDs();
-        for (const peerID of lobby) {
-            if (!PlayerManager.getPlayerFromID(peerID)) {
-                PlayerManager.addPlayer({ x: 15, y: 3 }, this.controls2, peerID);
-                console.log("ADDED PLAYER", peerID)
-            }
-        }
-        
+           
         const messages = GameServer.get().getReceivedMessages();
         for (const message of messages) {
             if (message.type === "playerData") {
-                const player = PlayerManager.getPlayerFromID(message.id);
+                let player = PlayerManager.getPlayerFromID(message.id);
                 if (!player) {
-                    continue;
+                    PlayerManager.addPlayer({ x: message.xPos, y: message.yPos }, this.controls2, message.id);
+                    player = PlayerManager.getPlayerFromID(message.id)!;
                 }
+
                 player.playerBody.dynamicObject.pos = {
                     x: message.xPos,
                     y: message.yPos
@@ -110,8 +104,8 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
         ProjectileManager.draw();
         ItemManager.draw();
         PlayerManager.draw();
-        TileHandler.draw();
         ParticleHandler.draw();
+        TileHandler.draw();
     }
 
     public loadLevel(lvl: Level) {

@@ -11,7 +11,6 @@ export class PlayerSlide implements StateInterface<PlayerState> {
     private platformIgnoreTime = new Countdown(0.15);
     private newHeight: number;
     private crouch: boolean;
-    private frictionIgnoreTime = new Countdown(0.2);
     private unstuckSpeed: number = 7;
 
     constructor(playerBody: PlayerBody, crouch: boolean) {
@@ -22,7 +21,6 @@ export class PlayerSlide implements StateInterface<PlayerState> {
 
     public stateEntered(): void {
         this.platformIgnoreTime.setToReady();
-        this.frictionIgnoreTime.reset();
         this.playerBody.playerMove.moveEnabled = false;
         this.playerBody.dynamicObject.height = this.newHeight;
         this.playerBody.dynamicObject.pos.y += this.playerBody.standardHeight - this.playerBody.dynamicObject.height;
@@ -37,10 +35,17 @@ export class PlayerSlide implements StateInterface<PlayerState> {
 
         this.playerBody.setArmOffset(armOffset);
     }
-
+    
     public stateUpdate(deltaTime: number): void {    
+        
         const animation = this.crouch ? this.playerBody.animations.crouch : this.playerBody.animations.slide;
         this.playerBody.setAnimation(animation);
+
+
+
+        if (this.playerBody.dynamicObject.grounded) {
+            this.playerBody.dynamicObject.frictionMultiplier = 1 /5 ;
+        }
         
         this.playerBody.playerJump.jumpEnabled = true;
         if (Input.keyPress(this.playerBody.controls.jump)) { 
@@ -49,18 +54,15 @@ export class PlayerSlide implements StateInterface<PlayerState> {
             if (this.playerBody.dynamicObject.onPlatform()) {
                 this.playerBody.playerJump.jumpEnabled = false;
             }
-
+            
             if (this.playerBody.dynamicObject.grounded && this.playerBody.idleCollision()) {
                 this.playerBody.dynamicObject.velocity.x = this.unstuckSpeed * this.playerBody.dynamicObject.getDirectionMultiplier();
                 this.playerBody.playerJump.jumpEnabled = false;
             }
         }
-
+        
         this.playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isDone();
-        this.playerBody.dynamicObject.ignoreFriction = !this.frictionIgnoreTime.isDone();
         this.platformIgnoreTime.update(deltaTime);
-        this.frictionIgnoreTime.update(deltaTime);
-
 
         this.playerBody.rotateArm(deltaTime);
         this.playerBody.update(deltaTime);
@@ -78,10 +80,8 @@ export class PlayerSlide implements StateInterface<PlayerState> {
             }
             return PlayerState.Slide;
         }
-        if (this.playerBody.dynamicObject.grounded) {
-            return PlayerState.Standing;
-        }
-        return PlayerState.Jump;
+
+        return PlayerState.Standard;
     }
 
     public stateExited(): void {
@@ -95,6 +95,7 @@ export class PlayerSlide implements StateInterface<PlayerState> {
         this.playerBody.playerMove.moveEnabled = true;
 
         this.playerBody.playerItem.forcedThrowType = null;
+        this.playerBody.dynamicObject.frictionMultiplier = 1;
     }
 
     public stateDraw(): void {

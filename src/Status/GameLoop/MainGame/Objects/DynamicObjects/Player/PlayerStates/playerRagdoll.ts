@@ -60,7 +60,7 @@ export class PlayerRagdoll implements StateInterface<PlayerState> {
         this.legs.velocity = { x: vel.x, y: vel.y };
 
         if (this.playerBody.playerJump.isJumping) {
-            const jumpLeft = this.playerBody.playerJump.getJumpRemainig();
+            const jumpLeft = this.playerBody.playerJump.getJumpRemaining();
             const jumpCharge = this.playerBody.playerJump.getJumpForce() / 5;
             this.body.velocity.y -= jumpLeft * jumpCharge;
             this.head.velocity.y -= jumpLeft * jumpCharge;
@@ -197,7 +197,7 @@ export class PlayerRagdoll implements StateInterface<PlayerState> {
     public stateChange(): PlayerState {
         const exitKeyPressed = Input.keyPress(this.playerBody.controls.ragdoll) || Input.keyPress(this.playerBody.controls.jump);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
-            return PlayerState.Standing;
+            return PlayerState.Standard;
         }
         return PlayerState.Ragdoll;
     }

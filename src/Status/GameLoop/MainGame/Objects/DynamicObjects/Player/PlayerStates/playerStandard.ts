@@ -3,7 +3,7 @@ import { StateInterface } from "../../../../Common/StateMachine/stateInterface";
 import { PlayerState } from "./playerState";
 import { PlayerBody } from "../Body/playerBody";
 
-export class PlayerStanding implements StateInterface<PlayerState> {
+export class PlayerStandard implements StateInterface<PlayerState> {
 
     private playerBody: PlayerBody;
 
@@ -13,10 +13,27 @@ export class PlayerStanding implements StateInterface<PlayerState> {
 
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
-        this.playerBody.setArmOffset(armOffset);    
+        this.playerBody.setArmOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.setAnimation();    
+        this.playerBody.rotateArm(deltaTime);
+        this.playerBody.update(deltaTime);
+    }
+
+    private setAnimation() {
+
+        if (!this.playerBody.dynamicObject.grounded) {
+
+            if (this.playerBody.dynamicObject.velocity.y < 0) {
+                this.playerBody.setAnimation(this.playerBody.animations.jump);
+            } else {
+                this.playerBody.setAnimation(this.playerBody.animations.fall);
+            }
+            return;
+        }
+
         const left = Input.keyDown(this.playerBody.controls.left);
         const right = Input.keyDown(this.playerBody.controls.right);
 
@@ -27,9 +44,6 @@ export class PlayerStanding implements StateInterface<PlayerState> {
         } else {
             this.playerBody.setAnimation(this.playerBody.animations.idle);
         };
-
-        this.playerBody.rotateArm(deltaTime);
-        this.playerBody.update(deltaTime);
     }
 
     public stateChange(): PlayerState {
@@ -37,7 +51,11 @@ export class PlayerStanding implements StateInterface<PlayerState> {
         if (Input.keyPress(this.playerBody.controls.ragdoll)) {
             return PlayerState.Ragdoll;
         }
-        
+
+        if (Input.keyPress(this.playerBody.controls.jump) && !this.playerBody.dynamicObject.grounded && !this.playerBody.playerJump.isJumping) {
+            return PlayerState.Flap;
+        }
+
         if (Input.keyDown(this.playerBody.controls.down)) {
             if (Math.abs(this.playerBody.dynamicObject.velocity.x) < 3) {
                 return PlayerState.Crouch;
@@ -46,15 +64,11 @@ export class PlayerStanding implements StateInterface<PlayerState> {
             }
         }
 
-        if (!this.playerBody.dynamicObject.grounded) {
-            return PlayerState.Jump;
-        }
-
-        return PlayerState.Standing;
+        return PlayerState.Standard;
     }
 
     public stateExited(): void {
-        
+
     }
 
     public stateDraw(): void {

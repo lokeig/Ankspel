@@ -39,7 +39,7 @@ export class PlayerJump {
         
         this.coyoteTime.update(deltaTime);
     }
-    public getJumpRemainig(): number {
+    public getJumpRemaining(): number {
         return 1 - this.maxJumpTime.getPercentageReady();
     }
     

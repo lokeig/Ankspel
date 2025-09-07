@@ -7,10 +7,9 @@ import { Vector } from "../../../Common/Types/vector";
 import { PlayerBody } from "./Body/playerBody";
 
 import { PlayerFlap } from "./PlayerStates/playerFlap";
-import { PlayerInAir } from "./PlayerStates/playerInAir";
 import { PlayerRagdoll } from "./PlayerStates/playerRagdoll";
 import { PlayerSlide } from "./PlayerStates/playerSlide";
-import { PlayerStanding } from "./PlayerStates/playerStanding";
+import { PlayerStandard } from "./PlayerStates/playerStandard";
 import { GameServer } from "../../../../Server/Common/server";
 import { PlayerDataMessage } from "../../../../Server/Common/MessageTypes/messageType";
 
@@ -26,10 +25,9 @@ export class Player {
 
         this.playerBody = new PlayerBody(pos, sprite, controls);
 
-        this.stateMachine = new StateMachine(PlayerState.Standing);
+        this.stateMachine = new StateMachine(PlayerState.Standard);
 
-        this.stateMachine.addState(PlayerState.Standing, new PlayerStanding(this.playerBody));
-        this.stateMachine.addState(PlayerState.Jump, new PlayerInAir(this.playerBody));
+        this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.playerBody));
         this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.playerBody));
         const isCrouch = true;
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.playerBody, !isCrouch));

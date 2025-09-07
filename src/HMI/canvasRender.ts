@@ -12,7 +12,6 @@ export class CanvasRender implements RenderIF {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.fillStyle = "green";
     }
 
     private loadImage(src: string): HTMLImageElement {

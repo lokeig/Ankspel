@@ -45,15 +45,11 @@ export class PlayerFlap implements StateInterface<PlayerState> {
             return PlayerState.Crouch;
         }
 
-        if (this.playerBody.dynamicObject.grounded) {
-            return PlayerState.Standing;
-        }
-
-        if (Input.keyDown(this.playerBody.controls.jump)) {
+        if (Input.keyDown(this.playerBody.controls.jump) && !this.playerBody.dynamicObject.grounded) {
             return PlayerState.Flap
         }
 
-        return PlayerState.Jump;
+        return PlayerState.Standard;
     }
 
     public stateExited(): void {

@@ -1,6 +1,5 @@
 export enum PlayerState {
-    Standing,
-    Jump,
+    Standard,
     Slide,
     Crouch,
     Flap,

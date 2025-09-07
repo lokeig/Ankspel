@@ -1,5 +1,6 @@
 
 export enum GameLoopState {
     mainMenu,
-    inMatch
+    inMatch,
+    lobby
 }

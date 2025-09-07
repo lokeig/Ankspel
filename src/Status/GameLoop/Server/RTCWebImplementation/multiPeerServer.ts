@@ -14,7 +14,7 @@ export class MultiPeerServer implements ServerInterface {
 
             this.socket.send(JSON.stringify({ type: "join" }));
 
-            this.socket.send(JSON.stringify({ type: "list-peers" }));
+            this.socket.send(JSON.stringify({ type: "list-users" }));
 
         };
     }
@@ -65,13 +65,13 @@ export class MultiPeerServer implements ServerInterface {
                 this.myID = data.id;
                 break;
 
-            case "peer-joined":
+            case "user-joined":
                 if (!this.peers[data.id]) {
-                    console.log(`New peer joined: ${data.id}, connecting...`);
+                    console.log(`New user joined: ${data.id}, connecting...`);
                 }
                 break;
 
-            case "peer-list":
+            case "user-list":
                 console.log("Here are all other users:", data.peers);
                 for (const peer of data.peers.values())
                     if (!this.peers[peer]) {
