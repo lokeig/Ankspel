@@ -14,7 +14,7 @@ export class LobbyLoop implements StateInterface<GameLoopState> {
 
     public stateChange(): GameLoopState {
         if (Input.keyPress(" ")) {
-            return GameLoopState.inMatch;
+            return GameLoopState.playing;
         }
     }
 

@@ -10,10 +10,10 @@ export class GameLoop {
     private stateMachine: StateMachine<GameLoopState>;
 
     constructor() {
-        const initalState = GameLoopState.inMatch;
+        const initalState = GameLoopState.playing;
         this.stateMachine = new StateMachine(initalState);
 
-        this.stateMachine.addState(GameLoopState.inMatch, new InMatchLoop());
+        this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         this.waitForID().then(() => {
             this.stateMachine.enterState();
             requestAnimationFrame(this.gameLoop);

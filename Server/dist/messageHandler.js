@@ -16,12 +16,18 @@ class MessageHandler {
             case "candidate":
                 this.forward(dataInfo);
                 break;
+            case "join-lobby":
+                this.joinLobby(dataInfo, dataInfo.data.lobbyID);
+                break;
+            case "host-lobby":
+                this.hostLobby(dataInfo, dataInfo.data.lobbyID);
+                break;
             default:
                 console.warn("Unknown message type:", dataInfo.data.type);
         }
     }
     join(dataInfo) {
-        dataInfo.connectedUsers.set(dataInfo.clientID, dataInfo.clientSocket);
+        dataInfo.users.set(dataInfo.clientID, dataInfo.clientSocket);
         dataInfo.clientSocket.send(JSON.stringify({
             type: "welcome",
             id: dataInfo.clientID,
@@ -31,17 +37,85 @@ class MessageHandler {
             id: dataInfo.clientID,
         }, dataInfo.clientSocket);
     }
-    listUsers(dataInfo) {
-        console.log(dataInfo.clientID);
-        if (dataInfo.clientSocket && dataInfo.clientID) {
+    joinLobby(dataInfo, lobbyID) {
+        const lobby = dataInfo.lobbyManager.getLobby(lobbyID);
+        if (!lobby) {
             dataInfo.clientSocket.send(JSON.stringify({
-                type: "user-list",
-                peers: Array.from(dataInfo.connectedUsers.keys()).filter((pid) => pid !== dataInfo.clientID),
+                type: "lobby-not-found",
+                id: lobbyID
             }));
+            return;
+        }
+        dataInfo.lobbyManager.addUser(lobbyID, dataInfo.clientID);
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "joined-lobby",
+            id: lobbyID
+        }));
+        this.broadcast(dataInfo, {
+            type: "user-joined-lobby",
+            id: dataInfo.clientID
+        }, dataInfo.clientSocket);
+    }
+    leaveLobby(dataInfo, lobbyID) {
+        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (!lobby) {
+            return;
+        }
+        const oldHost = lobby.getHost();
+        lobby.removeUser(dataInfo.clientID);
+        if (dataInfo.clientID === oldHost) {
+            const newHost = lobby.setNewHost();
+            if (newHost) {
+                const userIDs = lobby.getUsers();
+                for (const userID of userIDs) {
+                    const userSocket = dataInfo.users.get(userID);
+                    if (userSocket && userSocket.readyState === ws_1.WebSocket.OPEN) {
+                        userSocket.send(JSON.stringify({
+                            type: "new-host",
+                            hostID: newHost
+                        }));
+                    }
+                }
+            }
+        }
+        if (lobby.getUsers().size === 0) {
+            dataInfo.lobbyManager.removeLobby(lobbyID);
         }
     }
+    hostLobby(dataInfo, lobbyID) {
+        const lobby = dataInfo.lobbyManager.getLobby(lobbyID);
+        if (lobby) {
+            dataInfo.clientSocket.send(JSON.stringify({
+                type: "lobby-already-found",
+                id: lobbyID
+            }));
+            return;
+        }
+        dataInfo.lobbyManager.createLobby(lobbyID, dataInfo.clientID);
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "hosted-lobby",
+            id: lobbyID
+        }));
+    }
+    listUsers(dataInfo) {
+        console.log(dataInfo.clientID);
+        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (!lobby) {
+            return;
+        }
+        const userArray = [];
+        lobby.getUsers().forEach((e) => {
+            if (e !== dataInfo.clientID) {
+                userArray.push(e);
+            }
+        });
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "user-list",
+            users: userArray,
+        }));
+    }
     forward(dataInfo) {
-        const target = dataInfo.connectedUsers.get(dataInfo.data.to);
+        const target = dataInfo.users.get(dataInfo.data.to);
         if (target && target.readyState === ws_1.WebSocket.OPEN) {
             target.send(JSON.stringify({
                 ...dataInfo.data,
@@ -51,14 +125,24 @@ class MessageHandler {
     }
     broadcast(dataInfo, msg, exclude) {
         const text = JSON.stringify(msg);
-        dataInfo.connectedUsers.forEach((user) => {
-            if (user !== exclude && user.readyState === ws_1.WebSocket.OPEN) {
-                user.send(text);
+        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (!lobby) {
+            return;
+        }
+        const userIDs = lobby.getUsers();
+        for (const userID of userIDs.values()) {
+            const userSocket = dataInfo.users.get(userID);
+            if (userSocket !== exclude && userSocket.readyState === ws_1.WebSocket.OPEN) {
+                userSocket.send(text);
             }
-        });
+        }
     }
     cleanup(dataInfo) {
-        dataInfo.connectedUsers.delete(dataInfo.clientID);
+        dataInfo.users.delete(dataInfo.clientID);
+        const lobbyID = dataInfo.lobbyManager.getUserLobbyID(dataInfo.clientID);
+        if (lobbyID) {
+            this.leaveLobby(dataInfo, lobbyID);
+        }
         this.broadcast(dataInfo, { type: "user-left", id: dataInfo.clientID }, dataInfo.clientSocket);
     }
 }

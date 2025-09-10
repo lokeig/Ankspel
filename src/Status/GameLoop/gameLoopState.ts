@@ -1,6 +1,8 @@
 
 export enum GameLoopState {
-    mainMenu,
-    inMatch,
-    lobby
+    lobby,
+    scoreScreen,
+    postMatch,
+    playing,
+    editor
 }

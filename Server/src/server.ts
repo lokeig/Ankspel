@@ -2,14 +2,16 @@ import { MessageHandler } from "./messageHandler.js";
 import { DataInfo } from "./dataInfo.js";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocketServer, WebSocket } from "ws";
+import { LobbyManager } from "./lobbyManager.js";
 
 
 
 const PORT = 3000;
 const server = new WebSocketServer({ port: PORT });
 
-// Keep track of connected users
-const users = new Map<string, WebSocket>();
+const users = new Map<string, WebSocket>(); 
+const lobbyManager = new LobbyManager();
+
 
 server.on("connection", (socket: WebSocket) => {
     let id = uuidv4();
@@ -28,14 +30,14 @@ server.on("connection", (socket: WebSocket) => {
         }
         console.log(data.type);
 
-        const dataInfo = new DataInfo(data, id, socket, users)
+        const dataInfo = new DataInfo(data, id, socket, users, lobbyManager)
         messageHandler.handle(dataInfo)
     });
 
 
 
     socket.on("close", () => {
-        const dataInfo = new DataInfo(null, id, socket, users);
+        const dataInfo = new DataInfo(null, id, socket, users, lobbyManager);
         messageHandler.cleanup(dataInfo);
     });
 

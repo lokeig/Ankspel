@@ -93,7 +93,7 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
     }
 
     public stateChange(): GameLoopState {
-        return GameLoopState.inMatch;
+        return GameLoopState.playing;
     }
 
     public stateExited(): void {

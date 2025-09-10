@@ -3,7 +3,7 @@ import { ServerInterface } from "../Common/serverInterface";
 import { ServerMessage } from "../Common/MessageTypes/messageType";
 
 export class MultiPeerServer implements ServerInterface {
-    private peers: Record<string, PeerConnectionManager> = {};
+    private peers: Map<string, PeerConnectionManager> = new Map();
     private receivedMessages: ServerMessage[] = [];
     private myID: string | null = null;
 
@@ -13,7 +13,8 @@ export class MultiPeerServer implements ServerInterface {
             console.log("Connected to signaling server");
 
             this.socket.send(JSON.stringify({ type: "join" }));
-
+            this.socket.send(JSON.stringify({ type: "host-lobby", lobbyID: "abc" }));
+            this.socket.send(JSON.stringify({ type: "join-lobby", lobbyID: "abc" }));
             this.socket.send(JSON.stringify({ type: "list-users" }));
 
         };
@@ -32,12 +33,12 @@ export class MultiPeerServer implements ServerInterface {
     }
 
     public getPeerIDs(): Array<string> {
-        return Object.keys(this.peers);
+        return Array.from(this.peers.keys());
     }
 
     private addPeer(peerId: string, isInitiator = false) {
         // Check if peer already exists
-        if (this.peers[peerId]) {
+        if (this.peers.get(peerId)) {
             return;
         }
 
@@ -53,7 +54,7 @@ export class MultiPeerServer implements ServerInterface {
             peer.createOffer();
         }
 
-        this.peers[peerId] = peer;
+        this.peers.set(peerId, peer);
     }
 
     private handleMessage(event: MessageEvent) {
@@ -66,37 +67,71 @@ export class MultiPeerServer implements ServerInterface {
                 break;
 
             case "user-joined":
-                if (!this.peers[data.id]) {
+                if (!this.peers.has(data.id)) {
                     console.log(`New user joined: ${data.id}, connecting...`);
+                    this.addPeer(data.id, true);
                 }
                 break;
 
+            case "user-left":
+                if (this.peers.has(data.id)) {
+                    console.log(`user left: ${data.id}`);
+                    this.peers.get(data.id)?.close();
+                    this.peers.delete(data.id);
+                }
+
+                break;
+
             case "user-list":
-                console.log("Here are all other users:", data.peers);
-                for (const peer of data.peers.values())
-                    if (!this.peers[peer]) {
-                        this.addPeer(peer, true);
+                console.log("Here are all other users:", data.users);
+                for (const user of data.users.values())
+                    if (!this.peers.has(user)) {
+                        this.addPeer(user, true);
                     }
                 break;
 
             case "offer":
-                if (!this.peers[data.from]) {
+                if (!this.peers.has(data.from)) {
                     this.addPeer(data.from, false);
                 }
-                this.peers[data.from].handleOffer(data.offer);
+                this.peers.get(data.from)!.handleOffer(data.offer);
                 break;
 
             case "answer":
-                this.peers[data.from]?.handleAnswer(data.answer);
+                this.peers.get(data.from)?.handleAnswer(data.answer);
                 break;
 
             case "candidate":
-                this.peers[data.from]?.addIceCandidate(data.candidate);
+                this.peers.get(data.from)?.addIceCandidate(data.candidate);
+                break;
+
+            case "user-joined-lobby":
+                console.log(`New user joined: ${data.id}`);
+                break;
+
+            case "joined-lobby":
+                console.log(`joined lobby: ${data.id}`);
+                break;
+
+            case "lobby-not-found":
+                console.log(`could not find lobby: ${data.id}`);
+                break;
+
+            case "lobby-already-found":
+                console.log(`could not host lobby: ${data.id}, lobby already exists`);
+                break;
+
+            case "hosted-lobby":
+                console.log(`Hosted lobby: ${data.id}`);
+                break;
+
+            case "new-host":
+                console.log(`New host: ${data.hostID}`);
                 break;
         }
     }
 
     public sendMessage(msg: ServerMessage) {
-        Object.values(this.peers).forEach(peer => peer.sendMessage(msg));
+        this.peers.forEach(peer => peer.sendMessage(msg));
     }
 }

@@ -44,13 +44,6 @@ export class PeerConnectionManager {
         }
         this.dataChannel.onopen = () => {
             console.log(`DataChannel with ${this.peerId} open`);
-            // const msg: NewPlayerMessage = {
-            //     type: "newPlayer",
-            //     id: this.myID,
-            //     xPos: 15,
-            //     yPos: 3
-            // };
-            // this.dataChannel?.send(JSON.stringify(msg));
         }
         this.dataChannel.onmessage = e => {
             try {
@@ -70,10 +63,10 @@ export class PeerConnectionManager {
         const offer = await this.peerConnection.createOffer();
         await this.peerConnection.setLocalDescription(offer);
 
-        this.socket.send(JSON.stringify({ 
-            type: "offer", 
-            to: this.peerId, 
-            offer: offer 
+        this.socket.send(JSON.stringify({
+            type: "offer",
+            to: this.peerId,
+            offer: offer
         }));
     }
 
@@ -81,8 +74,8 @@ export class PeerConnectionManager {
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
-        
-        this.socket.send(JSON.stringify({ 
+
+        this.socket.send(JSON.stringify({
             type: "answer",
             to: this.peerId,
             answer: answer
@@ -106,6 +99,14 @@ export class PeerConnectionManager {
         } else {
             this.pendingCandidates.push(iceCandidate);
         }
+    }
+
+    public close() {
+        if (this.dataChannel) {
+            this.dataChannel.close();
+            this.dataChannel = null;
+        }
+        this.peerConnection.close();
     }
 
     public sendMessage(msg: ServerMessage) {

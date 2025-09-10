@@ -4,10 +4,11 @@ const messageHandler_js_1 = require("./messageHandler.js");
 const dataInfo_js_1 = require("./dataInfo.js");
 const uuid_1 = require("uuid");
 const ws_1 = require("ws");
+const lobbyManager_js_1 = require("./lobbyManager.js");
 const PORT = 3000;
 const server = new ws_1.WebSocketServer({ port: PORT });
-// Keep track of connected users
 const users = new Map();
+const lobbyManager = new lobbyManager_js_1.LobbyManager();
 server.on("connection", (socket) => {
     let id = (0, uuid_1.v4)();
     const messageHandler = new messageHandler_js_1.MessageHandler();
@@ -23,11 +24,11 @@ server.on("connection", (socket) => {
             return;
         }
         console.log(data.type);
-        const dataInfo = new dataInfo_js_1.DataInfo(data, id, socket, users);
+        const dataInfo = new dataInfo_js_1.DataInfo(data, id, socket, users, lobbyManager);
         messageHandler.handle(dataInfo);
     });
     socket.on("close", () => {
-        const dataInfo = new dataInfo_js_1.DataInfo(null, id, socket, users);
+        const dataInfo = new dataInfo_js_1.DataInfo(null, id, socket, users, lobbyManager);
         messageHandler.cleanup(dataInfo);
     });
 });
