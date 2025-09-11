@@ -57,7 +57,7 @@ export class PlayerStandard implements StateInterface<PlayerState> {
         }
 
         if (Input.keyDown(this.playerBody.controls.down)) {
-            if (Math.abs(this.playerBody.dynamicObject.velocity.x) < 3) {
+            if (Math.abs(this.playerBody.dynamicObject.velocity.x) < 3 || !this.playerBody.dynamicObject.grounded) {
                 return PlayerState.Crouch;
             } else {
                 return PlayerState.Slide

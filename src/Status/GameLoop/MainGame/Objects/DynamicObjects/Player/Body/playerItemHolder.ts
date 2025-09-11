@@ -2,7 +2,6 @@ import { Input } from "../../../../Common/input";
 import { Controls } from "../../../../Common/Types/controls";
 import { ItemManager } from "../../Items/Manager/itemManager";
 import { DynamicObject } from "../../Common/dynamicObject";
-import { ItemLogic } from "../../Items/Common/itemLogic";
 import { ThrowType } from "./throwType";
 import { ItemType } from "../../Items/Common/itemType";
 import { ItemInterface } from "../../Items/Common/itemInterface";
@@ -21,7 +20,7 @@ export class PlayerItemHolder {
             if (!this.holding) {
                 this.holding = this.getNearbyItem(playerObject);
             } else {
-                this.throw(this.getThrowType(controls), this.holding.itemLogic);
+                this.throw(this.getThrowType(controls));
             }
         }
         // Interact with item
@@ -92,7 +91,12 @@ export class PlayerItemHolder {
         return ThrowType.light;
     }
 
-    public throw(throwType: ThrowType, itemLogic: ItemLogic) {
+    public throw(throwType: ThrowType) {
+        if (!this.holding) {
+            return;
+        }
+
+        const itemLogic = this.holding.itemLogic;
         this.holding = null;
         itemLogic.dynamicObject.grounded = false;
         itemLogic.owned = false;

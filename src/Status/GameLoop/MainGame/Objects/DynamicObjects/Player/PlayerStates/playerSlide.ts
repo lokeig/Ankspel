@@ -41,10 +41,12 @@ export class PlayerSlide implements StateInterface<PlayerState> {
         const animation = this.crouch ? this.playerBody.animations.crouch : this.playerBody.animations.slide;
         this.playerBody.setAnimation(animation);
 
-
-
-        if (this.playerBody.dynamicObject.grounded) {
-            this.playerBody.dynamicObject.frictionMultiplier = 1 /5 ;
+        if (!this.playerBody.dynamicObject.grounded) {
+            this.playerBody.dynamicObject.frictionMultiplier = 0.5;
+        } else if (Math.abs(this.playerBody.dynamicObject.velocity.x) > 1.8) {
+            this.playerBody.dynamicObject.frictionMultiplier = 1 / 5 ;
+        } else {
+            this.playerBody.dynamicObject.frictionMultiplier = 1;
         }
         
         this.playerBody.playerJump.jumpEnabled = true;

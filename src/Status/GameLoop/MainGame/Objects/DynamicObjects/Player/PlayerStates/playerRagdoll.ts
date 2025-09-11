@@ -7,6 +7,7 @@ import { Vector } from "../../../../Common/Types/vector";
 import { SpriteSheet } from "../../../../Common/Sprite/sprite";
 import { images } from "../../../../Common/images";
 import { Countdown } from "../../../../Common/cooldown";
+import { ThrowType } from "../Body/throwType";
 
 export class PlayerRagdoll implements StateInterface<PlayerState> {
 
@@ -35,7 +36,10 @@ export class PlayerRagdoll implements StateInterface<PlayerState> {
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.body = new DynamicObject({ x: 0, y: 0 }, this.width, this.width);
 
-        this.body.bounceFactor = 0.7;
+        const bounceFactor = 0.2;
+        this.legs.bounceFactor = bounceFactor;
+        this.head.bounceFactor = bounceFactor;
+        this.body.bounceFactor = bounceFactor;
         this.body.ignorePlatforms = true;
         const friction = 8;
         this.body.friction = friction;
@@ -45,6 +49,7 @@ export class PlayerRagdoll implements StateInterface<PlayerState> {
 
 
     public stateEntered(): void {
+        this.playerBody.playerItem.throw(ThrowType.drop);
         this.coyoteTime.setToReady();
         this.head.direction = this.playerBody.dynamicObject.direction;
         this.legs.direction = this.playerBody.dynamicObject.direction;
