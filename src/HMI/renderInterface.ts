@@ -1,5 +1,5 @@
-import { GameObject } from "../Status/GameLoop/MainGame/Objects/Common/gameObject";
-import { Vector } from "../Status/GameLoop/MainGame/Common/Types/vector";
+import { GameObject } from "../Status/Game/Objects/Common/gameObject";
+import { Vector } from "../Status/Game/Common/Types/vector";
 
 export interface RenderIF {
     draw(drawInfo: DrawInfo): void;
