@@ -2,16 +2,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lobby = void 0;
 class Lobby {
-    constructor(host) {
+    constructor(name, host) {
         this.connectedUsers = new Set();
         this.host = host;
+        this.name = name;
         this.connectedUsers.add(host);
+        this.maxSize = 8;
     }
     setHost(id) {
         this.host = id;
     }
     getHost() {
         return this.host;
+    }
+    getName() {
+        return this.name;
     }
     addUser(id) {
         if (this.connectedUsers.size === 0) {
@@ -29,6 +34,12 @@ class Lobby {
     }
     removeUser(id) {
         this.connectedUsers.delete(id);
+    }
+    setMaxSize(maxSize) {
+        this.maxSize = maxSize;
+    }
+    getMaxSize() {
+        return this.maxSize;
     }
 }
 exports.Lobby = Lobby;

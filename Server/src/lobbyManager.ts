@@ -6,8 +6,8 @@ export class LobbyManager {
 
     private userIDToLobbyID: Map<string, string> = new Map();
 
-    public createLobby(lobbyID: string, host: string): void {
-        const lobby = new Lobby(host);
+    public createLobby(lobbyID: string, lobbyName: string, host: string): void {
+        const lobby = new Lobby(lobbyName, host);
         this.lobbies.set(lobbyID, lobby);
         this.hosts.set(host, lobby);
     }
@@ -49,6 +49,10 @@ export class LobbyManager {
 
     public removeLobby(lobbyID: string) {
         this.lobbies.delete(lobbyID);
+    }
+
+    public getLobbies(): Map<string, Lobby> {
+        return this.lobbies;
     }
 
 

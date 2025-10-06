@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageHandler = void 0;
 const ws_1 = require("ws");
+const uuid_1 = require("uuid");
 class MessageHandler {
     handle(dataInfo) {
         switch (dataInfo.data.type) {
@@ -16,11 +17,14 @@ class MessageHandler {
             case "candidate":
                 this.forward(dataInfo);
                 break;
+            case "list-lobbies":
+                this.listLobbies(dataInfo);
+                break;
             case "join-lobby":
                 this.joinLobby(dataInfo, dataInfo.data.lobbyID);
                 break;
             case "host-lobby":
-                this.hostLobby(dataInfo, dataInfo.data.lobbyID);
+                this.hostLobby(dataInfo, dataInfo.data.lobbyName);
                 break;
             default:
                 console.warn("Unknown message type:", dataInfo.data.type);
@@ -82,23 +86,15 @@ class MessageHandler {
             dataInfo.lobbyManager.removeLobby(lobbyID);
         }
     }
-    hostLobby(dataInfo, lobbyID) {
-        const lobby = dataInfo.lobbyManager.getLobby(lobbyID);
-        if (lobby) {
-            dataInfo.clientSocket.send(JSON.stringify({
-                type: "lobby-already-found",
-                id: lobbyID
-            }));
-            return;
-        }
-        dataInfo.lobbyManager.createLobby(lobbyID, dataInfo.clientID);
+    hostLobby(dataInfo, lobbyName) {
+        const lobbyID = (0, uuid_1.v4)();
+        dataInfo.lobbyManager.createLobby(lobbyID, lobbyName, dataInfo.clientID);
         dataInfo.clientSocket.send(JSON.stringify({
             type: "hosted-lobby",
             id: lobbyID
         }));
     }
     listUsers(dataInfo) {
-        console.log(dataInfo.clientID);
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
         if (!lobby) {
             return;
@@ -111,7 +107,25 @@ class MessageHandler {
         });
         dataInfo.clientSocket.send(JSON.stringify({
             type: "user-list",
-            users: userArray,
+            users: userArray
+        }));
+    }
+    listLobbies(dataInfo) {
+        const lobbies = dataInfo.lobbyManager.getLobbies();
+        const lobbyArray = [];
+        for (const [key, lobby] of lobbies.entries()) {
+            const msg = {
+                host: lobby.getHost(),
+                lobbyID: key,
+                lobbyName: lobby.getName(),
+                playerCount: `${lobby.getUsers().size} / ${lobby.getMaxSize()}`,
+                status: "Online"
+            };
+            lobbyArray.push(msg);
+        }
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "lobby-list",
+            lobbies: lobbyArray
         }));
     }
     forward(dataInfo) {

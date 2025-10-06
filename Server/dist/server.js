@@ -28,6 +28,7 @@ server.on("connection", (socket) => {
         messageHandler.handle(dataInfo);
     });
     socket.on("close", () => {
+        console.log("Client disconnected");
         const dataInfo = new dataInfo_js_1.DataInfo(null, id, socket, users, lobbyManager);
         messageHandler.cleanup(dataInfo);
     });

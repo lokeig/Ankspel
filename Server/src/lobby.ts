@@ -1,18 +1,26 @@
 export class Lobby {
     private host: string;
+    private name: string;
     private connectedUsers: Set<string> = new Set();
+    private maxSize: number;
 
-    constructor(host: string) {
+    constructor(name: string, host: string) {
         this.host = host;
+        this.name = name;
         this.connectedUsers.add(host);
+        this.maxSize = 8;
     }
-
+    
     public setHost(id: string): void {
         this.host = id;
     }
 
     public getHost(): string {
         return this.host;
+    }
+
+    public getName(): string {
+        return this.name;
     }
 
     public addUser(id: string) {
@@ -34,5 +42,13 @@ export class Lobby {
 
     public removeUser(id: string) {
         this.connectedUsers.delete(id);
+    }
+
+    public setMaxSize(maxSize: number) {
+        this.maxSize = maxSize;
+    }
+
+    public getMaxSize(): number {
+        return this.maxSize;
     }
 }

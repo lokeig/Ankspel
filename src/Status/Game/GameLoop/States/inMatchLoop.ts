@@ -1,12 +1,12 @@
 import { ItemManager } from "../../Objects/DynamicObjects/Items/Manager/itemManager";
 import { PlayerManager } from "../../Objects/DynamicObjects/Player/playerManager";
 import { TileType as TileType } from "../../Objects/StaticObjects/tileType";
-import { Shotgun } from "../../Objects/DynamicObjects/Items/Implementations/shotgun";
-import { Glock } from "../../Objects/DynamicObjects/Items/Implementations/glock";
-import { Grenade } from "../../Objects/DynamicObjects/Items/Implementations/grenade";
+import { Shotgun } from "../../../Implementations/Items/shotgun";
+import { Glock } from "../../../Implementations/Items/glock";
+import { Grenade } from "../../../Implementations/Items/grenade";
 import { StateInterface } from "../../Common/StateMachine/stateInterface";
 import { GameLoopState } from "../gameLoopState";
-import { GameServer } from "../../../Server/Common/server";
+import { GameServer } from "../../../Server/server";
 import { GameLoopUtility } from "../gameLoopUtility";
 
 export class InMatchLoop implements StateInterface<GameLoopState> {
@@ -18,8 +18,10 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
         GameLoopUtility.fillArea({ x: 9, y: 11 }, 2, 4, TileType.Ice);
         GameLoopUtility.fillArea({ x: 9, y: 5 }, 2, 4, TileType.Ice);
         GameLoopUtility.fillArea({ x: 15, y: 7 }, 3, 3, TileType.Ice);
-
         GameLoopUtility.createTile({ x: 15, y: 6 }, TileType.Ice);
+
+        const local = true;
+        PlayerManager.addPlayer({ x: 15, y: 12 }, local);
 
         ItemManager.addItem({ x: 10, y: 2 }, Shotgun);
         ItemManager.addItem({ x: 20, y: 14 }, Shotgun);

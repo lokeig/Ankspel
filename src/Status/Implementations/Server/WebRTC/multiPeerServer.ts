@@ -1,6 +1,7 @@
+import { LobbyList } from "../../../Game/GameLoop/States/Lobby/LobbyList/lobbylist";
+import { ServerMessage } from "../../../Server/MessageTypes/messageType";
+import { ServerInterface } from "../../../Server/serverInterface";
 import { PeerConnectionManager } from "./peerConnectionManager";
-import { ServerInterface } from "../Common/serverInterface";
-import { ServerMessage } from "../Common/MessageTypes/messageType";
 
 export class MultiPeerServer implements ServerInterface {
     private peers: Map<string, PeerConnectionManager> = new Map();
@@ -12,11 +13,8 @@ export class MultiPeerServer implements ServerInterface {
         socket.onopen = () => {
             console.log("Connected to signaling server");
 
-            this.socket.send(JSON.stringify({ type: "join" }));
-            this.socket.send(JSON.stringify({ type: "host-lobby", lobbyID: "abc" }));
-            this.socket.send(JSON.stringify({ type: "join-lobby", lobbyID: "abc" }));
-            this.socket.send(JSON.stringify({ type: "list-users" }));
-
+            socket.send(JSON.stringify({ type: "host-lobby", lobbyName: "MyDucklingz" }));
+            socket.send(JSON.stringify({ type: "list-lobbies" }))
         };
     }
 
@@ -37,7 +35,6 @@ export class MultiPeerServer implements ServerInterface {
     }
 
     private addPeer(peerId: string, isInitiator = false) {
-        // Check if peer already exists
         if (this.peers.get(peerId)) {
             return;
         }
@@ -90,6 +87,11 @@ export class MultiPeerServer implements ServerInterface {
                     }
                 break;
 
+            case "lobby-list":
+                console.log("Got a new lobby-list");
+                LobbyList.get().refresh(data.lobbies);
+                break;
+
             case "offer":
                 if (!this.peers.has(data.from)) {
                     this.addPeer(data.from, false);
@@ -132,7 +134,7 @@ export class MultiPeerServer implements ServerInterface {
     }
 
     public sendMessage(msg: ServerMessage) {
-        msg.id = this.myID!; 
+        msg.id = this.myID!;
         this.peers.forEach(peer => peer.sendMessage(msg));
-    }   
+    }
 }

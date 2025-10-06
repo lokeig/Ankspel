@@ -1,12 +1,12 @@
-import { images } from "../../../../Common/images";
-import { LerpValue } from "../../../../Common/Lerp/lerp";
-import { triangleLerp } from "../../../../Common/Lerp/Functions/triangleLerp";
-import { SpriteSheet } from "../../../../Common/Sprite/sprite";
-import { Vector } from "../../../../Common/Types/vector";
-import { ItemLogic } from "../Common/itemLogic";
-import { ItemInterface } from "../Common/itemInterface";
-import { FirearmInfo } from "../Common/firearmInfo";
-import { Utility } from "../../../../Common/Utility/utility";
+import { images } from "../../Game/Common/images";
+import { LerpValue } from "../../Game/Common/Lerp/lerp";
+import { triangleLerp } from "../../Game/Common/Lerp/Functions/triangleLerp";
+import { SpriteSheet } from "../../Game/Common/Sprite/sprite";
+import { Vector } from "../../Game/Common/Types/vector";
+import { ItemLogic } from "../../Game/Objects/DynamicObjects/Items/Common/itemLogic";
+import { ItemInterface } from "../../Game/Objects/DynamicObjects/Items/Common/itemInterface";
+import { FirearmInfo } from "../../Game/Objects/DynamicObjects/Items/Common/firearmInfo";
+import { Utility } from "../../Game/Common/Utility/utility";
 
 enum ShotgunState {
     loaded,
@@ -72,7 +72,6 @@ export class Shotgun implements ItemInterface {
         const drawPos = this.itemLogic.getDrawpos(this.drawSize);
         this.spriteSheet.draw(0, 0, drawPos, this.drawSize, this.itemLogic.isFlip(), this.itemLogic.angle);
 
-        // Handle
         const handleOffsetRotated = Utility.Angle.rotateForce({ x: this.handleOffset, y: 0 }, this.itemLogic.angle);
         const handleDrawPos = {
             x: drawPos.x + handleOffsetRotated.x * this.itemLogic.dynamicObject.getDirectionMultiplier(), 

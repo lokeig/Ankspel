@@ -1,4 +1,4 @@
-import { PlayerState } from "../../../Game/Objects/DynamicObjects/Player/PlayerStates/playerState"
+import { PlayerState } from "../../Game/Objects/DynamicObjects/Player/PlayerStates/playerState"
 
 export type ServerMessage =
     PlayerDataMessage

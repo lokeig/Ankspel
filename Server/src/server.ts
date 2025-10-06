@@ -9,7 +9,7 @@ import { LobbyManager } from "./lobbyManager.js";
 const PORT = 3000;
 const server = new WebSocketServer({ port: PORT });
 
-const users = new Map<string, WebSocket>(); 
+const users = new Map<string, WebSocket>();
 const lobbyManager = new LobbyManager();
 
 
@@ -37,6 +37,8 @@ server.on("connection", (socket: WebSocket) => {
 
 
     socket.on("close", () => {
+        console.log("Client disconnected");
+
         const dataInfo = new DataInfo(null, id, socket, users, lobbyManager);
         messageHandler.cleanup(dataInfo);
     });

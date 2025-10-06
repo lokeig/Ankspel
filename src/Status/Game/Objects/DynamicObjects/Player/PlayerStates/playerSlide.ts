@@ -44,7 +44,7 @@ export class PlayerSlide implements StateInterface<PlayerState> {
         if (!this.playerBody.dynamicObject.grounded) {
             this.playerBody.dynamicObject.frictionMultiplier = 0.5;
         } else if (Math.abs(this.playerBody.dynamicObject.velocity.x) > 1.8) {
-            this.playerBody.dynamicObject.frictionMultiplier = 1 / 5 ;
+            this.playerBody.dynamicObject.frictionMultiplier = 1 / 5;
         } else {
             this.playerBody.dynamicObject.frictionMultiplier = 1;
         }

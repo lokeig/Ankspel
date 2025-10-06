@@ -1,5 +1,7 @@
 import { DataInfo } from "./dataInfo";
-import { Data, WebSocket } from "ws";
+import { WebSocket } from "ws";
+import { LobbyMsg } from "./types";
+import { v4 as uuidv4 } from "uuid";
 
 export class MessageHandler {
 
@@ -19,12 +21,16 @@ export class MessageHandler {
                 this.forward(dataInfo);
                 break;
 
+            case "list-lobbies":
+                this.listLobbies(dataInfo);
+                break;
+                
             case "join-lobby":
                 this.joinLobby(dataInfo, dataInfo.data.lobbyID);
                 break;
 
             case "host-lobby":
-                this.hostLobby(dataInfo, dataInfo.data.lobbyID);
+                this.hostLobby(dataInfo, dataInfo.data.lobbyName);
                 break;
 
             default:
@@ -114,19 +120,10 @@ export class MessageHandler {
         }
     }
 
-    private hostLobby(dataInfo: DataInfo, lobbyID: string) {
-        const lobby = dataInfo.lobbyManager.getLobby(lobbyID);
-        if (lobby) {
-            dataInfo.clientSocket.send(
-                JSON.stringify({
-                    type: "lobby-already-found",
-                    id: lobbyID
-                })
-            );
-            return;
-        }
-
-        dataInfo.lobbyManager.createLobby(lobbyID, dataInfo.clientID);
+    private hostLobby(dataInfo: DataInfo, lobbyName: string) {
+        
+        const lobbyID = uuidv4();
+        dataInfo.lobbyManager.createLobby(lobbyID, lobbyName, dataInfo.clientID);
 
         dataInfo.clientSocket.send(
             JSON.stringify({
@@ -138,7 +135,6 @@ export class MessageHandler {
     }
 
     private listUsers(dataInfo: DataInfo) {
-        console.log(dataInfo.clientID)
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
         if (!lobby) {
             return;
@@ -153,10 +149,31 @@ export class MessageHandler {
         dataInfo.clientSocket.send(
             JSON.stringify({
                 type: "user-list",
-                users: userArray,
+                users: userArray
             })
         );
 
+    }
+
+    private listLobbies(dataInfo: DataInfo) {
+        const lobbies = dataInfo.lobbyManager.getLobbies();
+        const lobbyArray: LobbyMsg[] = [];
+        for (const [key, lobby] of lobbies.entries()) {
+            const msg: LobbyMsg = {
+                host: lobby.getHost(),
+                lobbyID: key,
+                lobbyName: lobby.getName(),
+                playerCount: `${lobby.getUsers().size} / ${lobby.getMaxSize()}`,
+                status: "Online"
+            };
+            lobbyArray.push(msg);
+        }
+        dataInfo.clientSocket.send(
+            JSON.stringify({
+                type: "lobby-list",
+                lobbies: lobbyArray
+            })
+        );
     }
 
     private forward(dataInfo: DataInfo) {

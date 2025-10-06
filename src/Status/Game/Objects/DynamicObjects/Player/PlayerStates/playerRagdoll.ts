@@ -36,7 +36,7 @@ export class PlayerRagdoll implements StateInterface<PlayerState> {
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.body = new DynamicObject({ x: 0, y: 0 }, this.width, this.width);
 
-        const bounceFactor = 0.2;
+        const bounceFactor = 0.5;
         this.legs.bounceFactor = bounceFactor;
         this.head.bounceFactor = bounceFactor;
         this.body.bounceFactor = bounceFactor;

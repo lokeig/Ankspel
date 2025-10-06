@@ -1,8 +1,6 @@
-import { Controls } from "../../../Common/Types/controls";
 import { Vector } from "../../../Common/Types/vector";
 import { Player } from "./player";
 import { Grid } from "../../../Common/grid";
-import { GameServer } from "../../../../Server/Common/server";
 
 export class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();

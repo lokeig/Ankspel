@@ -10,8 +10,8 @@ import { PlayerFlap } from "./PlayerStates/playerFlap";
 import { PlayerRagdoll } from "./PlayerStates/playerRagdoll";
 import { PlayerSlide } from "./PlayerStates/playerSlide";
 import { PlayerStandard } from "./PlayerStates/playerStandard";
-import { GameServer } from "../../../../Server/Common/server";
-import { PlayerDataMessage } from "../../../../Server/Common/MessageTypes/messageType";
+import { GameServer } from "../../../../Server/server";
+import { PlayerDataMessage } from "../../../../Server/MessageTypes/messageType";
 
 export class Player {
 

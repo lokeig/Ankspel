@@ -1,13 +1,13 @@
-import { images } from "../../../../Common/images";
-import { Countdown } from "../../../../Common/cooldown";
-import { SpriteSheet } from "../../../../Common/Sprite/sprite";
-import { ItemLogic } from "../Common/itemLogic";
-import { ItemInterface } from "../Common/itemInterface";
-import { Utility } from "../../../../Common/Utility/utility";
-import { Vector } from "../../../../Common/Types/vector";
-import { ExplosionVFX } from "../../../../Particles/Implementation/Explosion/explosionVFX";
-import { ParticleManager } from "../../../../Particles/particleManager";
-import { ProjectileManager } from "../../Projectiles/projectileManager";
+import { images } from "../../Game/Common/images";
+import { Countdown } from "../../Game/Common/cooldown";
+import { SpriteSheet } from "../../Game/Common/Sprite/sprite";
+import { ItemLogic } from "../../Game/Objects/DynamicObjects/Items/Common/itemLogic";
+import { ItemInterface } from "../../Game/Objects/DynamicObjects/Items/Common/itemInterface";
+import { Utility } from "../../Game/Common/Utility/utility";
+import { Vector } from "../../Game/Common/Types/vector";
+import { ParticleManager } from "../../Game/Particles/particleManager";
+import { ProjectileManager } from "../../Game/Objects/DynamicObjects/Projectiles/projectileManager";
+import { ExplosionVFX } from "../Particles/Explosion/explosionVFX";
 
 export class Grenade implements ItemInterface {
     public itemLogic: ItemLogic;

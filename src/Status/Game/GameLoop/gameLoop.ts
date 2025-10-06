@@ -3,15 +3,15 @@ import { GameLoopState } from "./gameLoopState";
 import { Input } from "../Common/input";
 import { StateMachine } from "../Common/StateMachine/stateMachine";
 import { InMatchLoop } from "./States/inMatchLoop";
-import { GameServer } from "../../Server/Common/server";
-import { LobbyLoop } from "./States/lobbyLoop";
+import { GameServer } from "../../Server/server";
+import { LobbyLoop } from "./States/Lobby/lobbyLoop";
 
 export class GameLoop {
     private lastTime = 0;
     private stateMachine: StateMachine<GameLoopState>;
 
     constructor() {
-        const initalState = GameLoopState.lobby;
+        const initalState = GameLoopState.playing;
 
         this.stateMachine = new StateMachine(initalState);
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());

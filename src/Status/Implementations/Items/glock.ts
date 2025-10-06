@@ -1,11 +1,11 @@
-import { images } from "../../../../Common/images";
-import { Animation } from "../../../../Common/Sprite/Animation/animation";
-import { SpriteSheet } from "../../../../Common/Sprite/sprite";
-import { SpriteAnimator } from "../../../../Common/Sprite/spriteAnimator";
-import { Vector } from "../../../../Common/Types/vector";
-import { FirearmInfo } from "../Common/firearmInfo";
-import { ItemLogic } from "../Common/itemLogic";
-import { ItemInterface } from "../Common/itemInterface";
+import { images } from "../../Game/Common/images";
+import { Animation } from "../../Game/Common/Sprite/Animation/animation";
+import { SpriteSheet } from "../../Game/Common/Sprite/sprite";
+import { SpriteAnimator } from "../../Game/Common/Sprite/spriteAnimator";
+import { Vector } from "../../Game/Common/Types/vector";
+import { FirearmInfo } from "../../Game/Objects/DynamicObjects/Items/Common/firearmInfo";
+import { ItemLogic } from "../../Game/Objects/DynamicObjects/Items/Common/itemLogic";
+import { ItemInterface } from "../../Game/Objects/DynamicObjects/Items/Common/itemInterface";
 
 export class Glock implements ItemInterface {
     public itemLogic: ItemLogic;

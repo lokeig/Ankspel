@@ -1,8 +1,8 @@
-import { images } from "../../../Common/images";
-import { Animation } from "../../../Common/Sprite/Animation/animation";
-import { SpriteSheet } from "../../../Common/Sprite/sprite";
-import { SpriteAnimator } from "../../../Common/Sprite/spriteAnimator";
-import { Vector } from "../../../Common/Types/vector";
+import { images } from "../../../Game/Common/images";
+import { Animation } from "../../../Game/Common/Sprite/Animation/animation";
+import { SpriteSheet } from "../../../Game/Common/Sprite/sprite";
+import { SpriteAnimator } from "../../../Game/Common/Sprite/spriteAnimator";
+import { Vector } from "../../../Game/Common/Types/vector";
 
 export class ExplosionParticle {
     private pos: Vector;

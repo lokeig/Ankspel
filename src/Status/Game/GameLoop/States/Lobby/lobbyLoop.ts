@@ -1,11 +1,11 @@
-import { GameLoopState } from "../gameLoopState";
-import { Input } from "../../Common/input";
-import { StateInterface } from "../../Common/StateMachine/stateInterface";
-import { GameServer } from "../../../Server/Common/server";
-import { StartGameMessage } from "../../../Server/Common/MessageTypes/messageType";
-import { GameLoopUtility } from "../gameLoopUtility";
-import { TileType } from "../../Objects/StaticObjects/tileType";
-import { PlayerManager } from "../../Objects/DynamicObjects/Player/playerManager";
+import { GameLoopState } from "../../gameLoopState";
+import { Input } from "../../../Common/input";
+import { StateInterface } from "../../../Common/StateMachine/stateInterface";
+import { GameServer } from "../../../../Server/server";
+import { StartGameMessage } from "../../../../Server/MessageTypes/messageType";
+import { GameLoopUtility } from "../../gameLoopUtility";
+import { TileType } from "../../../Objects/StaticObjects/tileType";
+import { PlayerManager } from "../../../Objects/DynamicObjects/Player/playerManager";
 
 export class LobbyLoop implements StateInterface<GameLoopState> {
     private startGame: boolean = false;

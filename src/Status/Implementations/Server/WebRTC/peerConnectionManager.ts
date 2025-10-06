@@ -1,4 +1,4 @@
-import { NewPlayerMessage, ServerMessage } from "../Common/MessageTypes/messageType";
+import { ServerMessage } from "../../../Server/MessageTypes/messageType";
 
 export class PeerConnectionManager {
 
