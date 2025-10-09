@@ -68,7 +68,11 @@ export class PeerConnectionManager {
         }));
     }
 
-    public async handleOffer(offer: RTCSessionDescriptionInit) {
+    async handleOffer(offer: RTCSessionDescriptionInit) {
+        if (this.peerConnection.signalingState === "have-local-offer") {
+            await this.peerConnection.setLocalDescription({ type: "rollback" });
+        }
+
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
@@ -82,6 +86,7 @@ export class PeerConnectionManager {
         this.pendingCandidates.forEach(c => this.peerConnection.addIceCandidate(c));
         this.pendingCandidates = [];
     }
+
 
     async handleAnswer(answer: RTCSessionDescriptionInit) {
         if (this.peerConnection.signalingState === "have-local-offer") {

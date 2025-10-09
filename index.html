@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel ="stylesheet" href="serverlist.css">
+    <link rel="stylesheet" href="serverlist.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas Game</title>
     <style>
@@ -12,6 +12,7 @@
             background: #222;
             color: white;
         }
+
         canvas {
             background: black;
             display: block;
@@ -42,14 +43,36 @@
 
             <div class="serverlist-footer">
                 <div class="footer-left">
-                    <button>Host</button>
+                    <button id="hostbutton">Host</button>
+                    <button id="startbutton">Start</button>
                 </div>
                 <div class="footer-right">
-                    <button>Join</button>
-                    <button>Leave</button>
+                    <button id="leavebutton">Leave</button>
+                    <button id="joinbutton">Join</button>
                 </div>
             </div>
 
+        </div>
+
+        <div id="hostMenu" class="modal hidden">
+            <div class="modal-content">
+                <h2>Create Lobby</h2>
+
+                <div class="input-row">
+                    <label for="lobbyNameInput">Lobby Name: </label>
+                    <input type="text" id="lobbyNameInput" placeholder="Enter lobby name">
+                </div>
+
+                <div class="input-row">
+                    <label for="maxPlayersInput">Max Players: </label>
+                    <input type="number" id="maxPlayersInput" value="4" min="2" max="16">
+                </div>
+
+                <div class="modal-buttons">
+                    <button id="cancelHostbutton">Cancel</button>
+                    <button id="createLobbybutton" disabled>Create</button>
+                </div>
+            </div>
         </div>
 
     </div>

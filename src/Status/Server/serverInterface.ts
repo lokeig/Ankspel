@@ -1,9 +1,11 @@
+import { Emitter } from "./emitter";
 import { ServerMessage } from "./MessageTypes/messageType";
 
 export interface ServerInterface {
-    getReceivedMessages(): Array<ServerMessage>;
-    sendMessage(text: ServerMessage): void;
+    emitter: Emitter;
     getID(): string | null;
-    getPeerIDs(): Array<string>;
-    update(): void;
+    sendMessage(text: ServerMessage): void;
+    sendToServer(message: any): void;
+    clearMessages(): void;
+    getReceivedMessages(): Array<ServerMessage>;
 }

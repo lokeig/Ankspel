@@ -1,4 +1,4 @@
-import { LobbyList } from "../../../Game/GameLoop/States/Lobby/LobbyList/lobbylist";
+import { Emitter } from "../../../Server/emitter";
 import { ServerMessage } from "../../../Server/MessageTypes/messageType";
 import { ServerInterface } from "../../../Server/serverInterface";
 import { PeerConnectionManager } from "./peerConnectionManager";
@@ -7,14 +7,15 @@ export class MultiPeerServer implements ServerInterface {
     private peers: Map<string, PeerConnectionManager> = new Map();
     private receivedMessages: ServerMessage[] = [];
     private myID: string | null = null;
+    public emitter: Emitter = new Emitter();
 
     constructor(private socket: WebSocket) {
         socket.onmessage = e => this.handleMessage(e);
         socket.onopen = () => {
             console.log("Connected to signaling server");
 
-            socket.send(JSON.stringify({ type: "host-lobby", lobbyName: "MyDucklingz" }));
-            socket.send(JSON.stringify({ type: "list-lobbies" }))
+            socket.send(JSON.stringify({ type: "join" }));
+            socket.send(JSON.stringify({ type: "list-lobbies" }));
         };
     }
 
@@ -22,7 +23,11 @@ export class MultiPeerServer implements ServerInterface {
         return this.receivedMessages;
     }
 
-    public update(): void {
+    public sendToServer(message: any): void {
+        this.socket.send(JSON.stringify(message));
+    }
+
+    public clearMessages(): void {
         this.receivedMessages = [];
     }
 
@@ -30,14 +35,9 @@ export class MultiPeerServer implements ServerInterface {
         return this.myID;
     }
 
-    public getPeerIDs(): Array<string> {
-        return Array.from(this.peers.keys());
-    }
-
-    private addPeer(peerId: string, isInitiator = false) {
-        if (this.peers.get(peerId)) {
-            return;
-        }
+    private addPeer(peerId: string) {
+        let isInitiator = false;
+        if (this.peers.get(peerId)) return;
 
         const peer = new PeerConnectionManager(peerId, this.socket);
 
@@ -45,6 +45,10 @@ export class MultiPeerServer implements ServerInterface {
             console.log("Received message from", from, msg);
             this.receivedMessages.push(msg);
         });
+
+        if (this.myID && peerId < this.myID) {
+            isInitiator = true;
+        }
 
         if (isInitiator) {
             peer.createDataChannel();
@@ -66,7 +70,7 @@ export class MultiPeerServer implements ServerInterface {
             case "user-joined":
                 if (!this.peers.has(data.id)) {
                     console.log(`New user joined: ${data.id}, connecting...`);
-                    this.addPeer(data.id, true);
+                    this.addPeer(data.id);
                 }
                 break;
 
@@ -81,20 +85,21 @@ export class MultiPeerServer implements ServerInterface {
 
             case "user-list":
                 console.log("Here are all other users:", data.users);
-                for (const user of data.users.values())
+                for (const user of data.users.values()) {
                     if (!this.peers.has(user)) {
-                        this.addPeer(user, true);
+                        this.addPeer(user);
                     }
+                }
                 break;
 
             case "lobby-list":
                 console.log("Got a new lobby-list");
-                LobbyList.get().refresh(data.lobbies);
+                this.emitter.emit("refresh-lobbies", data.lobbies);
                 break;
 
             case "offer":
                 if (!this.peers.has(data.from)) {
-                    this.addPeer(data.from, false);
+                    this.addPeer(data.from);
                 }
                 this.peers.get(data.from)!.handleOffer(data.offer);
                 break;
@@ -107,28 +112,27 @@ export class MultiPeerServer implements ServerInterface {
                 this.peers.get(data.from)?.addIceCandidate(data.candidate);
                 break;
 
-            case "user-joined-lobby":
-                console.log(`New user joined: ${data.id}`);
-                break;
-
             case "joined-lobby":
                 console.log(`joined lobby: ${data.id}`);
+                this.socket.send(JSON.stringify({ type: "list-users" }));
+                this.emitter.emit("joined-lobby", data.id);
                 break;
 
-            case "lobby-not-found":
-                console.log(`could not find lobby: ${data.id}`);
-                break;
-
-            case "lobby-already-found":
-                console.log(`could not host lobby: ${data.id}, lobby already exists`);
+            case "left-lobby":
+                console.log(`left lobby`);
+                this.emitter.emit("left-lobby", null);
                 break;
 
             case "hosted-lobby":
                 console.log(`Hosted lobby: ${data.id}`);
+                this.emitter.emit("hosting-lobby", data.id);
                 break;
 
             case "new-host":
                 console.log(`New host: ${data.hostID}`);
+                if (data.hostID === this.myID) {
+                    this.emitter.emit("hosting-lobby", null);
+                }
                 break;
         }
     }

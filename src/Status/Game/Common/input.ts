@@ -13,8 +13,9 @@ export class Input {
             if (!this.keysDown.has(e.key)) {
                 this.keysPressed.add(e.key);
             }
+            const target = e.target as HTMLElement;
             this.keysDown.add(e.key);
-            if (e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            if ((e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
                 e.preventDefault();
             }
         });

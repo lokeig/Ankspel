@@ -6,7 +6,7 @@ import { Glock } from "../../../Implementations/Items/glock";
 import { Grenade } from "../../../Implementations/Items/grenade";
 import { StateInterface } from "../../Common/StateMachine/stateInterface";
 import { GameLoopState } from "../gameLoopState";
-import { GameServer } from "../../../Server/server";
+import { GameServer } from "../../../Server/gameServer";
 import { GameLoopUtility } from "../gameLoopUtility";
 
 export class InMatchLoop implements StateInterface<GameLoopState> {
@@ -44,7 +44,7 @@ export class InMatchLoop implements StateInterface<GameLoopState> {
         }
 
         GameLoopUtility.update(deltaTime);
-        GameServer.get().update();
+        GameServer.get().clearMessages();
     }
 
     public stateChange(): GameLoopState {

@@ -6,9 +6,11 @@ export class LobbyManager {
 
     private userIDToLobbyID: Map<string, string> = new Map();
 
-    public createLobby(lobbyID: string, lobbyName: string, host: string): void {
+    public createLobby(lobbyID: string, lobbyName: string, lobbySize: number, host: string): void {
         const lobby = new Lobby(lobbyName, host);
+        lobby.setMaxSize(lobbySize);
         this.lobbies.set(lobbyID, lobby);
+        this.userIDToLobbyID.set(host, lobbyID);
         this.hosts.set(host, lobby);
     }
 
@@ -21,6 +23,23 @@ export class LobbyManager {
         this.userIDToLobbyID.set(userID, lobbyID);
     }
 
+    public removeUserFromLobby(lobbyID: string, userID: string) {
+        const lobby = this.lobbies.get(lobbyID);
+        if (!lobby) {
+            return;
+        }
+        lobby.removeUser(userID);
+        this.userIDToLobbyID.delete(userID);
+
+        if (lobby.getHost() === userID) {
+            this.hosts.delete(userID);
+            lobby.setNewHost();
+        }
+        
+        if (lobby.getUsers().size === 0) {
+            this.removeLobby(lobbyID);
+        }
+    } 
 
     public getLobby(lobbyID: string): Lobby | undefined {
         return this.lobbies.get(lobbyID);
@@ -54,7 +73,4 @@ export class LobbyManager {
     public getLobbies(): Map<string, Lobby> {
         return this.lobbies;
     }
-
-
-
 }

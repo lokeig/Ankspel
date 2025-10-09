@@ -3,7 +3,7 @@ import { GameLoopState } from "./gameLoopState";
 import { Input } from "../Common/input";
 import { StateMachine } from "../Common/StateMachine/stateMachine";
 import { InMatchLoop } from "./States/inMatchLoop";
-import { GameServer } from "../../Server/server";
+import { GameServer } from "../../Server/gameServer";
 import { LobbyLoop } from "./States/Lobby/lobbyLoop";
 
 export class GameLoop {
@@ -11,11 +11,12 @@ export class GameLoop {
     private stateMachine: StateMachine<GameLoopState>;
 
     constructor() {
-        const initalState = GameLoopState.playing;
+        const initalState = GameLoopState.lobby;
 
         this.stateMachine = new StateMachine(initalState);
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         this.stateMachine.addState(GameLoopState.lobby, new LobbyLoop());
+        this.stateMachine.enterState();
 
         this.waitForID().then(() => {
             this.stateMachine.enterState();
@@ -40,7 +41,7 @@ export class GameLoop {
         Render.get().clear();
         this.stateMachine.draw();
 
-        GameServer.get().update();
+        GameServer.get().clearMessages();
 
         requestAnimationFrame(this.gameLoop);
     }

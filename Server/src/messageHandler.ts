@@ -24,13 +24,17 @@ export class MessageHandler {
             case "list-lobbies":
                 this.listLobbies(dataInfo);
                 break;
-                
+
             case "join-lobby":
                 this.joinLobby(dataInfo, dataInfo.data.lobbyID);
                 break;
 
+            case "leave-lobby":
+                this.leaveLobby(dataInfo);
+                break;
+
             case "host-lobby":
-                this.hostLobby(dataInfo, dataInfo.data.lobbyName);
+                this.hostLobby(dataInfo, dataInfo.data.lobbyName, dataInfo.data.lobbySize);
                 break;
 
             default:
@@ -47,28 +51,23 @@ export class MessageHandler {
                 id: dataInfo.clientID,
             })
         );
-
-        this.broadcast(
-            dataInfo,
-            {
-                type: "user-joined",
-                id: dataInfo.clientID,
-            },
-            dataInfo.clientSocket
-        );
     }
 
     private joinLobby(dataInfo: DataInfo, lobbyID: string) {
 
         const lobby = dataInfo.lobbyManager.getLobby(lobbyID);
         if (!lobby) {
-            dataInfo.clientSocket.send(
-                JSON.stringify({
-                    type: "lobby-not-found",
-                    id: lobbyID
-                })
-            );
             return;
+        }
+        if (dataInfo.lobbyManager.getUserLobbyID(dataInfo.clientID) == lobbyID) {
+            return;
+        }
+        if (lobby.getMaxSize() == lobby.getUsers().size) {
+            return;
+        }
+        const prevLobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (prevLobby) {
+            this.leaveLobby(dataInfo);
         }
 
         dataInfo.lobbyManager.addUser(lobbyID, dataInfo.clientID);
@@ -79,51 +78,40 @@ export class MessageHandler {
             })
         );
 
-        this.broadcast(
-            dataInfo,
-            {
-                type: "user-joined-lobby",
-                id: dataInfo.clientID
-            },
-            dataInfo.clientSocket
-        );
+        this.broadcastToLobby(dataInfo, { type: "user-joined", id: dataInfo.clientID });
+        this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
 
-    private leaveLobby(dataInfo: DataInfo, lobbyID: string) {
+    private leaveLobby(dataInfo: DataInfo) {
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        const lobbyID = dataInfo.lobbyManager.getUserLobbyID(dataInfo.clientID)
+
         if (!lobby) {
             return;
         }
 
+        this.broadcastToLobby(dataInfo, { type: "user-left", id: dataInfo.clientID });
+
         const oldHost = lobby.getHost();
-        lobby.removeUser(dataInfo.clientID);
+        dataInfo.lobbyManager.removeUserFromLobby(lobbyID!, dataInfo.clientID);
 
         if (dataInfo.clientID === oldHost) {
-            const newHost = lobby.setNewHost();
-            if (newHost) {
-                const userIDs = lobby.getUsers();
-
-                for (const userID of userIDs) {
-                    const userSocket = dataInfo.users.get(userID);
-                    if (userSocket && userSocket.readyState === WebSocket.OPEN) {
-                        userSocket.send(JSON.stringify({
-                            type: "new-host",
-                            hostID: newHost
-                        }));
-                    }
-                }
-            }
+            const newHost = lobby.getHost();
+            this.broadcast(dataInfo, {type: "new-host", hostID: newHost });
         }
 
-        if (lobby.getUsers().size === 0) {
-            dataInfo.lobbyManager.removeLobby(lobbyID);
-        }
+        dataInfo.clientSocket.send(JSON.stringify({type: "left-lobby"}));
+        this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
 
-    private hostLobby(dataInfo: DataInfo, lobbyName: string) {
-        
+    private hostLobby(dataInfo: DataInfo, lobbyName: string, lobbySize: number) {
+        const prevLobby = dataInfo.lobbyManager.getUserLobbyID(dataInfo.clientID);
+        if (prevLobby) {
+            this.leaveLobby(dataInfo);
+        }
+
         const lobbyID = uuidv4();
-        dataInfo.lobbyManager.createLobby(lobbyID, lobbyName, dataInfo.clientID);
+        dataInfo.lobbyManager.createLobby(lobbyID, lobbyName, lobbySize, dataInfo.clientID);
 
         dataInfo.clientSocket.send(
             JSON.stringify({
@@ -132,7 +120,9 @@ export class MessageHandler {
             })
         );
 
+        this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
+
 
     private listUsers(dataInfo: DataInfo) {
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
@@ -155,19 +145,26 @@ export class MessageHandler {
 
     }
 
-    private listLobbies(dataInfo: DataInfo) {
+    private getLobbies(dataInfo: DataInfo): LobbyMsg[] {
         const lobbies = dataInfo.lobbyManager.getLobbies();
         const lobbyArray: LobbyMsg[] = [];
+
         for (const [key, lobby] of lobbies.entries()) {
             const msg: LobbyMsg = {
                 host: lobby.getHost(),
                 lobbyID: key,
                 lobbyName: lobby.getName(),
-                playerCount: `${lobby.getUsers().size} / ${lobby.getMaxSize()}`,
-                status: "Online"
+                playerCount: lobby.getUsers().size,
+                maxPlayers: lobby.getMaxSize(),
+                status: lobby.getStatus()
             };
             lobbyArray.push(msg);
         }
+        return lobbyArray;
+    }
+
+    private listLobbies(dataInfo: DataInfo) {
+        const lobbyArray = this.getLobbies(dataInfo);
         dataInfo.clientSocket.send(
             JSON.stringify({
                 type: "lobby-list",
@@ -188,16 +185,10 @@ export class MessageHandler {
         }
     }
 
-    private broadcast(dataInfo: DataInfo, msg: any, exclude: WebSocket) {
+    private broadcast(dataInfo: DataInfo, msg: any, exclude: WebSocket | null = null ) {
         const text = JSON.stringify(msg);
 
-        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
-        if (!lobby) {
-            return;
-        }
-        const userIDs = lobby.getUsers();
-
-        for (const userID of userIDs.values()) {
+        for (const userID of dataInfo.users.keys()) {
             const userSocket = dataInfo.users.get(userID)!;
             if (userSocket !== exclude && userSocket.readyState === WebSocket.OPEN) {
                 userSocket.send(text);
@@ -205,14 +196,22 @@ export class MessageHandler {
         }
     }
 
-    public cleanup(dataInfo: DataInfo) {
-        dataInfo.users.delete(dataInfo.clientID);
-
-        const lobbyID = dataInfo.lobbyManager.getUserLobbyID(dataInfo.clientID)
-        if (lobbyID) {
-            this.leaveLobby(dataInfo, lobbyID);
+    private broadcastToLobby(dataInfo: DataInfo, msg: any) {
+        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (!lobby) {
+            return;
         }
+        const text = JSON.stringify(msg);
+        for (const userID of lobby.getUsers().values()) {
+            const userSocket = dataInfo.users.get(userID)!;
+            if (userSocket !== dataInfo.clientSocket && userSocket.readyState === WebSocket.OPEN) {
+                userSocket.send(text);
+            }
+        }
+    }
 
-        this.broadcast(dataInfo, { type: "user-left", id: dataInfo.clientID }, dataInfo.clientSocket);
+    public cleanup(dataInfo: DataInfo) {
+        this.leaveLobby(dataInfo);
+        dataInfo.users.delete(dataInfo.clientID);
     }
 }

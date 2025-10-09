@@ -10,7 +10,7 @@ import { PlayerFlap } from "./PlayerStates/playerFlap";
 import { PlayerRagdoll } from "./PlayerStates/playerRagdoll";
 import { PlayerSlide } from "./PlayerStates/playerSlide";
 import { PlayerStandard } from "./PlayerStates/playerStandard";
-import { GameServer } from "../../../../Server/server";
+import { GameServer } from "../../../../Server/gameServer";
 import { PlayerDataMessage } from "../../../../Server/MessageTypes/messageType";
 
 export class Player {
@@ -53,7 +53,7 @@ export class Player {
             return;
         }
         this.stateMachine.update(deltaTime);
-        this.sendPlayerInfo();
+       // this.sendPlayerInfo();
         
     };
 

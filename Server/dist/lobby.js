@@ -8,6 +8,7 @@ class Lobby {
         this.name = name;
         this.connectedUsers.add(host);
         this.maxSize = 8;
+        this.status = "Open";
     }
     setHost(id) {
         this.host = id;
@@ -40,6 +41,12 @@ class Lobby {
     }
     getMaxSize() {
         return this.maxSize;
+    }
+    setStatus(newStatus) {
+        this.status = newStatus;
+    }
+    getStatus() {
+        return this.status;
     }
 }
 exports.Lobby = Lobby;
