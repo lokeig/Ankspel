@@ -4,5 +4,5 @@ export type Lobby = {
     lobbyName: string,
     playerCount: number,
     maxPlayers: number,
-    status: string
+    closed: boolean
 };

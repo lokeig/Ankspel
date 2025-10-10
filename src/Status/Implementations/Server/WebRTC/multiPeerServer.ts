@@ -132,8 +132,13 @@ export class MultiPeerServer implements ServerInterface {
                 console.log(`New host: ${data.hostID}`);
                 if (data.hostID === this.myID) {
                     this.emitter.emit("hosting-lobby", null);
+                    console.log("You are host!");
                 }
                 break;
+
+            case "lobby-starting":
+                console.log("Starting lobby");
+                this.emitter.emit("start-game", null);
         }
     }
 

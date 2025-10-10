@@ -2,9 +2,15 @@ import { GameLoopState } from "../../gameLoopState";
 import { StateInterface } from "../../../Common/StateMachine/stateInterface";
 import { GameLoopUtility } from "../../gameLoopUtility";
 import { LobbyList } from "./LobbyList/lobbylist";
+import { GameServer } from "../../../../Server/gameServer";
 
 
 export class LobbyLoop implements StateInterface<GameLoopState> {
+    private start: boolean = false;
+    constructor() {
+        GameServer.get().emitter.subscribe("start-game", () => { this.start = true; })
+    }
+
     public stateEntered(): void {
         LobbyList.get().show();
     }
@@ -18,8 +24,9 @@ export class LobbyLoop implements StateInterface<GameLoopState> {
     }
 
     public stateChange(): GameLoopState {
-        // Maybe if we get a message from the server that lobby is ready to start?
-
+        if (this.start) {
+            return GameLoopState.playing;
+        }
         return GameLoopState.lobby;
     }
 

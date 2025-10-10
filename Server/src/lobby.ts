@@ -3,14 +3,14 @@ export class Lobby {
     private name: string;
     private connectedUsers: Set<string> = new Set();
     private maxSize: number;
-    private status: string;
+    private closed: boolean;
 
     constructor(name: string, host: string) {
         this.host = host;
         this.name = name;
         this.connectedUsers.add(host);
         this.maxSize = 8;
-        this.status = "Open";
+        this.closed = false;
     }
     
     public setHost(id: string): void {
@@ -54,11 +54,11 @@ export class Lobby {
         return this.maxSize;
     }
 
-    public setStatus(newStatus: string): void {
-        this.status = newStatus;
+    public setClosed(status: boolean): void {
+        this.closed = status;
     }
 
-    public getStatus(): string {
-        return this.status;
+    public getClosed(): boolean {
+        return this.closed;
     }
 }

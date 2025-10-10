@@ -29,6 +29,9 @@ class MessageHandler {
             case "host-lobby":
                 this.hostLobby(dataInfo, dataInfo.data.lobbyName, dataInfo.data.lobbySize);
                 break;
+            case "start-lobby":
+                this.startLobby(dataInfo);
+                break;
             default:
                 console.warn("Unknown message type:", dataInfo.data.type);
         }
@@ -38,6 +41,54 @@ class MessageHandler {
         dataInfo.clientSocket.send(JSON.stringify({
             type: "welcome",
             id: dataInfo.clientID,
+        }));
+    }
+    listUsers(dataInfo) {
+        const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
+        if (!lobby) {
+            return;
+        }
+        const userArray = [];
+        lobby.getUsers().forEach((e) => {
+            if (e !== dataInfo.clientID) {
+                userArray.push(e);
+            }
+        });
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "user-list",
+            users: userArray
+        }));
+    }
+    forward(dataInfo) {
+        const target = dataInfo.users.get(dataInfo.data.to);
+        if (target && target.readyState === ws_1.WebSocket.OPEN) {
+            target.send(JSON.stringify({
+                ...dataInfo.data,
+                from: dataInfo.clientID,
+            }));
+        }
+    }
+    getLobbies(dataInfo) {
+        const lobbies = dataInfo.lobbyManager.getLobbies();
+        const lobbyArray = [];
+        for (const [key, lobby] of lobbies.entries()) {
+            const msg = {
+                host: lobby.getHost(),
+                lobbyID: key,
+                lobbyName: lobby.getName(),
+                playerCount: lobby.getUsers().size,
+                maxPlayers: lobby.getMaxSize(),
+                closed: lobby.getClosed()
+            };
+            lobbyArray.push(msg);
+        }
+        return lobbyArray;
+    }
+    listLobbies(dataInfo) {
+        const lobbyArray = this.getLobbies(dataInfo);
+        dataInfo.clientSocket.send(JSON.stringify({
+            type: "lobby-list",
+            lobbies: lobbyArray
         }));
     }
     joinLobby(dataInfo, lobbyID) {
@@ -92,53 +143,14 @@ class MessageHandler {
         }));
         this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
-    listUsers(dataInfo) {
+    startLobby(dataInfo) {
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
         if (!lobby) {
             return;
         }
-        const userArray = [];
-        lobby.getUsers().forEach((e) => {
-            if (e !== dataInfo.clientID) {
-                userArray.push(e);
-            }
-        });
-        dataInfo.clientSocket.send(JSON.stringify({
-            type: "user-list",
-            users: userArray
-        }));
-    }
-    getLobbies(dataInfo) {
-        const lobbies = dataInfo.lobbyManager.getLobbies();
-        const lobbyArray = [];
-        for (const [key, lobby] of lobbies.entries()) {
-            const msg = {
-                host: lobby.getHost(),
-                lobbyID: key,
-                lobbyName: lobby.getName(),
-                playerCount: lobby.getUsers().size,
-                maxPlayers: lobby.getMaxSize(),
-                status: lobby.getStatus()
-            };
-            lobbyArray.push(msg);
-        }
-        return lobbyArray;
-    }
-    listLobbies(dataInfo) {
-        const lobbyArray = this.getLobbies(dataInfo);
-        dataInfo.clientSocket.send(JSON.stringify({
-            type: "lobby-list",
-            lobbies: lobbyArray
-        }));
-    }
-    forward(dataInfo) {
-        const target = dataInfo.users.get(dataInfo.data.to);
-        if (target && target.readyState === ws_1.WebSocket.OPEN) {
-            target.send(JSON.stringify({
-                ...dataInfo.data,
-                from: dataInfo.clientID,
-            }));
-        }
+        lobby.setClosed(true);
+        this.broadcast(dataInfo, { type: "lobby-starting" });
+        this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
     broadcast(dataInfo, msg, exclude = null) {
         const text = JSON.stringify(msg);

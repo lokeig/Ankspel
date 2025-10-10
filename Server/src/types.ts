@@ -4,5 +4,5 @@ export type LobbyMsg = {
     lobbyName: string,
     playerCount: number,
     maxPlayers: number,
-    status: string;
+    closed: boolean;
 }

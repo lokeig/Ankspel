@@ -27,10 +27,10 @@ export class LobbyListCSS {
 
         this.leavebutton = document.getElementById("leavebutton") as HTMLButtonElement;
         this.leavebutton.addEventListener("click", () => this.onLeave());
-        
+
         this.joinbutton = document.getElementById("joinbutton") as HTMLButtonElement;
         this.joinbutton.addEventListener("click", () => this.onJoin());
-        
+
         this.hostbutton = document.getElementById("hostbutton") as HTMLButtonElement;
         this.hostbutton.addEventListener("click", () => this.onHost());
 
@@ -120,8 +120,8 @@ export class LobbyListCSS {
             return "Connected";
         }
 
-        if (lobby.status === "Playing") {
-            return "Playing";
+        if (lobby.closed) {
+            return "Closed";
         }
 
         if (lobby.playerCount === lobby.maxPlayers) {
@@ -162,6 +162,7 @@ export class LobbyListCSS {
     }
 
     private onStart(): void {
+        GameServer.get().sendToServer({ type: "start-lobby" });
         return;
     }
 }
