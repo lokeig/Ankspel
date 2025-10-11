@@ -111,7 +111,7 @@ class MessageHandler {
             type: "joined-lobby",
             id: lobbyID
         }));
-        this.broadcastToLobby(dataInfo, { type: "user-joined", id: dataInfo.clientID });
+        this.broadcastToLobby(dataInfo, { type: "user-joined", id: dataInfo.clientID }, dataInfo.clientSocket);
         this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
     leaveLobby(dataInfo) {
@@ -149,7 +149,7 @@ class MessageHandler {
             return;
         }
         lobby.setClosed(true);
-        this.broadcast(dataInfo, { type: "lobby-starting" });
+        this.broadcastToLobby(dataInfo, { type: "lobby-starting" });
         this.broadcast(dataInfo, { type: "lobby-list", lobbies: this.getLobbies(dataInfo) });
     }
     broadcast(dataInfo, msg, exclude = null) {
@@ -161,7 +161,7 @@ class MessageHandler {
             }
         }
     }
-    broadcastToLobby(dataInfo, msg) {
+    broadcastToLobby(dataInfo, msg, exclude = null) {
         const lobby = dataInfo.lobbyManager.getUsersLobby(dataInfo.clientID);
         if (!lobby) {
             return;
@@ -169,7 +169,7 @@ class MessageHandler {
         const text = JSON.stringify(msg);
         for (const userID of lobby.getUsers().values()) {
             const userSocket = dataInfo.users.get(userID);
-            if (userSocket !== dataInfo.clientSocket && userSocket.readyState === ws_1.WebSocket.OPEN) {
+            if (userSocket !== exclude && userSocket.readyState === ws_1.WebSocket.OPEN) {
                 userSocket.send(text);
             }
         }

@@ -18,8 +18,23 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@shared": ["Shared"],
+      "@render": ["src/Render"],
+      "@common": ["src/Game/Common"],
+      "@core": ["src/Game/CoreObjects"],
+      "@server": ["src/Server"],
+      "@player": ["src/Game/Player"],
+      "@item": ["src/Game/Item"],
+      "@projectile": ["src/Game/Projectile"],
+      
+      "@game/*": ["src/Game/*"],
+      "@impl/*": ["src/Implementations/*"],
+    }
     
   },
-  "include": ["src"]
+  "include": ["src", "Shared"]
 }

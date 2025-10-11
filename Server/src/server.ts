@@ -1,8 +1,8 @@
-import { MessageHandler } from "./messageHandler.js";
-import { DataInfo } from "./dataInfo.js";
 import { v4 as uuidv4 } from "uuid";
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
+import { DataInfo } from "./dataInfo.js";
 import { LobbyManager } from "./lobbyManager.js";
+import { MessageHandler } from "./messageHandler.js";
 
 
 

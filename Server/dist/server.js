@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const messageHandler_js_1 = require("./messageHandler.js");
-const dataInfo_js_1 = require("./dataInfo.js");
 const uuid_1 = require("uuid");
 const ws_1 = require("ws");
+const dataInfo_js_1 = require("./dataInfo.js");
 const lobbyManager_js_1 = require("./lobbyManager.js");
+const messageHandler_js_1 = require("./messageHandler.js");
 const PORT = 3000;
 const server = new ws_1.WebSocketServer({ port: PORT });
 const users = new Map();

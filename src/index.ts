@@ -1,11 +1,10 @@
-import { CanvasRender } from "./HMI/canvasRender";
-import { Render } from "./HMI/render";
-import { GameLoop } from "./Status/Game/GameLoop/gameLoop";
-import { Input } from "./Status/Game/Common/input";
-import { GameServer } from "./Status/Server/gameServer";
-import { MultiPeerServer } from "./Status/Implementations/Server/WebRTC/multiPeerServer";
-import { LobbyList } from "./Status/Game/GameLoop/States/Lobby/LobbyList/lobbylist";
-import { LobbyListCSS } from "./Status/Implementations/LobbyList/CSS/lobbyListCSS";
+import { GameLoop } from "@game/GameLoop";
+import { Render } from "@render";
+import { LobbyListCSS } from "@impl/LobbyList/CSS";
+import { CanvasRender } from "@impl/Render";
+import { MultiPeerServer } from "@impl/Server/WebRTC";
+import { GameServer, LobbyList } from "@server";
+import { Input } from "@common";
 
 Input.init();
 Render.set(new CanvasRender("gameCanvas"));
