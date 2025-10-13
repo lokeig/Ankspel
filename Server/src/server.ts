@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket, WebSocketServer } from "ws";
-import { DataInfo } from "./dataInfo.js";
-import { LobbyManager } from "./lobbyManager.js";
-import { MessageHandler } from "./messageHandler.js";
 
-
+import { LobbyManager } from "./lobbyManager";
+import { MessageHandler } from "./messageHandler";
+import { ServerInfo } from "./serverInfo";
+import { ClientMessage } from "../../Shared";
 
 const PORT = 3000;
 const server = new WebSocketServer({ port: PORT });
@@ -19,31 +19,28 @@ server.on("connection", (socket: WebSocket) => {
 
     console.log("New client connected");
 
-    socket.on("message", (message) => {
+    socket.on("message", (message: MessageEvent) => {
         const text = message.toString();
-        let data;
+        let data: ClientMessage;
         try {
             data = JSON.parse(text);
         } catch (e) {
             console.warn("Invalid JSON:", text);
             return;
         }
+
         console.log(data.type);
 
-        const dataInfo = new DataInfo(data, id, socket, users, lobbyManager)
-        messageHandler.handle(dataInfo)
+        const serverInfo = new ServerInfo(id, socket, users, lobbyManager)
+        messageHandler.handle(serverInfo, data)
     });
-
-
 
     socket.on("close", () => {
         console.log("Client disconnected");
 
-        const dataInfo = new DataInfo(null, id, socket, users, lobbyManager);
-        messageHandler.cleanup(dataInfo);
+        const serverInfo = new ServerInfo(id, socket, users, lobbyManager);
+        messageHandler.cleanup(serverInfo);
     });
-
-
 });
 
 console.log(

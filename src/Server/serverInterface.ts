@@ -1,13 +1,13 @@
+import { ClientMessage } from "@shared";
 import { Emitter } from "./emitter";
-import { ServerMessage } from "./messageType";
 
 interface ServerInterface {
     emitter: Emitter;
     getID(): string | null;
-    sendMessage(text: ServerMessage): void;
-    sendToServer(message: any): void;
+    sendMessage(text: any): void;
+    sendToServer(message: ClientMessage): void;
     clearMessages(): void;
-    getReceivedMessages(): Array<ServerMessage>;
+    getReceivedMessages(): Array<any>;
 }
 
 export type { ServerInterface }

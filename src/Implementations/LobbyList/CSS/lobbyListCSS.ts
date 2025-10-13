@@ -1,6 +1,6 @@
 import { GameServer } from "@server";
-import { Lobby } from "../../../../../Shared/lobbyMessageData";
 import { HostMenu } from "./hostMenuCSS";
+import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
 
 class LobbyListCSS {
     private mainDiv: HTMLElement;
@@ -13,7 +13,7 @@ class LobbyListCSS {
     private startbutton: HTMLButtonElement;
     private leavebutton: HTMLButtonElement;
 
-    private lastLobbies: Lobby[] = [];
+    private lastLobbies: LobbyMessageData[] = [];
 
     private connectedLobby: string | null = null;
     private hosting: boolean = false;
@@ -40,7 +40,7 @@ class LobbyListCSS {
 
         const emitter = GameServer.get().emitter;
 
-        emitter.subscribe("refresh-lobbies", (lobbies: Lobby[]) => {
+        emitter.subscribe("refresh-lobbies", (lobbies: LobbyMessageData[]) => {
             this.refresh(lobbies);
         });
 
@@ -60,9 +60,11 @@ class LobbyListCSS {
             this.refresh(this.lastLobbies);
         });
 
-        emitter.subscribe("hosting-lobby", (lobbyID: string) => {
+        emitter.subscribe("hosting-lobby", (lobbyID: string | null) => {
             this.hosting = true;
-            this.connectedLobby = lobbyID;
+            if (lobbyID) {
+                this.connectedLobby = lobbyID;
+            }
             this.leavebutton.disabled = false;
             this.startbutton.disabled = false;
             this.refresh(this.lastLobbies);
@@ -77,7 +79,7 @@ class LobbyListCSS {
         this.mainDiv.style.display = "none";
     }
 
-    refresh(lobbies: Lobby[]): void {
+    refresh(lobbies: LobbyMessageData[]): void {
         this.lastLobbies = lobbies;
 
         let foundPreviousSelection: boolean = false;
@@ -110,7 +112,7 @@ class LobbyListCSS {
         }
     }
 
-    private getStatus(lobby: Lobby): string {
+    private getStatus(lobby: LobbyMessageData): string {
         if (lobby.lobbyID === this.connectedLobby) {
             if (this.hosting) {
                 return "Hosting"
@@ -147,20 +149,29 @@ class LobbyListCSS {
     }
 
     private onLeave(): void {
-        GameServer.get().sendToServer({ type: "leave-lobby" });
+        const leaveMsg: ClientMessage = {
+            type: CMsgType.leaveLobby
+        };
+        GameServer.get().sendToServer(leaveMsg);
     }
 
     private onJoin(): void {
         if (!this.selectedLobbyId) {
             return;
         }
-
-        GameServer.get().sendToServer({ type: "join-lobby", lobbyID: this.selectedLobbyId });
+        const joinMsg: ClientMessage = {
+            type: CMsgType.joinLobby,
+            lobbyID: this.selectedLobbyId
+        };
+        GameServer.get().sendToServer(joinMsg);
         this.clearSelection();
     }
 
     private onStart(): void {
-        GameServer.get().sendToServer({ type: "start-lobby" });
+        const startMsg: ClientMessage = {
+            type: CMsgType.startLobby
+        };
+        GameServer.get().sendToServer(startMsg);
         return;
     }
 }

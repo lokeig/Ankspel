@@ -58,7 +58,7 @@ export class Lobby {
         this.closed = status;
     }
 
-    public getClosed(): boolean {
+    public isClosed(): boolean {
         return this.closed;
     }
 }

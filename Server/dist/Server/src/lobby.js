@@ -45,7 +45,7 @@ class Lobby {
     setClosed(status) {
         this.closed = status;
     }
-    getClosed() {
+    isClosed() {
         return this.closed;
     }
 }

@@ -1,5 +1,4 @@
 import { StateMachine, Controls, Vector, SpriteSheet, images } from "@common";
-import { PlayerDataMessage, GameServer } from "@server";
 import { PlayerBody } from "./Body/playerBody";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 
@@ -42,20 +41,8 @@ class Player {
         if (!this.local) {
             return;
         }
-        this.stateMachine.update(deltaTime);
-       // this.sendPlayerInfo();
-        
+        this.stateMachine.update(deltaTime);        
     };
-
-    private sendPlayerInfo() {
-        const msg: PlayerDataMessage = {
-            type: "playerData",
-            xPos: this.playerBody.dynamicObject.pos.x,
-            yPos: this.playerBody.dynamicObject.pos.y,
-            state: this.stateMachine.getState()
-        };
-        GameServer.get().sendMessage(msg);
-    }
 
     public draw() {
         this.stateMachine.draw();

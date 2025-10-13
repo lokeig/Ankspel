@@ -1,7 +1,7 @@
 import { GameServer } from "@server";
+import { ClientMessage, CMsgType } from "@shared";
 
 class HostMenu {
-
     private hostmenu: HTMLElement;
 
     private cancelbutton: HTMLButtonElement;
@@ -34,13 +34,17 @@ class HostMenu {
             const maxPlayers = parseInt(this.maxPlayersInput.value);
 
             console.log("Creating lobby:", lobbyName, maxPlayers);
-            this.hide();
+            this.hide();    
 
-            GameServer.get().sendToServer({ type: "host-lobby", lobbyName: this.nameInput.value, lobbySize: maxPlayers });
+            const hostLobbyMsg: ClientMessage = { 
+                type: CMsgType.hostLobby, 
+                lobbySize: maxPlayers, 
+                lobbyName: this.nameInput.value 
+            };
+            GameServer.get().sendToServer(hostLobbyMsg);
 
             this.nameInput.value = "";
             this.maxPlayersInput.value = "4";
-
         });
     }
 

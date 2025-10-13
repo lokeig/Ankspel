@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "start": "node dist/Server/src/server.js"
   },
   "dependencies": {
     "uuid": "^9.0.0",
