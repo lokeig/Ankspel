@@ -13,10 +13,11 @@ class PlayerStandard implements StateInterface<PlayerState> {
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
         this.playerBody.setArmOffset(armOffset);
+        this.playerBody.setArmPosition();
     }
 
     public stateUpdate(deltaTime: number): void {
-        this.setAnimation();    
+        this.setAnimation();
         this.playerBody.rotateArm(deltaTime);
         this.playerBody.update(deltaTime);
     }
@@ -46,8 +47,7 @@ class PlayerStandard implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-
-        if (Input.keyPress(this.playerBody.controls.ragdoll)) {
+        if (Input.keyPress(this.playerBody.controls.ragdoll) || this.playerBody.dead) {
             return PlayerState.Ragdoll;
         }
 

@@ -16,17 +16,17 @@ class PlayerArm {
         this.itemHoldingAnimation.addFrame({ row: 8, col: 0 });
         this.animator = new SpriteAnimator(new SpriteSheet(images.playerHands, 16, 16), animation);
     }
-    
-    public update(deltaTime: number) {
+
+    public update(deltaTime: number): void {
         this.animator.update(deltaTime);
     }
-    
-    public draw(flip: boolean) {
+
+    public draw(flip: boolean): void {
         if (this.hidden) {
             return;
-        }        
-        const drawPosX = this.pos.x; 
-        const drawPosY = this.pos.y; 
+        }
+        const drawPosX = this.pos.x;
+        const drawPosY = this.pos.y;
         const pos = { x: drawPosX, y: drawPosY };
         this.animator.draw(pos, this.drawSize, flip, this.angle);
     }
@@ -39,7 +39,7 @@ class PlayerArm {
     }
 
     public rotateArmUp(deltaTime: number): void {
-        this.angle -= deltaTime * this.rotateSpeed;
+        this.angle -= (deltaTime * this.rotateSpeed);
         this.angle = Math.max(this.angle, -Math.PI / 2)
     }
 
@@ -48,7 +48,7 @@ class PlayerArm {
         this.angle = Math.min(this.angle, 0);
     }
 
-    public setAnimation(animation: Animation) {
+    public setAnimation(animation: Animation): void {
         this.animator.setAnimation(animation);
     }
 }

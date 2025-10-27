@@ -1,4 +1,4 @@
-import { StateInterface, Countdown, SpriteSheet, images, Input, Vector } from "@common";
+import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerBody } from "../Body/playerBody";
 import { ThrowType } from "../Body/throwType";
@@ -24,8 +24,8 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
 
-        this.width = playerBody.standardWidth;
-        this.height = playerBody.standardHeight / 3;
+        this.width = PlayerBody.standardWidth;
+        this.height = PlayerBody.standardHeight / 3;
 
         this.head = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
@@ -55,7 +55,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.legs.pos = { x: pos.x, y: pos.y + this.height * 2 };
 
         const vel = this.playerBody.dynamicObject.velocity;
-        this.head.velocity = { x: vel.x - 0.05 * this.head.getDirectionMultiplier(), y: vel.y };
+        this.head.velocity = { x: vel.x, y: vel.y };
         this.body.velocity = { x: vel.x, y: vel.y };
         this.legs.velocity = { x: vel.x, y: vel.y };
 
@@ -84,12 +84,17 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
 
-        this.keepBodiesTogether(this.head, this.body, this.height, false);
-        this.keepBodiesTogether(this.legs, this.body, this.height, false);
+        this.keepBodiesTogether(this.head, this.body, this.height - 1, false);
+        this.keepBodiesTogether(this.legs, this.body, this.height - 1, false);
         this.keepBodiesTogether(this.head, this.legs, this.height * 1.5, true);
 
+        if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
+            this.head.velocity.x = Utility.Random.getRandomNumber(-0.1, 0.1);
+        }
 
-        this.handleInputs(deltaTime);
+        if (!this.playerBody.dead) {
+            this.handleInputs(deltaTime);
+        }
 
         this.setHeadAngle();
         this.setLegsAngle();
@@ -121,7 +126,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         bodyPart1.velocity.x = impulseX;
         bodyPart1.velocity.y = impulseY;
         bodyPart2.velocity.x = -impulseX;
-        bodyPart2.velocity.y = -impulseY + 0.001;
+        bodyPart2.velocity.y = -impulseY;
 
         bodyPart1.updatePositions();
         bodyPart2.updatePositions();
@@ -195,19 +200,30 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
+        if (this.playerBody.dead) {
+            return PlayerState.Ragdoll;
+        }
+        this.updateStandard();
         const exitKeyPressed = Input.keyPress(this.playerBody.controls.ragdoll) || Input.keyPress(this.playerBody.controls.jump);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
-            return PlayerState.Standard;
+            if (!this.playerBody.idleCollision()) {
+                return PlayerState.Standard;
+            }
         }
         return PlayerState.Ragdoll;
     }
 
-    public stateExited(): void {
+    public updateStandard(): void {
         const jumpHeight = 25;
         this.playerBody.dynamicObject.pos = { x: this.legs.pos.x, y: this.legs.pos.y - this.legs.height - jumpHeight };
         this.playerBody.dynamicObject.velocity = { x: this.body.velocity.x, y: -5 };
         this.playerBody.dynamicObject.grounded = true;
         this.playerBody.setArmPosition();
+        this.playerBody.dynamicObject.setNewCollidableObjects();
+    }
+
+    public stateExited(): void {
+        this.updateStandard();
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {
@@ -217,11 +233,8 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public stateDraw(): void {
-        const flip = this.head.direction === "left";
-
-        this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerBody.drawSize, flip, this.headAngle);
-        this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerBody.drawSize, flip, this.legsAngle);
-
+        this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerBody.drawSize, this.head.isFlip(), this.headAngle);
+        this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerBody.drawSize, this.head.isFlip(), this.legsAngle);
     }
 }
 

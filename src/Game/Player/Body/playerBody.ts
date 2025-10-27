@@ -1,15 +1,16 @@
-import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation } from "@common";
+import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation, Side } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
+import { ProjectileInterface, ProjectileManager } from "@projectile";
+import { ProjectileCollision } from "@game/Projectile/projectileCollision";
 
 class PlayerBody {
 
-    public controls: Controls;
-    public drawSize: number = 64;
-    public rotateSpeed: number = 25;
+    public readonly controls: Controls;
+    public readonly drawSize: number = 64;
     private animator: SpriteAnimator;
 
     public animations = {
@@ -23,23 +24,32 @@ class PlayerBody {
         turn: new Animation()
     };
 
-    public readonly standardFriction: number = 10;
-    public readonly slideFriction: number = 5;
-    public readonly standardHeight: number = 46;
-    public readonly standardWidth: number = 18;
+    public static readonly standardHeight: number = 46;
+    public static readonly standardWidth: number = 18;
 
     public dynamicObject: DynamicObject;
-    public playerJump = new PlayerJump();
-    public playerMove = new PlayerMove();
-    public playerItem = new PlayerItemHolder();
+    public playerJump: PlayerJump;
+    public playerMove: PlayerMove;
+    public playerItem: PlayerItemHolder;
     public armFront = new PlayerArm(this.animations.idle);
+    public dead: boolean = false;
+    private projectileCollision: ProjectileCollision;
 
     constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
-        this.dynamicObject = new DynamicObject(pos, this.standardWidth, this.standardHeight);
+        this.dynamicObject = new DynamicObject(pos, PlayerBody.standardWidth, PlayerBody.standardHeight);
         this.controls = controls;
 
         this.animator = new SpriteAnimator(spriteSheet, this.animations.idle);
         this.setUpAnimations();
+        this.playerMove = new PlayerMove(this.dynamicObject);
+        this.playerJump = new PlayerJump(this.dynamicObject);
+        this.playerItem = new PlayerItemHolder(this.dynamicObject);
+
+        this.projectileCollision = new ProjectileCollision(this.dynamicObject);
+        this.projectileCollision.setOnHit(() => {
+            this.dead = true;
+            console.log(" You died cuh ");
+        });
     }
 
     private setUpAnimations(): void {
@@ -57,6 +67,7 @@ class PlayerBody {
     }
 
     public update(deltaTime: number): void {
+        this.projectileCollision.check();
         this.updateDynamicObject(deltaTime);
         this.animator.update(deltaTime);
         this.updateArm(deltaTime);
@@ -69,15 +80,28 @@ class PlayerBody {
             this.playerJump.isJumping = false;
         }
 
-        this.playerJump.update(deltaTime, this.dynamicObject, this.controls);
-        this.playerMove.update(deltaTime, this.dynamicObject, this.controls);
-        this.playerItem.update(deltaTime, this.dynamicObject, this.controls);
+        this.playerJump.update(deltaTime, this.controls);
+        this.playerMove.update(deltaTime, this.controls);
+        this.playerItem.update(deltaTime, this.controls);
     }
 
     private updateArm(deltaTime: number): void {
         this.setArmPosition();
-        this.armFront.update(deltaTime);
         this.setHoldingPosition();
+        this.armFront.update(deltaTime);
+    }
+
+    public setArmPosition(): void {
+        const pos = this.getDrawPos();
+        const itemOffset = this.playerItem.holding ? this.playerItem.holding.itemLogic.handOffset : { x: 0, y: 0 };
+        if (this.dynamicObject.isFlip()) {
+            pos.x += this.drawSize - this.armFront.drawSize - this.armFront.posOffset.x - itemOffset.x;
+        } else {
+            pos.x += this.armFront.posOffset.x + itemOffset.x
+        }
+        pos.y += this.armFront.posOffset.y + itemOffset.y;
+
+        this.armFront.pos = pos;
     }
 
     private setHoldingPosition(): void {
@@ -99,19 +123,11 @@ class PlayerBody {
         item.dynamicObject.pos.y += offset.y;
     }
 
-    public setArmPosition(): void {
-        const pos = this.getDrawPos();
-        if (this.dynamicObject.direction === "right") {
-            pos.x += this.armFront.posOffset.x;
-        } else {
-            pos.x += this.drawSize - this.armFront.drawSize - this.armFront.posOffset.x;
-        }
-        pos.y += this.armFront.posOffset.y;
-        this.armFront.pos = pos;
-    }
-
     public rotateArm(deltaTime: number): void {
-        if (this.itemNoRotationCollision()) {
+        if (this.playerMove.willTurn(this.controls)) {
+            this.armFront.angle *= -1;
+        }
+        if (this.armFront.angle > 0 || this.itemNoRotationCollision()) {
             this.armFront.rotateArmUp(deltaTime);
         } else {
             this.armFront.rotateArmDown(deltaTime);
@@ -139,10 +155,6 @@ class PlayerBody {
 
     public setArmOffset(amount: Vector): void {
         const result = amount;
-        if (this.playerItem.holding) {
-            result.x += this.playerItem.holding.itemLogic.handOffset.x;
-            result.y += this.playerItem.holding.itemLogic.handOffset.y;
-        }
         this.armFront.posOffset = result;
     }
 
@@ -150,8 +162,8 @@ class PlayerBody {
         const prevHeight = this.dynamicObject.height;
         const prevY = this.dynamicObject.pos.y;
 
-        this.dynamicObject.height = this.standardHeight;
-        this.dynamicObject.pos.y -= this.standardHeight - prevHeight;
+        this.dynamicObject.height = PlayerBody.standardHeight;
+        this.dynamicObject.pos.y -= PlayerBody.standardHeight - prevHeight;
 
         const returnValue = this.dynamicObject.getHorizontalTileCollision();
 
@@ -169,6 +181,7 @@ class PlayerBody {
         }
     }
 
+
     public getDrawPos(): Vector {
         const x = this.dynamicObject.pos.x + ((this.dynamicObject.width - this.drawSize) / 2);
         const y = this.dynamicObject.pos.y + (this.dynamicObject.height - this.drawSize);
@@ -176,13 +189,11 @@ class PlayerBody {
     }
 
     public draw(): void {
-        const flip = this.dynamicObject.direction === "left";
-
-        this.animator.draw(this.getDrawPos(), this.drawSize, flip, 0);
+        this.animator.draw(this.getDrawPos(), this.drawSize, this.dynamicObject.isFlip(), 0);
         if (this.playerItem.holding) {
             this.playerItem.holding.draw();
         }
-        this.armFront.draw(flip);
+        this.armFront.draw(this.dynamicObject.isFlip());
     };
 }
 

@@ -7,7 +7,7 @@ class Player {
     public playerBody: PlayerBody;
     private stateMachine: StateMachine<PlayerState>;
     private local: boolean;
-    private controls: Controls = {
+    private static controls: Controls = {
         jump: " ",
         left: "a",
         right: "d",
@@ -20,10 +20,10 @@ class Player {
         strafe: "l",
         menu: "esc"
     }
+    
     constructor(pos: Vector, local: boolean) {
-
         const sprite = new SpriteSheet(images.playerImage, 32, 32);
-        this.playerBody = new PlayerBody(pos, sprite, this.controls);
+        this.playerBody = new PlayerBody(pos, sprite, Player.controls);
         this.local = local;
 
         this.stateMachine = new StateMachine(PlayerState.Standard);
@@ -34,14 +34,13 @@ class Player {
         this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.playerBody, isCrouch));
         this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll(this.playerBody));
         this.stateMachine.enterState();
-
     }
 
     public update(deltaTime: number): void {
         if (!this.local) {
             return;
         }
-        this.stateMachine.update(deltaTime);        
+        this.stateMachine.update(deltaTime);
     };
 
     public draw() {

@@ -1,5 +1,5 @@
 export { ItemManager } from "./itemManager";
 export { ItemLogic } from "./itemLogic";
-export { FirearmInfo } from "./firearmInfo";
 export type { ItemInterface } from "./itemInterface";
+export type { FirearmInterface, ExplosiveInterface } from "./interfaceTypes";
 export { ItemType } from "./itemType";

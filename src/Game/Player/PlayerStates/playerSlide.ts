@@ -21,14 +21,14 @@ class PlayerSlide implements StateInterface<PlayerState> {
         this.platformIgnoreTime.setToReady();
         this.playerBody.playerMove.moveEnabled = false;
         this.playerBody.dynamicObject.height = this.newHeight;
-        this.playerBody.dynamicObject.pos.y += this.playerBody.standardHeight - this.playerBody.dynamicObject.height;
+        this.playerBody.dynamicObject.pos.y += PlayerBody.standardHeight - this.playerBody.dynamicObject.height;
         
         this.playerBody.playerItem.forcedThrowType = ThrowType.drop;
 
         let armOffset = { x: 16, y: 42 };
 
         if (this.crouch) {
-            armOffset = { x: 8, y: 34 };
+            armOffset = { x: 10, y: 34 };
         }
 
         this.playerBody.setArmOffset(armOffset);
@@ -69,7 +69,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerBody.controls.ragdoll)) {
+        if (Input.keyPress(this.playerBody.controls.ragdoll) && !this.playerBody.idleCollision()) {
             return PlayerState.Ragdoll;
         }
         if (Input.keyDown(this.playerBody.controls.down) || this.playerBody.idleCollision()) {
@@ -85,12 +85,11 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateExited(): void {
-        this.playerBody.dynamicObject.pos.y -= this.playerBody.standardHeight - this.playerBody.dynamicObject.height;
-        this.playerBody.dynamicObject.height = this.playerBody.standardHeight;
+        this.playerBody.dynamicObject.pos.y -= PlayerBody.standardHeight - this.playerBody.dynamicObject.height;
+        this.playerBody.dynamicObject.height = PlayerBody.standardHeight;
         
+        this.platformIgnoreTime.reset();
         this.playerBody.dynamicObject.ignorePlatforms = false;
-        this.playerBody.dynamicObject.ignoreFriction = false;
-
         this.playerBody.playerJump.jumpEnabled = true;
         this.playerBody.playerMove.moveEnabled = true;
 

@@ -1,3 +1,5 @@
+import { TileType } from "../Types/tileType";
+
 const images = {
     // Player
     playerImage: '/assets/player.png',
@@ -22,4 +24,8 @@ const images = {
     explosion: '/assets/explosion.png'
 };
 
-export { images };
+function getTileImage(type: TileType): string {
+    return `/assets/tile${TileType[type]}.png`;
+}
+
+export { images, getTileImage };

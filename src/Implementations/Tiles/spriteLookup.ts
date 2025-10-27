@@ -48,4 +48,7 @@ const spriteLookup: Record<number, [number, number]> = {
     255: [1, 3]
 };
 
-export { spriteLookup };
+const lipLeftLookup = [7, 6];
+const lipRightLookup = [7, 7];
+
+export { spriteLookup, lipLeftLookup, lipRightLookup };

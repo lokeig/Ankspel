@@ -1,8 +1,8 @@
-import { GameServer } from "@server";
+import { GameServer, LobbyListInterface } from "@server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
 
-class LobbyListCSS {
+class LobbyListCSS implements LobbyListInterface {
     private mainDiv: HTMLElement;
     private lobbyDiv: HTMLElement;
     private selectedLobbyId: string | null = null;

@@ -1,20 +1,21 @@
 import { Vector, Utility } from "@common";
 import { ProjectileManager } from "@game/Projectile";
+import { Bullet } from "@impl/Projectiles";
 
 class FirearmInfo {
 
     public knockback = { x: 0, y: 0 };
-    public bulletSize: number = 2;
     public bulletAngleVariation: number = 0;
     public bulletSpeed: number = 2300;
     public pipeOffset: Vector = { x: 0, y: 0 };
     public bulletLifespan: number = 0.2;
     public ammo: number = 10;
+    public bulletCount: number = 1;
 
-    public shoot(centerPos: Vector, angle: number, flip: boolean): void {
+    public shoot(centerPos: Vector, angle: number, flip: boolean): Vector {
 
         if (this.ammo < 1) {
-            return;
+            return { x: 0, y: 0 };
         }
 
         const direcMult = flip ? -1 : 1;
@@ -25,11 +26,13 @@ class FirearmInfo {
             y: centerPos.y + offset.y
         };
 
-        const shotAngle = angle + (Math.random() * 2 - 1) * this.bulletAngleVariation;
-        const speed = Utility.Angle.rotateForce({ x: this.bulletSpeed, y: 0 }, shotAngle);
-        speed.x *= direcMult;
-        ProjectileManager.addBullet({ x: pos.x - this.bulletSize / 2, y: pos.y - this.bulletSize / 2 }, this.bulletSize, speed, this.bulletLifespan);
-        
+        for (let i = 0; i < this.bulletCount; i++) {
+            const shotAngle = angle + Utility.Random.getRandomNumber(-this.bulletAngleVariation, this.bulletAngleVariation);
+            const speed = Utility.Angle.rotateForce({ x: this.bulletSpeed, y: 0 }, shotAngle);
+            speed.x *= direcMult;
+            ProjectileManager.addProjectile(new Bullet({...pos}, speed, this.bulletLifespan));
+        }
+        return this.getKnockback(angle, flip);
     }
     
     public getKnockback(angle: number, flip: boolean): Vector {
@@ -40,14 +43,7 @@ class FirearmInfo {
         if (angle === 0) {
             result.y += this.knockback.y;
         }        
-        if (this.empty()) {
-            this.knockback = { x: 0, y: 0 };
-        }
         return result;
-    }
-
-    public empty(): boolean {
-        return this.ammo < 1;
     }
 }
 

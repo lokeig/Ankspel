@@ -1,51 +1,61 @@
 import { SpriteAnimator, Animation, SpriteSheet, images, Vector } from "@common";
-import { ItemInterface, ItemLogic, FirearmInfo } from "@game/Item";
+import { ItemLogic, FirearmInterface, ItemType } from "@game/Item";
+import { FirearmInfo } from "./firearmInfo";
 
 
-class Glock implements ItemInterface {
+class Glock implements FirearmInterface {
     public itemLogic: ItemLogic;
     private drawSize: number = 40;
 
     private defaultAnimation = new Animation();
     private shootAnimation = new Animation();
     private animator: SpriteAnimator = new SpriteAnimator(new SpriteSheet(images.glock, 20, 20), this.defaultAnimation)
+    private firearmInfo: FirearmInfo
 
     constructor(pos: Vector) {
-        this.itemLogic = new ItemLogic(pos, 30, 15);
+        const width = 30;
+        const height = 15;
+        this.itemLogic = new ItemLogic(pos, width, height, ItemType.fireArm);
         this.itemLogic.handOffset = { x: 2, y: 2 }
-        this.itemLogic.holdOffset  = { x: 10, y: -4 }
+        this.itemLogic.holdOffset = { x: 10, y: -4 }
         this.itemLogic.setHitboxOffset({ x: 14, y: 8 });
 
-        const firearmInfo = new FirearmInfo();
-        firearmInfo.ammo = 9;
-        firearmInfo.bulletAngleVariation = Math.PI / 36;
-        firearmInfo.knockback = { x: 9, y: 2 };
-        firearmInfo.pipeOffset = { x: 4, y: -6 };
-        this.itemLogic.setFirearmInfo(firearmInfo);
+        this.firearmInfo = new FirearmInfo();
+        this.firearmInfo.bulletSpeed = 5;
+        this.firearmInfo.bulletLifespan = 15;
+        this.firearmInfo.ammo = 9;
+        this.firearmInfo.bulletAngleVariation = Math.PI / 36;
+        this.firearmInfo.knockback = { x: 9, y: 2 };
+        this.firearmInfo.pipeOffset = { x: 14, y: -6 };
 
         this.defaultAnimation.addFrame({ row: 0, col: 0 });
-        this.shootAnimation.addRow(0, 3);
-        this.shootAnimation.addFrame({ row: 0, col: 0 });
+        this.shootAnimation.addFrame({ row: 0, col: 1 });
+        this.shootAnimation.addFrame({ row: 0, col: 2 });
+        this.shootAnimation.addFrame({ row: 0, col: 3 });
+
         this.shootAnimation.fps = 24;
     }
 
-    update(deltaTime: number): void {
+    public update(deltaTime: number): void {
         this.itemLogic.update(deltaTime);
         this.animator.update(deltaTime);
+        if (this.animator.animationDone()) {
+            this.animator.setAnimation(this.defaultAnimation);
+        }
     }
 
-    interact(): void {
-        this.itemLogic.getFirearmInfo().shoot(this.itemLogic.dynamicObject.getCenter(), this.itemLogic.angle, this.itemLogic.isFlip());
+    public shoot(): Vector {
         this.animator.reset();
         this.animator.setAnimation(this.shootAnimation);
+        return this.firearmInfo.shoot(this.itemLogic.dynamicObject.getCenter(), this.itemLogic.angle, this.itemLogic.isFlip());
     }
 
-    draw(): void {
+    public draw(): void {
         this.animator.draw(this.itemLogic.getDrawpos(this.drawSize), this.drawSize, this.itemLogic.isFlip(), this.itemLogic.angle);
     }
-    
-    shouldBeDeleted(): boolean {
-        return this.itemLogic.deletable() && this.itemLogic.getFirearmInfo().empty();
+
+    public shouldBeDeleted(): boolean {
+        return this.itemLogic.deletable() && this.firearmInfo.ammo === 0;
     }
 }
 

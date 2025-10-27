@@ -21,6 +21,10 @@ class StateMachine<T>  {
         return this.currentState;
     }
 
+    public forceState(state: T): void {
+        this.changeState(state);
+    }
+
     private changeState(newState: T): void {
         this.getStateInterface().stateExited();
         this.currentState = newState;

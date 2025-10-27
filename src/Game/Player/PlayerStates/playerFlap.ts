@@ -19,22 +19,20 @@ class PlayerFlap implements StateInterface<PlayerState> {
     public stateUpdate(deltaTime: number): void {
         this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
         this.playerBody.setAnimation(this.playerBody.animations.flap);
-
-        if (this.playerBody.playerMove.willTurn(this.playerBody.dynamicObject, this.playerBody.controls)) {
-            this.playerBody.armFront.angle = Math.PI / 2;
+        
+        if (this.playerBody.playerMove.willTurn(this.playerBody.controls)) {
+            this.playerBody.armFront.angle *= -1;
         }
-
         if (this.playerBody.playerItem.holding) {
             this.playerBody.armFront.rotateArmUp(deltaTime);
         } else {
-            this.playerBody.armFront.angle = 0;
+            this.playerBody.armFront.rotateArmDown(deltaTime);
         }
-
         this.playerBody.update(deltaTime);
     }
 
     public stateChange(): PlayerState {
-        
+
         if (Input.keyPress(this.playerBody.controls.ragdoll)) {
             return PlayerState.Ragdoll;
         }

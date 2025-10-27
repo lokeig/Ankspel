@@ -26,11 +26,11 @@ class Grid {
             }
         }
 
-        for (const [newKey, projectileSet] of movedObjects.entries()) {
+        for (const [newKey, objectSet] of movedObjects.entries()) {
             if (!objects.has(newKey)) {
                 objects.set(newKey, new Set());
             }
-            for (const projectile of projectileSet) {
+            for (const projectile of objectSet) {
                 objects.get(newKey)!.add(projectile);
             }
         }

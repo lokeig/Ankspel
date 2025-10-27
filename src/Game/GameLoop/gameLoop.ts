@@ -2,7 +2,7 @@ import { StateMachine, Input } from "@common";
 import { Render } from "@render";
 import { LobbyList, GameServer } from "@server";
 import { GameLoopState } from "./gameLoopState";
-import { InMatchLoop } from "./States/inMatchLoop";
+import { InMatchLoop } from "./inMatchLoop";
 
 class GameLoop {
     private lastTime = 0;
@@ -15,10 +15,10 @@ class GameLoop {
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         this.stateMachine.enterState();
         
-        GameServer.get().emitter.subscribe("start-game", () => {
-            requestAnimationFrame(this.gameLoop);
+        // GameServer.get().emitter.subscribe("start-game", () => {
             LobbyList.get().hide();
-        });
+            requestAnimationFrame(this.gameLoop);
+        // });
     }
 
     private gameLoop = (currentTime: number) => {
@@ -30,7 +30,6 @@ class GameLoop {
         this.stateMachine.draw();
         Input.update();
         
-        GameServer.get().clearMessages();
         requestAnimationFrame(this.gameLoop);
     }
 }

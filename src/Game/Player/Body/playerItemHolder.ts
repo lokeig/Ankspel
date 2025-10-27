@@ -1,47 +1,52 @@
-import { Controls, Input } from "@common";
-import { ItemInterface, ItemManager, ItemType } from "@game/Item";
+import { Controls, Input, Vector } from "@common";
+import { ItemInterface, ItemManager, ItemType, FirearmInterface, ExplosiveInterface } from "@game/Item";
 import { DynamicObject } from "@core";
 import { ThrowType } from "./throwType";
 
 class PlayerItemHolder {
+    private playerObject: DynamicObject;
     public holding: ItemInterface | null = null;
     public nearbyItems: Array<ItemInterface> = [];
-    private lastHeldItem: ItemInterface | null = null;
     public forcedThrowType: null | ThrowType = null;
+    private lastHeldItem: ItemInterface | null = null;
 
-    public update(deltaTime: number, playerObject: DynamicObject, controls: Controls) {
-        this.nearbyItems = ItemManager.getNearby(playerObject.pos, playerObject.width, playerObject.height);
+    constructor(object: DynamicObject) {
+        this.playerObject = object;
+    }
 
-        // Pickup or throw item
+    public update(deltaTime: number, controls: Controls) {
+        this.nearbyItems = ItemManager.getNearby(this.playerObject.pos, this.playerObject.width, this.playerObject.height);
+
         if (Input.keyPress(controls.pickup)) {
-            if (!this.holding) {
-                this.holding = this.getNearbyItem(playerObject);
-            } else {
+            if (this.holding) {
                 this.throw(this.getThrowType(controls));
+            } else {
+                this.holding = this.getNearbyItem();
             }
         }
-        // Interact with item
+
         if (this.holding && Input.keyPress(controls.shoot)) {
-            this.holding.interact();
             switch (this.holding.itemLogic.getType()) {
                 case (ItemType.fireArm): {
-                    const knockback = this.holding.itemLogic.getFirearmInfo().getKnockback(this.holding.itemLogic.angle, this.holding.itemLogic.isFlip());
-                    playerObject.velocity.x -= knockback.x;
-                    playerObject.velocity.y -= knockback.y;
+                    const knockback = (this.holding as FirearmInterface).shoot();
+                    this.playerObject.velocity.x -= knockback.x;
+                    this.playerObject.velocity.y -= knockback.y;
                     break;
                 }
-                case (ItemType.explosive): {
 
+                case (ItemType.explosive): {
+                    (this.holding as ExplosiveInterface).activate();
+                    break;
                 }
             }
         }
     }
     
-    public getNearbyItem(playerObject: DynamicObject): ItemInterface | null {
+    private getNearbyItem(): ItemInterface | null {
         let fallbackItem: ItemInterface | null = null;
         
         for (const item of this.nearbyItems.values()) {
-            if (!playerObject.collision(item.itemLogic.getPickupHitbox())) {
+            if (!this.playerObject.collision(item.itemLogic.getPickupHitbox())) {
                 continue
             } 
             
@@ -62,7 +67,7 @@ class PlayerItemHolder {
         return fallbackItem;
     }
 
-    public getThrowType(controls: Controls): ThrowType {
+    private getThrowType(controls: Controls): ThrowType {
         if (this.forcedThrowType !== null) {
             return this.forcedThrowType;
         }

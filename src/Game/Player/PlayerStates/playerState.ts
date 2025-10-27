@@ -3,7 +3,7 @@ enum PlayerState {
     Slide,
     Crouch,
     Flap,
-    Ragdoll
+    Ragdoll,
 }
 
 export { PlayerState };

@@ -1,47 +1,52 @@
 import { Vector, Lerp, lerpAngle, Utility } from "@common";
 import { DynamicObject, GameObject } from "@core";
-import { FirearmInfo } from "./firearmInfo";
 import { ItemType } from "./itemType";
 
-
 class ItemLogic {
-    public itemType!: ItemType;
-    private firearmInfo!: FirearmInfo;
-
     public dynamicObject: DynamicObject;
 
     public handOffset: Vector = { x: 0, y: 0 };
     public holdOffset: Vector = { x: 0, y: 0 };
-    private hitboxOffset: Vector = { x: 0, y: 0 };
-    public collidable: boolean = false;
     public owned: boolean = false;
+    private hitboxOffset: Vector = { x: 0, y: 0 };
 
     public angle: number = 0;
-    public personalAngle: number = 0;
     public rotateSpeed: number = 0;
     private rotateLerp = new Lerp(15, lerpAngle);
+    private itemType: ItemType;
 
-    constructor(pos: Vector, width: number, height: number) {
+    constructor(pos: Vector, width: number, height: number, itemType: ItemType) {
         this.dynamicObject = new DynamicObject(pos, width, height);
+        this.itemType = itemType;
     }
 
-    public setFirearmInfo(firearmInfo: FirearmInfo) {
-        this.itemType = ItemType.fireArm;
-        this.firearmInfo = firearmInfo;
-    }
-
-    public getFirearmInfo(): FirearmInfo {
-        return this.firearmInfo;
+    public getType(): ItemType {
+        return this.itemType;
     }
 
     public setHitboxOffset(offset: Vector) {
         this.hitboxOffset = offset;
     }
 
-    public getType(): ItemType {
-        return this.itemType;
+    public update(deltaTime: number): void {
+        if (!this.owned) {
+            this.updateItemPhysics(deltaTime);
+        } else {
+            this.dynamicObject.setNewCollidableObjects();
+        }
     }
-    
+
+    private updateItemPhysics(deltaTime: number) {
+        this.dynamicObject.friction = this.dynamicObject.grounded ? 5 : 1;
+
+        this.updateAngle(deltaTime);
+        this.dynamicObject.update(deltaTime);
+        if (this.dynamicObject.collisions.side) {
+            this.rotateSpeed *= 0.5;
+        }
+
+    }
+
     private updateAngle(deltaTime: number): void {
         const normalized = Utility.Angle.normalizeAngle(this.angle);
         if (this.dynamicObject.grounded && normalized !== 0 && normalized !== -Math.PI) {
@@ -57,25 +62,6 @@ class ItemLogic {
         }
 
         this.angle += this.rotateSpeed * deltaTime;
-    }    
-
-    public update(deltaTime: number): void {
-        if (!this.owned) {
-            this.updateItemPhysics(deltaTime);
-        } else {
-            this.dynamicObject.setNewCollidableObjects();
-        }
-    }
-
-    public updateItemPhysics(deltaTime: number) {
-        this.dynamicObject.friction = this.dynamicObject.grounded ? 5 : 1;
-
-        this.updateAngle(deltaTime);
-        this.dynamicObject.update(deltaTime);
-        if (this.dynamicObject.collisions.side) {
-            this.rotateSpeed *= 0.5;
-        }
-        
     }
 
     public getPickupHitbox(): GameObject {
@@ -90,11 +76,11 @@ class ItemLogic {
     }
 
     public isFlip(): boolean {
-        return this.dynamicObject.direction === "left";
+        return this.dynamicObject.isFlip();
     }
 
     public deletable(): boolean {
-        return !this.owned && this.dynamicObject.grounded && Math.abs(this.dynamicObject.velocity.x) < 0.3;; 
+        return !this.owned && this.dynamicObject.grounded && Math.abs(this.dynamicObject.velocity.x) < 0.3;;
     }
 }
 

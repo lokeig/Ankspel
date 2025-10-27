@@ -76,94 +76,58 @@ class PeerConnectionManager {
         this.messageCallback = callback;
     }
 
-    public isConnected(): boolean {
-        return this.dataChannel?.readyState === "open" &&
-            this.peerConnection.connectionState === "connected";
-    }
-
-    public isConnecting(): boolean {
-        return this.peerConnection.connectionState === "connecting" ||
-            this.peerConnection.connectionState === "new";
-    }
-
     public async createOffer() {
-        try {
-            const offer = await this.peerConnection.createOffer();
-            await this.peerConnection.setLocalDescription(offer);
+        const offer = await this.peerConnection.createOffer();
+        await this.peerConnection.setLocalDescription(offer);
 
-            const offerMessage: ForwardMessage<WebRTCMessage> = {
-                type: CMsgType.forward,
-                to: this.peerId,
-                msg: { type: WebRTCSignalType.Offer, offer: offer }
-            };
-            this.socket.send(JSON.stringify(offerMessage));
-        } catch (error) {
-            console.error("Error creating offer:", error);
-        }
+        const offerMessage: ForwardMessage<WebRTCMessage> = {
+            type: CMsgType.forward,
+            to: this.peerId,
+            msg: { type: WebRTCSignalType.Offer, offer: offer }
+        };
+        this.socket.send(JSON.stringify(offerMessage));
     }
 
-    async handleOffer(offer: RTCSessionDescriptionInit) {
-        try {
-            if (this.peerConnection.signalingState === "have-local-offer") {
-                await this.peerConnection.setLocalDescription({ type: "rollback" });
-            }
+    public async handleOffer(offer: RTCSessionDescriptionInit) {
+        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await this.peerConnection.createAnswer();
+        await this.peerConnection.setLocalDescription(answer);
 
-            await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await this.peerConnection.createAnswer();
-            await this.peerConnection.setLocalDescription(answer);
+        const answerMessage: ForwardMessage<WebRTCMessage> = {
+            type: CMsgType.forward,
+            to: this.peerId,
+            msg: { type: WebRTCSignalType.Answer, answer }
+        };
+        this.socket.send(JSON.stringify(answerMessage));
 
-            const answerMessage: ForwardMessage<WebRTCMessage> = {
-                type: CMsgType.forward,
-                to: this.peerId,
-                msg: { type: WebRTCSignalType.Answer, answer }
-            };
-            this.socket.send(JSON.stringify(answerMessage));
-
-            this.pendingCandidates.forEach(candidate => {
-                this.peerConnection.addIceCandidate(candidate).catch(console.error);
-            });
-            this.pendingCandidates = [];
-        } catch (error) {
-            console.error("Error handling offer:", error);
-        }
+        this.pendingCandidates.forEach((candidate: RTCIceCandidate) => {
+            this.peerConnection.addIceCandidate(candidate)
+        });
+        this.pendingCandidates = [];
     }
 
-    async handleAnswer(answer: RTCSessionDescriptionInit) {
-        try {
-            if (this.peerConnection.signalingState === "have-local-offer") {
-                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-            }
-        } catch (error) {
-            console.error("Error handling answer:", error);
-        }
+    public async handleAnswer(answer: RTCSessionDescriptionInit) {
+        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     }
 
     public async addIceCandidate(candidate: RTCIceCandidateInit) {
-        try {
-            const iceCandidate = new RTCIceCandidate(candidate);
-            if (this.peerConnection.remoteDescription) {
-                await this.peerConnection.addIceCandidate(iceCandidate);
-            } else {
-                this.pendingCandidates.push(iceCandidate);
-            }
-        } catch (error) {
-            console.error("Error adding ICE candidate:", error);
+        const iceCandidate = new RTCIceCandidate(candidate);
+        if (this.peerConnection.remoteDescription) {
+            await this.peerConnection.addIceCandidate(iceCandidate);
+        } else {
+            this.pendingCandidates.push(iceCandidate);
         }
     }
 
     public close() {
-        if (this.peerConnection.connectionState === "closed") {
-            return;
-        }
-        if (this.dataChannel && this.dataChannel.readyState !== "closed") {
+        if (this.dataChannel) {
             this.dataChannel.close();
         }
-        this.dataChannel = null;
         this.peerConnection.close();
     }
 
     public sendMessage(msg: any) {
-        if (this.isConnected()) {
+        if (this.dataChannel?.readyState === "open" && this.peerConnection.connectionState === "connected") {
             this.dataChannel!.send(JSON.stringify(msg));
         }
     }

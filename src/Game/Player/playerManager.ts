@@ -1,5 +1,6 @@
 import { Grid, Vector } from "@common";
 import { Player } from "./player";
+import { PlayerBody } from "./Body/playerBody";
 
 class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
@@ -25,17 +26,12 @@ class PlayerManager {
         return this.players.get(Grid.key(pos));
     }
 
-    public static setPlayerPos(gridPos: Vector) {
-        for (const playerSet of this.players.values()) {
-            for (const player of playerSet.values()) {
-                player.playerBody.dynamicObject.pos = gridPos;
-            }
-        }
-    }
-
     public static addPlayer(gridPos: Vector, local: boolean) {
 
-        const player = new Player(Grid.getWorldPos(gridPos), local);
+        const pos = Grid.getWorldPos(gridPos);
+        pos.y -= PlayerBody.standardHeight;
+        pos.x -= PlayerBody.standardWidth / 2;
+        const player = new Player(pos, local);
 
         const playerSet = this.getPlayers(gridPos);
         if (!playerSet) {
@@ -43,9 +39,6 @@ class PlayerManager {
         }
         this.getPlayers(gridPos)!.add(player);
 
-        player.playerBody.dynamicObject.pos.y -= player.playerBody.standardHeight;
-        player.playerBody.dynamicObject.pos.x += (Grid.gridSize - player.playerBody.standardWidth) / 2;
-        player.playerBody.setArmPosition();
     }
 
     public static setPlayerID(playerID: string, player: Player) {

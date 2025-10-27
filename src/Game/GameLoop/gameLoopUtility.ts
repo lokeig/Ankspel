@@ -3,7 +3,7 @@ import { ParticleManager } from "@game/Particles";
 import { ItemManager } from "@game/Item";
 import { PlayerManager } from "@game/Player";
 import { ProjectileManager } from "@game/Projectile";
-import { TileManager, TileType } from "@game/StaticObjects/Tiles";
+import { TileConstructor, TileManager } from "@game/StaticObjects/Tiles";
 
 class GameLoopUtility {
 
@@ -40,12 +40,12 @@ class GameLoopUtility {
         TileManager.draw();
     }
 
-    public static createTile(pos: Vector, type: TileType): void {
+    public static createTile(pos: Vector, type: TileConstructor): void {
         TileManager.setTile(pos, type)
     }
 
 
-    public static fillArea(pos: Vector, width: number, height: number, type: TileType) {
+    public static fillArea(pos: Vector, width: number, height: number, type: TileConstructor) {
         for (let i = 0; i < width; i++) {
             const posX = pos.x + i;
             for (let j = 0; j < height; j++) {

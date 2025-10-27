@@ -2,15 +2,14 @@ import { Emitter, ServerInterface } from "@server";
 import { PeerConnectionManager } from "./peerConnectionManager";
 import { ClientMessage, CMsgType, ForwardedMessage, SMsgType, ServerMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
-import { Utility } from "@common";
 
 class MultiPeerServer implements ServerInterface {
+    public emitter: Emitter = new Emitter();
     private peers: Map<string, PeerConnectionManager> = new Map();
     private receivedMessages: any[] = [];
     private myID: string | null = null;
-    public emitter: Emitter = new Emitter();
     private socket: WebSocket;
-    private isInLobby: boolean = false;
+    private host: boolean = false;
 
     constructor(socket: WebSocket) {
         this.socket = socket;
@@ -25,25 +24,17 @@ class MultiPeerServer implements ServerInterface {
         };
     }
 
-    public getReceivedMessages(): ServerMessage[] {
-        return this.receivedMessages;
+    public isHost(): boolean {
+        return this.host;
     }
 
     public sendToServer(message: ClientMessage): void {
         this.socket.send(JSON.stringify(message));
     }
 
-    public clearMessages(): void {
-        this.receivedMessages = [];
-    }
-
-    public getID(): string | null {
-        return this.myID;
-    }
-
     private cleanupAllPeers(): void {
         console.log("Cleaning up all peer connections");
-        this.peers.forEach((peer, peerId) => {
+        this.peers.forEach((peer: PeerConnectionManager, peerId: string) => {
             console.log(`Closing connection to peer: ${peerId}`);
             peer.close();
         });
@@ -51,20 +42,8 @@ class MultiPeerServer implements ServerInterface {
     }
 
     private addPeer(peerId: string) {
-        if (peerId === this.myID) {
+        if (peerId === this.myID || this.peers.has(peerId)) {
             return;
-        }
-
-        if (this.peers.has(peerId)) {
-            const existingPeer = this.peers.get(peerId)!;
-            if (existingPeer.isConnected() || existingPeer.isConnecting()) {
-                console.log(`Peer ${peerId} is already connecting`);
-                return;
-            } else {
-                console.log(`new connection to ${peerId}`);
-                existingPeer.close();
-                this.peers.delete(peerId);
-            }
         }
 
         console.log(`Creating new peer connection to: ${peerId}`);
@@ -80,21 +59,12 @@ class MultiPeerServer implements ServerInterface {
 
         if (isInitiator) {
             console.log(`Initiating connection to ${peerId}`);
-            setTimeout(() => {
-                if (this.peers.has(peerId)) {
-                    peer.createDataChannel();
-                    peer.createOffer();
-                }
-            }, Utility.Random.getRandomNumber(100, 500));
+            peer.createDataChannel();
+            peer.createOffer();
         }
     }
 
     private handleForwardedMessage(data: ForwardedMessage<WebRTCMessage>): void {
-        if (!this.isInLobby) {
-            console.log("Ignoring webrtc not in lobby");
-            return;
-        }
-
         switch (data.msg.type) {
             case WebRTCSignalType.Offer:
                 console.log(`Received offer from ${data.from}`);
@@ -136,10 +106,9 @@ class MultiPeerServer implements ServerInterface {
             case SMsgType.userLeft:
                 console.log(`User left: ${data.userID}`);
                 const peer = this.peers.get(data.userID);
-                if (peer) {
-                    peer.close();
-                    this.peers.delete(data.userID);
-                }
+                peer?.close();
+                this.peers.delete(data.userID);
+
                 break;
 
             case SMsgType.userList:
@@ -156,30 +125,29 @@ class MultiPeerServer implements ServerInterface {
 
             case SMsgType.joinSuccess:
                 console.log(`Joined lobby: ${data.lobbyID}`);
-                this.isInLobby = true;
                 this.emitter.emit("joined-lobby", data.lobbyID);
-                setTimeout(() => {
-                    const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
-                    this.socket.send(JSON.stringify(listUsersMsg));
-                }, 200);
+
+                const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
+                this.socket.send(JSON.stringify(listUsersMsg));
                 break;
 
             case SMsgType.leaveSuccess:
                 console.log(`Left lobby`);
-                this.isInLobby = false;
                 this.cleanupAllPeers();
                 this.emitter.emit("left-lobby", null);
+                this.host = false;
                 break;
 
             case SMsgType.hostSuccess:
                 console.log(`Hosted lobby: ${data.lobbyID}`);
-                this.isInLobby = true;
+                this.host = true;
                 this.emitter.emit("hosting-lobby", data.lobbyID);
                 break;
 
             case SMsgType.newHost:
                 console.log(`New host: ${data.hostID}`);
                 if (data.hostID === this.myID) {
+                    this.host = true;
                     this.emitter.emit("hosting-lobby", null);
                     console.log("You are host!");
                 }

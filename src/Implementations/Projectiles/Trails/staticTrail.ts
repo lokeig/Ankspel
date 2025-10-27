@@ -1,14 +1,15 @@
 import { SpriteSheet, images, Vector } from "@common";
+import { TrailInterface } from "@projectile";
 
-class StaticTrail {
+class StaticTrail implements TrailInterface  {
     private spriteSheet = new SpriteSheet(images.bullet, 8, 1);
     private startingLocation: Vector;
     private target!: Vector;
     private maxLength: number;
     private size: number;
     private speed: Vector;
-    public removing: boolean = false;
-    public setToRemove: boolean = false;
+    private removing: boolean = false;
+    private setToRemove: boolean = false;
 
     constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
         this.startingLocation = startingLocation;
@@ -55,6 +56,14 @@ class StaticTrail {
             };
         }
         this.target = target;
+    }
+
+    public setToDelete(): void {
+        this.removing = true;
+    }
+
+    public shouldBeDeleted(): boolean {
+        return this.setToRemove;
     }
 
     public draw(): void {

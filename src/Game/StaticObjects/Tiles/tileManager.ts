@@ -1,111 +1,106 @@
-import { Vector, Grid, SpriteSheet, Utility, Neighbours, Direction } from "@common";
-import { StaticObject, CollisionObject } from "@core";
-import { Tile } from "./tile";
-import { TileType } from "./tileType";
-
+import { Vector, Grid, Utility, Direction, Side } from "@common";
+import { CollisionObject, GameObject } from "@core";
+import { TileConstructor, TileInterface } from "./tileInterface";
 
 class TileManager {
 
-    private static tiles = new Map<string, StaticObject>();
+    private static tiles = new Map<string, TileInterface>();
 
     public static clear(): void {
         this.tiles = new Map;
     }
 
-    public static getTile(gridPos: Vector): StaticObject | undefined {
+    public static getTile(gridPos: Vector): TileInterface | undefined {
         return this.tiles.get(Grid.key(gridPos));
     }
 
-    public static setTile(gridPos: Vector, type: TileType) {
+    public static setTile(gridPos: Vector, tileConstructor: TileConstructor) {
         const size = Grid.gridSize;
         const pos = Grid.getWorldPos(gridPos);
-        const sprite = new SpriteSheet(`/assets/tile${TileType[type]}.png`, 16, 16);
-        const value = new Tile(pos, sprite, size, size, size);
-        this.tiles.set(Grid.key(gridPos), value);
+        const newTile = new tileConstructor(pos, size);
 
-        value.neighbours = this.getNeighbours(gridPos);
-        value.update();
+        this.tiles.set(Grid.key(gridPos), newTile);
 
-        for (const [key, _] of Object.entries(value.neighbours) as [Direction, boolean][]) {
-            const neighbourTile = this.shift(gridPos, key);
-            const tile = this.getTile(neighbourTile);
+        this.setNeighbours(newTile);
+        newTile.update();
 
-            if (!tile) {
-                continue;
-            }
-            
-            tile.setNeighbour(Utility.Direction.getReverseDirection(key), true)
+        for (const direction of newTile.staticObject.getNeighbours()) {
+            const tile = this.getTile(this.shift(gridPos, direction));
+            tile!.staticObject.setNeighbour(Utility.Direction.getReverseDirection(direction))
+            tile!.update();
         }
     }
-    
+
     public static getNearbyTiles(pos: Vector, width: number, height: number): CollisionObject[] {
         const result: CollisionObject[] = [];
-    
+
         const startX = pos.x - Grid.gridSize * 2;
         const endX = pos.x + width + Grid.gridSize * 2;
         const startY = pos.y - Grid.gridSize * 2;
         const endY = pos.y + height + Grid.gridSize * 2;
-    
+
         for (let x = startX; x < endX; x += Grid.gridSize) {
             for (let y = startY; y < endY; y += Grid.gridSize) {
                 const gridPos = Grid.getGridPos({ x, y });
-    
+
                 this.processTile(gridPos, result);
             }
         }
 
         return result;
     }
-    
-    private static processTile(gridPos: Vector, accumulatedCollidable: Array<CollisionObject>): void {
-        
-        const tile = this.getTile(gridPos);
 
+    private static processTile(gridPos: Vector, accumulatedCollidable: Array<CollisionObject>): void {
+
+        const tile = this.getTile(gridPos);
         if (!tile) {
             return;
         }
+        const tileObj = tile.staticObject;
 
-        accumulatedCollidable.push({ gameObject: tile, platform: tile.platform });
-    
-        if (tile.lipLeft) {
-            accumulatedCollidable.push({ gameObject: tile.lipLeft, platform: true });
+        accumulatedCollidable.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
+
+        if (tile.staticObject.getLip(Side.left)) {
+            const lipLeft = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
+            lipLeft.pos.x -= tileObj.getLipWidth();
+            accumulatedCollidable.push({ gameObject: lipLeft, platform: true });
         }
-    
-        if (tile.lipRight) {
-            accumulatedCollidable.push({ gameObject: tile.lipRight, platform: true });
+
+        if (tile.staticObject.getLip(Side.right)) {
+            const lipRight = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
+            lipRight.pos.x += tileObj.width;
+            accumulatedCollidable.push({ gameObject: lipRight, platform: true });
         }
     }
 
+    private static tilesMatch(a: TileInterface, b: TileInterface): boolean {
+        return a.constructor === b.constructor;
+    }
 
     private static shift(gridPos: Vector, direction: Direction): Vector {
         switch (direction) {
-            case "left":     return  { x: gridPos.x - 1, y: gridPos.y };
-            case "right":    return  { x: gridPos.x + 1, y: gridPos.y };
-            case "top":      return  { x: gridPos.x, y: gridPos.y - 1 };
-            case "bot":      return  { x: gridPos.x, y: gridPos.y + 1 };
-            case "topLeft":  return  { x: gridPos.x - 1, y: gridPos.y - 1 };
-            case "topRight": return  { x: gridPos.x + 1, y: gridPos.y - 1 };
-            case "botLeft":  return  { x: gridPos.x - 1, y: gridPos.y + 1 };
-            case "botRight": return  { x: gridPos.x + 1, y: gridPos.y + 1 };
+            case Direction.left: return { x: gridPos.x - 1, y: gridPos.y };
+            case Direction.right: return { x: gridPos.x + 1, y: gridPos.y };
+            case Direction.top: return { x: gridPos.x, y: gridPos.y - 1 };
+            case Direction.bot: return { x: gridPos.x, y: gridPos.y + 1 };
+            case Direction.topLeft: return { x: gridPos.x - 1, y: gridPos.y - 1 };
+            case Direction.topRight: return { x: gridPos.x + 1, y: gridPos.y - 1 };
+            case Direction.botLeft: return { x: gridPos.x - 1, y: gridPos.y + 1 };
+            case Direction.botRight: return { x: gridPos.x + 1, y: gridPos.y + 1 };
         }
     }
 
-    private static getNeighbours(gridPos: Vector): Neighbours {
-        const tile = this.getTile(gridPos);
-        const neighbours: Neighbours = { 
-            left: false, right: false, top: false, bot: false, 
-            topLeft: false, topRight: false, botRight: false, botLeft: false 
-        }
-        if (!tile) {
-            return neighbours;
-        }
-       
-        for (const [key, _] of Object.entries(neighbours) as [Direction, boolean][]) {
-            if (tile.tileEqual(this.getTile(this.shift(gridPos, key)))) {
-                neighbours[key] = true;
+    private static setNeighbours(tile: TileInterface): void {
+        const gridPos = Grid.getGridPos(tile.staticObject.pos);
+
+        for (const key of Object.values(Direction)) {
+            const neighbourTile = this.tiles.get(Grid.key(this.shift(gridPos, key)));
+            if (neighbourTile && this.tilesMatch(tile, neighbourTile)) {
+                tile.staticObject.setNeighbour(key);
+            } else {
+                tile.staticObject.removeNeighbour(key);
             }
         }
-        return neighbours;
     }
 
     static draw() {

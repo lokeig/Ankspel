@@ -16,15 +16,16 @@ export type { StateInterface } from "./StateMachine/stateInterface";
 
 // Types
 export type { Vector } from "./Types/vector";
-export type { Neighbours } from "./Types/neighbours";
-export type { Direction } from "./Types/direction";
+export { Direction } from "./Types/direction";
+export { Side } from "./Types/side";
+export { TileType } from "./Types/tileType";
 export type { Controls } from "./Types/controls";
 
 // Utility
 export { Utility } from "./Utility/utility";
 
 // Other
-export { images } from "./Other/images";
+export { images, getTileImage } from "./Other/images";
 export { Input } from "./Other/input";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";

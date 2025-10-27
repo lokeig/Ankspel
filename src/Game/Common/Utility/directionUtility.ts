@@ -2,16 +2,16 @@ import { Direction } from "../Types/direction"
 
 class DirectionUtility {
 
-    getReverseDirection(direction: Direction) {
+    public getReverseDirection(direction: Direction): Direction {
         switch (direction) {
-            case "left": return "right";
-            case "right": return "left";
-            case "top": return "bot";
-            case "bot": return "top";
-            case "topLeft": return "botRight";
-            case "topRight": return "botLeft";
-            case "botLeft": return "topRight";
-            case "botRight": return "topLeft";
+            case Direction.left: return Direction.right;
+            case Direction.right: return Direction.left;
+            case Direction.top: return Direction.bot;
+            case Direction.bot: return Direction.top;
+            case Direction.topLeft: return Direction.botRight;
+            case Direction.topRight: return Direction.botLeft;
+            case Direction.botLeft: return Direction.topRight;
+            case Direction.botRight: return Direction.topLeft;
         }
     }
 }

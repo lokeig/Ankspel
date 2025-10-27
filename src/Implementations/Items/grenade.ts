@@ -1,10 +1,11 @@
 import { SpriteSheet, images, Countdown, Vector, Utility } from "@common";
-import { ItemInterface, ItemLogic } from "@game/Item";
+import { ExplosiveInterface, ItemLogic, ItemType } from "@game/Item";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
+import { Bullet } from "@impl/Projectiles";
 
-class Grenade implements ItemInterface {
+class Grenade implements ExplosiveInterface {
     public itemLogic: ItemLogic;
     private spriteSheet = new SpriteSheet(images.grenade, 16, 16);
     private drawSize: number = 32;
@@ -14,7 +15,9 @@ class Grenade implements ItemInterface {
     private activated: boolean = false;    
 
     constructor(pos: Vector) {
-        this.itemLogic = new ItemLogic(pos, 15, 19);
+        const width = 6;
+        const height = 19;
+        this.itemLogic = new ItemLogic(pos, width, height, ItemType.explosive);
         this.itemLogic.dynamicObject.bounceFactor = 0.3;
 
         this.itemLogic.holdOffset = { x: 12, y: -6 }
@@ -36,15 +39,14 @@ class Grenade implements ItemInterface {
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const speed = Utility.Angle.rotateForce({ x: 2000, y: 0 }, angle)
-                const size = 2;
                 const lifespan = 0.06;
                 const pos = this.itemLogic.dynamicObject.pos;
-                ProjectileManager.addBullet({x: pos.x, y: pos.y }, size, speed, lifespan);
+                ProjectileManager.addProjectile(new Bullet({ ...pos }, speed, lifespan));
             }
         }
     }
 
-    interact(): void {
+    activate(): void {
         this.activated = true;
     }
 

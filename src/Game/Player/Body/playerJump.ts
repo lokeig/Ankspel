@@ -10,24 +10,30 @@ class PlayerJump {
     private coyoteTime = new Countdown(0.15);
     private maxJumpTime = new Countdown(0.2);
 
-    public update(deltaTime: number, playerObject: DynamicObject, controls: Controls) {
-        if (playerObject.grounded) {
+    private playerObject: DynamicObject;
+
+    constructor(object: DynamicObject) {
+        this.playerObject = object;
+    }
+
+    public update(deltaTime: number, controls: Controls) {
+        if (this.playerObject.grounded) {
             this.coyoteTime.reset();
         }
-        this.jump(deltaTime, playerObject, controls);
+        this.jump(deltaTime, controls);
     }
 
     
-    private jump(deltaTime: number, playerObject: DynamicObject, controls: Controls): void {
+    private jump(deltaTime: number, controls: Controls): void {
         if (Input.keyPress(controls.jump) && this.jumpReady() && this.jumpEnabled) {
             this.isJumping = true;
-            playerObject.velocity.y = -this.minJump;
+            this.playerObject.velocity.y = -this.minJump;
             this.maxJumpTime.reset();
             this.coyoteTime.setToReady();
         }
         
         if (Input.keyDown(controls.jump) && this.isJumping && this.jumpEnabled) {
-            playerObject.velocity.y -= this.jumpForce * deltaTime;
+            this.playerObject.velocity.y -= this.jumpForce * deltaTime;
             this.maxJumpTime.update(deltaTime);
         }
         
