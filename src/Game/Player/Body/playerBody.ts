@@ -1,11 +1,9 @@
-import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation, Side } from "@common";
+import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
-import { ProjectileInterface, ProjectileManager } from "@projectile";
-import { ProjectileCollision } from "@game/Projectile/projectileCollision";
 
 class PlayerBody {
 
@@ -33,7 +31,6 @@ class PlayerBody {
     public playerItem: PlayerItemHolder;
     public armFront = new PlayerArm(this.animations.idle);
     public dead: boolean = false;
-    private projectileCollision: ProjectileCollision;
 
     constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
         this.dynamicObject = new DynamicObject(pos, PlayerBody.standardWidth, PlayerBody.standardHeight);
@@ -44,12 +41,6 @@ class PlayerBody {
         this.playerMove = new PlayerMove(this.dynamicObject);
         this.playerJump = new PlayerJump(this.dynamicObject);
         this.playerItem = new PlayerItemHolder(this.dynamicObject);
-
-        this.projectileCollision = new ProjectileCollision(this.dynamicObject);
-        this.projectileCollision.setOnHit(() => {
-            this.dead = true;
-            console.log(" You died cuh ");
-        });
     }
 
     private setUpAnimations(): void {
@@ -67,7 +58,6 @@ class PlayerBody {
     }
 
     public update(deltaTime: number): void {
-        this.projectileCollision.check();
         this.updateDynamicObject(deltaTime);
         this.animator.update(deltaTime);
         this.updateArm(deltaTime);

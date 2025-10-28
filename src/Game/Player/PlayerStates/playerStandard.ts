@@ -1,13 +1,19 @@
-import { StateInterface, Input } from "@common";
+import { StateInterface, Input, Vector } from "@common";
 import { PlayerBody } from "../Body/playerBody";
 import { PlayerState } from "./playerState";
+import { ProjectileCollision } from "@game/Projectile";
 
 class PlayerStandard implements StateInterface<PlayerState> {
 
     private playerBody: PlayerBody;
+    private projectileCollision: ProjectileCollision;
 
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
+        this.projectileCollision = new ProjectileCollision(this.playerBody.dynamicObject);
+        this.projectileCollision.setOnHit((hitpos: Vector) => {
+            this.playerBody.dead = true;
+        })
     }
 
     public stateEntered(): void {
@@ -17,6 +23,7 @@ class PlayerStandard implements StateInterface<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.projectileCollision.check();
         this.setAnimation();
         this.playerBody.rotateArm(deltaTime);
         this.playerBody.update(deltaTime);

@@ -3,6 +3,7 @@ import { DynamicObject } from "@core";
 import { PlayerBody } from "../Body/playerBody";
 import { ThrowType } from "../Body/throwType";
 import { PlayerState } from "./playerState";
+import { ProjectileCollision } from "@projectile";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
 
@@ -20,17 +21,18 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     private coyoteTime = new Countdown(0.15);
 
     private spriteSheet = new SpriteSheet(images.playerImage, 32, 32);
+    private headProjectileCollision: ProjectileCollision;
+    private legsProjectileCollision: ProjectileCollision
 
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
-
         this.width = PlayerBody.standardWidth;
         this.height = PlayerBody.standardHeight / 3;
 
         this.head = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.body = new DynamicObject({ x: 0, y: 0 }, this.width, this.width);
-
+        
         const bounceFactor = 0.5;
         this.legs.bounceFactor = bounceFactor;
         this.head.bounceFactor = bounceFactor;
@@ -40,6 +42,12 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.body.friction = friction;
         this.head.friction = friction;
         this.legs.friction = friction;
+
+        this.headProjectileCollision = new ProjectileCollision(this.head);
+        this.legsProjectileCollision = new ProjectileCollision(this.legs);
+        this.headProjectileCollision.setOnHit((hitpos: Vector) => {
+            this.playerBody.dead = true;
+        })
     }
 
 
@@ -206,17 +214,18 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.updateStandard();
         const exitKeyPressed = Input.keyPress(this.playerBody.controls.ragdoll) || Input.keyPress(this.playerBody.controls.jump);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
-            if (!this.playerBody.idleCollision()) {
-                return PlayerState.Standard;
-            }
+            // if (!this.playerBody.idleCollision()) {
+            return PlayerState.Standard;
+            // }
         }
         return PlayerState.Ragdoll;
     }
 
     public updateStandard(): void {
-        const jumpHeight = 25;
-        this.playerBody.dynamicObject.pos = { x: this.legs.pos.x, y: this.legs.pos.y - this.legs.height - jumpHeight };
-        this.playerBody.dynamicObject.velocity = { x: this.body.velocity.x, y: -5 };
+        this.playerBody.dynamicObject.pos = {
+            x: this.legs.pos.x,
+            y: this.legs.pos.y + this.legs.height - PlayerBody.standardHeight
+        };
         this.playerBody.dynamicObject.grounded = true;
         this.playerBody.setArmPosition();
         this.playerBody.dynamicObject.setNewCollidableObjects();
@@ -224,6 +233,10 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
 
     public stateExited(): void {
         this.updateStandard();
+        const jumpHeight = 25;
+        const exitVerticalSpeed = -5;
+        this.playerBody.dynamicObject.pos.y -= jumpHeight;
+        this.playerBody.dynamicObject.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {

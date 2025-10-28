@@ -1,15 +1,16 @@
 import { GameObject } from "@core";
 import { ProjectileManager } from "./projectileManager";
+import { Vector } from "@common";
 
 class ProjectileCollision {
     private affectedBody: GameObject;
-    private onHit!: () => void;
+    private onHit!: (hitPos: Vector) => void;
 
     constructor(body: GameObject) {
         this.affectedBody = body;
     }
 
-    public setOnHit(fn: () => void): void {
+    public setOnHit(fn: (hitPos: Vector) => void): void {
         this.onHit = fn;
     }
 
@@ -17,7 +18,7 @@ class ProjectileCollision {
         const nearbyProjectiles = ProjectileManager.getNearbyProjectiles(this.affectedBody.pos, this.affectedBody.width, this.affectedBody.height);
         for (const projectile of nearbyProjectiles) {
             if (this.affectedBody.collision(projectile.body)) {
-                this.onHit();
+                this.onHit(projectile.body.pos);
             }
         }
     }

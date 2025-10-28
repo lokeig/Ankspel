@@ -1,20 +1,26 @@
-import { StateInterface, Countdown, Input } from "@common";
+import { StateInterface, Countdown, Input, Vector } from "@common";
 import { PlayerBody } from "../Body/playerBody";
 import { ThrowType } from "../Body/throwType";
 import { PlayerState } from "./playerState";
+import { ProjectileCollision } from "@game/Projectile";
 
 class PlayerSlide implements StateInterface<PlayerState> {
-    
+
     private playerBody: PlayerBody;
     private platformIgnoreTime = new Countdown(0.15);
     private newHeight: number;
     private crouch: boolean;
     private unstuckSpeed: number = 7;
+    private projectileCollision: ProjectileCollision;
 
     constructor(playerBody: PlayerBody, crouch: boolean) {
         this.playerBody = playerBody;
         this.crouch = crouch;
         this.newHeight = 20;
+        this.projectileCollision = new ProjectileCollision(playerBody.dynamicObject);
+        this.projectileCollision.setOnHit((hitpos: Vector) => {
+            this.playerBody.dead = true;
+        })
     }
 
     public stateEntered(): void {
@@ -22,7 +28,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
         this.playerBody.playerMove.moveEnabled = false;
         this.playerBody.dynamicObject.height = this.newHeight;
         this.playerBody.dynamicObject.pos.y += PlayerBody.standardHeight - this.playerBody.dynamicObject.height;
-        
+
         this.playerBody.playerItem.forcedThrowType = ThrowType.drop;
 
         let armOffset = { x: 16, y: 42 };
@@ -33,9 +39,9 @@ class PlayerSlide implements StateInterface<PlayerState> {
 
         this.playerBody.setArmOffset(armOffset);
     }
-    
-    public stateUpdate(deltaTime: number): void {    
-        
+
+    public stateUpdate(deltaTime: number): void {
+
         const animation = this.crouch ? this.playerBody.animations.crouch : this.playerBody.animations.slide;
         this.playerBody.setAnimation(animation);
 
@@ -46,21 +52,21 @@ class PlayerSlide implements StateInterface<PlayerState> {
         } else {
             this.playerBody.dynamicObject.frictionMultiplier = 1;
         }
-        
+
         this.playerBody.playerJump.jumpEnabled = true;
-        if (Input.keyPress(this.playerBody.controls.jump)) { 
+        if (Input.keyPress(this.playerBody.controls.jump)) {
             this.platformIgnoreTime.reset();
-            
+
             if (this.playerBody.dynamicObject.onPlatform()) {
                 this.playerBody.playerJump.jumpEnabled = false;
             }
-            
+
             if (this.playerBody.dynamicObject.grounded && this.playerBody.idleCollision()) {
                 this.playerBody.dynamicObject.velocity.x = this.unstuckSpeed * this.playerBody.dynamicObject.getDirectionMultiplier();
                 this.playerBody.playerJump.jumpEnabled = false;
             }
         }
-        
+
         this.playerBody.dynamicObject.ignorePlatforms = !this.platformIgnoreTime.isDone();
         this.platformIgnoreTime.update(deltaTime);
 
@@ -87,7 +93,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
     public stateExited(): void {
         this.playerBody.dynamicObject.pos.y -= PlayerBody.standardHeight - this.playerBody.dynamicObject.height;
         this.playerBody.dynamicObject.height = PlayerBody.standardHeight;
-        
+
         this.platformIgnoreTime.reset();
         this.playerBody.dynamicObject.ignorePlatforms = false;
         this.playerBody.playerJump.jumpEnabled = true;

@@ -1,14 +1,20 @@
-import { StateInterface, Input } from "@common";
+import { StateInterface, Input, Vector } from "@common";
 import { PlayerBody } from "../Body/playerBody";
 import { PlayerState } from "./playerState";
+import { ProjectileCollision } from "@projectile";
 
 class PlayerFlap implements StateInterface<PlayerState> {
 
     private playerBody: PlayerBody;
     private flapSpeed: number = 1.5;
+    private projectileCollision: ProjectileCollision;
 
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
+        this.projectileCollision = new ProjectileCollision(this.playerBody.dynamicObject);
+        this.projectileCollision.setOnHit((hitpos: Vector) => {
+            this.playerBody.dead = true;
+        })
     }
 
     public stateEntered(): void {
@@ -19,7 +25,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
     public stateUpdate(deltaTime: number): void {
         this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
         this.playerBody.setAnimation(this.playerBody.animations.flap);
-        
+
         if (this.playerBody.playerMove.willTurn(this.playerBody.controls)) {
             this.playerBody.armFront.angle *= -1;
         }
