@@ -1,37 +1,31 @@
-type EventListener = (message: any) => void;
+import { GameMessage, GMsgType } from "./gameMessage";
+
+type EventFunction = (message: GameMessage) => void;
 
 class Emitter {
-    private subscribers: Map<string, Set<EventListener>> = new Map();
+    private subscribers: Map<GMsgType, Set<EventFunction>> = new Map();
 
-    public subscribe(event: string, listener: EventListener): void {
+    public subscribe(event: GMsgType, listenFunction: EventFunction): void {
         if (!this.subscribers.has(event)) {
             this.subscribers.set(event, new Set());
         }
-        this.subscribers.get(event)!.add(listener);
+        this.subscribers.get(event)!.add(listenFunction);
     }
 
-    public unsubscribe(event: string, listener: EventListener): void {
-        const ev = this.subscribers.get(event)
-        if (!ev) {
+    public unsubscribe(event: GMsgType, listener: EventFunction): void {
+        const eventSet = this.subscribers.get(event)
+        if (!eventSet) {
             return;
         }
-        ev.delete(listener);
+        eventSet.delete(listener);
     }
 
-    public once(event: string, listener: EventListener): void {
-        const wrapper: EventListener = (message: any) => {
-            listener(message);
-            this.unsubscribe(event, wrapper);
-        };
-        this.subscribe(event, wrapper);
-    }
-
-    public emit(event: string, message: any): void {
-        const ev = this.subscribers.get(event);
-        if (!ev) {
+    public publish(message: GameMessage): void {
+        const eventSet = this.subscribers.get(message.type);
+        if (!eventSet) {
             return
         }
-        for (const listener of ev.values()) {
+        for (const listener of eventSet.values()) {
             listener(message);
         }
     }

@@ -1,7 +1,6 @@
-import { StateInterface, Countdown, Input, Vector } from "@common";
+import { StateInterface, Countdown, Input, Vector, PlayerState } from "@common";
 import { PlayerBody } from "../Body/playerBody";
 import { ThrowType } from "../Body/throwType";
-import { PlayerState } from "./playerState";
 import { ProjectileCollision } from "@game/Projectile";
 
 class PlayerSlide implements StateInterface<PlayerState> {
@@ -41,6 +40,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.projectileCollision.check();
 
         const animation = this.crouch ? this.playerBody.animations.crouch : this.playerBody.animations.slide;
         this.playerBody.setAnimation(animation);
@@ -75,7 +75,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerBody.controls.ragdoll) && !this.playerBody.idleCollision()) {
+        if (Input.keyPress(this.playerBody.controls.ragdoll) || this.playerBody.dead) {
             return PlayerState.Ragdoll;
         }
         if (Input.keyDown(this.playerBody.controls.down) || this.playerBody.idleCollision()) {

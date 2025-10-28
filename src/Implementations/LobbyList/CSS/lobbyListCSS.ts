@@ -1,4 +1,4 @@
-import { GameServer, LobbyListInterface } from "@server";
+import { GameServer, GMsgType, LobbyListInterface } from "@server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
 
@@ -40,7 +40,7 @@ class LobbyListCSS implements LobbyListInterface {
 
         const emitter = GameServer.get().emitter;
 
-        emitter.subscribe("refresh-lobbies", (lobbies: LobbyMessageData[]) => {
+        emitter.subscribe(GMsgType.refreshLobbies, (lobbies) => {
             this.refresh(lobbies);
         });
 

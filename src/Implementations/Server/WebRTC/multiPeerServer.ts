@@ -1,4 +1,4 @@
-import { Emitter, ServerInterface } from "@server";
+import { Emitter, GameMessage, GMsgType, ServerInterface } from "@server";
 import { PeerConnectionManager } from "./peerConnectionManager";
 import { ClientMessage, CMsgType, ForwardedMessage, SMsgType, ServerMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
@@ -6,7 +6,6 @@ import { WebRTCMessage, WebRTCSignalType } from "./types";
 class MultiPeerServer implements ServerInterface {
     public emitter: Emitter = new Emitter();
     private peers: Map<string, PeerConnectionManager> = new Map();
-    private receivedMessages: any[] = [];
     private myID: string | null = null;
     private socket: WebSocket;
     private host: boolean = false;
@@ -50,9 +49,9 @@ class MultiPeerServer implements ServerInterface {
         const peer = new PeerConnectionManager(peerId, this.socket);
         this.peers.set(peerId, peer);
 
-        peer.setOnMessage((msg: any, from: string) => {
-            console.log("Received message from", from, msg);
-            this.receivedMessages.push(msg);
+        peer.setOnMessage((msg: GameMessage) => {
+            console.log("Received message from", msg);
+            this.emitter.publish(msg);
         });
 
         const isInitiator = peerId < this.myID!;
@@ -120,13 +119,12 @@ class MultiPeerServer implements ServerInterface {
 
             case SMsgType.lobbyList:
                 console.log("Got a new lobby-list");
-                this.emitter.emit("refresh-lobbies", data.lobbies);
+                this.emitter.publish({ type: GMsgType.refreshLobbies, lobbies: data.lobbies });
                 break;
 
             case SMsgType.joinSuccess:
                 console.log(`Joined lobby: ${data.lobbyID}`);
-                this.emitter.emit("joined-lobby", data.lobbyID);
-
+                this.emitter.publish({ type: GMsgType.inLobby, lobbyID: data.lobbyID });
                 const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
                 this.socket.send(JSON.stringify(listUsersMsg));
                 break;
@@ -134,33 +132,32 @@ class MultiPeerServer implements ServerInterface {
             case SMsgType.leaveSuccess:
                 console.log(`Left lobby`);
                 this.cleanupAllPeers();
-                this.emitter.emit("left-lobby", null);
+                this.emitter.publish({ type: GMsgType.noLobby });
                 this.host = false;
                 break;
 
             case SMsgType.hostSuccess:
                 console.log(`Hosted lobby: ${data.lobbyID}`);
                 this.host = true;
-                this.emitter.emit("hosting-lobby", data.lobbyID);
+                this.emitter.publish({ type: GMsgType.hostingLobby, lobbyID: data.lobbyID });
                 break;
 
             case SMsgType.newHost:
                 console.log(`New host: ${data.hostID}`);
                 if (data.hostID === this.myID) {
                     this.host = true;
-                    this.emitter.emit("hosting-lobby", null);
+                    this.emitter.publish({ type: GMsgType.hostingLobby, lobbyID: null });
                     console.log("You are host!");
                 }
                 break;
 
             case SMsgType.startGame:
                 console.log("Starting lobby");
-                this.emitter.emit("start-game", null);
+                this.emitter.publish({ type: GMsgType.startGame });
         }
     }
 
-    public sendMessage(msg: any) {
-        msg.id = this.myID;
+    public sendMessage(msg: GameMessage) {
         this.peers.forEach((peer: PeerConnectionManager) => {
             peer.sendMessage(msg);
         });

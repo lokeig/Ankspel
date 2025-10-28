@@ -1,8 +1,7 @@
-import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility } from "@common";
+import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility, PlayerState } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerBody } from "../Body/playerBody";
 import { ThrowType } from "../Body/throwType";
-import { PlayerState } from "./playerState";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
@@ -32,7 +31,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.head = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.body = new DynamicObject({ x: 0, y: 0 }, this.width, this.width);
-        
+
         const bounceFactor = 0.5;
         this.legs.bounceFactor = bounceFactor;
         this.head.bounceFactor = bounceFactor;
@@ -46,6 +45,9 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.headProjectileCollision = new ProjectileCollision(this.head);
         this.legsProjectileCollision = new ProjectileCollision(this.legs);
         this.headProjectileCollision.setOnHit((hitpos: Vector) => {
+            this.playerBody.dead = true;
+        })
+        this.legsProjectileCollision.setOnHit((hitpos: Vector) => {
             this.playerBody.dead = true;
         })
     }
@@ -80,6 +82,9 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.headProjectileCollision.check();
+        this.legsProjectileCollision.check();
+        
         this.coyoteTime.update(deltaTime);
         if (this.isGrounded()) {
             this.coyoteTime.reset();

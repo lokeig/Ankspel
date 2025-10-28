@@ -19,6 +19,7 @@ export type { Vector } from "./Types/vector";
 export { Direction } from "./Types/direction";
 export { Side } from "./Types/side";
 export { TileType } from "./Types/tileType";
+export { PlayerState } from "./Types/playerState";
 export type { Controls } from "./Types/controls";
 
 // Utility

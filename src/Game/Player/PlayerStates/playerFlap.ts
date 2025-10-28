@@ -1,6 +1,5 @@
-import { StateInterface, Input, Vector } from "@common";
+import { StateInterface, Input, Vector, PlayerState } from "@common";
 import { PlayerBody } from "../Body/playerBody";
-import { PlayerState } from "./playerState";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerFlap implements StateInterface<PlayerState> {
@@ -23,6 +22,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.projectileCollision.check();
         this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
         this.playerBody.setAnimation(this.playerBody.animations.flap);
 
@@ -38,8 +38,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-
-        if (Input.keyPress(this.playerBody.controls.ragdoll)) {
+        if (Input.keyPress(this.playerBody.controls.ragdoll) || this.playerBody.dead) {
             return PlayerState.Ragdoll;
         }
 

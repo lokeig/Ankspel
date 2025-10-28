@@ -1,6 +1,5 @@
-import { StateInterface, Input, Vector } from "@common";
+import { StateInterface, Input, Vector, PlayerState } from "@common";
 import { PlayerBody } from "../Body/playerBody";
-import { PlayerState } from "./playerState";
 import { ProjectileCollision } from "@game/Projectile";
 
 class PlayerStandard implements StateInterface<PlayerState> {
