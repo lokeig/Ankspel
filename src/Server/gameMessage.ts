@@ -19,5 +19,7 @@ interface GameMessageMap {
     [GMsgType.playerInfo]: { pos: Vector, state: PlayerState };
 }
 
+type GameMessage = GameMessageMap[GMsgType];
+
 export { GMsgType };
-export type { GameMessageMap };
+export type { GameMessageMap, GameMessage };

@@ -19,7 +19,6 @@ class InMatchLoop implements StateInterface<GameLoopState> {
 
         const local = true;
         PlayerManager.addPlayer({ x: 15, y: 14 }, local);
-        PlayerManager.addPlayer({ x: 25, y: 5 }, !local);
 
         ItemManager.addItem({ x: 10, y: 2 }, Shotgun);
         ItemManager.addItem({ x: 20, y: 14 }, Shotgun);

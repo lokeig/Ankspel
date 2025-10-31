@@ -2,7 +2,7 @@ import { Vector } from "@common";
 import { StaticObject } from "@core";
 
 interface TileInterface {
-    staticObject: StaticObject;
+    body: StaticObject;
     update(): void;
     draw(): void;
 }

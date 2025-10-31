@@ -1,38 +1,30 @@
 import { GameMessageMap, GMsgType } from "./gameMessage";
 
-type EventFunction = (message: GameMessageMap) => void;
+type ListenFunction<T extends GMsgType> = (msg: GameMessageMap[T]) => void;
 
 class Emitter {
-    private subscribers: {
-        [K in GMsgType]: Set<Emitter(message: GameMessageMap[K]) => void;
-    public subscribe(event: GMsgType, listenFunction: EventFunction): void {
-        if (!this.subscribers.has(event)) {
-            this.subscribers.set(event, new Set());
-        }
-        this.subscribers.get(event)!.add(listenFunction);
-    }
+    private subscribers: { [K in GMsgType]: Set<ListenFunction<K>> };
 
-    public unsubscribe(event: GMsgType, listener: EventFunction): void {
-        const eventSet = this.subscribers.get(event)
-        if (!eventSet) {
-            return;
-        }
-        eventSet.delete(listener);
-    }
-
-    public publish(message: GameMessageMap): void {
-        const eventSet = this.subscribers.get(message);
-        if (!eventSet) {
-            return
-        }
-        for (const listener of eventSet.values()) {
-            listener(message);
+    constructor() {
+        this.subscribers = {} as { [K in GMsgType]: Set<ListenFunction<K>> };
+        for (const key of Object.values(GMsgType)) {
+            this.subscribers[key] = new Set<ListenFunction<typeof key>>();
         }
     }
 
-    public removeAll(): void {
-        this.subscribers.clear();
+    public subscribe<T extends GMsgType>(type: T, listenFunction: ListenFunction<T>): void {
+        this.subscribers[type].add(listenFunction);
+    }
+
+    public unsubscribe<T extends GMsgType>(type: T, listenFunction: ListenFunction<T>): void {
+        this.subscribers[type].delete(listenFunction);
+    }
+
+    public publish<T extends GMsgType>(type: T, message: GameMessageMap[T]): void {
+        for (const listenFunction of this.subscribers[type].values()) {
+            listenFunction(message);
+        }
     }
 }
 
-export { Emitter }
+export { Emitter };

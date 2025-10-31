@@ -1,10 +1,9 @@
 import { StateMachine, Controls, Vector, SpriteSheet, images } from "@common";
-import { PlayerBody } from "./Body/playerBody";
+import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 
 class Player {
-
-    public playerBody: PlayerBody;
+    public character: PlayerCharacter;
     private stateMachine: StateMachine<PlayerState>;
     private local: boolean;
     private static controls: Controls = {
@@ -23,16 +22,16 @@ class Player {
     
     constructor(pos: Vector, local: boolean) {
         const sprite = new SpriteSheet(images.playerImage, 32, 32);
-        this.playerBody = new PlayerBody(pos, sprite, Player.controls);
+        this.character = new PlayerCharacter(pos, sprite, Player.controls);
         this.local = local;
 
         this.stateMachine = new StateMachine(PlayerState.Standard);
-        this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.playerBody));
-        this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.playerBody));
+        this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
+        this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.character));
         const isCrouch = true;
-        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.playerBody, !isCrouch));
-        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.playerBody, isCrouch));
-        this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll(this.playerBody));
+        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !isCrouch));
+        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, isCrouch));
+        this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll(this.character));
         this.stateMachine.enterState();
     }
 

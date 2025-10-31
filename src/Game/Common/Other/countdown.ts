@@ -1,23 +1,28 @@
 class Countdown {
-    timeCounted: number = 0;
-    cooldownTime: number;
+    private timeCounted: number = 0;
+    private cooldownTime: number;
+
     constructor(cooldownTime: number) {
         this.cooldownTime = cooldownTime;
     }
-    update(deltaTime: number) {
+    
+    public update(deltaTime: number) {
         this.timeCounted += deltaTime;
     }
-    isDone(): boolean {
+    
+    public isDone(): boolean {
         return this.timeCounted >= this.cooldownTime;
     }
-    reset() {
+    
+    public reset() {
         this.timeCounted = 0;
     }
-    setToReady() {
+    
+    public setToReady() {
         this.timeCounted = this.cooldownTime;
     }
 
-    getPercentageReady(): number {
+    public getPercentageReady(): number {
         return this.timeCounted / this.cooldownTime;
     }
 }

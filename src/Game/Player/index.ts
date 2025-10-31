@@ -1,3 +1,3 @@
 export { PlayerManager } from "./playerManager";
 export { Player } from "./player";
-export { ThrowType } from "./Body/throwType";
+export { ThrowType } from "./Character/throwType";

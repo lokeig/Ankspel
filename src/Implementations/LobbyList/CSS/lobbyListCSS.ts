@@ -40,17 +40,17 @@ class LobbyListCSS implements LobbyListInterface {
 
         const emitter = GameServer.get().emitter;
 
-        emitter.subscribe(GMsgType.refreshLobbies, (lobbies) => {
+        emitter.subscribe(GMsgType.refreshLobbies, ({ lobbies }) => {
             this.refresh(lobbies);
         });
 
-        emitter.subscribe("joined-lobby", (lobbyID: string) => {
+        emitter.subscribe(GMsgType.inLobby, ({ lobbyID }) => {
             this.connectedLobby = lobbyID;
             this.leavebutton.disabled = false;
             this.refresh(this.lastLobbies);
         });
 
-        emitter.subscribe("left-lobby", () => {
+        emitter.subscribe(GMsgType.noLobby, () => {
             this.connectedLobby = null;
             this.hosting = false;
             this.leavebutton.disabled = true;
@@ -60,7 +60,7 @@ class LobbyListCSS implements LobbyListInterface {
             this.refresh(this.lastLobbies);
         });
 
-        emitter.subscribe("hosting-lobby", (lobbyID: string | null) => {
+        emitter.subscribe(GMsgType.hostingLobby, ({ lobbyID }) => {
             this.hosting = true;
             if (lobbyID) {
                 this.connectedLobby = lobbyID;
@@ -71,15 +71,15 @@ class LobbyListCSS implements LobbyListInterface {
         });
     }
 
-    show(): void {
+    public show(): void {
         this.mainDiv.style.display = "flex";
     }
 
-    hide(): void {
+    public hide(): void {
         this.mainDiv.style.display = "none";
     }
 
-    refresh(lobbies: LobbyMessageData[]): void {
+    public refresh(lobbies: LobbyMessageData[]): void {
         this.lastLobbies = lobbies;
 
         let foundPreviousSelection: boolean = false;

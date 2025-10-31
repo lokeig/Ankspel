@@ -1,6 +1,6 @@
 import { CMsgType, ForwardMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
-import { GameMessage } from "@server";
+import { GameMessage, GMsgType } from "@server";
 
 class PeerConnectionManager {
     private peerConnection: RTCPeerConnection;
@@ -8,7 +8,7 @@ class PeerConnectionManager {
     private pendingCandidates: RTCIceCandidate[] = [];
     private peerId: string;
     private socket: WebSocket;
-    private messageCallback: (msg: GameMessage) => void = () => { };
+    private messageCallback: (type: GMsgType, msg: GameMessage) => void = () => { };
 
     constructor(peerId: string, socket: WebSocket) {
         this.peerId = peerId;
@@ -57,8 +57,8 @@ class PeerConnectionManager {
 
         this.dataChannel.onmessage = (e: MessageEvent) => {
             try {
-                const msg = JSON.parse(e.data);
-                this.messageCallback(msg);
+                const msg: { type: GMsgType, gameMessage: GameMessage } = JSON.parse(e.data);
+                this.messageCallback(msg.type, msg.gameMessage);
             } catch (error) {
                 console.error("Failed to parse message:", error);
             }
@@ -73,7 +73,7 @@ class PeerConnectionManager {
         };
     }
 
-    public setOnMessage(callback: (msg: GameMessage) => void) {
+    public setOnMessage(callback: (type: GMsgType, msg: GameMessage) => void) {
         this.messageCallback = callback;
     }
 
@@ -127,9 +127,9 @@ class PeerConnectionManager {
         this.peerConnection.close();
     }
 
-    public sendMessage(msg: GameMessage) {
+    public sendMessage(type: GMsgType, gameMessage: GameMessage) {
         if (this.dataChannel?.readyState === "open" && this.peerConnection.connectionState === "connected") {
-            this.dataChannel!.send(JSON.stringify(msg));
+            this.dataChannel!.send(JSON.stringify({ type, gameMessage }));
         }
     }
 }

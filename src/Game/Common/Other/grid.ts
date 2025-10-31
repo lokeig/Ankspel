@@ -1,7 +1,7 @@
 import { Vector } from "../Types/vector";
 
 class Grid {
-    public static gridSize: number = 32;
+    public static size: number = 32;
 
     public static updateMapPositions<T>(objects: Map<string, Set<T>>, getPos: (e: T) => Vector) {
         const movedObjects: Map<string, Set<T>> = new Map();
@@ -37,11 +37,11 @@ class Grid {
     }
 
     public static getGridPos(pos: Vector): Vector {
-        return { x: Math.floor(pos.x / this.gridSize), y: Math.floor(pos.y / this.gridSize) }
+        return { x: Math.floor(pos.x / this.size), y: Math.floor(pos.y / this.size) }
     }
 
     public static getWorldPos(gridPos: Vector): Vector {
-        return { x: gridPos.x * this.gridSize, y: gridPos.y * this.gridSize } 
+        return { x: gridPos.x * this.size, y: gridPos.y * this.size } 
     }
 
     public static key(pos: Vector): string {

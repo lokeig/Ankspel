@@ -6,7 +6,7 @@ import { ProjectileManager } from "@game/Projectile";
 import { Bullet } from "@impl/Projectiles";
 
 class Grenade implements ExplosiveInterface {
-    public itemLogic: ItemLogic;
+    public common: ItemLogic;
     private spriteSheet = new SpriteSheet(images.grenade, 16, 16);
     private drawSize: number = 32;
     private setToDelete: boolean = false;
@@ -17,22 +17,22 @@ class Grenade implements ExplosiveInterface {
     constructor(pos: Vector) {
         const width = 6;
         const height = 19;
-        this.itemLogic = new ItemLogic(pos, width, height, ItemType.explosive);
-        this.itemLogic.dynamicObject.bounceFactor = 0.3;
+        this.common = new ItemLogic(pos, width, height, ItemType.explosive);
+        this.common.body.bounceFactor = 0.3;
 
-        this.itemLogic.holdOffset = { x: 12, y: -6 }
-        this.itemLogic.setHitboxOffset({ x: 30, y: 30 });
+        this.common.holdOffset = { x: 12, y: -6 }
+        this.common.setHitboxOffset({ x: 30, y: 30 });
     }
 
     update(deltaTime: number): void {
         if (this.activated) {
             this.explosionDelay.update(deltaTime); 
         }
-        this.itemLogic.update(deltaTime);
+        this.common.update(deltaTime);
 
         if (this.explosionDelay.isDone()) {
 
-            ParticleManager.addParticle(new ExplosionVFX(this.itemLogic.dynamicObject.getCenter()));
+            ParticleManager.addParticle(new ExplosionVFX(this.common.body.getCenter()));
             this.setToDelete = true;
 
             const amountOfBullets = 16;
@@ -40,7 +40,7 @@ class Grenade implements ExplosiveInterface {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const speed = Utility.Angle.rotateForce({ x: 2000, y: 0 }, angle)
                 const lifespan = 0.06;
-                const pos = this.itemLogic.dynamicObject.pos;
+                const pos = this.common.body.pos;
                 ProjectileManager.addProjectile(new Bullet({ ...pos }, speed, lifespan));
             }
         }
@@ -52,7 +52,7 @@ class Grenade implements ExplosiveInterface {
 
     draw(): void {
         const col = this.activated ? 1 : 0;
-        this.spriteSheet.draw(0, col, this.itemLogic.getDrawpos(this.drawSize), this.drawSize, this.itemLogic.isFlip(), this.itemLogic.angle)
+        this.spriteSheet.draw(0, col, this.common.getDrawpos(this.drawSize), this.drawSize, this.common.isFlip(), this.common.angle)
     }
 
     shouldBeDeleted(): boolean {

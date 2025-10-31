@@ -1,6 +1,6 @@
 import { StateMachine, Input } from "@common";
 import { Render } from "@render";
-import { LobbyList, GameServer } from "@server";
+import { LobbyList, GameServer, GMsgType } from "@server";
 import { GameLoopState } from "./gameLoopState";
 import { InMatchLoop } from "./inMatchLoop";
 
@@ -15,10 +15,10 @@ class GameLoop {
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         this.stateMachine.enterState();
         
-        // GameServer.get().emitter.subscribe("start-game", () => {
+        GameServer.get().emitter.subscribe(GMsgType.startGame, () => {
             LobbyList.get().hide();
             requestAnimationFrame(this.gameLoop);
-        // });
+        });
     }
 
     private gameLoop = (currentTime: number) => {

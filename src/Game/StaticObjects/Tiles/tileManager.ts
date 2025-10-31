@@ -1,6 +1,6 @@
 import { Vector, Grid, Utility, Direction, Side } from "@common";
 import { CollisionObject, GameObject } from "@core";
-import { TileConstructor, TileInterface } from "./tileInterface";
+import { TileInterface } from "./tileInterface";
 
 class TileManager {
 
@@ -14,33 +14,29 @@ class TileManager {
         return this.tiles.get(Grid.key(gridPos));
     }
 
-    public static setTile(gridPos: Vector, tileConstructor: TileConstructor) {
-        const size = Grid.gridSize;
-        const pos = Grid.getWorldPos(gridPos);
-        const newTile = new tileConstructor(pos, size);
+    public static setTile(gridPos: Vector, tile: TileInterface) {
+        this.tiles.set(Grid.key(gridPos), tile);
 
-        this.tiles.set(Grid.key(gridPos), newTile);
+        this.setNeighbours(tile);
+        tile.update();
 
-        this.setNeighbours(newTile);
-        newTile.update();
-
-        for (const direction of newTile.staticObject.getNeighbours()) {
-            const tile = this.getTile(this.shift(gridPos, direction));
-            tile!.staticObject.setNeighbour(Utility.Direction.getReverseDirection(direction))
-            tile!.update();
+        for (const direction of tile.body.getNeighbours()) {
+            const neighbourTile = this.getTile(this.shift(gridPos, direction));
+            neighbourTile!.body.setNeighbour(Utility.Direction.getReverseDirection(direction));
+            neighbourTile!.update();
         }
     }
 
     public static getNearbyTiles(pos: Vector, width: number, height: number): CollisionObject[] {
         const result: CollisionObject[] = [];
 
-        const startX = pos.x - Grid.gridSize * 2;
-        const endX = pos.x + width + Grid.gridSize * 2;
-        const startY = pos.y - Grid.gridSize * 2;
-        const endY = pos.y + height + Grid.gridSize * 2;
+        const startX = pos.x - Grid.size * 2;
+        const endX = pos.x + width + Grid.size * 2;
+        const startY = pos.y - Grid.size * 2;
+        const endY = pos.y + height + Grid.size * 2;
 
-        for (let x = startX; x < endX; x += Grid.gridSize) {
-            for (let y = startY; y < endY; y += Grid.gridSize) {
+        for (let x = startX; x < endX; x += Grid.size) {
+            for (let y = startY; y < endY; y += Grid.size) {
                 const gridPos = Grid.getGridPos({ x, y });
 
                 this.processTile(gridPos, result);
@@ -56,17 +52,17 @@ class TileManager {
         if (!tile) {
             return;
         }
-        const tileObj = tile.staticObject;
+        const tileObj = tile.body;
 
         accumulatedCollidable.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
 
-        if (tile.staticObject.getLip(Side.left)) {
+        if (tile.body.getLip(Side.left)) {
             const lipLeft = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
             lipLeft.pos.x -= tileObj.getLipWidth();
             accumulatedCollidable.push({ gameObject: lipLeft, platform: true });
         }
 
-        if (tile.staticObject.getLip(Side.right)) {
+        if (tile.body.getLip(Side.right)) {
             const lipRight = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
             lipRight.pos.x += tileObj.width;
             accumulatedCollidable.push({ gameObject: lipRight, platform: true });
@@ -91,14 +87,14 @@ class TileManager {
     }
 
     private static setNeighbours(tile: TileInterface): void {
-        const gridPos = Grid.getGridPos(tile.staticObject.pos);
+        const gridPos = Grid.getGridPos(tile.body.pos);
 
         for (const key of Object.values(Direction)) {
             const neighbourTile = this.tiles.get(Grid.key(this.shift(gridPos, key)));
             if (neighbourTile && this.tilesMatch(tile, neighbourTile)) {
-                tile.staticObject.setNeighbour(key);
+                tile.body.setNeighbour(key);
             } else {
-                tile.staticObject.removeNeighbour(key);
+                tile.body.removeNeighbour(key);
             }
         }
     }

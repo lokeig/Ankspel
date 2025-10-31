@@ -4,7 +4,7 @@ import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
 
 class Shotgun implements FirearmInterface {
-    public itemLogic: ItemLogic;
+    public common: ItemLogic;
     private handleOffset: number = 0;
     private maxHandleOffset: number = -4;
     private handleLerp = new Lerp(6, lerpTriangle)
@@ -16,10 +16,10 @@ class Shotgun implements FirearmInterface {
     constructor(pos: Vector) {
         const width = 30;
         const height = 15;
-        this.itemLogic = new ItemLogic(pos, width, height, ItemType.fireArm);
-        this.itemLogic.holdOffset = { x: 14, y: -4 };
-        this.itemLogic.handOffset = { x: 4, y: 0 };
-        this.itemLogic.setHitboxOffset({ x: 30, y: 8 });
+        this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
+        this.common.holdOffset = { x: 14, y: -4 };
+        this.common.handOffset = { x: 4, y: 0 };
+        this.common.setHitboxOffset({ x: 30, y: 8 });
         this.firearmInfo = new FirearmInfo();
 
         this.firearmInfo = new FirearmInfo;
@@ -32,7 +32,7 @@ class Shotgun implements FirearmInterface {
     }
 
     public update(deltaTime: number): void {
-        this.itemLogic.update(deltaTime);
+        this.common.update(deltaTime);
         if (this.handleLerp.isActive()) {
             this.handleOffset = this.handleLerp.update(deltaTime);
         }
@@ -52,7 +52,7 @@ class Shotgun implements FirearmInterface {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.reloadable;
-        return this.firearmInfo.shoot(this.itemLogic.dynamicObject.getCenter(), this.itemLogic.angle, this.itemLogic.isFlip());
+        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip());
     }
 
     private reload(): Vector {
@@ -63,19 +63,19 @@ class Shotgun implements FirearmInterface {
 
     public draw(): void {
         const drawSize = 64;
-        const drawPos = this.itemLogic.getDrawpos(drawSize);
-        this.spriteSheet.draw(0, 0, drawPos, drawSize, this.itemLogic.isFlip(), this.itemLogic.angle);
+        const drawPos = this.common.getDrawpos(drawSize);
+        this.spriteSheet.draw(0, 0, drawPos, drawSize, this.common.isFlip(), this.common.angle);
 
-        const handleOffsetRotated = Utility.Angle.rotateForce({ x: this.handleOffset, y: 0 }, this.itemLogic.angle);
+        const handleOffsetRotated = Utility.Angle.rotateForce({ x: this.handleOffset, y: 0 }, this.common.angle);
         const handleDrawPos = {
-            x: drawPos.x + handleOffsetRotated.x * this.itemLogic.dynamicObject.getDirectionMultiplier(),
+            x: drawPos.x + handleOffsetRotated.x * this.common.body.getDirectionMultiplier(),
             y: drawPos.y + handleOffsetRotated.y
         }
-        this.spriteSheet.draw(1, 0, handleDrawPos, drawSize, this.itemLogic.isFlip(), this.itemLogic.angle);
+        this.spriteSheet.draw(1, 0, handleDrawPos, drawSize, this.common.isFlip(), this.common.angle);
     }
 
     public shouldBeDeleted(): boolean {
-        return this.itemLogic.deletable() && this.currentState === ShotgunState.empty;
+        return this.common.deletable() && this.currentState === ShotgunState.empty;
     }
 
 }

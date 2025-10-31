@@ -49,9 +49,9 @@ class MultiPeerServer implements ServerInterface {
         const peer = new PeerConnectionManager(peerId, this.socket);
         this.peers.set(peerId, peer);
 
-        peer.setOnMessage((msg: GameMessage) => {
+        peer.setOnMessage((type: GMsgType, msg: GameMessage) => {
             console.log("Received message from", msg);
-            this.emitter.publish(msg);
+            this.emitter.publish(type, msg);
         });
 
         const isInitiator = peerId < this.myID!;
@@ -119,12 +119,12 @@ class MultiPeerServer implements ServerInterface {
 
             case SMsgType.lobbyList:
                 console.log("Got a new lobby-list");
-                this.emitter.publish({ type: GMsgType.refreshLobbies, lobbies: data.lobbies });
+                this.emitter.publish(GMsgType.refreshLobbies, {lobbies: data.lobbies });
                 break;
 
             case SMsgType.joinSuccess:
                 console.log(`Joined lobby: ${data.lobbyID}`);
-                this.emitter.publish({ type: GMsgType.inLobby, lobbyID: data.lobbyID });
+                this.emitter.publish(GMsgType.inLobby, {lobbyID: data.lobbyID });
                 const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
                 this.socket.send(JSON.stringify(listUsersMsg));
                 break;
@@ -132,34 +132,34 @@ class MultiPeerServer implements ServerInterface {
             case SMsgType.leaveSuccess:
                 console.log(`Left lobby`);
                 this.cleanupAllPeers();
-                this.emitter.publish({ type: GMsgType.noLobby });
+                this.emitter.publish(GMsgType.noLobby, {});
                 this.host = false;
                 break;
 
             case SMsgType.hostSuccess:
                 console.log(`Hosted lobby: ${data.lobbyID}`);
                 this.host = true;
-                this.emitter.publish({ type: GMsgType.hostingLobby, lobbyID: data.lobbyID });
+                this.emitter.publish(GMsgType.hostingLobby, {lobbyID: data.lobbyID });
                 break;
 
             case SMsgType.newHost:
                 console.log(`New host: ${data.hostID}`);
                 if (data.hostID === this.myID) {
                     this.host = true;
-                    this.emitter.publish({ type: GMsgType.hostingLobby, lobbyID: null });
+                    this.emitter.publish(GMsgType.hostingLobby, { lobbyID: null });
                     console.log("You are host!");
                 }
                 break;
 
             case SMsgType.startGame:
                 console.log("Starting lobby");
-                this.emitter.publish({ type: GMsgType.startGame });
+                this.emitter.publish(GMsgType.startGame, {});
         }
     }
 
-    public sendMessage(msg: GameMessage) {
+    public sendMessage(type: GMsgType, msg: GameMessage) {
         this.peers.forEach((peer: PeerConnectionManager) => {
-            peer.sendMessage(msg);
+            peer.sendMessage(type, msg);
         });
     }
 }

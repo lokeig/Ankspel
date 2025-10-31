@@ -1,7 +1,7 @@
 import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility, PlayerState } from "@common";
 import { DynamicObject } from "@core";
-import { PlayerBody } from "../Body/playerBody";
-import { ThrowType } from "../Body/throwType";
+import { PlayerBody } from "../Character/playerCharacter";
+import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
@@ -56,15 +56,15 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     public stateEntered(): void {
         this.playerBody.playerItem.throw(ThrowType.drop);
         this.coyoteTime.setToReady();
-        this.head.direction = this.playerBody.dynamicObject.direction;
-        this.legs.direction = this.playerBody.dynamicObject.direction;
+        this.head.direction = this.playerBody.body.direction;
+        this.legs.direction = this.playerBody.body.direction;
 
-        const pos = this.playerBody.dynamicObject.pos;
+        const pos = this.playerBody.body.pos;
         this.head.pos = { x: pos.x, y: pos.y };
         this.body.pos = { x: pos.x, y: pos.y + this.height };
         this.legs.pos = { x: pos.x, y: pos.y + this.height * 2 };
 
-        const vel = this.playerBody.dynamicObject.velocity;
+        const vel = this.playerBody.body.velocity;
         this.head.velocity = { x: vel.x, y: vel.y };
         this.body.velocity = { x: vel.x, y: vel.y };
         this.legs.velocity = { x: vel.x, y: vel.y };
@@ -227,21 +227,21 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public updateStandard(): void {
-        this.playerBody.dynamicObject.pos = {
+        this.playerBody.body.pos = {
             x: this.legs.pos.x,
             y: this.legs.pos.y + this.legs.height - PlayerBody.standardHeight
         };
-        this.playerBody.dynamicObject.grounded = true;
+        this.playerBody.body.grounded = true;
         this.playerBody.setArmPosition();
-        this.playerBody.dynamicObject.setNewCollidableObjects();
+        this.playerBody.body.setNewCollidableObjects();
     }
 
     public stateExited(): void {
         this.updateStandard();
         const jumpHeight = 25;
         const exitVerticalSpeed = -5;
-        this.playerBody.dynamicObject.pos.y -= jumpHeight;
-        this.playerBody.dynamicObject.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
+        this.playerBody.body.pos.y -= jumpHeight;
+        this.playerBody.body.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {

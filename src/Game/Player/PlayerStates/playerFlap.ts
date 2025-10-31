@@ -1,5 +1,5 @@
 import { StateInterface, Input, Vector, PlayerState } from "@common";
-import { PlayerBody } from "../Body/playerBody";
+import { PlayerBody } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerFlap implements StateInterface<PlayerState> {
@@ -10,7 +10,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
 
     constructor(playerBody: PlayerBody) {
         this.playerBody = playerBody;
-        this.projectileCollision = new ProjectileCollision(this.playerBody.dynamicObject);
+        this.projectileCollision = new ProjectileCollision(this.playerBody.body);
         this.projectileCollision.setOnHit((hitpos: Vector) => {
             this.playerBody.dead = true;
         })
@@ -23,7 +23,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
-        this.playerBody.dynamicObject.velocity.y = Math.min(this.playerBody.dynamicObject.velocity.y, this.flapSpeed);
+        this.playerBody.body.velocity.y = Math.min(this.playerBody.body.velocity.y, this.flapSpeed);
         this.playerBody.setAnimation(this.playerBody.animations.flap);
 
         if (this.playerBody.playerMove.willTurn(this.playerBody.controls)) {
@@ -46,7 +46,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
             return PlayerState.Crouch;
         }
 
-        if (Input.keyDown(this.playerBody.controls.jump) && !this.playerBody.dynamicObject.grounded) {
+        if (Input.keyDown(this.playerBody.controls.jump) && !this.playerBody.body.grounded) {
             return PlayerState.Flap
         }
 

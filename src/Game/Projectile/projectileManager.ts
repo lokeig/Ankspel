@@ -54,13 +54,13 @@ class ProjectileManager {
     public static getNearbyProjectiles(pos: Vector, width: number, height: number): ProjectileInterface[] {
         const result: ProjectileInterface[] = [];
 
-        const startX = pos.x - Grid.gridSize * 2;
-        const endX = pos.x + width + Grid.gridSize * 2;
-        const startY = pos.y - Grid.gridSize * 2;
-        const endY = pos.y + height + Grid.gridSize * 2;
+        const startX = pos.x - Grid.size * 2;
+        const endX = pos.x + width + Grid.size * 2;
+        const startY = pos.y - Grid.size * 2;
+        const endY = pos.y + height + Grid.size * 2;
 
-        for (let x = startX; x < endX; x += Grid.gridSize) {
-            for (let y = startY; y < endY; y += Grid.gridSize) {
+        for (let x = startX; x < endX; x += Grid.size) {
+            for (let y = startY; y < endY; y += Grid.size) {
                 const gridPos = Grid.getGridPos({ x, y });
 
                 this.processProjectileSet(gridPos, result);

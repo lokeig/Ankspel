@@ -18,7 +18,7 @@ class ItemManager {
             }
         }
 
-        Grid.updateMapPositions<ItemInterface>(this.items, e => e.itemLogic.dynamicObject.pos);
+        Grid.updateMapPositions<ItemInterface>(this.items, e => e.common.body.pos);
     }
     
     public static getItems(pos: Vector): Set<ItemInterface> | undefined{
@@ -28,13 +28,13 @@ class ItemManager {
     public static getNearby(pos: Vector, width: number, height: number): ItemInterface[] {
         const result: ItemInterface[] = [];
         
-        const startX = pos.x - Grid.gridSize * 2;
-        const endX = pos.x + width + Grid.gridSize * 2;
-        const startY = pos.y - Grid.gridSize * 2;
-        const endY = pos.y + height + Grid.gridSize * 2;
+        const startX = pos.x - Grid.size * 2;
+        const endX = pos.x + width + Grid.size * 2;
+        const startY = pos.y - Grid.size * 2;
+        const endY = pos.y + height + Grid.size * 2;
     
-        for (let x = startX; x < endX; x += Grid.gridSize) {
-            for (let y = startY; y < endY; y += Grid.gridSize) {
+        for (let x = startX; x < endX; x += Grid.size) {
+            for (let y = startY; y < endY; y += Grid.size) {
                 const gridPos = Grid.getGridPos({ x, y });
                 
                 this.processItemArray(gridPos, result);
@@ -56,12 +56,9 @@ class ItemManager {
         }
     }
     
-    public static addItem(gridPos: Vector, itemClass: new (pos: Vector) => ItemInterface) {
+    public static addItem(item: ItemInterface) {
+        const gridPos = item.common.body.pos;
         const itemSet = this.getItems(gridPos);
-        
-        const item = new itemClass(Grid.getWorldPos(gridPos));
-        item.itemLogic.dynamicObject.pos.y += item.itemLogic.dynamicObject.height;
-        item.itemLogic.dynamicObject.pos.x += (item.itemLogic.dynamicObject.width - Grid.gridSize) / 2;
         
         if (!itemSet) {
             this.items.set(Grid.key(gridPos), new Set());
@@ -73,7 +70,7 @@ class ItemManager {
     public static draw() {
         for (const itemSet of this.items.values()) {
             for (const item of itemSet) {
-                if (!item.itemLogic.owned) {
+                if (!item.common.owned) {
                     item.draw();
                 }            
             }

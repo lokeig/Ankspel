@@ -121,7 +121,7 @@ class DynamicObject extends GameObject {
         if (Math.abs(this.velocity.x) < 0.01) {
             this.velocity.x = 0;
         }
-        const maxSpeed = Grid.gridSize;
+        const maxSpeed = Grid.size;
         this.velocity.x = Math.max(Math.min(this.velocity.x, maxSpeed), -maxSpeed);
         this.velocity.y = Math.max(Math.min(this.velocity.y, maxSpeed), -maxSpeed);
     }

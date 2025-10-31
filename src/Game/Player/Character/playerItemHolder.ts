@@ -26,7 +26,7 @@ class PlayerItemHolder {
         }
 
         if (this.holding && Input.keyPress(controls.shoot)) {
-            switch (this.holding.itemLogic.getType()) {
+            switch (this.holding.common.getType()) {
                 case (ItemType.fireArm): {
                     const knockback = (this.holding as FirearmInterface).shoot();
                     this.playerObject.velocity.x -= knockback.x;
@@ -46,7 +46,7 @@ class PlayerItemHolder {
         let fallbackItem: ItemInterface | null = null;
         
         for (const item of this.nearbyItems.values()) {
-            if (!this.playerObject.collision(item.itemLogic.getPickupHitbox())) {
+            if (!this.playerObject.collision(item.common.getPickupHitbox())) {
                 continue
             } 
             
@@ -55,13 +55,13 @@ class PlayerItemHolder {
                 continue;
             }
             
-            item.itemLogic.owned = true;
+            item.common.owned = true;
             this.lastHeldItem = item;
             return item;
         }
         
         if (fallbackItem) {
-            fallbackItem.itemLogic.owned = true;
+            fallbackItem.common.owned = true;
             this.lastHeldItem = fallbackItem;
         }
         return fallbackItem;
@@ -98,35 +98,35 @@ class PlayerItemHolder {
             return;
         }
 
-        const itemLogic = this.holding.itemLogic;
+        const itemLogic = this.holding.common;
         this.holding = null;
-        itemLogic.dynamicObject.grounded = false;
+        itemLogic.body.grounded = false;
         itemLogic.owned = false;
-        const direcMult = itemLogic.dynamicObject.getDirectionMultiplier();
+        const direcMult = itemLogic.body.getDirectionMultiplier();
         
         switch (throwType) {
             case(ThrowType.light): {
-                itemLogic.dynamicObject.velocity = { x: 3.5 * direcMult, y: -3.5 };
+                itemLogic.body.velocity = { x: 3.5 * direcMult, y: -3.5 };
                 itemLogic.rotateSpeed = 10;
                 break;
             }
             case(ThrowType.hard): {
-                itemLogic.dynamicObject.velocity = { x: 15 * direcMult, y: -5 };
+                itemLogic.body.velocity = { x: 15 * direcMult, y: -5 };
                 itemLogic.rotateSpeed = 15;
                 break;
             }
             case(ThrowType.hardDiagonal): {
-                itemLogic.dynamicObject.velocity = { x: 15 * direcMult, y: -10 };
+                itemLogic.body.velocity = { x: 15 * direcMult, y: -10 };
                 itemLogic.rotateSpeed = 15;
                 break;
             }
             case(ThrowType.drop): {
-                itemLogic.dynamicObject.velocity = { x: 0 * direcMult, y: 0 };
+                itemLogic.body.velocity = { x: 0 * direcMult, y: 0 };
                 itemLogic.rotateSpeed = 5;
                 break;
             }
             case(ThrowType.upwards): {
-                itemLogic.dynamicObject.velocity = { x: 0 * direcMult, y: -10 };
+                itemLogic.body.velocity = { x: 0 * direcMult, y: -10 };
                 itemLogic.rotateSpeed = 8;
                 break;
             }

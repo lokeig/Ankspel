@@ -3,7 +3,7 @@ import { DynamicObject, GameObject } from "@core";
 import { ItemType } from "./itemType";
 
 class ItemLogic {
-    public dynamicObject: DynamicObject;
+    public body: DynamicObject;
 
     public handOffset: Vector = { x: 0, y: 0 };
     public holdOffset: Vector = { x: 0, y: 0 };
@@ -16,7 +16,7 @@ class ItemLogic {
     private itemType: ItemType;
 
     constructor(pos: Vector, width: number, height: number, itemType: ItemType) {
-        this.dynamicObject = new DynamicObject(pos, width, height);
+        this.body = new DynamicObject(pos, width, height);
         this.itemType = itemType;
     }
 
@@ -32,16 +32,16 @@ class ItemLogic {
         if (!this.owned) {
             this.updateItemPhysics(deltaTime);
         } else {
-            this.dynamicObject.setNewCollidableObjects();
+            this.body.setNewCollidableObjects();
         }
     }
 
     private updateItemPhysics(deltaTime: number) {
-        this.dynamicObject.friction = this.dynamicObject.grounded ? 5 : 1;
+        this.body.friction = this.body.grounded ? 5 : 1;
 
         this.updateAngle(deltaTime);
-        this.dynamicObject.update(deltaTime);
-        if (this.dynamicObject.collisions.side) {
+        this.body.update(deltaTime);
+        if (this.body.collisions.side) {
             this.rotateSpeed *= 0.5;
         }
 
@@ -49,7 +49,7 @@ class ItemLogic {
 
     private updateAngle(deltaTime: number): void {
         const normalized = Utility.Angle.normalizeAngle(this.angle);
-        if (this.dynamicObject.grounded && normalized !== 0 && normalized !== -Math.PI) {
+        if (this.body.grounded && normalized !== 0 && normalized !== -Math.PI) {
             this.rotateSpeed = 0;
             if (!this.rotateLerp.isActive()) {
                 const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
@@ -65,22 +65,22 @@ class ItemLogic {
     }
 
     public getPickupHitbox(): GameObject {
-        return this.dynamicObject.getScaled(this.hitboxOffset.x, this.hitboxOffset.y);
+        return this.body.getScaled(this.hitboxOffset.x, this.hitboxOffset.y);
     }
 
     public getDrawpos(drawSize: number): Vector {
         return {
-            x: this.dynamicObject.pos.x + ((this.dynamicObject.width - drawSize) / 2),
-            y: this.dynamicObject.pos.y + ((this.dynamicObject.height - drawSize) / 2)
+            x: this.body.pos.x + ((this.body.width - drawSize) / 2),
+            y: this.body.pos.y + ((this.body.height - drawSize) / 2)
         };
     }
 
     public isFlip(): boolean {
-        return this.dynamicObject.isFlip();
+        return this.body.isFlip();
     }
 
     public deletable(): boolean {
-        return !this.owned && this.dynamicObject.grounded && Math.abs(this.dynamicObject.velocity.x) < 0.3;;
+        return !this.owned && this.body.grounded && Math.abs(this.body.velocity.x) < 0.3;;
     }
 }
 
