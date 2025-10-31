@@ -10,20 +10,14 @@ enum GMsgType {
     playerInfo = "playerInfo"
 }
 
-type PlayerInfoMessage = {
-    type: GMsgType.playerInfo,
-    pos: Vector,
-    state: PlayerState
-}
-
 interface GameMessageMap {
     [GMsgType.refreshLobbies]: { lobbies: LobbyMessageData[] };
-    | { type: GMsgType.inLobby, lobbyID: string }
-    | { type: GMsgType.hostingLobby, lobbyID: string | null }
-    | { type: GMsgType.noLobby }
-    | { type: GMsgType.startGame }
-    | PlayerInfoMessage
+    [GMsgType.inLobby]: { lobbyID: string };
+    [GMsgType.hostingLobby]: { lobbyID: string | null };
+    [GMsgType.noLobby]: {};
+    [GMsgType.startGame]: {};
+    [GMsgType.playerInfo]: { pos: Vector, state: PlayerState };
 }
 
-export type { GameMessage, PlayerInfoMessage };
 export { GMsgType };
+export type { GameMessageMap };

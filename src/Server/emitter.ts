@@ -1,10 +1,10 @@
-import { GameMessage, GMsgType } from "./gameMessage";
+import { GameMessageMap, GMsgType } from "./gameMessage";
 
-type EventFunction = (message: GameMessage) => void;
+type EventFunction = (message: GameMessageMap) => void;
 
 class Emitter {
-    private subscribers: Map<GMsgType, Set<EventFunction>> = new Map();
-
+    private subscribers: {
+        [K in GMsgType]: Set<Emitter(message: GameMessageMap[K]) => void;
     public subscribe(event: GMsgType, listenFunction: EventFunction): void {
         if (!this.subscribers.has(event)) {
             this.subscribers.set(event, new Set());
@@ -20,8 +20,8 @@ class Emitter {
         eventSet.delete(listener);
     }
 
-    public publish(message: GameMessage): void {
-        const eventSet = this.subscribers.get(message.type);
+    public publish(message: GameMessageMap): void {
+        const eventSet = this.subscribers.get(message);
         if (!eventSet) {
             return
         }
