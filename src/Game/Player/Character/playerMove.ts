@@ -5,10 +5,10 @@ class PlayerMove {
 
     public moveEnabled: boolean = true;
     public movespeed: number = 50;
-    private playerObject: DynamicObject;
+    private playerCharacter: DynamicObject;
 
     constructor(object: DynamicObject) {
-        this.playerObject = object;
+        this.playerCharacter = object;
     }
 
     public update(deltaTime: number, controls: Controls): void {
@@ -24,26 +24,26 @@ class PlayerMove {
 
         if (left && right) {
             if (Input.keyPress(controls.left)) {
-                this.playerObject.direction = Side.left;
+                this.playerCharacter.direction = Side.left;
             }
             if (Input.keyPress(controls.right)) {
-                this.playerObject.direction = Side.right;
+                this.playerCharacter.direction = Side.right;
             }
         } else {
             if (left) {
-                this.playerObject.direction = Side.left;
+                this.playerCharacter.direction = Side.left;
             }
             if (right) {
-                this.playerObject.direction = Side.right;
+                this.playerCharacter.direction = Side.right;
             }
         }
 
-        this.playerObject.velocity.x += this.movespeed * directionMultiplier * deltaTime;
+        this.playerCharacter.velocity.x += this.movespeed * directionMultiplier * deltaTime;
     }
 
     public willTurn(controls: Controls): boolean {
-        const willTurnRight = Input.keyPress(controls.right) && this.playerObject.isFlip();
-        const willTurnLeft = Input.keyPress(controls.left) && !this.playerObject.isFlip();
+        const willTurnRight = Input.keyPress(controls.right) && this.playerCharacter.isFlip();
+        const willTurnLeft = Input.keyPress(controls.left) && !this.playerCharacter.isFlip();
         return (willTurnLeft || willTurnRight) && this.moveEnabled;
     }
 }

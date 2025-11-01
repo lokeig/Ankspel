@@ -157,7 +157,7 @@ class MessageHandler {
         }
         lobby.setClosed(true);
         const startMsg = { type: Shared_1.SMsgType.startGame };
-        this.broadcastToLobby(serverInfo, startMsg);
+        this.sendTo(serverInfo.clientSocket, startMsg);
         this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
     }
     sendTo(client, msg) {

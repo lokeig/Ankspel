@@ -1,21 +1,21 @@
-import { Controls, Input, Vector } from "@common";
+import { Controls, Input } from "@common";
 import { ItemInterface, ItemManager, ItemType, FirearmInterface, ExplosiveInterface } from "@game/Item";
 import { DynamicObject } from "@core";
 import { ThrowType } from "./throwType";
 
 class PlayerItemHolder {
-    private playerObject: DynamicObject;
+    private playerCharacter: DynamicObject;
     public holding: ItemInterface | null = null;
     public nearbyItems: Array<ItemInterface> = [];
     public forcedThrowType: null | ThrowType = null;
     private lastHeldItem: ItemInterface | null = null;
 
     constructor(object: DynamicObject) {
-        this.playerObject = object;
+        this.playerCharacter = object;
     }
 
     public update(deltaTime: number, controls: Controls) {
-        this.nearbyItems = ItemManager.getNearby(this.playerObject.pos, this.playerObject.width, this.playerObject.height);
+        this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
 
         if (Input.keyPress(controls.pickup)) {
             if (this.holding) {
@@ -29,8 +29,8 @@ class PlayerItemHolder {
             switch (this.holding.common.getType()) {
                 case (ItemType.fireArm): {
                     const knockback = (this.holding as FirearmInterface).shoot();
-                    this.playerObject.velocity.x -= knockback.x;
-                    this.playerObject.velocity.y -= knockback.y;
+                    this.playerCharacter.velocity.x -= knockback.x;
+                    this.playerCharacter.velocity.y -= knockback.y;
                     break;
                 }
 
@@ -46,7 +46,7 @@ class PlayerItemHolder {
         let fallbackItem: ItemInterface | null = null;
         
         for (const item of this.nearbyItems.values()) {
-            if (!this.playerObject.collision(item.common.getPickupHitbox())) {
+            if (!this.playerCharacter.collision(item.common.getPickupHitbox())) {
                 continue
             } 
             

@@ -1,52 +1,52 @@
 import { StateInterface, Input, Vector, PlayerState } from "@common";
-import { PlayerBody } from "../Character/playerCharacter";
+import { PlayerCharacter } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerFlap implements StateInterface<PlayerState> {
 
-    private playerBody: PlayerBody;
+    private playerCharacter: PlayerCharacter;
     private flapSpeed: number = 1.5;
     private projectileCollision: ProjectileCollision;
 
-    constructor(playerBody: PlayerBody) {
-        this.playerBody = playerBody;
-        this.projectileCollision = new ProjectileCollision(this.playerBody.body);
+    constructor(playerCharacter: PlayerCharacter) {
+        this.playerCharacter = playerCharacter;
+        this.projectileCollision = new ProjectileCollision(this.playerCharacter.body);
         this.projectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerBody.dead = true;
+            this.playerCharacter.dead = true;
         })
     }
 
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
-        this.playerBody.setArmOffset(armOffset);
+        this.playerCharacter.setArmOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
-        this.playerBody.body.velocity.y = Math.min(this.playerBody.body.velocity.y, this.flapSpeed);
-        this.playerBody.setAnimation(this.playerBody.animations.flap);
+        this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
+        this.playerCharacter.setAnimation(this.playerCharacter.animations.flap);
 
-        if (this.playerBody.playerMove.willTurn(this.playerBody.controls)) {
-            this.playerBody.armFront.angle *= -1;
+        if (this.playerCharacter.playerMove.willTurn(this.playerCharacter.controls)) {
+            this.playerCharacter.armFront.angle *= -1;
         }
-        if (this.playerBody.playerItem.holding) {
-            this.playerBody.armFront.rotateArmUp(deltaTime);
+        if (this.playerCharacter.playerItem.holding) {
+            this.playerCharacter.armFront.rotateArmUp(deltaTime);
         } else {
-            this.playerBody.armFront.rotateArmDown(deltaTime);
+            this.playerCharacter.armFront.rotateArmDown(deltaTime);
         }
-        this.playerBody.update(deltaTime);
+        this.playerCharacter.update(deltaTime);
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerBody.controls.ragdoll) || this.playerBody.dead) {
+        if (Input.keyPress(this.playerCharacter.controls.ragdoll) || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
 
-        if (Input.keyDown(this.playerBody.controls.down)) {
+        if (Input.keyDown(this.playerCharacter.controls.down)) {
             return PlayerState.Crouch;
         }
 
-        if (Input.keyDown(this.playerBody.controls.jump) && !this.playerBody.body.grounded) {
+        if (Input.keyDown(this.playerCharacter.controls.jump) && !this.playerCharacter.body.grounded) {
             return PlayerState.Flap
         }
 
@@ -58,7 +58,7 @@ class PlayerFlap implements StateInterface<PlayerState> {
     }
 
     public stateDraw(): void {
-        this.playerBody.draw();
+        this.playerCharacter.draw();
     }
 }
 

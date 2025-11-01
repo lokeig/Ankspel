@@ -1,8 +1,5 @@
-import { images } from "../../../Game/Common/Other/images";
-import { Animation } from "../../../Game/Common/Sprite/Animation/animation";
-import { SpriteSheet } from "../../../Game/Common/Sprite/sprite";
-import { SpriteAnimator } from "../../../Game/Common/Sprite/spriteAnimator";
-import { Vector } from "../../../Game/Common/Types/vector";
+import { Vector, SpriteAnimator, SpriteSheet, images, Animation } from "@common";
+
 
 class ExplosionParticle {
     private pos: Vector;

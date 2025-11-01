@@ -1,10 +1,11 @@
 import { ClientMessage } from "@shared";
 import { Emitter } from "./emitter";
-import { GameMessage, GMsgType } from "./gameMessage";
+import { GameMessageMap, GMsgType } from "./gameMessage";
 
 interface ServerInterface {
     emitter: Emitter;
-    sendMessage(type: GMsgType, text: GameMessage): void;
+    getID(): string;
+    sendMessage<T extends GMsgType>(type: T, text: GameMessageMap[T]): void;
     sendToServer(message: ClientMessage): void;
     isHost(): boolean;
 }

@@ -21,9 +21,9 @@ type ClientMessage =
     | { type: CMsgType.joinLobby; lobbyID: string }
     | { type: CMsgType.leaveLobby }
     | { type: CMsgType.hostLobby; lobbyName: string; lobbySize: number }
-    | { type: CMsgType.startLobby }
+    | { type: CMsgType.startLobby; }
     | { type: CMsgType.listLobbies }
-    | { type: CMsgType.listUsers };
+    | { type: CMsgType.listUsers }
 
 export type { ClientMessage, ForwardMessage };
 export { CMsgType };

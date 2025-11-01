@@ -1,6 +1,9 @@
 import { GameServer, GMsgType, LobbyListInterface } from "@server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
+import { PlayerManager } from "@player";
+import { MapManager } from "@game/Map";
+import { GameLoopUtility } from "@game/GameLoop/gameLoopUtility";
 
 class LobbyListCSS implements LobbyListInterface {
     private mainDiv: HTMLElement;
@@ -169,10 +172,9 @@ class LobbyListCSS implements LobbyListInterface {
 
     private onStart(): void {
         const startMsg: ClientMessage = {
-            type: CMsgType.startLobby
+            type: CMsgType.startLobby,
         };
         GameServer.get().sendToServer(startMsg);
-        return;
     }
 }
 

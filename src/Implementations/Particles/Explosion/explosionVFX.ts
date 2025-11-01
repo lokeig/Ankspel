@@ -1,7 +1,5 @@
-import { Countdown } from "../../../Game/Common/Other/countdown";
-import { Vector } from "../../../Game/Common/Types/vector";
-import { Utility } from "../../../Game/Common/Utility/utility";
-import { ParticleInterface } from "../../../Game/Particles/particleInterface";
+import { Vector, Countdown, Utility } from "@common";
+import { ParticleInterface } from "@game/Particles";
 import { ExplosionParticle } from "./explosionParticle";
 
 class ExplosionVFX implements ParticleInterface {
@@ -19,7 +17,7 @@ class ExplosionVFX implements ParticleInterface {
         this.particleSpawnLocations = Utility.Vector.getPointsAroundCircle(pos, radius, amount);
         Utility.Vector.randomOffsetVectorArray(this.particleSpawnLocations, 7);
         this.particleSpawnLocations.push({ x: pos.x, y: pos.y });
-        this.order = Utility.Random.getRandomArray(amount);
+        this.order = Utility.Random.getRandomArray(amount + 1);
         this.nextParticleCountdown.setToReady();
     }
 

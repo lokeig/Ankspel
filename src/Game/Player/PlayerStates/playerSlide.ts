@@ -1,34 +1,34 @@
 import { StateInterface, Countdown, Input, Vector, PlayerState } from "@common";
-import { PlayerBody } from "../Character/playerCharacter";
+import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@game/Projectile";
 
 class PlayerSlide implements StateInterface<PlayerState> {
 
-    private playerBody: PlayerBody;
+    private playerCharacter: PlayerCharacter;
     private platformIgnoreTime = new Countdown(0.15);
     private newHeight: number;
     private crouch: boolean;
     private unstuckSpeed: number = 7;
     private projectileCollision: ProjectileCollision;
 
-    constructor(playerBody: PlayerBody, crouch: boolean) {
-        this.playerBody = playerBody;
+    constructor(playerCharacter: PlayerCharacter, crouch: boolean) {
+        this.playerCharacter = playerCharacter;
         this.crouch = crouch;
         this.newHeight = 20;
-        this.projectileCollision = new ProjectileCollision(playerBody.body);
+        this.projectileCollision = new ProjectileCollision(playerCharacter.body);
         this.projectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerBody.dead = true;
+            this.playerCharacter.dead = true;
         })
     }
 
     public stateEntered(): void {
         this.platformIgnoreTime.setToReady();
-        this.playerBody.playerMove.moveEnabled = false;
-        this.playerBody.body.height = this.newHeight;
-        this.playerBody.body.pos.y += PlayerBody.standardHeight - this.playerBody.body.height;
+        this.playerCharacter.playerMove.moveEnabled = false;
+        this.playerCharacter.body.height = this.newHeight;
+        this.playerCharacter.body.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.body.height;
 
-        this.playerBody.playerItem.forcedThrowType = ThrowType.drop;
+        this.playerCharacter.playerItem.forcedThrowType = ThrowType.drop;
 
         let armOffset = { x: 16, y: 42 };
 
@@ -36,51 +36,51 @@ class PlayerSlide implements StateInterface<PlayerState> {
             armOffset = { x: 10, y: 34 };
         }
 
-        this.playerBody.setArmOffset(armOffset);
+        this.playerCharacter.setArmOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
 
-        const animation = this.crouch ? this.playerBody.animations.crouch : this.playerBody.animations.slide;
-        this.playerBody.setAnimation(animation);
+        const animation = this.crouch ? this.playerCharacter.animations.crouch : this.playerCharacter.animations.slide;
+        this.playerCharacter.setAnimation(animation);
 
-        if (!this.playerBody.body.grounded) {
-            this.playerBody.body.frictionMultiplier = 0.5;
-        } else if (Math.abs(this.playerBody.body.velocity.x) > 1.8) {
-            this.playerBody.body.frictionMultiplier = 1 / 5;
+        if (!this.playerCharacter.body.grounded) {
+            this.playerCharacter.body.frictionMultiplier = 0.5;
+        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 1.8) {
+            this.playerCharacter.body.frictionMultiplier = 1 / 5;
         } else {
-            this.playerBody.body.frictionMultiplier = 1;
+            this.playerCharacter.body.frictionMultiplier = 1;
         }
 
-        this.playerBody.playerJump.jumpEnabled = true;
-        if (Input.keyPress(this.playerBody.controls.jump)) {
+        this.playerCharacter.playerJump.jumpEnabled = true;
+        if (Input.keyPress(this.playerCharacter.controls.jump)) {
             this.platformIgnoreTime.reset();
 
-            if (this.playerBody.body.onPlatform()) {
-                this.playerBody.playerJump.jumpEnabled = false;
+            if (this.playerCharacter.body.onPlatform()) {
+                this.playerCharacter.playerJump.jumpEnabled = false;
             }
 
-            if (this.playerBody.body.grounded && this.playerBody.idleCollision()) {
-                this.playerBody.body.velocity.x = this.unstuckSpeed * this.playerBody.body.getDirectionMultiplier();
-                this.playerBody.playerJump.jumpEnabled = false;
+            if (this.playerCharacter.body.grounded && this.playerCharacter.idleCollision()) {
+                this.playerCharacter.body.velocity.x = this.unstuckSpeed * this.playerCharacter.body.getDirectionMultiplier();
+                this.playerCharacter.playerJump.jumpEnabled = false;
             }
         }
 
-        this.playerBody.body.ignorePlatforms = !this.platformIgnoreTime.isDone();
+        this.playerCharacter.body.ignorePlatforms = !this.platformIgnoreTime.isDone();
         this.platformIgnoreTime.update(deltaTime);
 
-        this.playerBody.rotateArm(deltaTime);
-        this.playerBody.update(deltaTime);
+        this.playerCharacter.rotateArm(deltaTime);
+        this.playerCharacter.update(deltaTime);
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerBody.controls.ragdoll) || this.playerBody.dead) {
+        if (Input.keyPress(this.playerCharacter.controls.ragdoll) || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
-        if (Input.keyDown(this.playerBody.controls.down) || this.playerBody.idleCollision()) {
+        if (Input.keyDown(this.playerCharacter.controls.down) || this.playerCharacter.idleCollision()) {
             const maxCrouchSpeed = 3;
-            const validCrouch = !this.playerBody.body.grounded || Math.abs(this.playerBody.body.velocity.x) < maxCrouchSpeed || this.playerBody.idleCollision()
+            const validCrouch = !this.playerCharacter.body.grounded || Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed || this.playerCharacter.idleCollision()
             if (this.crouch && validCrouch) {
                 return PlayerState.Crouch;
             }
@@ -91,20 +91,20 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateExited(): void {
-        this.playerBody.body.pos.y -= PlayerBody.standardHeight - this.playerBody.body.height;
-        this.playerBody.body.height = PlayerBody.standardHeight;
+        this.playerCharacter.body.pos.y -= PlayerCharacter.standardHeight - this.playerCharacter.body.height;
+        this.playerCharacter.body.height = PlayerCharacter.standardHeight;
 
         this.platformIgnoreTime.reset();
-        this.playerBody.body.ignorePlatforms = false;
-        this.playerBody.playerJump.jumpEnabled = true;
-        this.playerBody.playerMove.moveEnabled = true;
+        this.playerCharacter.body.ignorePlatforms = false;
+        this.playerCharacter.playerJump.jumpEnabled = true;
+        this.playerCharacter.playerMove.moveEnabled = true;
 
-        this.playerBody.playerItem.forcedThrowType = null;
-        this.playerBody.body.frictionMultiplier = 1;
+        this.playerCharacter.playerItem.forcedThrowType = null;
+        this.playerCharacter.body.frictionMultiplier = 1;
     }
 
     public stateDraw(): void {
-        this.playerBody.draw();
+        this.playerCharacter.draw();
     }
 }
 

@@ -3,7 +3,12 @@ import { Player } from "./player";
 
 class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
-    private static playersID: Map<string, Player> = new Map();
+
+    private static localPlayers: Player[] = [];
+    private static currentLocalCount = 0;
+
+    private static IDToPlayer: Map<string, Player> = new Map();
+    private static playerToID: Map<Player, string> = new Map();
 
     static update(deltaTime: number) {
         for (const playerSet of this.players.values()) {
@@ -36,9 +41,9 @@ class PlayerManager {
         return result;
     }
 
-    public static addPlayer(local: boolean) {
+    public static addPlayer(local: boolean, id: string) {
         const pos = { x: 0, y: 0 };
-        const player = new Player(pos, local);
+        const player = new Player(local);
 
         const playerSet = this.getPlayerSet(pos);
         if (!playerSet) {
@@ -46,10 +51,11 @@ class PlayerManager {
         }
         this.getPlayerSet(pos)!.add(player);
 
-    }
-
-    public static setPlayerID(playerID: string, player: Player) {
-        this.playersID.set(playerID, player);
+        if (local) {
+            this.localPlayers[this.currentLocalCount++] = player;
+        }
+        this.IDToPlayer.set(id, player);
+        this.playerToID.set(player, id);
     }
 
     public static draw() {
@@ -61,7 +67,11 @@ class PlayerManager {
     }
 
     public static getPlayerFromID(ID: string): Player | undefined {
-        return this.playersID.get(ID);
+        return this.IDToPlayer.get(ID);
+    }
+
+    public static getPlayersID(player: Player): string | undefined {
+        return this.playerToID.get(player);
     }
 }
 

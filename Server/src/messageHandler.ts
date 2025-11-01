@@ -5,7 +5,7 @@ import { ServerInfo } from "./serverInfo";
 
 export class MessageHandler {
 
-    handle(serverInfo: ServerInfo, data: ClientMessage): void {
+    public handle(serverInfo: ServerInfo, data: ClientMessage): void {
         switch (data.type) {
             case CMsgType.connect:
                 this.join(serverInfo);
@@ -184,14 +184,14 @@ export class MessageHandler {
             return;
         }
         lobby.setClosed(true);
-        const startMsg: ServerMessage = { type: SMsgType.startGame }
-        this.broadcastToLobby(serverInfo, startMsg);
+        const startMsg: ServerMessage = { type: SMsgType.startGame };
+        this.sendTo(serverInfo.clientSocket, startMsg);
         this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
     }
 
     private sendTo(client: WebSocket, msg: ServerMessage) {
         if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(msg))
+            client.send(JSON.stringify(msg));
         }
     }
 

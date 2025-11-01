@@ -1,6 +1,7 @@
 import { Grid, Utility, Vector } from "@common";
 import { TileConstructor, TileInterface } from "@game/StaticObjects/Tiles";
-import { itemConstructor, ItemInterface } from "@item";
+import { ItemConstructor, ItemInterface } from "@item";
+import { PlayerCharacter } from "@player";
 
 class GameMap {
     private tiles: TileInterface[] = [];
@@ -17,7 +18,7 @@ class GameMap {
         return this.tiles;
     }
 
-    public setItem(item: itemConstructor, gridPos: Vector) {
+    public setItem(item: ItemConstructor, gridPos: Vector) {
         const pos = Grid.getWorldPos(gridPos);
         const newItem = new item(pos);
         newItem.common.body.pos.y += newItem.common.body.height;
@@ -31,6 +32,8 @@ class GameMap {
 
     public setPlayerSpawn(gridPos: Vector) {
         const pos = Grid.getWorldPos(gridPos);
+        pos.y -= PlayerCharacter.standardHeight;
+        pos.x -= PlayerCharacter.standardWidth / 2;
         this.playerSpawns.push(pos);
     }
 
@@ -40,21 +43,22 @@ class GameMap {
         const base = Math.floor(amount / spawnCount);
         const extra = amount % spawnCount;
 
-        const order = Utility.Random.getRandomArray(amount);
+        const order = Utility.Random.getRandomArray(spawnCount);
         const result: Vector[] = new Array(amount);
 
-        let writeIndex = 0;
+        let index = 0;
 
-        for (let i = 0; i < spawnCount; i++) {
+        for (let i = 0; i < spawnCount && i < amount; i++) {
             for (let j = 0; j < base; j++) {
-                result[order[writeIndex++]] = this.playerSpawns[i];
+                result[index++] = this.playerSpawns[order[i]];
             }
         }
 
         for (let i = 0; i < extra; i++) {
-            result[order[writeIndex++]] = this.playerSpawns[i];
+            result[index++] = this.playerSpawns[order[i]];
         }
 
+        console.log(result);
         return result;
     }
 }

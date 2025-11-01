@@ -14,7 +14,8 @@ class TileManager {
         return this.tiles.get(Grid.key(gridPos));
     }
 
-    public static setTile(gridPos: Vector, tile: TileInterface) {
+    public static setTile(tile: TileInterface) {
+        const gridPos = Grid.getGridPos(tile.body.pos);
         this.tiles.set(Grid.key(gridPos), tile);
 
         this.setNeighbours(tile);

@@ -1,12 +1,12 @@
 import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility, PlayerState } from "@common";
 import { DynamicObject } from "@core";
-import { PlayerBody } from "../Character/playerCharacter";
+import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@projectile";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
 
-    private playerBody: PlayerBody;
+    private playerCharacter: PlayerCharacter;
     private head: DynamicObject;
     private body: DynamicObject;
     private legs: DynamicObject;
@@ -23,10 +23,10 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     private headProjectileCollision: ProjectileCollision;
     private legsProjectileCollision: ProjectileCollision
 
-    constructor(playerBody: PlayerBody) {
-        this.playerBody = playerBody;
-        this.width = PlayerBody.standardWidth;
-        this.height = PlayerBody.standardHeight / 3;
+    constructor(playerCharacter: PlayerCharacter) {
+        this.playerCharacter = playerCharacter;
+        this.width = PlayerCharacter.standardWidth;
+        this.height = PlayerCharacter.standardHeight / 3;
 
         this.head = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
         this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
@@ -45,33 +45,33 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.headProjectileCollision = new ProjectileCollision(this.head);
         this.legsProjectileCollision = new ProjectileCollision(this.legs);
         this.headProjectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerBody.dead = true;
+            this.playerCharacter.dead = true;
         })
         this.legsProjectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerBody.dead = true;
+            this.playerCharacter.dead = true;
         })
     }
 
 
     public stateEntered(): void {
-        this.playerBody.playerItem.throw(ThrowType.drop);
+        this.playerCharacter.playerItem.throw(ThrowType.drop);
         this.coyoteTime.setToReady();
-        this.head.direction = this.playerBody.body.direction;
-        this.legs.direction = this.playerBody.body.direction;
+        this.head.direction = this.playerCharacter.body.direction;
+        this.legs.direction = this.playerCharacter.body.direction;
 
-        const pos = this.playerBody.body.pos;
+        const pos = this.playerCharacter.body.pos;
         this.head.pos = { x: pos.x, y: pos.y };
         this.body.pos = { x: pos.x, y: pos.y + this.height };
         this.legs.pos = { x: pos.x, y: pos.y + this.height * 2 };
 
-        const vel = this.playerBody.body.velocity;
+        const vel = this.playerCharacter.body.velocity;
         this.head.velocity = { x: vel.x, y: vel.y };
         this.body.velocity = { x: vel.x, y: vel.y };
         this.legs.velocity = { x: vel.x, y: vel.y };
 
-        if (this.playerBody.playerJump.isJumping) {
-            const jumpLeft = this.playerBody.playerJump.getJumpRemaining();
-            const jumpCharge = this.playerBody.playerJump.getJumpForce() / 5;
+        if (this.playerCharacter.playerJump.isJumping) {
+            const jumpLeft = this.playerCharacter.playerJump.getJumpRemaining();
+            const jumpCharge = this.playerCharacter.playerJump.getJumpForce() / 5;
             this.body.velocity.y -= jumpLeft * jumpCharge;
             this.head.velocity.y -= jumpLeft * jumpCharge;
             this.legs.velocity.y -= jumpLeft * jumpCharge;
@@ -105,7 +105,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
             this.head.velocity.x = Utility.Random.getRandomNumber(-0.1, 0.1);
         }
 
-        if (!this.playerBody.dead) {
+        if (!this.playerCharacter.dead) {
             this.handleInputs(deltaTime);
         }
 
@@ -178,7 +178,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     private handleInputs(deltaTime: number): void {
 
         const maxSpeed = 1;
-        if (Input.keyPress(this.playerBody.controls.left)) {
+        if (Input.keyPress(this.playerCharacter.controls.left)) {
             if (!(this.body.velocity.x > -maxSpeed)) {
                 return
             }
@@ -190,7 +190,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
             }
         }
 
-        if (Input.keyPress(this.playerBody.controls.right)) {
+        if (Input.keyPress(this.playerCharacter.controls.right)) {
             if (!(this.body.velocity.x < maxSpeed)) {
                 return
             }
@@ -203,7 +203,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
 
         }
 
-        if (Input.keyPress(this.playerBody.controls.up)) {
+        if (Input.keyPress(this.playerCharacter.controls.up)) {
             if (!this.isGrounded()) {
                 return;
             }
@@ -213,13 +213,13 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-        if (this.playerBody.dead) {
+        if (this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
         this.updateStandard();
-        const exitKeyPressed = Input.keyPress(this.playerBody.controls.ragdoll) || Input.keyPress(this.playerBody.controls.jump);
+        const exitKeyPressed = Input.keyPress(this.playerCharacter.controls.ragdoll) || Input.keyPress(this.playerCharacter.controls.jump);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
-            // if (!this.playerBody.idleCollision()) {
+            // if (!this.playerCharacter.idleCollision()) {
             return PlayerState.Standard;
             // }
         }
@@ -227,32 +227,32 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     public updateStandard(): void {
-        this.playerBody.body.pos = {
+        this.playerCharacter.body.pos = {
             x: this.legs.pos.x,
-            y: this.legs.pos.y + this.legs.height - PlayerBody.standardHeight
+            y: this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
         };
-        this.playerBody.body.grounded = true;
-        this.playerBody.setArmPosition();
-        this.playerBody.body.setNewCollidableObjects();
+        this.playerCharacter.body.grounded = true;
+        this.playerCharacter.setArmPosition();
+        this.playerCharacter.body.setNewCollidableObjects();
     }
 
     public stateExited(): void {
         this.updateStandard();
         const jumpHeight = 25;
         const exitVerticalSpeed = -5;
-        this.playerBody.body.pos.y -= jumpHeight;
-        this.playerBody.body.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
+        this.playerCharacter.body.pos.y -= jumpHeight;
+        this.playerCharacter.body.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {
-        const x = bodyPart.pos.x + (this.width - this.playerBody.drawSize) / 2;
-        const y = bodyPart.pos.y + (this.height - this.playerBody.drawSize) / 2;
+        const x = bodyPart.pos.x + (this.width - this.playerCharacter.drawSize) / 2;
+        const y = bodyPart.pos.y + (this.height - this.playerCharacter.drawSize) / 2;
         return { x, y };
     }
 
     public stateDraw(): void {
-        this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerBody.drawSize, this.head.isFlip(), this.headAngle);
-        this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerBody.drawSize, this.head.isFlip(), this.legsAngle);
+        this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerCharacter.drawSize, this.head.isFlip(), this.headAngle);
+        this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerCharacter.drawSize, this.head.isFlip(), this.legsAngle);
     }
 }
 
