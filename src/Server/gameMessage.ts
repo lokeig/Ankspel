@@ -12,7 +12,7 @@ enum GMsgType {
 
     loadMap = "loadMap",
     playerSpawn = "playerSpawn",
-    itemSpawn = "itemSpawn",
+    spawnItem = "spawnItem",
     dataDone = "dataDone",
     readyToStart = "readyToStart",
 
@@ -25,17 +25,16 @@ interface GameMessageMap {
     [GMsgType.hostingLobby]: { lobbyID: string | null };
     [GMsgType.noLobby]: {};
 
-    [GMsgType.playerInfo]: { pos: Vector, state: PlayerState };
+    [GMsgType.playerInfo]: { id: string, pos: Vector, velocity: Vector, holding: number | null, state: PlayerState };
     [GMsgType.newPlayer]: { local: boolean, id: string };
 
     [GMsgType.loadMap]: { name: string };
     [GMsgType.playerSpawn]: { id: string, location: Vector };
-    [GMsgType.itemSpawn]: { id: string, location: Vector, itemType: string }
+    [GMsgType.spawnItem]: { id: number, location: Vector, itemType: string }
 
     [GMsgType.dataDone]: {}
     [GMsgType.readyToStart]: {}
     [GMsgType.startGame]: { time: number };
-
 }
 
 type GameMessage = GameMessageMap[GMsgType];

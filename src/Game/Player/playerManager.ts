@@ -30,6 +30,10 @@ class PlayerManager {
         return this.players.get(Grid.key(pos));
     }
 
+    public static getLocal(): Player[] {
+        return this.localPlayers;
+    }
+
     public static getPlayers(): Player[] {
         const result: Player[] = [];
 
@@ -70,7 +74,7 @@ class PlayerManager {
         return this.IDToPlayer.get(ID);
     }
 
-    public static getPlayersID(player: Player): string | undefined {
+    public static getPlayerID(player: Player): string | undefined {
         return this.playerToID.get(player);
     }
 }

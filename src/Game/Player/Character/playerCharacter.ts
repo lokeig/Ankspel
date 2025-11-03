@@ -1,4 +1,4 @@
-import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation } from "@common";
+import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation, images } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemHolder } from "./playerItemHolder";
@@ -32,11 +32,14 @@ class PlayerCharacter {
     public armFront = new PlayerArm(this.animations.idle);
     public dead: boolean = false;
 
-    constructor(pos: Vector, spriteSheet: SpriteSheet, controls: Controls) {
+    constructor(pos: Vector, local: boolean, controls?: Controls) {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
-        this.controls = controls;
-
-        this.animator = new SpriteAnimator(spriteSheet, this.animations.idle);
+        if (local && controls) {
+            this.controls = controls;
+        }
+        
+        const sprite = new SpriteSheet(images.playerImage, 32, 32);
+        this.animator = new SpriteAnimator(sprite, this.animations.idle);
         this.setUpAnimations();
         this.playerMove = new PlayerMove(this.body);
         this.playerJump = new PlayerJump(this.body);

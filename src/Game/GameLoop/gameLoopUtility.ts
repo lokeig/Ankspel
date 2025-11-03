@@ -3,7 +3,6 @@ import { ItemManager } from "@game/Item";
 import { PlayerManager } from "@game/Player";
 import { ProjectileManager } from "@game/Projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { GameMap, MapManager } from "@game/Map";
 
 class GameLoopUtility {
 
@@ -38,22 +37,6 @@ class GameLoopUtility {
         PlayerManager.draw();
         ParticleManager.draw();
         TileManager.draw();
-    }
-
-    public static loadMap(map: GameMap): void {
-        const tiles = map.getTiles();
-        const items = map.getItems();
-        items.forEach(item => ItemManager.addItem(item));
-        tiles.forEach(tile => TileManager.setTile(tile));
-    }
-
-    public static setSpawns(mapName: string): void {
-        const map = MapManager.getMap(mapName);
-        const players = PlayerManager.getPlayers();
-        const spawns = map.getRandomSpawnLocations(players.length);
-        for (let i = 0; i < players.length; i++) {
-            players[i].setCharacter(spawns[i]);
-        }
     }
 }
 
