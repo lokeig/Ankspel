@@ -1,9 +1,9 @@
 import { GameMap, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
-import { GameServer, GMsgType } from "@server";
+import { GameServer, GMsgType } from "@game/Server";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { ItemManager } from "@item";
-import { Grid, PlayerState } from "@common";
+import { Grid, PlayerState, Utility } from "@common";
 
 class NetworkHandler {
     private static readyCount = 0;
@@ -37,15 +37,19 @@ class NetworkHandler {
         emitter.subscribe(GMsgType.spawnItem, ({ itemType, id, location }) => {
             ItemManager.spawn(itemType, location, id);
         });
-        emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state }) => {
+        emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state, holding, velocity }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
                 console.log("Sending non existing playerID: ", id);
                 return;
             }
             player.character.body.pos = pos;
+            if (holding) {
+                console.log("ok")
+                player.character.playerItem.holding = ItemManager.getItemFromID(holding)!;
+            }
             player.setState(state);
-        })
+        });
     }
 
     public static update(): void {
@@ -92,6 +96,19 @@ class NetworkHandler {
                 location: spawns[i],
             });
         }
+    }
+
+    public static quickLoadForTest() {
+        const map = MapManager.getMap("defaultMap");
+        this.loadMap(map);
+        this.loadMapItems(map);
+        PlayerManager.addPlayer(true, "0");
+        const player = PlayerManager.getPlayerFromID("0")!;
+        const spawns = map.getRandomSpawnLocations(1);
+        const controls = Utility.File.getControls(0);
+        player.setCharacter(spawns[0]);
+        player.setControls(controls);
+
     }
 
     private static loadMapItems(map: GameMap): void {

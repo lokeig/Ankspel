@@ -3,7 +3,7 @@ import { Animation } from "./Animation/animation";
 import { SpriteSheet } from "./sprite";
 
 class SpriteAnimator {
-    public spriteSheet: SpriteSheet;
+    private spriteSheet: SpriteSheet;
     private animation: Animation;
     private currentFrame: number = 0;
     private timer: number = 0;
@@ -39,12 +39,12 @@ class SpriteAnimator {
         return this.animation;
     }
 
-    public draw(pos: Vector, size: number, flip: boolean, angle: number) {
+    public draw(pos: Vector, size: number, flip: boolean, angle: number): void {
         const frame = this.animation.getFrame(this.currentFrame);
         this.spriteSheet.draw(frame.row, frame.col, pos, size, flip, angle);
     }
 
-    public setAnimation(animation: Animation) {
+    public setAnimation(animation: Animation): void {
         this.done = false;
         if (this.animation !== animation) {
             this.animation = animation;

@@ -4,24 +4,34 @@ import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
 
 class Shotgun implements FirearmInterface {
-    public common: ItemLogic;
+    public common!: ItemLogic;
     private handleOffset: number = 0;
     private maxHandleOffset: number = -4;
     private handleLerp = new Lerp(6, lerpTriangle)
 
     private currentState: ShotgunState = ShotgunState.loaded;
-    private spriteSheet = new SpriteSheet(images.shotgun, 32, 32);
-    private firearmInfo: FirearmInfo;
+    private spriteSheet: SpriteSheet;
+    private firearmInfo!: FirearmInfo;
 
     constructor(pos: Vector) {
+        const spriteInfo = Utility.File.getImage(images.shotgun);
+        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.setCommonInfo(pos);
+        this.setupFirearmInfo();
+    }
+    
+    private setCommonInfo(pos: Vector): void {
         const width = 30;
         const height = 15;
         this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
         this.common.holdOffset = { x: 14, y: -4 };
         this.common.handOffset = { x: 4, y: 0 };
         this.common.setHitboxOffset({ x: 30, y: 8 });
+    }
+    
+    private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
-
+        this.firearmInfo = new FirearmInfo();
         this.firearmInfo = new FirearmInfo;
         this.firearmInfo.ammo = 2;
         this.firearmInfo.bulletCount = 10;

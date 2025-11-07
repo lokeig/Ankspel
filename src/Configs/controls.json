@@ -1,0 +1,18 @@
+{
+  "players": [
+    {
+      "keyboard": {
+        "jump": " ",
+        "left": "a",
+        "right": "d",
+        "down": "s",
+        "up": "w",
+        "shoot": "ArrowLeft",
+        "pickup": "ArrowUp",
+        "ragdoll": "e",
+        "strafe": "l",
+        "menu": "esc"
+      }
+    }
+  ]
+}

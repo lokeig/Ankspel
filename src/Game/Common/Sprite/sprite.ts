@@ -12,7 +12,7 @@ class SpriteSheet {
         this.frameHeight = frameHeight;
     }
   
-    getFrame(row: number, col: number): { x: number, y: number, width: number, height: number } {
+    private getFrame(row: number, col: number): { x: number, y: number, width: number, height: number } {
         return {
             x: col * this.frameWidth,
             y: row * this.frameHeight,
@@ -21,7 +21,7 @@ class SpriteSheet {
         };
     }
 
-    draw(row: number, col: number, pos: Vector, size: number, flip: boolean, angle: number) {
+    public draw(row: number, col: number, pos: Vector, size: number, flip: boolean, angle: number): void {
 
         const source = this.getFrame(row, col);
         const drawInfo: DrawInfo = {
@@ -35,7 +35,7 @@ class SpriteSheet {
         Render.get().draw(drawInfo);
     }
 
-    drawLine(row: number, col: number, pos1: Vector, pos2: Vector, width: number) {
+    public drawLine(row: number, col: number, pos1: Vector, pos2: Vector, width: number): void {
         const source = this.getFrame(row, col);
         Render.get().drawLine(this.imageSrc, pos1.x, pos1.y, pos2.x, pos2.y, width, source);
     }

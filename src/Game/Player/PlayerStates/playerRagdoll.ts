@@ -3,6 +3,7 @@ import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@projectile";
+import { click } from "../Character/playerControls";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
 
@@ -19,11 +20,14 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
 
     private coyoteTime = new Countdown(0.15);
 
-    private spriteSheet = new SpriteSheet(images.playerImage, 32, 32);
+    private spriteSheet: SpriteSheet;
     private headProjectileCollision: ProjectileCollision;
     private legsProjectileCollision: ProjectileCollision
 
     constructor(playerCharacter: PlayerCharacter) {
+        const spriteInfo = Utility.File.getImage(images.playerImage);
+        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+
         this.playerCharacter = playerCharacter;
         this.width = PlayerCharacter.standardWidth;
         this.height = PlayerCharacter.standardHeight / 3;
@@ -84,7 +88,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     public stateUpdate(deltaTime: number): void {
         this.headProjectileCollision.check();
         this.legsProjectileCollision.check();
-        
+
         this.coyoteTime.update(deltaTime);
         if (this.isGrounded()) {
             this.coyoteTime.reset();
@@ -176,40 +180,6 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
     }
 
     private handleInputs(deltaTime: number): void {
-
-        const maxSpeed = 1;
-        if (Input.keyPress(this.playerCharacter.controls.left)) {
-            if (!(this.body.velocity.x > -maxSpeed)) {
-                return
-            }
-
-            this.body.velocity.x -= 3;
-
-            if (this.isGrounded()) {
-                this.body.velocity.y -= 10;
-            }
-        }
-
-        if (Input.keyPress(this.playerCharacter.controls.right)) {
-            if (!(this.body.velocity.x < maxSpeed)) {
-                return
-            }
-
-            this.body.velocity.x += 3;
-
-            if (this.isGrounded()) {
-                this.body.velocity.y -= 10;
-            }
-
-        }
-
-        if (Input.keyPress(this.playerCharacter.controls.up)) {
-            if (!this.isGrounded()) {
-                return;
-            }
-            this.body.velocity.y -= 10;
-            return;
-        }
     }
 
     public stateChange(): PlayerState {
@@ -217,23 +187,20 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
             return PlayerState.Ragdoll;
         }
         this.updateStandard();
-        const exitKeyPressed = Input.keyPress(this.playerCharacter.controls.ragdoll) || Input.keyPress(this.playerCharacter.controls.jump);
+        const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump(click);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
-            // if (!this.playerCharacter.idleCollision()) {
             return PlayerState.Standard;
-            // }
         }
         return PlayerState.Ragdoll;
     }
 
     public updateStandard(): void {
-        this.playerCharacter.body.pos = {
+        const pos = {
             x: this.legs.pos.x,
             y: this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
         };
         this.playerCharacter.body.grounded = true;
-        this.playerCharacter.setArmPosition();
-        this.playerCharacter.body.setNewCollidableObjects();
+        this.playerCharacter.setPos(pos);
     }
 
     public stateExited(): void {

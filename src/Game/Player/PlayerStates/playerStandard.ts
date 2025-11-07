@@ -1,6 +1,8 @@
-import { StateInterface, Input, Vector, PlayerState } from "@common";
+import { StateInterface, Vector, PlayerState } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@game/Projectile";
+import { click } from "../Character/playerControls";
+import { PlayerAnimType } from "../Character/playerAnimType";
 
 class PlayerStandard implements StateInterface<PlayerState> {
 
@@ -17,51 +19,49 @@ class PlayerStandard implements StateInterface<PlayerState> {
 
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
-        this.playerCharacter.setArmOffset(armOffset);
-        this.playerCharacter.setArmPosition();
+        this.playerCharacter.armFront.setOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
-        this.setAnimation();
         this.playerCharacter.rotateArm(deltaTime);
         this.playerCharacter.update(deltaTime);
+        this.setAnimation();
     }
 
     private setAnimation() {
-
+        const animator = this.playerCharacter.animator;
         if (!this.playerCharacter.body.grounded) {
 
             if (this.playerCharacter.body.velocity.y < 0) {
-                this.playerCharacter.setAnimation(this.playerCharacter.animations.jump);
+                animator.setAnimation(PlayerAnimType.jump);
             } else {
-                this.playerCharacter.setAnimation(this.playerCharacter.animations.fall);
+                animator.setAnimation(PlayerAnimType.fall);
             }
             return;
         }
-
-        const left = Input.keyDown(this.playerCharacter.controls.left);
-        const right = Input.keyDown(this.playerCharacter.controls.right);
+        const left = this.playerCharacter.controls.left();
+        const right = this.playerCharacter.controls.right();
 
         if ((left && this.playerCharacter.body.velocity.x > 0.3) || right && this.playerCharacter.body.velocity.x < -0.3) {
-            this.playerCharacter.setAnimation(this.playerCharacter.animations.turn);
+            animator.setAnimation(PlayerAnimType.turn);
         } else if (Math.abs(this.playerCharacter.body.velocity.x) > 0.3) {
-            this.playerCharacter.setAnimation(this.playerCharacter.animations.walk);
+            animator.setAnimation(PlayerAnimType.walk);
         } else {
-            this.playerCharacter.setAnimation(this.playerCharacter.animations.idle);
+            animator.setAnimation(PlayerAnimType.idle);
         };
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerCharacter.controls.ragdoll) || this.playerCharacter.dead) {
+        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
 
-        if (Input.keyPress(this.playerCharacter.controls.jump) && !this.playerCharacter.body.grounded && !this.playerCharacter.playerJump.isJumping) {
+        if (this.playerCharacter.controls.jump(click) && !this.playerCharacter.body.grounded && !this.playerCharacter.playerJump.isJumping) {
             return PlayerState.Flap;
         }
 
-        if (Input.keyDown(this.playerCharacter.controls.down)) {
+        if (this.playerCharacter.controls.down()) {
             if (Math.abs(this.playerCharacter.body.velocity.x) < 3 || !this.playerCharacter.body.grounded) {
                 return PlayerState.Crouch;
             } else {

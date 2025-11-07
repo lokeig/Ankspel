@@ -1,49 +1,43 @@
-import { Controls, Input, Side } from "@common";
+import { Side } from "@common";
 import { DynamicObject } from "@core";
+import { PlayerControls } from "./playerControls";
 
 class PlayerMove {
-
     public moveEnabled: boolean = true;
-    public movespeed: number = 50;
+    private movespeed: number = 50;
     private playerCharacter: DynamicObject;
+    private controls: PlayerControls;
 
-    constructor(object: DynamicObject) {
+    constructor(object: DynamicObject, controls: PlayerControls) {
         this.playerCharacter = object;
+        this.controls = controls;
     }
 
-    public update(deltaTime: number, controls: Controls): void {
+    public update(deltaTime: number): void {
         if (this.moveEnabled) {
-            this.move(deltaTime, controls);
+            this.move(deltaTime);
         }
     }
 
-    public move(deltaTime: number, controls: Controls): void {
-        const left = Input.keyDown(controls.left);
-        const right = Input.keyDown(controls.right);
-        const directionMultiplier = Number(right) - Number(left);
-
+    public move(deltaTime: number): void {
+        const left = this.controls.left();
+        const right = this.controls.right();
+       
         if (left && right) {
-            if (Input.keyPress(controls.left)) {
-                this.playerCharacter.direction = Side.left;
-            }
-            if (Input.keyPress(controls.right)) {
-                this.playerCharacter.direction = Side.right;
-            }
-        } else {
-            if (left) {
-                this.playerCharacter.direction = Side.left;
-            }
-            if (right) {
-                this.playerCharacter.direction = Side.right;
-            }
+            const click = true;
+            this.playerCharacter.direction = this.controls.left(click) ? Side.left : Side.right;
+        } else if (left) {
+            this.playerCharacter.direction = Side.left;
+        } else if (right) {
+            this.playerCharacter.direction = Side.right;
         }
 
-        this.playerCharacter.velocity.x += this.movespeed * directionMultiplier * deltaTime;
+        this.playerCharacter.velocity.x += this.movespeed * this.controls.getMoveDirection() * deltaTime;
     }
 
-    public willTurn(controls: Controls): boolean {
-        const willTurnRight = Input.keyPress(controls.right) && this.playerCharacter.isFlip();
-        const willTurnLeft = Input.keyPress(controls.left) && !this.playerCharacter.isFlip();
+    public willTurn(): boolean {
+        const willTurnLeft = this.controls.left() && !this.playerCharacter.isFlip();
+        const willTurnRight = this.controls.right() && this.playerCharacter.isFlip();
         return (willTurnLeft || willTurnRight) && this.moveEnabled;
     }
 }

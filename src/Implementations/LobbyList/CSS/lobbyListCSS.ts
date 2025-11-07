@@ -1,4 +1,4 @@
-import { GameServer, GMsgType, LobbyListInterface } from "@server";
+import { GameServer, GMsgType, LobbyListInterface } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
 import { PlayerManager } from "@player";

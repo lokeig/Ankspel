@@ -1,6 +1,6 @@
 import { StateMachine, Input } from "@common";
 import { Render } from "@render";
-import { GameServer, GMsgType, LobbyList } from "@server";
+import { GameServer, GMsgType, LobbyList } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
 import { InMatchLoop } from "./inMatchLoop";
 import { NetworkHandler } from "./networkHandler";
@@ -16,6 +16,8 @@ class GameLoop {
         this.stateMachine = new StateMachine(initalState);
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         GameServer.get().emitter.subscribe(GMsgType.startGame, ({ time }) => { this.startGame(time); })
+        NetworkHandler.quickLoadForTest();
+        this.startGame(Date.now());
     }
 
     private startGame(time: number): void {

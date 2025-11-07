@@ -1,8 +1,8 @@
-import { SpriteSheet, images, Vector } from "@common";
+import { SpriteSheet, images, Vector, Utility } from "@common";
 import { TrailInterface } from "@projectile";
 
-class StaticTrail implements TrailInterface  {
-    private spriteSheet = new SpriteSheet(images.bullet, 8, 1);
+class StaticTrail implements TrailInterface {
+    private spriteSheet: SpriteSheet;
     private startingLocation: Vector;
     private target!: Vector;
     private maxLength: number;
@@ -12,6 +12,8 @@ class StaticTrail implements TrailInterface  {
     private setToRemove: boolean = false;
 
     constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
+        const spriteInfo = Utility.File.getImage(images.trail);
+        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
         this.startingLocation = startingLocation;
         this.maxLength = length;
         this.size = size;

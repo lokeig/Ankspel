@@ -7,14 +7,16 @@ import { Bullet } from "@impl/Projectiles";
 
 class Grenade implements ExplosiveInterface {
     public common: ItemLogic;
-    private spriteSheet = new SpriteSheet(images.grenade, 16, 16);
+    private spriteSheet: SpriteSheet;
     private drawSize: number = 32;
     private setToDelete: boolean = false;
 
     private explosionDelay = new Countdown(2);
-    private activated: boolean = false;    
+    private activated: boolean = false;
 
     constructor(pos: Vector) {
+        const spriteInfo = Utility.File.getImage(images.grenade);
+        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
         const width = 6;
         const height = 19;
         this.common = new ItemLogic(pos, width, height, ItemType.explosive);
@@ -26,7 +28,7 @@ class Grenade implements ExplosiveInterface {
 
     update(deltaTime: number): void {
         if (this.activated) {
-            this.explosionDelay.update(deltaTime); 
+            this.explosionDelay.update(deltaTime);
         }
         this.common.update(deltaTime);
 

@@ -22,11 +22,12 @@
 
     "baseUrl": ".",
     "paths": {
+      "@config": ["src/Configs"],
       "@shared": ["Shared"],
       "@render": ["src/Render"],
       "@common": ["src/Game/Common"],
       "@core": ["src/Game/CoreObjects"],
-      "@server": ["src/Server"],
+      "@server": ["src/Game/Server"],
       "@player": ["src/Game/Player"],
       "@item": ["src/Game/Item"],
       "@projectile": ["src/Game/Projectile"],

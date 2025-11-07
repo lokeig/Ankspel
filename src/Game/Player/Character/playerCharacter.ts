@@ -1,113 +1,50 @@
-import { Controls, SpriteAnimator, Vector, SpriteSheet, Utility, Animation, images } from "@common";
+import { Vector, Utility, Controls } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemHolder } from "./playerItemHolder";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
+import { PlayerControls } from "./playerControls";
+import { playerAnimation } from "./playerAnimation";
 
 class PlayerCharacter {
 
-    public readonly controls: Controls;
     public readonly drawSize: number = 64;
-    private animator: SpriteAnimator;
-
-    public animations = {
-        idle: new Animation(),
-        walk: new Animation(),
-        crouch: new Animation(),
-        flap: new Animation(),
-        jump: new Animation(),
-        fall: new Animation(),
-        slide: new Animation(),
-        turn: new Animation()
-    };
-
     public static readonly standardHeight: number = 46;
     public static readonly standardWidth: number = 18;
 
     public body: DynamicObject;
-    public playerJump: PlayerJump;
-    public playerMove: PlayerMove;
-    public playerItem: PlayerItemHolder;
-    public armFront = new PlayerArm(this.animations.idle);
+    public animator: playerAnimation;
+    public armFront = new PlayerArm();
     public dead: boolean = false;
 
-    constructor(pos: Vector, local: boolean, controls?: Controls) {
+    public controls!: PlayerControls;
+    public playerJump!: PlayerJump;
+    public playerMove!: PlayerMove;
+    public playerItem!: PlayerItemHolder;
+
+    constructor(pos: Vector) {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
-        if (local && controls) {
-            this.controls = controls;
+        this.animator = new playerAnimation();
+    }
+
+    private setArmPos(): void {
+        let offset = { x: 0, y: 0 };
+        if (this.playerItem.holding) {
+            offset = this.playerItem.holding.common.handOffset;
         }
-        
-        const sprite = new SpriteSheet(images.playerImage, 32, 32);
-        this.animator = new SpriteAnimator(sprite, this.animations.idle);
-        this.setUpAnimations();
-        this.playerMove = new PlayerMove(this.body);
-        this.playerJump = new PlayerJump(this.body);
-        this.playerItem = new PlayerItemHolder(this.body);
-    }
-
-    private setUpAnimations(): void {
-        this.animations.idle.addFrame({ row: 0, col: 0 });
-        this.animations.walk.addRow(1, 6);
-        this.animations.walk.repeat = true;
-        this.animations.crouch.addFrame({ row: 2, col: 0 });
-        this.animations.flap.addRow(3, 4);
-        this.animations.flap.repeat = true;
-        this.animations.flap.fps = 16;
-        this.animations.jump.addFrame({ row: 4, col: 0 });
-        this.animations.fall.addFrame({ row: 5, col: 0 });
-        this.animations.slide.addFrame({ row: 6, col: 0 });
-        this.animations.turn.addFrame({ row: 7, col: 0 });
-    }
-
-    public update(deltaTime: number): void {
-        this.updateDynamicObject(deltaTime);
-        this.animator.update(deltaTime);
-        this.updateArm(deltaTime);
-    }
-
-    private updateDynamicObject(deltaTime: number): void {
-        this.body.update(deltaTime);
-
-        if (this.body.collisions.up) {
-            this.playerJump.isJumping = false;
-        }
-
-        this.playerJump.update(deltaTime, this.controls);
-        this.playerMove.update(deltaTime, this.controls);
-        this.playerItem.update(deltaTime, this.controls);
-    }
-
-    private updateArm(deltaTime: number): void {
-        this.setArmPosition();
-        this.setHoldingPosition();
-        this.armFront.update(deltaTime);
-    }
-
-    public setArmPosition(): void {
-        const pos = this.getDrawPos();
-        const itemOffset = this.playerItem.holding ? this.playerItem.holding.common.handOffset : { x: 0, y: 0 };
-        if (this.body.isFlip()) {
-            pos.x += this.drawSize - this.armFront.drawSize - this.armFront.posOffset.x - itemOffset.x;
-        } else {
-            pos.x += this.armFront.posOffset.x + itemOffset.x
-        }
-        pos.y += this.armFront.posOffset.y + itemOffset.y;
-
-        this.armFront.pos = pos;
+        this.armFront.setPosition(this.getDrawPos(), this.drawSize, offset, this.body.isFlip());
     }
 
     private setHoldingPosition(): void {
         if (!this.playerItem.holding) {
             return;
         }
-
         const item = this.playerItem.holding.common;
 
         item.body.setCenterToPos(this.armFront.getCenter());
         item.body.direction = this.body.direction;
         item.angle = this.armFront.angle;
-
         const offset = Utility.Angle.rotateForce(
             { x: item.holdOffset.x, y: item.holdOffset.y },
             item.angle
@@ -116,11 +53,43 @@ class PlayerCharacter {
         item.body.pos.y += offset.y;
     }
 
-    public rotateArm(deltaTime: number): void {
-        if (this.playerMove.willTurn(this.controls)) {
+    public setPos(pos: Vector) {
+        this.body.pos = pos;
+        this.setArmPos();
+        this.setHoldingPosition();
+        this.body.setNewCollidableObjects();
+    }
+
+    public setControls(controls: Controls) {
+        this.controls = new PlayerControls(controls);
+        this.playerMove = new PlayerMove(this.body, this.controls);
+        this.playerJump = new PlayerJump(this.body, this.controls);
+        this.playerItem = new PlayerItemHolder(this.body, this.controls);
+    }
+
+    private updateControllers(deltaTime: number): void {
+        if (this.body.collisions.up) {
+            this.playerJump.isJumping = false;
+        }
+        this.playerJump.update(deltaTime);
+        this.playerMove.update(deltaTime);
+        this.playerItem.update(deltaTime);
+    }
+
+    public update(deltaTime: number): void {
+        this.body.update(deltaTime);
+        this.setArmPos();
+        this.updateControllers(deltaTime);
+        this.setHoldingPosition();
+        const holdingItem = this.playerItem.holding !== null;
+        this.animator.update(deltaTime, holdingItem);
+    }
+
+    public rotateArm(deltaTime: number, forceup: Boolean = false): void {
+        if (this.playerMove.willTurn()) {
             this.armFront.angle *= -1;
         }
-        if (this.armFront.angle > 0 || this.itemNoRotationCollision()) {
+        if (forceup || this.armFront.angle > 0 || this.itemNoRotationCollision()) {
             this.armFront.rotateArmUp(deltaTime);
         } else {
             this.armFront.rotateArmDown(deltaTime);
@@ -131,7 +100,6 @@ class PlayerCharacter {
         if (!this.playerItem.holding) {
             return false;
         }
-
         const item = this.playerItem.holding.common;
         const tempItemPos = {
             x: item.body.pos.x,
@@ -144,11 +112,6 @@ class PlayerCharacter {
         item.body.pos = tempItemPos;
 
         return collision !== undefined;
-    }
-
-    public setArmOffset(amount: Vector): void {
-        const result = amount;
-        this.armFront.posOffset = result;
     }
 
     public idleCollision(): boolean {
@@ -166,15 +129,6 @@ class PlayerCharacter {
         return returnValue !== undefined;
     }
 
-    public setAnimation(animation: Animation) {
-        this.animator.setAnimation(animation);
-        this.armFront.setAnimation(animation);
-        if (this.playerItem.holding) {
-            this.armFront.setAnimation(this.armFront.itemHoldingAnimation);
-        }
-    }
-
-
     public getDrawPos(): Vector {
         const x = this.body.pos.x + ((this.body.width - this.drawSize) / 2);
         const y = this.body.pos.y + (this.body.height - this.drawSize);
@@ -182,11 +136,11 @@ class PlayerCharacter {
     }
 
     public draw(): void {
-        this.animator.draw(this.getDrawPos(), this.drawSize, this.body.isFlip(), 0);
+        this.animator.drawBody(this.getDrawPos(), this.drawSize, this.body.isFlip());
         if (this.playerItem.holding) {
             this.playerItem.holding.draw();
         }
-        this.armFront.draw(this.body.isFlip());
+        this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.body.isFlip());
     };
 }
 

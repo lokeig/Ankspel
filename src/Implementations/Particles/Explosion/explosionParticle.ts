@@ -1,4 +1,4 @@
-import { Vector, SpriteAnimator, SpriteSheet, images, Animation } from "@common";
+import { Vector, SpriteAnimator, SpriteSheet, images, Animation, Utility } from "@common";
 
 
 class ExplosionParticle {
@@ -6,8 +6,8 @@ class ExplosionParticle {
     private scale: number;
     private angle: number = 0;
     private drawSize: number = 128;
-    
-    private spriteAnimator: SpriteAnimator;
+
+    private animator: SpriteAnimator;
     private animation = new Animation;
     public setToDelete: boolean = false;
 
@@ -16,22 +16,21 @@ class ExplosionParticle {
         this.scale = scale;
         this.angle = rotation;
 
-        const spriteSize = 64;
-        const sprite = new SpriteSheet(images.explosion, spriteSize, spriteSize);
-        this.spriteAnimator = new SpriteAnimator(sprite, this.animation);
+        const spriteInfo = Utility.File.getImage(images.explosion);
+        this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animation);
         this.animation.fps = 24;
         const framesWide = 4;
         this.animation.addSegment(0, 10, framesWide);
     }
 
-    
+
     public update(deltaTime: number): void {
         const upwardsSpeed = 5;
-        this.pos.y -= upwardsSpeed * deltaTime; 
+        this.pos.y -= upwardsSpeed * deltaTime;
         this.angle += 0.1 * deltaTime;
 
-        this.spriteAnimator.update(deltaTime);
-        if (this.spriteAnimator.animationDone()) {
+        this.animator.update(deltaTime);
+        if (this.animator.animationDone()) {
             this.setToDelete = true;
         }
     }
@@ -43,10 +42,10 @@ class ExplosionParticle {
         };
 
     }
-    
+
     public draw(): void {
         const flip = false;
-        this.spriteAnimator.draw(this.getDrawPos(), this.drawSize * this.scale, flip, this.angle);
+        this.animator.draw(this.getDrawPos(), this.drawSize * this.scale, flip, this.angle);
     }
 }
 

@@ -1,5 +1,6 @@
-import { Countdown, Controls, Input } from "@common";
+import { Countdown } from "@common";
 import { DynamicObject } from "@core";
+import { PlayerControls } from "./playerControls";
 
 class PlayerJump {
     public isJumping: boolean = false;
@@ -11,33 +12,36 @@ class PlayerJump {
     private maxJumpTime = new Countdown(0.2);
 
     private playerCharacter: DynamicObject;
+    private controls: PlayerControls;
 
-    constructor(object: DynamicObject) {
+    constructor(object: DynamicObject, controls: PlayerControls) {
         this.playerCharacter = object;
+        this.controls = controls;
     }
 
-    public update(deltaTime: number, controls: Controls) {
+    public update(deltaTime: number) {
         if (this.playerCharacter.grounded) {
             this.coyoteTime.reset();
         }
-        this.jump(deltaTime, controls);
+        this.jump(deltaTime);
     }
 
     
-    private jump(deltaTime: number, controls: Controls): void {
-        if (Input.keyPress(controls.jump) && this.jumpReady() && this.jumpEnabled) {
+    private jump(deltaTime: number): void {
+        const press = true;
+        if (this.controls.jump(press) && this.jumpReady() && this.jumpEnabled) {
             this.isJumping = true;
             this.playerCharacter.velocity.y = -this.minJump;
             this.maxJumpTime.reset();
             this.coyoteTime.setToReady();
         }
         
-        if (Input.keyDown(controls.jump) && this.isJumping && this.jumpEnabled) {
+        if (this.controls.jump() && this.isJumping && this.jumpEnabled) {
             this.playerCharacter.velocity.y -= this.jumpForce * deltaTime;
             this.maxJumpTime.update(deltaTime);
         }
         
-        if (!Input.keyDown(controls.jump) || this.maxJumpTime.isDone()) {
+        if (!this.controls.jump() || this.maxJumpTime.isDone()) {
             this.isJumping = false;
         }
         

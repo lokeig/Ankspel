@@ -1,8 +1,8 @@
-import { Emitter, GameMessage, GMsgType, ServerInterface } from "@server";
+import { Emitter, GameMessage, GMsgType, ServerInterface } from "@game/Server";
 import { PeerConnectionManager } from "./peerConnectionManager";
 import { ClientMessage, CMsgType, ForwardedMessage, SMsgType, ServerMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
-import { GameMessageMap } from "src/Server/gameMessage";
+import { GameMessageMap } from "@game/Server/gameMessage";
 
 class MultiPeerServer implements ServerInterface {
     public emitter: Emitter = new Emitter();

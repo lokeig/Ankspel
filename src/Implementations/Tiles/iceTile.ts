@@ -1,11 +1,11 @@
-import { getTileImage, SpriteSheet, TileType, Vector } from "@common";
+import { images, SpriteSheet, Utility, Vector } from "@common";
 import { BaseTile } from "./baseTile";
 
 class IceTile extends BaseTile {
     constructor(pos: Vector, size: number) {
         super(pos, size);
-        const spriteSize = 16;
-        this.sprite = new SpriteSheet(getTileImage(TileType.Ice), spriteSize, spriteSize);
+        const spriteInfo = Utility.File.getImage(images.tileIce);
+        this.sprite = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
     }
 }
 

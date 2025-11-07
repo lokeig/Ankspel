@@ -1,4 +1,4 @@
-import { GameServer } from "@server";
+import { GameServer } from "@game/Server";
 import { ClientMessage, CMsgType } from "@shared";
 
 class HostMenu {

@@ -1,4 +1,4 @@
-import { StateMachine, Controls, Vector, SpriteSheet, images } from "@common";
+import { Controls, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 
@@ -7,32 +7,18 @@ class Player {
     private stateMachine: StateMachine<PlayerState>;
     private local: boolean;
 
-    private controls: Controls = {
-        jump: " ",
-        left: "a",
-        right: "d",
-        down: "s",
-        up: "w",
-
-        shoot: "ArrowLeft",
-        pickup: "ArrowUp",
-        ragdoll: "e",
-        strafe: "l",
-        menu: "esc"
-    }
-
     constructor(local: boolean) {
         this.local = local;
         this.stateMachine = new StateMachine(PlayerState.Standard);
-        if (!local) {
-            
-        }
     }
 
     public setCharacter(pos: Vector): void {
-        const sprite = new SpriteSheet(images.playerImage, 32, 32);
-        this.character = new PlayerCharacter({ ...pos }, this.controls);
+        this.character = new PlayerCharacter({ ...pos });
         this.setupStateMachine();
+    }
+
+    public setControls(controls: Controls) {
+        this.character.setControls(controls);
     }
 
     private setupStateMachine(): void {
@@ -54,9 +40,6 @@ class Player {
     }
 
     public update(deltaTime: number): void {
-        if (!this.local) {
-            return;
-        }
         this.stateMachine.update(deltaTime);
     };
 

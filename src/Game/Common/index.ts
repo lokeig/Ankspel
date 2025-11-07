@@ -26,7 +26,7 @@ export type { Controls } from "./Types/controls";
 export { Utility } from "./Utility/utility";
 
 // Other
-export { images, getTileImage } from "./Other/images";
+export { images } from "./Utility/Files/images";
 export { Input } from "./Other/input";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";

@@ -1,31 +1,34 @@
-import { Controls, Input } from "@common";
 import { ItemInterface, ItemManager, ItemType, FirearmInterface, ExplosiveInterface } from "@game/Item";
 import { DynamicObject } from "@core";
 import { ThrowType } from "./throwType";
+import { PlayerControls } from "./playerControls";
 
 class PlayerItemHolder {
     private playerCharacter: DynamicObject;
+    private controls: PlayerControls;
+    
     public holding: ItemInterface | null = null;
     public nearbyItems: Array<ItemInterface> = [];
     public forcedThrowType: null | ThrowType = null;
     private lastHeldItem: ItemInterface | null = null;
 
-    constructor(object: DynamicObject) {
+    constructor(object: DynamicObject, controls: PlayerControls) {
         this.playerCharacter = object;
+        this.controls = controls;
     }
 
-    public update(deltaTime: number, controls: Controls) {
+    public update(deltaTime: number) {
         this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
-
-        if (Input.keyPress(controls.pickup)) {
+        const press = true;
+        if (this.controls.pickup(press)) {
             if (this.holding) {
-                this.throw(this.getThrowType(controls));
+                this.throw(this.getThrowType());
             } else {
                 this.holding = this.getNearbyItem();
             }
         }
 
-        if (this.holding && Input.keyPress(controls.shoot)) {
+        if (this.holding && this.controls.shoot(press)) {
             switch (this.holding.common.getType()) {
                 case (ItemType.fireArm): {
                     const knockback = (this.holding as FirearmInterface).shoot();
@@ -67,15 +70,15 @@ class PlayerItemHolder {
         return fallbackItem;
     }
 
-    private getThrowType(controls: Controls): ThrowType {
+    private getThrowType(): ThrowType {
         if (this.forcedThrowType !== null) {
             return this.forcedThrowType;
         }
-        const left = Input.keyDown(controls.left);
-        const right = Input.keyDown(controls.right);
-        const up = Input.keyDown(controls.up);
+        const left = this.controls.left();
+        const right = this.controls.right();
+        const up = this.controls.up();
 
-        if (Input.keyDown(controls.down)) {
+        if (this.controls.down()) {
             return ThrowType.drop;
         }
 

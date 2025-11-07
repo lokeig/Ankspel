@@ -1,5 +1,5 @@
 import { Input } from "@common";
-import { GameServer, LobbyList } from "@server";
+import { GameServer, LobbyList } from "@game/Server";
 import { Render } from "@render";
 import { GameLoop } from "@game/GameLoop";
 

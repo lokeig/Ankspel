@@ -1,0 +1,44 @@
+{
+    "images": {
+        "player": {
+            "src": "/assets/player.png",
+            "frameWidth": 32,
+            "frameHeight": 32
+        },
+        "playerHands": {
+            "src": "/assets/playerHands.png",
+            "frameWidth": 16,
+            "frameHeight": 16
+        },
+        "tileIce": {
+            "src": "/assets/tileIce.png",
+            "frameWidth": 16,
+            "frameHeight": 16
+        },
+        "shotgun": {
+            "src": "/assets/shotguns.png",
+            "frameWidth": 32,
+            "frameHeight": 32
+        },
+        "glock": {
+            "src": "/assets/glock.png",
+            "frameWidth": 20,
+            "frameHeight": 20
+        },
+        "grenade": {
+            "src": "/assets/grenade.png",
+            "frameWidth": 16,
+            "frameHeight": 16
+        },
+        "trail": {
+            "src": "/assets/bullet.png",
+            "frameWidth": 8,
+            "frameHeight": 1
+        },
+        "explosion": {
+            "src": "/assets/explosion.png",
+            "frameWidth": 64,
+            "frameHeight": 64
+        }
+    }
+}

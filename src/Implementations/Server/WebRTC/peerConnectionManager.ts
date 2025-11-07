@@ -1,6 +1,6 @@
 import { CMsgType, ForwardMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
-import { GameMessage, GMsgType } from "@server";
+import { GameMessage, GMsgType } from "@game/Server";
 
 class PeerConnectionManager {
     private peerConnection: RTCPeerConnection;

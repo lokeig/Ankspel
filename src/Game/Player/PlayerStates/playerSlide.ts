@@ -1,7 +1,9 @@
-import { StateInterface, Countdown, Input, Vector, PlayerState } from "@common";
+import { StateInterface, Countdown, Vector, PlayerState } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@game/Projectile";
+import { click } from "../Character/playerControls";
+import { PlayerAnimType } from "../Character/playerAnimType";
 
 class PlayerSlide implements StateInterface<PlayerState> {
 
@@ -27,23 +29,20 @@ class PlayerSlide implements StateInterface<PlayerState> {
         this.playerCharacter.playerMove.moveEnabled = false;
         this.playerCharacter.body.height = this.newHeight;
         this.playerCharacter.body.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.body.height;
-
         this.playerCharacter.playerItem.forcedThrowType = ThrowType.drop;
 
         let armOffset = { x: 16, y: 42 };
-
         if (this.crouch) {
             armOffset = { x: 10, y: 34 };
         }
-
-        this.playerCharacter.setArmOffset(armOffset);
+        this.playerCharacter.armFront.setOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
 
-        const animation = this.crouch ? this.playerCharacter.animations.crouch : this.playerCharacter.animations.slide;
-        this.playerCharacter.setAnimation(animation);
+        const animation = this.crouch ? PlayerAnimType.crouch : PlayerAnimType.slide;
+        this.playerCharacter.animator.setAnimation(animation);
 
         if (!this.playerCharacter.body.grounded) {
             this.playerCharacter.body.frictionMultiplier = 0.5;
@@ -54,7 +53,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
         }
 
         this.playerCharacter.playerJump.jumpEnabled = true;
-        if (Input.keyPress(this.playerCharacter.controls.jump)) {
+        if (this.playerCharacter.controls.jump(click)) {
             this.platformIgnoreTime.reset();
 
             if (this.playerCharacter.body.onPlatform()) {
@@ -75,10 +74,10 @@ class PlayerSlide implements StateInterface<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerCharacter.controls.ragdoll) || this.playerCharacter.dead) {
+        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
-        if (Input.keyDown(this.playerCharacter.controls.down) || this.playerCharacter.idleCollision()) {
+        if (this.playerCharacter.controls.down(click) || this.playerCharacter.idleCollision()) {
             const maxCrouchSpeed = 3;
             const validCrouch = !this.playerCharacter.body.grounded || Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed || this.playerCharacter.idleCollision()
             if (this.crouch && validCrouch) {

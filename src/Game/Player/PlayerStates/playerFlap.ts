@@ -1,6 +1,7 @@
-import { StateInterface, Input, Vector, PlayerState } from "@common";
+import { StateInterface, Vector, PlayerState } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@projectile";
+import { PlayerAnimType } from "../Character/playerAnimType";
 
 class PlayerFlap implements StateInterface<PlayerState> {
 
@@ -18,35 +19,30 @@ class PlayerFlap implements StateInterface<PlayerState> {
 
     public stateEntered(): void {
         const armOffset = { x: 10, y: 28 };
-        this.playerCharacter.setArmOffset(armOffset);
+        this.playerCharacter.armFront.setOffset(armOffset);
     }
 
     public stateUpdate(deltaTime: number): void {
         this.projectileCollision.check();
         this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
-        this.playerCharacter.setAnimation(this.playerCharacter.animations.flap);
+        this.playerCharacter.animator.setAnimation(PlayerAnimType.flap);
 
-        if (this.playerCharacter.playerMove.willTurn(this.playerCharacter.controls)) {
-            this.playerCharacter.armFront.angle *= -1;
-        }
-        if (this.playerCharacter.playerItem.holding) {
-            this.playerCharacter.armFront.rotateArmUp(deltaTime);
-        } else {
-            this.playerCharacter.armFront.rotateArmDown(deltaTime);
-        }
+        const forceRotationUp = this.playerCharacter.playerItem.holding !== null;
+        this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
         this.playerCharacter.update(deltaTime);
     }
 
     public stateChange(): PlayerState {
-        if (Input.keyPress(this.playerCharacter.controls.ragdoll) || this.playerCharacter.dead) {
+        const controls = this.playerCharacter.controls;
+        if (controls.ragdoll() || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
 
-        if (Input.keyDown(this.playerCharacter.controls.down)) {
+        if (controls.down()) {
             return PlayerState.Crouch;
         }
 
-        if (Input.keyDown(this.playerCharacter.controls.jump) && !this.playerCharacter.body.grounded) {
+        if (controls.jump() && !this.playerCharacter.body.grounded) {
             return PlayerState.Flap
         }
 
