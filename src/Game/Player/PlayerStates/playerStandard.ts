@@ -1,10 +1,11 @@
-import { StateInterface, Vector, PlayerState } from "@common";
+import { Vector, PlayerState } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@game/Projectile";
 import { click } from "../Character/playerControls";
-import { PlayerAnimType } from "../Character/playerAnimType";
+import { PlayerAnim } from "../../Common/Types/playerAnimType";
+import { IPlayerState } from "../IPlayerState";
 
-class PlayerStandard implements StateInterface<PlayerState> {
+class PlayerStandard implements IPlayerState {
 
     private playerCharacter: PlayerCharacter;
     private projectileCollision: ProjectileCollision;
@@ -29,14 +30,19 @@ class PlayerStandard implements StateInterface<PlayerState> {
         this.setAnimation();
     }
 
+    public offlineUpdate(deltaTime: number): void {
+        this.projectileCollision.check();
+        this.playerCharacter.offlineUpdate(deltaTime);
+    }
+
     private setAnimation() {
         const animator = this.playerCharacter.animator;
         if (!this.playerCharacter.body.grounded) {
 
             if (this.playerCharacter.body.velocity.y < 0) {
-                animator.setAnimation(PlayerAnimType.jump);
+                animator.setAnimation(PlayerAnim.jump);
             } else {
-                animator.setAnimation(PlayerAnimType.fall);
+                animator.setAnimation(PlayerAnim.fall);
             }
             return;
         }
@@ -44,11 +50,11 @@ class PlayerStandard implements StateInterface<PlayerState> {
         const right = this.playerCharacter.controls.right();
 
         if ((left && this.playerCharacter.body.velocity.x > 0.3) || right && this.playerCharacter.body.velocity.x < -0.3) {
-            animator.setAnimation(PlayerAnimType.turn);
+            animator.setAnimation(PlayerAnim.turn);
         } else if (Math.abs(this.playerCharacter.body.velocity.x) > 0.3) {
-            animator.setAnimation(PlayerAnimType.walk);
+            animator.setAnimation(PlayerAnim.walk);
         } else {
-            animator.setAnimation(PlayerAnimType.idle);
+            animator.setAnimation(PlayerAnim.idle);
         };
     }
 
@@ -57,7 +63,7 @@ class PlayerStandard implements StateInterface<PlayerState> {
             return PlayerState.Ragdoll;
         }
 
-        if (this.playerCharacter.controls.jump(click) && !this.playerCharacter.body.grounded && !this.playerCharacter.playerJump.isJumping) {
+        if (this.playerCharacter.controls.jump(click) && !this.playerCharacter.body.grounded && !this.playerCharacter.jump.isJumping) {
             return PlayerState.Flap;
         }
 
@@ -76,7 +82,7 @@ class PlayerStandard implements StateInterface<PlayerState> {
 
     }
 
-    public stateDraw(): void {
+    public draw(): void {
         this.playerCharacter.draw();
     }
 }

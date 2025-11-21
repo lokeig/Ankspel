@@ -1,6 +1,6 @@
 import { Side } from "@common";
 import { DynamicObject } from "@core";
-import { PlayerControls } from "./playerControls";
+import { click, PlayerControls } from "./playerControls";
 
 class PlayerMove {
     public moveEnabled: boolean = true;
@@ -22,10 +22,13 @@ class PlayerMove {
     public move(deltaTime: number): void {
         const left = this.controls.left();
         const right = this.controls.right();
-       
+
         if (left && right) {
-            const click = true;
-            this.playerCharacter.direction = this.controls.left(click) ? Side.left : Side.right;
+            if (this.controls.left(click)) {
+                this.playerCharacter.direction = Side.left;
+            } else if (this.controls.right(click)) {
+                this.playerCharacter.direction = Side.right;
+            }
         } else if (left) {
             this.playerCharacter.direction = Side.left;
         } else if (right) {

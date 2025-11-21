@@ -14,11 +14,11 @@ class PlayerManager {
         for (const playerSet of this.players.values()) {
             for (const player of playerSet) {
                 player.update(deltaTime);
-                if (!player.character.playerItem.holding) {
+                if (!player.character.equipment.isHolding()) {
                     continue;
                 }
-                if (player.character.playerItem.holding.shouldBeDeleted()) {
-                    player.character.playerItem.holding = null;
+                if (player.character.equipment.getHolding().shouldBeDeleted()) {
+                    player.character.equipment.setHolding(null);
                 }
             }
         }
@@ -45,7 +45,7 @@ class PlayerManager {
         return result;
     }
 
-    public static addPlayer(local: boolean, id: string) {
+    public static addPlayer(local: boolean, id: string): Player {
         const pos = { x: 0, y: 0 };
         const player = new Player(local);
 
@@ -60,6 +60,7 @@ class PlayerManager {
         }
         this.IDToPlayer.set(id, player);
         this.playerToID.set(player, id);
+        return player;
     }
 
     public static draw() {

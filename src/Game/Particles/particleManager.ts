@@ -1,7 +1,7 @@
-import { ParticleInterface } from "./particleInterface";
+import { IParticle } from "./IParticle";
 
 class ParticleManager {
-    private static particles: Set<ParticleInterface> = new Set();
+    private static particles: Set<IParticle> = new Set();
 
     public static update(deltaTime: number): void {
         for (const particle of this.particles.values()) {
@@ -18,7 +18,7 @@ class ParticleManager {
         } 
     }
 
-    public static addParticle(particle: ParticleInterface): void {
+    public static addParticle(particle: IParticle): void {
         this.particles.add(particle);
     }
 }

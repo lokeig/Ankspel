@@ -1,13 +1,13 @@
-import { ServerInterface } from "./serverInterface";
+import { ServerIF } from "./serverIF";
 
 class GameServer {
-    static serverIF: ServerInterface;
+    static serverIF: ServerIF;
 
-    static set(serverInterface: ServerInterface): void {
+    static set(serverInterface: ServerIF): void {
         this.serverIF = serverInterface;
     }
 
-    static get(): ServerInterface {
+    static get(): ServerIF {
         return this.serverIF;
     }
 }

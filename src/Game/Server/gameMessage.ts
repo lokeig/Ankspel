@@ -1,4 +1,4 @@
-import { Vector, PlayerState } from "@common";
+import { Vector, PlayerState, PlayerAnim, Side } from "@common";
 import { LobbyMessageData } from "@shared"
 
 enum GMsgType {
@@ -25,7 +25,15 @@ interface GameMessageMap {
     [GMsgType.hostingLobby]: { lobbyID: string | null };
     [GMsgType.noLobby]: {};
 
-    [GMsgType.playerInfo]: { id: string, pos: Vector, velocity: Vector, holding: number | null, state: PlayerState };
+    [GMsgType.playerInfo]: {
+        id: string
+        pos: Vector
+        holding: number | null
+        state: PlayerState
+        anim: PlayerAnim
+        side: Side
+        armAngle: number
+    };
     [GMsgType.newPlayer]: { local: boolean, id: string };
 
     [GMsgType.loadMap]: { name: string };

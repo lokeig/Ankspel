@@ -1,7 +1,7 @@
 import { SpriteSheet, images, Vector, Utility } from "@common";
-import { TrailInterface } from "@projectile";
+import { ITrail } from "@projectile";
 
-class StaticTrail implements TrailInterface {
+class StaticTrail implements ITrail {
     private spriteSheet: SpriteSheet;
     private startingLocation: Vector;
     private target!: Vector;

@@ -1,9 +1,9 @@
 import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility } from "@common";
-import { ItemLogic, FirearmInterface, ItemType } from "@game/Item";
+import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
 
-class Shotgun implements FirearmInterface {
+class Shotgun implements IFirearm {
     public common!: ItemLogic;
     private handleOffset: number = 0;
     private maxHandleOffset: number = -4;

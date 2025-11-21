@@ -1,9 +1,9 @@
 import { Vector, SpriteSheet, Side, Direction } from "@common";
 import { StaticObject } from "@core";
-import { TileInterface } from "../../Game/StaticObjects/Tiles/tileInterface";
+import { ITile } from "../../Game/StaticObjects/Tiles/ITile";
 import { lipLeftLookup, lipRightLookup, spriteLookup } from "./spriteLookup";
 
-abstract class BaseTile implements TileInterface {
+abstract class BaseTile implements ITile {
     public body: StaticObject;
     private spriteIndex: number = 0;
     private static lookup = spriteLookup;

@@ -1,4 +1,4 @@
-import { RenderIF } from "./renderInterface";
+import { RenderIF } from "./renderIF";
 
 class Render {
     public static renderIF: RenderIF;

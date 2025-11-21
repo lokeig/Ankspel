@@ -1,20 +1,20 @@
 import { Vector, Grid, Utility, Direction, Side } from "@common";
 import { CollisionObject, GameObject } from "@core";
-import { TileInterface } from "./tileInterface";
+import { ITile } from "./ITile";
 
 class TileManager {
 
-    private static tiles = new Map<string, TileInterface>();
+    private static tiles = new Map<string, ITile>();
 
     public static clear(): void {
         this.tiles = new Map;
     }
 
-    public static getTile(gridPos: Vector): TileInterface | undefined {
+    public static getTile(gridPos: Vector): ITile | undefined {
         return this.tiles.get(Grid.key(gridPos));
     }
 
-    public static setTile(tile: TileInterface) {
+    public static setTile(tile: ITile) {
         const gridPos = Grid.getGridPos(tile.body.pos);
         this.tiles.set(Grid.key(gridPos), tile);
 
@@ -70,7 +70,7 @@ class TileManager {
         }
     }
 
-    private static tilesMatch(a: TileInterface, b: TileInterface): boolean {
+    private static tilesMatch(a: ITile, b: ITile): boolean {
         return a.constructor === b.constructor;
     }
 
@@ -87,7 +87,7 @@ class TileManager {
         }
     }
 
-    private static setNeighbours(tile: TileInterface): void {
+    private static setNeighbours(tile: ITile): void {
         const gridPos = Grid.getGridPos(tile.body.pos);
 
         for (const key of Object.values(Direction)) {

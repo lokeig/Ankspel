@@ -1,4 +1,4 @@
-enum PlayerAnimType {
+enum PlayerAnim {
     idle,
     walk,
     crouch,
@@ -9,4 +9,4 @@ enum PlayerAnimType {
     turn
 }
 
-export { PlayerAnimType };
+export { PlayerAnim };
