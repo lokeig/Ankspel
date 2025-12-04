@@ -1,0 +1,112 @@
+{
+  "player": {
+    "idle": {
+      "frames": [
+        {
+          "row": 0,
+          "col": 0
+        }
+      ]
+    },
+    "walk": {
+      "row": 1,
+      "frameCount": 6,
+      "repeat": true
+    },
+    "crouch": {
+      "frames": [
+        {
+          "row": 2,
+          "col": 0
+        }
+      ]
+    },
+    "flap": {
+      "row": 3,
+      "frameCount": 4,
+      "repeat": true,
+      "fps": 16
+    },
+    "jump": {
+      "frames": [
+        {
+          "row": 4,
+          "col": 0
+        }
+      ]
+    },
+    "fall": {
+      "frames": [
+        {
+          "row": 5,
+          "col": 0
+        }
+      ]
+    },
+    "slide": {
+      "frames": [
+        {
+          "row": 6,
+          "col": 0
+        }
+      ]
+    },
+    "turn": {
+      "frames": [
+        {
+          "row": 7,
+          "col": 0
+        }
+      ]
+    },
+    "itemHolding": {
+      "frames": [
+        {
+          "row": 8,
+          "col": 0
+        }
+      ]
+    }
+  },
+  "glock": {
+    "default": {
+      "frames": [
+        {
+          "row": 0,
+          "col": 0
+        }
+      ]
+    },
+    "shoot": {
+      "frames": [
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 0,
+          "col": 3
+        }
+      ],
+      "fps": 24
+    }
+  },
+  "explosive": {
+    "animation": {
+      "grid": {
+        "startRow": 0,
+        "rowCount": 3,
+        "startCol": 0,
+        "colCount": 4
+      }
+    }
+  }
+}

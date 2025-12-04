@@ -1,8 +1,8 @@
 import { Vector, Countdown, Utility } from "@common";
-import { IParticl } from "@game/Particles";
+import { IParticle } from "@game/Particles";
 import { ExplosionParticle } from "./explosionParticle";
 
-class ExplosionVFX implements IParticl {
+class ExplosionVFX implements IParticle {
     
     private particles: Set<ExplosionParticle> = new Set;
     private particleSpawnLocations: Vector[];

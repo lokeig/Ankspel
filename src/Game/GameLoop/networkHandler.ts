@@ -14,7 +14,7 @@ class NetworkHandler {
         emitter.subscribe(GMsgType.newPlayer, ({ local, id }) => {
             const player = PlayerManager.addPlayer(local, id);
             if (local) {
-                const controls = Utility.File.getControls(0);
+                const controls = Utility.File.getControls("players", 0);
                 player.setControls(controls);
             }
         });
@@ -128,7 +128,7 @@ class NetworkHandler {
         PlayerManager.addPlayer(true, "0");
         const player = PlayerManager.getPlayerFromID("0")!;
         const spawns = map.getRandomSpawnLocations(1);
-        const controls = Utility.File.getControls(0);
+        const controls = Utility.File.getControls("players", 0);
         player.character.setPos(spawns[0]);
         player.setControls(controls);
     }
