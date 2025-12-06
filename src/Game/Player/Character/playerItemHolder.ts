@@ -19,8 +19,7 @@ class PlayerItemHolder {
 
     public update(deltaTime: number) {
         this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
-        const press = true;
-        if (this.controls.pickup(press)) {
+        if (this.controls.pickup()) {
             if (this.holding) {
                 this.throw(this.getThrowType());
             } else {
@@ -28,7 +27,7 @@ class PlayerItemHolder {
             }
         }
 
-        if (this.holding && this.controls.shoot(press)) {
+        if (this.holding && this.controls.shoot()) {
             switch (this.holding.common.getType()) {
                 case (ItemType.fireArm): {
                     const knockback = (this.holding as FirearmInterface).shoot();

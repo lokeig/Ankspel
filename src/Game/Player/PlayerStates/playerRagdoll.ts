@@ -1,9 +1,8 @@
-import { StateInterface, Countdown, SpriteSheet, images, Input, Vector, Utility, PlayerState } from "@common";
+import { StateInterface, Countdown, SpriteSheet, images, Vector, Utility, PlayerState, InputMode } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@projectile";
-import { click } from "../Character/playerControls";
 
 class PlayerRagdoll implements StateInterface<PlayerState> {
 
@@ -187,7 +186,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
             return PlayerState.Ragdoll;
         }
         this.updateStandard();
-        const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump(click);
+        const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump();
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
             return PlayerState.Standard;
         }

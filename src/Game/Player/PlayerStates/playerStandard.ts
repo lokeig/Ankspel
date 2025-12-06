@@ -1,7 +1,6 @@
-import { StateInterface, Vector, PlayerState } from "@common";
+import { StateInterface, Vector, PlayerState, InputMode } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ProjectileCollision } from "@game/Projectile";
-import { click } from "../Character/playerControls";
 import { PlayerAnimType } from "../Character/playerAnimType";
 
 class PlayerStandard implements StateInterface<PlayerState> {
@@ -57,7 +56,7 @@ class PlayerStandard implements StateInterface<PlayerState> {
             return PlayerState.Ragdoll;
         }
 
-        if (this.playerCharacter.controls.jump(click) && !this.playerCharacter.body.grounded && !this.playerCharacter.playerJump.isJumping) {
+        if (this.playerCharacter.controls.jump(InputMode.Press) && !this.playerCharacter.body.grounded && !this.playerCharacter.playerJump.isJumping) {
             return PlayerState.Flap;
         }
 

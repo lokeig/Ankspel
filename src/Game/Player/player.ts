@@ -40,8 +40,24 @@ class Player {
     }
 
     public update(deltaTime: number): void {
-        this.stateMachine.update(deltaTime);
+        if (this.local) {
+            this.localUpdate(deltaTime);
+        } else {
+            this.onlineUpdate(deltaTime);
+        }
     };
+
+    private onlineUpdate(deltaTime: number): void {
+        this.character.body.update(deltaTime);
+    }
+
+    private localUpdate(deltaTime: number): void {
+        this.stateMachine.update(deltaTime);
+    }
+
+    public isLocal(): boolean {
+        return this.isLocal();
+    }
 
     public draw(): void {
         this.stateMachine.draw();

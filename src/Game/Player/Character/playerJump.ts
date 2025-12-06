@@ -1,4 +1,4 @@
-import { Countdown } from "@common";
+import { Countdown, InputMode } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 
@@ -28,8 +28,7 @@ class PlayerJump {
 
     
     private jump(deltaTime: number): void {
-        const press = true;
-        if (this.controls.jump(press) && this.jumpReady() && this.jumpEnabled) {
+        if (this.controls.jump(InputMode.Press) && this.jumpReady() && this.jumpEnabled) {
             this.isJumping = true;
             this.playerCharacter.velocity.y = -this.minJump;
             this.maxJumpTime.reset();

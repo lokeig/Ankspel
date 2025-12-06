@@ -1,4 +1,4 @@
-import { Side } from "@common";
+import { InputMode, Side } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 
@@ -24,8 +24,7 @@ class PlayerMove {
         const right = this.controls.right();
        
         if (left && right) {
-            const click = true;
-            this.playerCharacter.direction = this.controls.left(click) ? Side.left : Side.right;
+            this.playerCharacter.direction = this.controls.left(InputMode.Press) ? Side.left : Side.right;
         } else if (left) {
             this.playerCharacter.direction = Side.left;
         } else if (right) {

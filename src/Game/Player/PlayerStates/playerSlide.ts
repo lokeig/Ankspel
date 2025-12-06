@@ -1,8 +1,7 @@
-import { StateInterface, Countdown, Vector, PlayerState } from "@common";
+import { StateInterface, Countdown, Vector, PlayerState, InputMode } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@game/Projectile";
-import { click } from "../Character/playerControls";
 import { PlayerAnimType } from "../Character/playerAnimType";
 
 class PlayerSlide implements StateInterface<PlayerState> {
@@ -53,7 +52,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
         }
 
         this.playerCharacter.playerJump.jumpEnabled = true;
-        if (this.playerCharacter.controls.jump(click)) {
+        if (this.playerCharacter.controls.jump(InputMode.Press)) {
             this.platformIgnoreTime.reset();
 
             if (this.playerCharacter.body.onPlatform()) {
@@ -77,7 +76,7 @@ class PlayerSlide implements StateInterface<PlayerState> {
         if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
-        if (this.playerCharacter.controls.down(click) || this.playerCharacter.idleCollision()) {
+        if (this.playerCharacter.controls.down(InputMode.Press) || this.playerCharacter.idleCollision()) {
             const maxCrouchSpeed = 3;
             const validCrouch = !this.playerCharacter.body.grounded || Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed || this.playerCharacter.idleCollision()
             if (this.crouch && validCrouch) {
