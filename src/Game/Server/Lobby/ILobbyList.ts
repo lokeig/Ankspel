@@ -1,9 +1,9 @@
 import { LobbyMessageData } from "@shared";
 
-interface LobbyListInterface {
+interface ILobbyList {
     refresh(lobbies: LobbyMessageData[]): void;
     show(): void;
     hide(): void;
 }
 
-export type { LobbyListInterface };
+export type { ILobbyList };

@@ -1,11 +1,11 @@
-import { StateInterface, Countdown, SpriteSheet, images, Vector, Utility, PlayerState, InputMode } from "@common";
+import { StateInterface, Countdown, SpriteSheet, images, Vector, Utility, PlayerState } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { ThrowType } from "../Character/throwType";
 import { ProjectileCollision } from "@projectile";
+import { IPlayerState } from "../IPlayerState";
 
-class PlayerRagdoll implements StateInterface<PlayerState> {
-
+class PlayerRagdoll implements IPlayerState {
     private playerCharacter: PlayerCharacter;
     private head: DynamicObject;
     private body: DynamicObject;
@@ -21,7 +21,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
 
     private spriteSheet: SpriteSheet;
     private headProjectileCollision: ProjectileCollision;
-    private legsProjectileCollision: ProjectileCollision
+    private legsProjectileCollision: ProjectileCollision;
 
     constructor(playerCharacter: PlayerCharacter) {
         const spriteInfo = Utility.File.getImage(images.playerImage);
@@ -55,9 +55,8 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         })
     }
 
-
     public stateEntered(): void {
-        this.playerCharacter.playerItem.throw(ThrowType.drop);
+        this.playerCharacter.itemManager.throw(ThrowType.drop);
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
         this.legs.direction = this.playerCharacter.body.direction;
@@ -72,9 +71,9 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         this.body.velocity = { x: vel.x, y: vel.y };
         this.legs.velocity = { x: vel.x, y: vel.y };
 
-        if (this.playerCharacter.playerJump.isJumping) {
-            const jumpLeft = this.playerCharacter.playerJump.getJumpRemaining();
-            const jumpCharge = this.playerCharacter.playerJump.getJumpForce() / 5;
+        if (this.playerCharacter.jump.isJumping) {
+            const jumpLeft = this.playerCharacter.jump.getJumpRemaining();
+            const jumpCharge = this.playerCharacter.jump.getJumpForce() / 5;
             this.body.velocity.y -= jumpLeft * jumpCharge;
             this.head.velocity.y -= jumpLeft * jumpCharge;
             this.legs.velocity.y -= jumpLeft * jumpCharge;
@@ -114,6 +113,11 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
 
         this.setHeadAngle();
         this.setLegsAngle();
+    }
+
+    public offlineUpdate(deltaTime: number): void {
+        this.headProjectileCollision.check();
+        this.legsProjectileCollision.check();
     }
 
     private isGrounded(): boolean {
@@ -156,7 +160,6 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
             x: prevBody2Vel.x - impulseX,
             y: prevBody2Vel.y - impulseY
         };
-
     }
 
     private setHeadAngle(): void {
@@ -216,7 +219,7 @@ class PlayerRagdoll implements StateInterface<PlayerState> {
         return { x, y };
     }
 
-    public stateDraw(): void {
+    public draw(): void {
         this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerCharacter.drawSize, this.head.isFlip(), this.headAngle);
         this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerCharacter.drawSize, this.head.isFlip(), this.legsAngle);
     }

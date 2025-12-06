@@ -7,12 +7,18 @@ import { Grid, PlayerState, Utility } from "@common";
 
 class NetworkHandler {
     private static readyCount = 0;
+    private static onStart: (t: number) => void = () => {};
     static init() {
         const emitter = GameServer.get().emitter;
 
         emitter.subscribe(GMsgType.newPlayer, ({ local, id }) => {
-            PlayerManager.addPlayer(local, id);
+            const player = PlayerManager.addPlayer(local, id);
+            if (local) {
+                const controls = Utility.File.getControls("players", 0);
+                player.setControls(controls);
+            }
         });
+
         emitter.subscribe(GMsgType.loadMap, ({ name }) => {
             const map = MapManager.getMap(name);
             this.loadMap(map);
@@ -20,43 +26,58 @@ class NetworkHandler {
                 this.hostInitializeMap(map);
             }
         });
+
         emitter.subscribe(GMsgType.dataDone, () => {
             if (!GameServer.get().isHost()) {
                 GameServer.get().sendMessage(GMsgType.readyToStart, {});
             }
         });
+
         emitter.subscribe(GMsgType.readyToStart, () => {
             if (GameServer.get().isHost()) {
                 this.readyCount++;
                 this.checkReadyToStart();
             }
         });
+
         emitter.subscribe(GMsgType.playerSpawn, ({ id, location }) => {
-            PlayerManager.getPlayerFromID(id)!.setCharacter(location);
+            PlayerManager.getPlayerFromID(id)!.character.setPos(location);
         });
+
         emitter.subscribe(GMsgType.spawnItem, ({ itemType, id, location }) => {
             ItemManager.spawn(itemType, location, id);
         });
-        emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state, holding, velocity }) => {
+
+        emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
                 console.log("Sending non existing playerID: ", id);
                 return;
             }
-            player.character.body.pos = pos;
+            player.character.setPos(pos);
             if (holding) {
-                console.log("ok")
-                player.character.playerItem.holding = ItemManager.getItemFromID(holding)!;
+                player.character.equipment.setHolding(ItemManager.getItemFromID(holding)!);
+            } else {
+                player.character.equipment.setHolding(null);
             }
             player.setState(state);
+            player.character.body.direction = side;
+            player.character.animator.setAnimation(anim);
+            player.character.armFront.angle = armAngle;
         });
+
+        emitter.subscribe(GMsgType.startGame, ({ time }) => {this.onStart(time) });
+    }
+
+    public static setStart(e: (t: number) => void) {
+        this.onStart = e;
     }
 
     public static update(): void {
         const localPlayers = PlayerManager.getLocal();
         for (const player of localPlayers) {
             const id = PlayerManager.getPlayerID(player)!;
-            let holding = player.character.playerItem.holding;
+            let holding = player.character.equipment.getHolding();
             let itemID: number | null = null;
             if (holding) {
                 itemID = ItemManager.getItemID(holding)!;
@@ -66,7 +87,9 @@ class NetworkHandler {
                 pos: player.character.body.pos,
                 state: PlayerState.Standard,
                 holding: itemID,
-                velocity: player.character.body.velocity
+                anim: player.character.animator.getCurrentAnimation(),
+                side: player.character.body.direction,
+                armAngle: player.character.armFront.angle,
             });
         }
     }
@@ -81,7 +104,7 @@ class NetworkHandler {
         this.loadMapPlayerSpawns(map);
         this.loadMapItems(map);
         if (PlayerManager.getPlayers().length === 1) {
-            this.startGame(Date.now() + 500);
+            this.onStart(Date.now() + 500);
         }
         GameServer.get().sendMessage(GMsgType.dataDone, {});
     }
@@ -90,7 +113,7 @@ class NetworkHandler {
         const players = PlayerManager.getPlayers();
         const spawns = map.getRandomSpawnLocations(players.length);
         for (let i = 0; i < players.length; i++) {
-            players[i].setCharacter(spawns[i]);
+            players[i].character.setPos(spawns[i]);
             GameServer.get().sendMessage(GMsgType.playerSpawn, {
                 id: PlayerManager.getPlayerID(players[i])!,
                 location: spawns[i],
@@ -98,17 +121,16 @@ class NetworkHandler {
         }
     }
 
-    public static quickLoadForTest() {
+    public static quickLoadForTest(): void {
         const map = MapManager.getMap("defaultMap");
         this.loadMap(map);
         this.loadMapItems(map);
         PlayerManager.addPlayer(true, "0");
         const player = PlayerManager.getPlayerFromID("0")!;
         const spawns = map.getRandomSpawnLocations(1);
-        const controls = Utility.File.getControls(0);
-        player.setCharacter(spawns[0]);
+        const controls = Utility.File.getControls("players", 0);
+        player.character.setPos(spawns[0]);
         player.setControls(controls);
-
     }
 
     private static loadMapItems(map: GameMap): void {
@@ -139,12 +161,8 @@ class NetworkHandler {
             GameServer.get().sendMessage(GMsgType.startGame, {
                 time: timeToStart
             });
-            this.startGame(timeToStart);
+            this.onStart(timeToStart);
         }
-    }
-
-    private static startGame(time: number): void {
-        GameServer.get().emitter.publish(GMsgType.startGame, { time });
     }
 }
 export { NetworkHandler };

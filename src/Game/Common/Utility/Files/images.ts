@@ -1,5 +1,3 @@
-import { TileType } from "../../Types/tileType";
-
 const images = {
     // Player
     playerImage: 'player',

@@ -1,19 +1,19 @@
-import { StateInterface } from "./stateInterface";
+import { IState } from "./IState";
 
-class StateMachine<T>  {
+class StateMachine<T, S extends IState<T> = IState<T>>  {
 
     private currentState: T;
-    private states: Map<T, StateInterface<T>> = new Map();
+    private states: Map<T, S> = new Map();
 
     constructor(initialState: T) {
         this.currentState = initialState;
     }
 
-    public getStateInterface(): StateInterface<T> {
+    public getIState(): S {
         return this.states.get(this.currentState)!
     }
 
-    public addState(key: T, value: StateInterface<T>) {
+    public addState(key: T, value: S) {
         this.states.set(key, value);
     }
 
@@ -26,17 +26,17 @@ class StateMachine<T>  {
     }
 
     private changeState(newState: T): void {
-        this.getStateInterface().stateExited();
+        this.getIState().stateExited();
         this.currentState = newState;
-        this.getStateInterface().stateEntered();
+        this.getIState().stateEntered();
     }
 
     public enterState(): void {
-        this.getStateInterface().stateEntered();
+        this.getIState().stateEntered();
     }
 
     public update(deltaTime: number): void {
-        const state = this.getStateInterface();
+        const state = this.getIState();
         state.stateUpdate(deltaTime);
         
         const nextState = state.stateChange();
@@ -46,7 +46,7 @@ class StateMachine<T>  {
     }
 
     public draw(): void {
-        this.getStateInterface().stateDraw()
+        this.getIState().draw();
     }
 }
 

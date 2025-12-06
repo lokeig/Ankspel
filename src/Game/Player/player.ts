@@ -1,18 +1,20 @@
 import { Controls, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
+import { IPlayerState } from "./IPlayerState";
 
 class Player {
     public character!: PlayerCharacter;
-    private stateMachine: StateMachine<PlayerState>;
+    private stateMachine: StateMachine<PlayerState, IPlayerState>;
     private local: boolean;
 
     constructor(local: boolean) {
         this.local = local;
-        this.stateMachine = new StateMachine(PlayerState.Standard);
+        this.stateMachine = new StateMachine<PlayerState, IPlayerState>(PlayerState.Standard);
+        this.setCharacter({ x: 0, y: 0 });
     }
 
-    public setCharacter(pos: Vector): void {
+    private setCharacter(pos: Vector): void {
         this.character = new PlayerCharacter({ ...pos });
         this.setupStateMachine();
     }
@@ -24,9 +26,9 @@ class Player {
     private setupStateMachine(): void {
         this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
         this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.character));
-        const isCrouch = true;
-        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !isCrouch));
-        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, isCrouch));
+        const crouch = true;
+        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
+        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
         this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll(this.character));
         this.stateMachine.enterState();
     }
@@ -41,26 +43,18 @@ class Player {
 
     public update(deltaTime: number): void {
         if (this.local) {
-            this.localUpdate(deltaTime);
+            this.stateMachine.update(deltaTime);
         } else {
-            this.onlineUpdate(deltaTime);
+            this.stateMachine.getIState().offlineUpdate(deltaTime);
         }
     };
-
-    private onlineUpdate(deltaTime: number): void {
-        this.character.body.update(deltaTime);
-    }
-
-    private localUpdate(deltaTime: number): void {
-        this.stateMachine.update(deltaTime);
-    }
 
     public isLocal(): boolean {
         return this.isLocal();
     }
 
     public draw(): void {
-        this.stateMachine.draw();
+        this.stateMachine.getIState().draw();
     }
 }
 

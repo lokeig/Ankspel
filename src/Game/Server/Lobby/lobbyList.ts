@@ -1,14 +1,14 @@
-import { LobbyListInterface } from "./lobbyListInterface";
+import { ILobbyList } from "./ILobbyList";
 
 
 class LobbyList {
-    private static current: LobbyListInterface;
+    private static current: ILobbyList;
 
-    public static set(lobbylistInterface: LobbyListInterface): void {
+    public static set(lobbylistInterface: ILobbyList): void {
         this.current = lobbylistInterface;
     }
 
-    public static get(): LobbyListInterface {
+    public static get(): ILobbyList {
         return this.current;
     }
 }

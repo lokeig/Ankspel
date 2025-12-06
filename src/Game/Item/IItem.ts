@@ -1,13 +1,13 @@
 import { Vector } from "@common";
 import { ItemLogic } from "./itemLogic";
 
-interface ItemInterface {
+interface IItem {
     update(deltaTime: number): void;
     draw(): void;
     shouldBeDeleted(): boolean;
     common: ItemLogic;
 }
 
-type ItemConstructor = new (pos: Vector) => ItemInterface
+type ItemConstructor = new (pos: Vector) => IItem
 
-export type { ItemInterface, ItemConstructor };
+export type { IItem, ItemConstructor };

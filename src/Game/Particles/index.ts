@@ -1,2 +1,2 @@
 export { ParticleManager } from "./particleManager";
-export type { ParticleInterface } from "./particleInterface";
+export type { IParticle } from "./IParticle";

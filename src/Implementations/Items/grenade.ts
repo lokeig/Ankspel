@@ -1,11 +1,11 @@
 import { SpriteSheet, images, Countdown, Vector, Utility } from "@common";
-import { ExplosiveInterface, ItemLogic, ItemType } from "@game/Item";
+import { IExplosive, ItemLogic, ItemType } from "@game/Item";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Bullet } from "@impl/Projectiles";
 
-class Grenade implements ExplosiveInterface {
+class Grenade implements IExplosive {
     public common: ItemLogic;
     private spriteSheet: SpriteSheet;
     private drawSize: number = 32;

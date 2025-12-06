@@ -2,7 +2,7 @@ import { ClientMessage } from "@shared";
 import { Emitter } from "./emitter";
 import { GameMessageMap, GMsgType } from "./gameMessage";
 
-interface ServerInterface {
+interface ServerIF {
     emitter: Emitter;
     getID(): string;
     sendMessage<T extends GMsgType>(type: T, text: GameMessageMap[T]): void;
@@ -10,4 +10,4 @@ interface ServerInterface {
     isHost(): boolean;
 }
 
-export type { ServerInterface }
+export type { ServerIF }

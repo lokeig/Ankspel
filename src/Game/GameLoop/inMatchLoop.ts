@@ -1,8 +1,8 @@
-import { StateInterface } from "@common";
+import { IState } from "@common";
 import { GameLoopState } from "./gameLoopState";
 import { GameLoopUtility } from "./gameLoopUtility";
 
-class InMatchLoop implements StateInterface<GameLoopState> {
+class InMatchLoop implements IState<GameLoopState> {
 
     public stateEntered(): void {
 
@@ -20,7 +20,7 @@ class InMatchLoop implements StateInterface<GameLoopState> {
 
     }
 
-    public stateDraw() {
+    public draw() {
         GameLoopUtility.draw();
     }
 }

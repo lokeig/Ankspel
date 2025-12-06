@@ -1,11 +1,12 @@
 import { Vector, Utility, Controls } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
-import { PlayerItemHolder } from "./playerItemHolder";
+import { PlayerItemManager } from "./playerItemManager";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { playerAnimation } from "./playerAnimation";
+import { PlayerEquipment } from "./playerEquipment";
 
 class PlayerCharacter {
 
@@ -19,28 +20,37 @@ class PlayerCharacter {
     public dead: boolean = false;
 
     public controls!: PlayerControls;
-    public playerJump!: PlayerJump;
-    public playerMove!: PlayerMove;
-    public playerItem!: PlayerItemHolder;
+    public jump!: PlayerJump;
+    public movement!: PlayerMove;
+    public equipment!: PlayerEquipment;
+    public itemManager!: PlayerItemManager;
 
     constructor(pos: Vector) {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
         this.animator = new playerAnimation();
+        this.equipment = new PlayerEquipment();
+    }
+
+    public setControls(controls: Controls) {
+        this.controls = new PlayerControls(controls);
+        this.movement = new PlayerMove(this.body, this.controls);
+        this.jump = new PlayerJump(this.body, this.controls);
+        this.itemManager = new PlayerItemManager(this.body, this.controls, this.equipment);
     }
 
     private setArmPos(): void {
         let offset = { x: 0, y: 0 };
-        if (this.playerItem.holding) {
-            offset = this.playerItem.holding.common.handOffset;
+        if (this.equipment.isHolding()) {
+            offset = this.equipment.getHolding().common.handOffset;
         }
         this.armFront.setPosition(this.getDrawPos(), this.drawSize, offset, this.body.isFlip());
     }
 
     private setHoldingPosition(): void {
-        if (!this.playerItem.holding) {
+        if (!this.equipment.isHolding()) {
             return;
         }
-        const item = this.playerItem.holding.common;
+        const item = this.equipment.getHolding().common;
 
         item.body.setCenterToPos(this.armFront.getCenter());
         item.body.direction = this.body.direction;
@@ -60,20 +70,18 @@ class PlayerCharacter {
         this.body.setNewCollidableObjects();
     }
 
-    public setControls(controls: Controls) {
-        this.controls = new PlayerControls(controls);
-        this.playerMove = new PlayerMove(this.body, this.controls);
-        this.playerJump = new PlayerJump(this.body, this.controls);
-        this.playerItem = new PlayerItemHolder(this.body, this.controls);
-    }
 
     private updateControllers(deltaTime: number): void {
         if (this.body.collisions.up) {
-            this.playerJump.isJumping = false;
+            this.jump.isJumping = false;
         }
-        this.playerJump.update(deltaTime);
-        this.playerMove.update(deltaTime);
-        this.playerItem.update(deltaTime);
+        this.jump.update(deltaTime);
+        this.movement.update(deltaTime);
+        this.itemManager.update(deltaTime);
+    }
+
+    public offlineUpdate(deltaTime: number): void {
+        this.animator.update(deltaTime, this.equipment.isHolding());
     }
 
     public update(deltaTime: number): void {
@@ -81,12 +89,11 @@ class PlayerCharacter {
         this.setArmPos();
         this.updateControllers(deltaTime);
         this.setHoldingPosition();
-        const holdingItem = this.playerItem.holding !== null;
-        this.animator.update(deltaTime, holdingItem);
+        this.animator.update(deltaTime, this.equipment.isHolding());
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {
-        if (this.playerMove.willTurn()) {
+        if (this.movement.willTurn()) {
             this.armFront.angle *= -1;
         }
         if (forceup || this.armFront.angle > 0 || this.itemNoRotationCollision()) {
@@ -97,10 +104,10 @@ class PlayerCharacter {
     }
 
     private itemNoRotationCollision(): boolean {
-        if (!this.playerItem.holding) {
+        if (!this.equipment.isHolding()) {
             return false;
         }
-        const item = this.playerItem.holding.common;
+        const item = this.equipment.getHolding().common;
         const tempItemPos = {
             x: item.body.pos.x,
             y: item.body.pos.y
@@ -137,8 +144,8 @@ class PlayerCharacter {
 
     public draw(): void {
         this.animator.drawBody(this.getDrawPos(), this.drawSize, this.body.isFlip());
-        if (this.playerItem.holding) {
-            this.playerItem.holding.draw();
+        if (this.equipment.isHolding()) {
+            this.equipment.getHolding().draw();
         }
         this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.body.isFlip());
     };

@@ -1,10 +1,10 @@
 import { Grid, Vector } from "@common";
-import { ItemConstructor, ItemInterface } from "./itemInterface";
+import { ItemConstructor, IItem } from "./IItem";
 
 class ItemManager {
-    private static items: Map<string, Set<ItemInterface>> = new Map();
-    private static IDToItem: Map<number, ItemInterface> = new Map();
-    private static ItemToID: Map<ItemInterface, number> = new Map();
+    private static items: Map<string, Set<IItem>> = new Map();
+    private static IDToItem: Map<number, IItem> = new Map();
+    private static ItemToID: Map<IItem, number> = new Map();
 
     private static register: Map<string, ItemConstructor> = new Map();
     private static itemIndex = 0;
@@ -19,14 +19,14 @@ class ItemManager {
                 item.update(deltaTime);
             }
         }
-        Grid.updateMapPositions<ItemInterface>(this.items, e => e.common.body.pos);
+        Grid.updateMapPositions<IItem>(this.items, e => e.common.body.pos);
     }
 
     public static registerItem(type: string, constructor: ItemConstructor): void {
         this.register.set(type, constructor);
     }
 
-    public static create(type: string, pos: Vector): ItemInterface | null {
+    public static create(type: string, pos: Vector): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
@@ -47,17 +47,17 @@ class ItemManager {
         this.setItemID(newItem, id);
     }
 
-    private static setItemID(item: ItemInterface, id: number) {
+    private static setItemID(item: IItem, id: number) {
         this.ItemToID.set(item, id);
         this.IDToItem.set(id, item);
     }
 
-    public static getItems(pos: Vector): Set<ItemInterface> | undefined {
+    public static getItems(pos: Vector): Set<IItem> | undefined {
         return this.items.get(Grid.key(pos));
     }
 
-    public static getNearby(pos: Vector, width: number, height: number): ItemInterface[] {
-        const result: ItemInterface[] = [];
+    public static getNearby(pos: Vector, width: number, height: number): IItem[] {
+        const result: IItem[] = [];
 
         const startX = pos.x - Grid.size * 2;
         const endX = pos.x + width + Grid.size * 2;
@@ -74,7 +74,7 @@ class ItemManager {
         return result;
     }
 
-    private static processItemArray(gridPos: Vector, accumulatedItems: Array<ItemInterface>): void {
+    private static processItemArray(gridPos: Vector, accumulatedItems: Array<IItem>): void {
         const itemArray = this.getItems(gridPos);
         if (!itemArray) {
             return;
@@ -84,7 +84,7 @@ class ItemManager {
         }
     }
 
-    private static addItem(item: ItemInterface) {
+    private static addItem(item: IItem) {
         const gridPos = item.common.body.pos;
         const itemSet = this.getItems(gridPos);
         if (!itemSet) {
@@ -93,11 +93,11 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static getItemFromID(id: number): ItemInterface | undefined {
+    public static getItemFromID(id: number): IItem | undefined {
         return this.IDToItem.get(id);
     }
 
-    public static getItemID(item: ItemInterface): number | undefined {
+    public static getItemID(item: IItem): number | undefined {
         return this.ItemToID.get(item);
     }
 

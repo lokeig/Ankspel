@@ -1,2 +1,2 @@
 export { TileManager } from "./tileManager";
-export type { TileInterface, TileConstructor } from "./tileInterface"
+export type { ITile, TileConstructor } from "./ITile"

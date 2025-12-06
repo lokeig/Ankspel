@@ -1,9 +1,9 @@
 import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility } from "@common";
-import { ItemLogic, FirearmInterface, ItemType } from "@game/Item";
+import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { FirearmInfo } from "./firearmInfo";
 
 
-class Glock implements FirearmInterface {
+class Glock implements IFirearm {
     public common!: ItemLogic;
     private defaultAnimation = new Animation();
     private shootAnimation = new Animation();

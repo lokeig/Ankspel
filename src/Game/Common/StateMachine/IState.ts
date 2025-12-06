@@ -1,9 +1,9 @@
-interface StateInterface<T> {
+interface IState<T> {
     stateUpdate(deltaTime: number): void;
     stateEntered(): void;
     stateExited(): void;
     stateChange(): T;
-    stateDraw(): void;
+    draw(): void;
 }
 
-export type { StateInterface };
+export type { IState };

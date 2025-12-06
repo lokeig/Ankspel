@@ -1,8 +1,8 @@
-interface TrailInterface {
+interface ITrail {
     update(deltaTime: number): void;
     shouldBeDeleted(): boolean;
     draw(): void;
     setToDelete(): void;
 }
 
-export type { TrailInterface };
+export type { ITrail };

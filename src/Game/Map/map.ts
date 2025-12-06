@@ -1,10 +1,10 @@
 import { Grid, Utility, Vector } from "@common";
-import { TileConstructor, TileInterface } from "@game/StaticObjects/Tiles";
+import { TileConstructor, ITile } from "@game/StaticObjects/Tiles";
 import { PlayerCharacter } from "@player";
 import { ItemDescription } from "./itemDescription";
 
 class GameMap {
-    private tiles: TileInterface[] = [];
+    private tiles: ITile[] = [];
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
 
@@ -14,7 +14,7 @@ class GameMap {
         this.tiles.push(newTile);
     }
 
-    public getTiles(): TileInterface[] {
+    public getTiles(): ITile[] {
         return this.tiles;
     }
 

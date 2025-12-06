@@ -1,7 +1,7 @@
-interface ParticleInterface {
+interface IParticle {
     update(deltaTime: number): void;
     draw(): void;
     shouldBeDeleted(): boolean;
 }
 
-export type { ParticleInterface };
+export type { IParticle };

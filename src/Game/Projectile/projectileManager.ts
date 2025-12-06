@@ -1,10 +1,10 @@
 import { Grid, Vector } from "@common";
-import { ProjectileInterface } from "./projectileInterface";
-import { TrailInterface } from "./trailInterface";
+import { IProjectile } from "./IProjectile";
+import { ITrail } from "./ITrail";
 
 class ProjectileManager {
-    private static projectiles: Map<string, Set<ProjectileInterface>> = new Map();
-    private static trails: Set<TrailInterface> = new Set();
+    private static projectiles: Map<string, Set<IProjectile>> = new Map();
+    private static trails: Set<ITrail> = new Set();
 
     public static update(deltaTime: number) {
         this.updateMapPositions(deltaTime);
@@ -31,16 +31,16 @@ class ProjectileManager {
             }
         }
 
-        Grid.updateMapPositions<ProjectileInterface>(this.projectiles, e => e.body.pos);
+        Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }
 
 
-    public static getProjectiles(pos: Vector): Set<ProjectileInterface> | undefined {
+    public static getProjectiles(pos: Vector): Set<IProjectile> | undefined {
         return this.projectiles.get(Grid.key(pos));
     }
 
 
-    public static addProjectile(newProjectile: ProjectileInterface) {
+    public static addProjectile(newProjectile: IProjectile) {
         const gridPos = Grid.getGridPos(newProjectile.body.pos);
         const projectileSet = this.getProjectiles(gridPos);
         if (!projectileSet) {
@@ -51,8 +51,8 @@ class ProjectileManager {
 
     }
 
-    public static getNearbyProjectiles(pos: Vector, width: number, height: number): ProjectileInterface[] {
-        const result: ProjectileInterface[] = [];
+    public static getNearbyProjectiles(pos: Vector, width: number, height: number): IProjectile[] {
+        const result: IProjectile[] = [];
 
         const startX = pos.x - Grid.size * 2;
         const endX = pos.x + width + Grid.size * 2;
@@ -70,7 +70,7 @@ class ProjectileManager {
         return result;
     }
 
-    private static processProjectileSet(gridPos: Vector, accumulatedItems: Array<ProjectileInterface>): void {
+    private static processProjectileSet(gridPos: Vector, accumulatedItems: Array<IProjectile>): void {
         const projectilSet = this.getProjectiles(gridPos);
 
         if (!projectilSet) {

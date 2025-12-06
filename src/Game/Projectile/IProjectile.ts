@@ -1,12 +1,12 @@
 import { DynamicObject } from "@core";
-import { TrailInterface } from "./trailInterface";
+import { ITrail } from "./ITrail";
 
-interface ProjectileInterface {
+interface IProjectile {
     body: DynamicObject;
     update(deltaTime: number): void;
     draw(): void;
-    getTrail(): TrailInterface;
+    getTrail(): ITrail;
     shouldBeDeleted(): boolean;
 }
 
-export type { ProjectileInterface };
+export type { IProjectile };
