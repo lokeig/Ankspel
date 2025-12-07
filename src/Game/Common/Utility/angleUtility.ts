@@ -6,10 +6,7 @@ class AngleUtility {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
 
-        return {
-            x: force.x * cos - force.y * sin,
-            y: force.x * sin + force.y * cos
-        };
+        return new Vector(force.x * cos - force.y * sin, force.x * sin + force.y * cos);
     }
 
     public normalizeAngle(angle: number) {

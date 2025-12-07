@@ -37,11 +37,11 @@ class Grid {
     }
 
     public static getGridPos(pos: Vector): Vector {
-        return { x: Math.floor(pos.x / this.size), y: Math.floor(pos.y / this.size) }
+        return new Vector(Math.floor(pos.x / this.size), Math.floor(pos.y / this.size));
     }
 
     public static getWorldPos(gridPos: Vector): Vector {
-        return { x: gridPos.x * this.size, y: gridPos.y * this.size } 
+        return new Vector(gridPos.x * this.size, gridPos.y * this.size);
     }
 
     public static key(pos: Vector): string {

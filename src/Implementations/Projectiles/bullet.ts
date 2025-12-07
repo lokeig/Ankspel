@@ -3,10 +3,10 @@ import { DynamicObject } from "@core";
 import { Render } from "@render";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { StaticTrail } from "./Trails/staticTrail";
-import { ProjectileInterface } from "@projectile";
+import { IProjectile } from "@projectile";
 
-class Bullet implements ProjectileInterface {
-    private angle: number; // Might be needed if want to use spritesheet
+class Bullet implements IProjectile {
+    private angle: number;
     public body: DynamicObject;
     private lifespan!: Countdown;
     public trail: StaticTrail;
@@ -17,14 +17,11 @@ class Bullet implements ProjectileInterface {
         this.lifespan = new Countdown(lifespan);
 
         this.angle = Math.atan2(velocity.y, velocity.x);
-        this.body.velocity = { ...velocity };
+        this.body.velocity = velocity.clone();
 
         const trailLength = 100;
-        const trailPos = {
-            x: pos.x + size / 2,
-            y: pos.y + size / 2
-        };
-        this.trail = new StaticTrail(trailPos, velocity, trailLength, size);
+        const trailPos = pos.clone().add(size / 2);
+        this.trail = new StaticTrail(trailPos, velocity.clone(), trailLength, size);
         this.trail.setTarget(trailPos);
     }
 
@@ -33,8 +30,7 @@ class Bullet implements ProjectileInterface {
     }
 
     public update(deltaTime: number): void {
-        const prevPos: Vector = { x: this.body.pos.x, y: this.body.pos.y };
-
+        const prevPos: Vector = this.body.pos.clone();
         this.body.collidableObjects = TileManager.getNearbyTiles(this.body.pos, this.body.width, this.body.height);
         this.body.pos.x += this.body.velocity.x * deltaTime;
         this.body.pos.y += this.body.velocity.y * deltaTime;

@@ -22,11 +22,11 @@ class Grenade implements IExplosive {
         this.common = new ItemLogic(pos, width, height, ItemType.explosive);
         this.common.body.bounceFactor = 0.3;
 
-        this.common.holdOffset = { x: 12, y: -6 }
-        this.common.setHitboxOffset({ x: 30, y: 30 });
+        this.common.holdOffset = new Vector(12, -6)
+        this.common.setHitboxOffset(new Vector(30, 30));
     }
 
-    update(deltaTime: number): void {
+    public update(deltaTime: number): void {
         if (this.activated) {
             this.explosionDelay.update(deltaTime);
         }
@@ -40,24 +40,24 @@ class Grenade implements IExplosive {
             const amountOfBullets = 16;
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
-                const speed = Utility.Angle.rotateForce({ x: 2000, y: 0 }, angle)
+                const speed = Utility.Angle.rotateForce(new Vector(2000, 0), angle);
                 const lifespan = 0.06;
                 const pos = this.common.body.pos;
-                ProjectileManager.addProjectile(new Bullet({ ...pos }, speed, lifespan));
+                ProjectileManager.addProjectile(new Bullet(pos.clone(), speed, lifespan));
             }
         }
     }
 
-    activate(): void {
+    public activate(): void {
         this.activated = true;
     }
 
-    draw(): void {
+    public draw(): void {
         const col = this.activated ? 1 : 0;
-        this.spriteSheet.draw(0, col, this.common.getDrawpos(this.drawSize), this.drawSize, this.common.isFlip(), this.common.angle)
+        this.spriteSheet.draw(0, col, this.common.getDrawPos(this.drawSize), this.drawSize, this.common.isFlip(), this.common.angle)
     }
 
-    shouldBeDeleted(): boolean {
+    public shouldBeDeleted(): boolean {
         return this.setToDelete;
     }
 }

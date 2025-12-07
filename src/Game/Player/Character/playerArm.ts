@@ -2,20 +2,20 @@ import { Vector } from "@common";
 
 class PlayerArm {
     private drawSize: number = 32;
-    public pos: Vector = { x: 0, y: 0 };
+    public pos: Vector = new Vector();
     public angle: number = 0;
-    private posOffset: Vector = { x: 0, y: 0 };
+    private posOffset: Vector = new Vector();
     private rotateSpeed: number = 25;
 
     public getCenter(): Vector {
-        return {
-            x: this.pos.x + (this.drawSize / 2),
-            y: this.pos.y + (this.drawSize / 2)
-        };
+        return new Vector(
+            this.pos.x + (this.drawSize / 2),
+            this.pos.y + (this.drawSize / 2)
+        );
     }
 
     public setPosition(playerPos: Vector, playerDrawSize: number, offset: Vector, flip: boolean): void {
-        const result = { ...playerPos };
+        const result = playerPos.clone();
         if (flip) {
             result.x += playerDrawSize - this.drawSize - this.posOffset.x - offset.x;
         } else {
@@ -26,7 +26,7 @@ class PlayerArm {
     }
 
     public setOffset(offset: Vector): void {
-        this.posOffset = { ...offset };
+        this.posOffset = offset.clone();
     }
 
     public getOffset(): Vector {

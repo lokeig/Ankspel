@@ -1,6 +1,6 @@
 import { InputMode, Side } from "@common";
 import { DynamicObject } from "@core";
-import { click, PlayerControls } from "./playerControls";
+import { PlayerControls } from "./playerControls";
 
 class PlayerMove {
     public moveEnabled: boolean = true;
@@ -26,7 +26,7 @@ class PlayerMove {
         if (left && right) {
             if (this.controls.left(InputMode.Press)) {
                 this.playerCharacter.direction = Side.left;
-            } else {
+            } else if (this.controls.right(InputMode.Press)) {
                 this.playerCharacter.direction = Side.right;
             }
         } else if (left) {
@@ -39,8 +39,8 @@ class PlayerMove {
     }
 
     public willTurn(): boolean {
-        const willTurnLeft = this.controls.left() && !this.playerCharacter.isFlip();
-        const willTurnRight = this.controls.right() && this.playerCharacter.isFlip();
+        const willTurnLeft = this.controls.left(InputMode.Press) && !this.playerCharacter.isFlip();
+        const willTurnRight = this.controls.right(InputMode.Press) && this.playerCharacter.isFlip();
         return (willTurnLeft || willTurnRight) && this.moveEnabled;
     }
 }

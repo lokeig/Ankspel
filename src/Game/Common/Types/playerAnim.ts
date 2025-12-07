@@ -7,7 +7,9 @@ enum PlayerAnim {
     fall = "fall",
     slide = "slide",
     turn = "turn",
-    itemHolding = "itemHolding"
+    itemHolding = "itemHolding",
+    upperRagdoll = "upperRagdoll",
+    lowerRagdoll = "lowerRagdoll"
 }
 
 export { PlayerAnim };

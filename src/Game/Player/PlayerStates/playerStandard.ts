@@ -1,43 +1,19 @@
-import { Vector, PlayerState, InputMode } from "@common";
+import { PlayerState, InputMode, Vector } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { ProjectileCollision } from "@game/Projectile";
-import { PlayerAnim } from "../../Common/Types/playerAnimType";
+import { PlayerAnim } from "../../Common/Types/playerAnim";
 import { IPlayerState } from "../IPlayerState";
+import { GameObject } from "@core";
 
 class PlayerStandard implements IPlayerState {
 
     private playerCharacter: PlayerCharacter;
-    private projectileCollision: ProjectileCollision;
-
     constructor(playerCharacter: PlayerCharacter) {
         this.playerCharacter = playerCharacter;
-        this.projectileCollision = new ProjectileCollision(this.playerCharacter.body);
-        this.projectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerCharacter.dead = true;
-        })
     }
 
-    public stateEntered(): void {
-        const armOffset = { x: 10, y: 28 };
-        this.playerCharacter.armFront.setOffset(armOffset);
-    }
-
-    public stateUpdate(deltaTime: number): void {
-        this.projectileCollision.check();
-        this.playerCharacter.rotateArm(deltaTime);
-        this.playerCharacter.update(deltaTime);
-        this.setAnimation();
-    }
-
-    public offlineUpdate(deltaTime: number): void {
-        this.projectileCollision.check();
-        this.playerCharacter.offlineUpdate(deltaTime);
-    }
-
-    private setAnimation() {
+    private setCurrentAnimation() {
         const animator = this.playerCharacter.animator;
         if (!this.playerCharacter.body.grounded) {
-
             if (this.playerCharacter.body.velocity.y < 0) {
                 animator.setAnimation(PlayerAnim.jump);
             } else {
@@ -45,9 +21,7 @@ class PlayerStandard implements IPlayerState {
             }
             return;
         }
-        const left = this.playerCharacter.controls.left();
-        const right = this.playerCharacter.controls.right();
-
+        const left = this.playerCharacter.controls.left(); const right = this.playerCharacter.controls.right();
         if ((left && this.playerCharacter.body.velocity.x > 0.3) || right && this.playerCharacter.body.velocity.x < -0.3) {
             animator.setAnimation(PlayerAnim.turn);
         } else if (Math.abs(this.playerCharacter.body.velocity.x) > 0.3) {
@@ -55,6 +29,21 @@ class PlayerStandard implements IPlayerState {
         } else {
             animator.setAnimation(PlayerAnim.idle);
         };
+    }
+
+    public stateEntered(): void {
+        const armOffset = new Vector(10, 28);
+        this.playerCharacter.armFront.setOffset(armOffset);
+    }
+
+    public stateUpdate(deltaTime: number): void {
+        this.playerCharacter.rotateArm(deltaTime);
+        this.playerCharacter.update(deltaTime);
+        this.setCurrentAnimation();
+    }
+
+    public offlineUpdate(deltaTime: number): void {
+        this.playerCharacter.offlineUpdate(deltaTime);
     }
 
     public stateChange(): PlayerState {
@@ -79,6 +68,23 @@ class PlayerStandard implements IPlayerState {
 
     public stateExited(): void {
 
+    }
+
+    public getHeadCollision(body: GameObject): boolean {
+        const playerBody = this.playerCharacter.body;
+        return new GameObject(playerBody.pos, playerBody.width, playerBody.height / 3).collision(body);
+    }
+
+    public getBodyCollision(body: GameObject): boolean {
+        const playerBody = this.playerCharacter.body;
+        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + playerBody.height / 3);
+        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
+    }
+
+    public getLegsCollision(body: GameObject): boolean {
+        const playerBody = this.playerCharacter.body;
+        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + 2 * playerBody.height / 3);
+        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
     }
 
     public draw(): void {

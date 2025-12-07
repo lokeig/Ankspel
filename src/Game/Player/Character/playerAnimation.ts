@@ -1,6 +1,6 @@
 import { Animation, images, SpriteAnimator, SpriteSheet, Utility, Vector, PlayerAnim } from "@common";
 
-class playerAnimation {
+class PlayerAnimation {
     private currAnim: PlayerAnim;
     private bodyAnimator: SpriteAnimator;
     private armAnimator: SpriteAnimator;
@@ -13,8 +13,9 @@ class playerAnimation {
         [PlayerAnim.fall]: new Animation(),
         [PlayerAnim.slide]: new Animation(),
         [PlayerAnim.turn]: new Animation(),
-        [PlayerAnim.itemHolding]: new Animation()
-
+        [PlayerAnim.itemHolding]: new Animation(),
+        [PlayerAnim.upperRagdoll]: new Animation(),
+        [PlayerAnim.lowerRagdoll]: new Animation()
     };
     private holding: boolean = false;
 
@@ -47,13 +48,20 @@ class playerAnimation {
     }
 
     public drawBody(pos: Vector, drawSize: number, flip: boolean): void {
-        console.log(this.currAnim);
         const angle = 0;
         this.bodyAnimator.draw(pos, drawSize, flip, angle);
     };
 
     public drawArm(pos: Vector, drawSize: number, angle: number, flip: boolean): void {
         this.armAnimator.draw(pos, drawSize, flip, angle);
+    }
+
+    public drawRagdoll(headPos: Vector, legsPos: Vector, drawSize: number, headAngle: number, legsAngle: number, flip: boolean) {
+        this.bodyAnimator.setAnimation(this.animations.upperRagdoll);
+        this.bodyAnimator.draw(headPos, drawSize, flip, headAngle);
+        this.bodyAnimator.setAnimation(this.animations.lowerRagdoll);
+        this.bodyAnimator.draw(legsPos, drawSize, flip, legsAngle);
+    
     }
 
     public update(deltaTime: number, holding: boolean): void {
@@ -63,4 +71,4 @@ class playerAnimation {
     }
 }
 
-export { playerAnimation };
+export { PlayerAnimation };

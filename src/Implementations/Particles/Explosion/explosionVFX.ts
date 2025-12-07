@@ -16,7 +16,7 @@ class ExplosionVFX implements IParticle {
 
         this.particleSpawnLocations = Utility.Vector.getPointsAroundCircle(pos, radius, amount);
         Utility.Vector.randomOffsetVectorArray(this.particleSpawnLocations, 7);
-        this.particleSpawnLocations.push({ x: pos.x, y: pos.y });
+        this.particleSpawnLocations.push(pos.clone());
         this.order = Utility.Random.getRandomArray(amount + 1);
         this.nextParticleCountdown.setToReady();
     }

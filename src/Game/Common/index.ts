@@ -15,14 +15,14 @@ export { StateMachine } from "./StateMachine/stateMachine";
 export type { IState } from "./StateMachine/IState";
 
 // Types
-export type { Vector } from "./Types/vector";
+export { Vector } from "./Types/vector";
+export type { Controls } from "./Types/controls";
+export { ThrowType } from "./Types/throwType";
 export { Direction } from "./Types/direction";
 export { Side } from "./Types/side";
 export { TileType } from "./Types/tileType";
 export { PlayerState } from "./Types/playerState";
-export { PlayerAnim } from "./Types/playerAnimType";
-
-export type { Controls } from "./Types/controls";
+export { PlayerAnim } from "./Types/playerAnim";
 
 // Utility
 export { Utility } from "./Utility/utility";

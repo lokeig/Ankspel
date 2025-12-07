@@ -1,4 +1,4 @@
-import { DrawInfo, Render } from "@render";
+import { DrawInfo, Rect, Render } from "@render";
 import { Vector } from "../Types/vector";
 
 class SpriteSheet {
@@ -12,7 +12,7 @@ class SpriteSheet {
         this.frameHeight = frameHeight;
     }
   
-    private getFrame(row: number, col: number): { x: number, y: number, width: number, height: number } {
+    private getFrame(row: number, col: number): Rect {
         return {
             x: col * this.frameWidth,
             y: row * this.frameHeight,
@@ -22,16 +22,13 @@ class SpriteSheet {
     }
 
     public draw(row: number, col: number, pos: Vector, size: number, flip: boolean, angle: number): void {
-
-        const source = this.getFrame(row, col);
         const drawInfo: DrawInfo = {
             imageSrc: this.imageSrc,
-            source: source,
+            source: this.getFrame(row, col),
             world: { x: pos.x, y: pos.y, width: size, height: size },
             flip: flip,
             angle: angle
         };
-
         Render.get().draw(drawInfo);
     }
 

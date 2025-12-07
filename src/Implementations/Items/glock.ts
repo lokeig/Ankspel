@@ -22,9 +22,9 @@ class Glock implements IFirearm {
         const width = 30;
         const height = 15;
         this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
-        this.common.handOffset = { x: 2, y: 2 }
-        this.common.holdOffset = { x: 10, y: -4 }
-        this.common.setHitboxOffset({ x: 14, y: 8 });
+        this.common.handOffset = new Vector(2, 2);
+        this.common.holdOffset = new Vector(10, -4);
+        this.common.setHitboxOffset(new Vector(14, 8));
     }
 
     private setupFirearmInfo(): void {
@@ -33,8 +33,8 @@ class Glock implements IFirearm {
         this.firearmInfo.bulletLifespan = 15;
         this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
-        this.firearmInfo.knockback = { x: 9, y: 2 };
-        this.firearmInfo.pipeOffset = { x: 14, y: -6 };
+        this.firearmInfo.knockback = new Vector(9, 2);
+        this.firearmInfo.pipeOffset = new Vector(14, -6);
     }
 
     private setupAnimations(): void {
@@ -61,7 +61,7 @@ class Glock implements IFirearm {
 
     public draw(): void {
         const drawSize = 40;
-        this.animator.draw(this.common.getDrawpos(drawSize), drawSize, this.common.isFlip(), this.common.angle);
+        this.animator.draw(this.common.getDrawPos(drawSize), drawSize, this.common.isFlip(), this.common.angle);
     }
 
     public shouldBeDeleted(): boolean {

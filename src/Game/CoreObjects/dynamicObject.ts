@@ -15,7 +15,7 @@ class DynamicObject extends GameObject {
     public frictionMultiplier = 1;
     public ignoreFriction: boolean = false;
 
-    public velocity: Vector = { x: 0, y: 0 }
+    public velocity = new Vector();
     public gravity: number = 27;
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
@@ -114,7 +114,6 @@ class DynamicObject extends GameObject {
         if (!this.ignoreGravity) {
             this.velocity.y += this.gravity * deltaTime;
         }
-
         if (!this.ignoreFriction) {
             this.velocity.x *= 1 / (1 + (deltaTime * this.friction * this.frictionMultiplier));
         }

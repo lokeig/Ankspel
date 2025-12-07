@@ -11,11 +11,7 @@ class Player {
     constructor(local: boolean) {
         this.local = local;
         this.stateMachine = new StateMachine<PlayerState, IPlayerState>(PlayerState.Standard);
-        this.setCharacter({ x: 0, y: 0 });
-    }
-
-    private setCharacter(pos: Vector): void {
-        this.character = new PlayerCharacter({ ...pos });
+        this.character = new PlayerCharacter(new Vector());
         this.setupStateMachine();
     }
 

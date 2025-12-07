@@ -66,8 +66,7 @@ class ItemManager {
 
         for (let x = startX; x < endX; x += Grid.size) {
             for (let y = startY; y < endY; y += Grid.size) {
-                const gridPos = Grid.getGridPos({ x, y });
-
+                const gridPos = Grid.getGridPos(new Vector(x, y));
                 this.processItemArray(gridPos, result);
             }
         }

@@ -4,11 +4,11 @@ import { ItemType } from "./itemType";
 
 class ItemLogic {
     public body: DynamicObject;
-
-    public handOffset: Vector = { x: 0, y: 0 };
-    public holdOffset: Vector = { x: 0, y: 0 };
     public owned: boolean = false;
-    private hitboxOffset: Vector = { x: 0, y: 0 };
+
+    public handOffset = new Vector();
+    public holdOffset = new Vector();
+    private hitboxOffset = new Vector();
 
     public angle: number = 0;
     public rotateSpeed: number = 0;
@@ -65,14 +65,14 @@ class ItemLogic {
     }
 
     public getPickupHitbox(): GameObject {
-        return this.body.getScaled(this.hitboxOffset.x, this.hitboxOffset.y);
+        return this.body.scale(this.hitboxOffset.x, this.hitboxOffset.y);
     }
 
-    public getDrawpos(drawSize: number): Vector {
-        return {
-            x: this.body.pos.x + ((this.body.width - drawSize) / 2),
-            y: this.body.pos.y + ((this.body.height - drawSize) / 2)
-        };
+    public getDrawPos(drawSize: number): Vector {
+        return new Vector(
+            this.body.pos.x + ((this.body.width - drawSize) / 2),
+            this.body.pos.y + ((this.body.height - drawSize) / 2)
+        );
     }
 
     public isFlip(): boolean {
@@ -80,7 +80,7 @@ class ItemLogic {
     }
 
     public deletable(): boolean {
-        return !this.owned && this.body.grounded && Math.abs(this.body.velocity.x) < 0.3;;
+        return !this.owned && this.body.grounded && Math.abs(this.body.velocity.x) < 0.3;
     }
 }
 

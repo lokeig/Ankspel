@@ -19,16 +19,16 @@ class Shotgun implements IFirearm {
         this.setCommonInfo(pos);
         this.setupFirearmInfo();
     }
-    
+
     private setCommonInfo(pos: Vector): void {
         const width = 30;
         const height = 15;
         this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
-        this.common.holdOffset = { x: 14, y: -4 };
-        this.common.handOffset = { x: 4, y: 0 };
-        this.common.setHitboxOffset({ x: 30, y: 8 });
+        this.common.holdOffset = new Vector(14, -4);
+        this.common.handOffset = new Vector(4, 0);
+        this.common.setHitboxOffset(new Vector(30, 8));
     }
-    
+
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
         this.firearmInfo = new FirearmInfo();
@@ -37,8 +37,8 @@ class Shotgun implements IFirearm {
         this.firearmInfo.bulletCount = 10;
         this.firearmInfo.bulletAngleVariation = Math.PI / 12;
         this.firearmInfo.bulletLifespan = 0.11;
-        this.firearmInfo.pipeOffset = { x: 28, y: -10 };
-        this.firearmInfo.knockback = { x: 12, y: 4 };
+        this.firearmInfo.pipeOffset = new Vector(28, -10);
+        this.firearmInfo.knockback = new Vector(12, 4);
     }
 
     public update(deltaTime: number): void {
@@ -54,7 +54,7 @@ class Shotgun implements IFirearm {
         } else if (this.currentState === ShotgunState.reloadable) {
             return this.reload();
         } else {
-            return { x: 0, y: 0 };
+            return new Vector();
         }
     }
 
@@ -68,19 +68,19 @@ class Shotgun implements IFirearm {
     private reload(): Vector {
         this.handleLerp.startLerp(0, this.maxHandleOffset);
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.empty : ShotgunState.loaded;
-        return { x: 0, y: 0 };
+        return new Vector();
     }
 
     public draw(): void {
         const drawSize = 64;
-        const drawPos = this.common.getDrawpos(drawSize);
+        const drawPos = this.common.getDrawPos(drawSize);
         this.spriteSheet.draw(0, 0, drawPos, drawSize, this.common.isFlip(), this.common.angle);
 
-        const handleOffsetRotated = Utility.Angle.rotateForce({ x: this.handleOffset, y: 0 }, this.common.angle);
-        const handleDrawPos = {
-            x: drawPos.x + handleOffsetRotated.x * this.common.body.getDirectionMultiplier(),
-            y: drawPos.y + handleOffsetRotated.y
-        }
+        const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.common.angle);
+        const handleDrawPos = new Vector(
+            drawPos.x + handleOffsetRotated.x * this.common.body.getDirectionMultiplier(),
+            drawPos.y + handleOffsetRotated.y
+        )
         this.spriteSheet.draw(1, 0, handleDrawPos, drawSize, this.common.isFlip(), this.common.angle);
     }
 

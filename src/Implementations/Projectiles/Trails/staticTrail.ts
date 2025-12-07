@@ -24,10 +24,7 @@ class StaticTrail implements ITrail {
         if (this.removing) {
             this.removeUpdate(deltaTime);
         } else {
-            this.setTarget({
-                x: this.target.x + this.speed.x * deltaTime,
-                y: this.target.y + this.speed.y * deltaTime
-            });
+            this.setTarget(this.target.clone().add(this.speed.clone().multiply(deltaTime)));
         }
     }
 
@@ -41,7 +38,7 @@ class StaticTrail implements ITrail {
         if (passedTargetX || passedTargetY) {
             this.setToRemove = true;
         } else {
-            this.startingLocation = { x: nextX, y: nextY };
+            this.startingLocation = new Vector(nextX, nextY);
         }
     }
 
@@ -52,10 +49,10 @@ class StaticTrail implements ITrail {
 
         if (length > this.maxLength) {
             const ratio = this.maxLength / length;
-            this.startingLocation = {
-                x: target.x - DX * ratio,
-                y: target.y - DY * ratio,
-            };
+            this.startingLocation = new Vector(
+                target.x - DX * ratio,
+                target.y - DY * ratio,
+            );
         }
         this.target = target;
     }

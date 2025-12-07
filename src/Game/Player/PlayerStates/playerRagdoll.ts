@@ -1,8 +1,6 @@
-import { StateInterface, Countdown, SpriteSheet, images, Vector, Utility, PlayerState } from "@common";
-import { DynamicObject } from "@core";
+import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType } from "@common";
+import { DynamicObject, GameObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { ThrowType } from "../Character/throwType";
-import { ProjectileCollision } from "@projectile";
 import { IPlayerState } from "../IPlayerState";
 
 class PlayerRagdoll implements IPlayerState {
@@ -19,40 +17,76 @@ class PlayerRagdoll implements IPlayerState {
 
     private coyoteTime = new Countdown(0.15);
 
-    private spriteSheet: SpriteSheet;
-    private headProjectileCollision: ProjectileCollision;
-    private legsProjectileCollision: ProjectileCollision;
-
     constructor(playerCharacter: PlayerCharacter) {
-        const spriteInfo = Utility.File.getImage(images.playerImage);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
-
         this.playerCharacter = playerCharacter;
-        this.width = PlayerCharacter.standardWidth;
         this.height = PlayerCharacter.standardHeight / 3;
+        this.width = PlayerCharacter.standardWidth;
 
-        this.head = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
-        this.legs = new DynamicObject({ x: 0, y: 0 }, this.width, this.height);
-        this.body = new DynamicObject({ x: 0, y: 0 }, this.width, this.width);
+        this.head = new DynamicObject(new Vector(), this.width, this.height);
+        this.legs = new DynamicObject(new Vector(), this.width, this.height);
+        this.body = new DynamicObject(new Vector(), this.width, this.height);
 
         const bounceFactor = 0.5;
-        this.legs.bounceFactor = bounceFactor;
-        this.head.bounceFactor = bounceFactor;
-        this.body.bounceFactor = bounceFactor;
+        this.legs.bounceFactor = bounceFactor; this.head.bounceFactor = bounceFactor; this.body.bounceFactor = bounceFactor;
         this.body.ignorePlatforms = true;
         const friction = 8;
-        this.body.friction = friction;
-        this.head.friction = friction;
-        this.legs.friction = friction;
+        this.body.friction = friction; this.head.friction = friction; this.legs.friction = friction;
+    }
 
-        this.headProjectileCollision = new ProjectileCollision(this.head);
-        this.legsProjectileCollision = new ProjectileCollision(this.legs);
-        this.headProjectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerCharacter.dead = true;
-        })
-        this.legsProjectileCollision.setOnHit((hitpos: Vector) => {
-            this.playerCharacter.dead = true;
-        })
+    private handleInputs(deltaTime: number): void {
+    }
+
+    private setAngle(head: boolean): void {
+        const bodyCenter = this.body.getCenter();
+        const otherBodyCenter = head ? this.head.getCenter() : this.legs.getCenter();
+        const DX = bodyCenter.x - otherBodyCenter.x;
+        const DY = bodyCenter.y - otherBodyCenter.y;
+        const angle = (Math.atan2(DY, DX) - Math.PI / 2) * this.legs.getDirectionMultiplier();;
+        if (head) {
+            this.headAngle = angle;
+        } else {
+            this.legsAngle = angle;
+        }
+    }
+
+    public updateStandardBody(): void {
+        const pos = new Vector(
+            this.legs.pos.x,
+            this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
+        );
+        this.playerCharacter.body.grounded = true;
+        this.playerCharacter.setPos(pos);
+    }
+
+    private isGrounded(): boolean {
+        return this.head.grounded || this.legs.grounded || this.body.grounded;
+    }
+
+    private keepBodiesTogether(bodyPart1: DynamicObject, bodyPart2: DynamicObject, distanceBetweenBodies: number, allowLongerDistance: boolean): void {
+        const prevGrounded1 = bodyPart1.grounded;
+        const prevGrounded2 = bodyPart2.grounded;
+
+        const body1Center = bodyPart1.getCenter();
+        const body2Center = bodyPart2.getCenter();
+
+        const DX = body2Center.x - body1Center.x;
+        const DY = body2Center.y - body1Center.y;
+        const distance = Math.hypot(DX, DY);
+        if (allowLongerDistance && distance > distanceBetweenBodies) {
+            return;
+        }
+        const diff = (distance - distanceBetweenBodies) / distance;
+        const impulse = new Vector(DX * diff * 0.5, DY * diff * 0.5);
+
+        bodyPart1.velocity = impulse.clone();
+        bodyPart2.velocity = impulse.clone();
+
+        bodyPart1.updatePositions();
+        bodyPart2.updatePositions();
+        bodyPart1.grounded = prevGrounded1;
+        bodyPart2.grounded = prevGrounded2;
+        bodyPart1.velocity.add(impulse);
+        bodyPart2.velocity.subtract(impulse);
     }
 
     public stateEntered(): void {
@@ -62,14 +96,14 @@ class PlayerRagdoll implements IPlayerState {
         this.legs.direction = this.playerCharacter.body.direction;
 
         const pos = this.playerCharacter.body.pos;
-        this.head.pos = { x: pos.x, y: pos.y };
-        this.body.pos = { x: pos.x, y: pos.y + this.height };
-        this.legs.pos = { x: pos.x, y: pos.y + this.height * 2 };
+        this.head.pos = pos.clone();
+        this.body.pos = pos.clone().add(new Vector(0, this.height));
+        this.legs.pos = pos.clone().add(new Vector(0, this.height * 2));
 
-        const vel = this.playerCharacter.body.velocity;
-        this.head.velocity = { x: vel.x, y: vel.y };
-        this.body.velocity = { x: vel.x, y: vel.y };
-        this.legs.velocity = { x: vel.x, y: vel.y };
+        const velocity = this.playerCharacter.body.velocity;
+        this.head.velocity = velocity.clone();
+        this.body.velocity = velocity.clone();
+        this.legs.velocity = velocity.clone();
 
         if (this.playerCharacter.jump.isJumping) {
             const jumpLeft = this.playerCharacter.jump.getJumpRemaining();
@@ -78,15 +112,11 @@ class PlayerRagdoll implements IPlayerState {
             this.head.velocity.y -= jumpLeft * jumpCharge;
             this.legs.velocity.y -= jumpLeft * jumpCharge;
         }
-
         this.headAngle = 0;
         this.legsAngle = 0;
     }
 
     public stateUpdate(deltaTime: number): void {
-        this.headProjectileCollision.check();
-        this.legsProjectileCollision.check();
-
         this.coyoteTime.update(deltaTime);
         if (this.isGrounded()) {
             this.coyoteTime.reset();
@@ -106,122 +136,64 @@ class PlayerRagdoll implements IPlayerState {
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
             this.head.velocity.x = Utility.Random.getRandomNumber(-0.1, 0.1);
         }
-
         if (!this.playerCharacter.dead) {
             this.handleInputs(deltaTime);
         }
-
-        this.setHeadAngle();
-        this.setLegsAngle();
+        const head = true;
+        this.setAngle(head);
+        this.setAngle(!head);
     }
 
     public offlineUpdate(deltaTime: number): void {
-        this.headProjectileCollision.check();
-        this.legsProjectileCollision.check();
-    }
-
-    private isGrounded(): boolean {
-        return this.head.grounded || this.legs.grounded || this.body.grounded;
-    }
-
-    private keepBodiesTogether(bodyPart1: DynamicObject, bodyPart2: DynamicObject, distanceBetweenBodies: number, allowLongerDistance: boolean): void {
-        const body1Center = bodyPart1.getCenter();
-        const body2Center = bodyPart2.getCenter();
-
-        const DX = body2Center.x - body1Center.x;
-        const DY = body2Center.y - body1Center.y;
-
-        const distance = Math.hypot(DX, DY);
-        if (allowLongerDistance && distance > distanceBetweenBodies) {
-            return
-        }
-        const diff = (distance - distanceBetweenBodies) / distance;
-
-        const impulseX = DX * diff * 0.5;
-        const impulseY = DY * diff * 0.5;
-
-        const prevBody1Vel = { x: bodyPart1.velocity.x, y: bodyPart1.velocity.y };
-        const prevBody2Vel = { x: bodyPart2.velocity.x, y: bodyPart2.velocity.y };
-
-        bodyPart1.velocity.x = impulseX;
-        bodyPart1.velocity.y = impulseY;
-        bodyPart2.velocity.x = -impulseX;
-        bodyPart2.velocity.y = -impulseY;
-
-        bodyPart1.updatePositions();
-        bodyPart2.updatePositions();
-
-        bodyPart1.velocity = {
-            x: prevBody1Vel.x + impulseX,
-            y: prevBody1Vel.y + impulseY
-        };
-
-        bodyPart2.velocity = {
-            x: prevBody2Vel.x - impulseX,
-            y: prevBody2Vel.y - impulseY
-        };
-    }
-
-    private setHeadAngle(): void {
-        const bodyCenter = this.body.getCenter();
-        const headCenter = this.head.getCenter();
-        const DX = bodyCenter.x - headCenter.x;
-        const DY = bodyCenter.y - headCenter.y;
-        const angle = Math.atan2(DY, DX);
-        this.headAngle = (angle - Math.PI / 2) * this.legs.getDirectionMultiplier();
-
-    }
-
-    private setLegsAngle(): void {
-        const bodyCenter = this.body.getCenter();
-        const legsCenter = this.legs.getCenter();
-        const DX = bodyCenter.x - legsCenter.x;
-        const DY = bodyCenter.y - legsCenter.y;
-        const angle = Math.atan2(DY, DX);
-        this.legsAngle = (angle + Math.PI / 2) * this.legs.getDirectionMultiplier();
-    }
-
-    private handleInputs(deltaTime: number): void {
     }
 
     public stateChange(): PlayerState {
         if (this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
-        this.updateStandard();
-        const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump();
+        this.updateStandardBody();
+        const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump(InputMode.Press);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
             return PlayerState.Standard;
         }
         return PlayerState.Ragdoll;
     }
 
-    public updateStandard(): void {
-        const pos = {
-            x: this.legs.pos.x,
-            y: this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
-        };
-        this.playerCharacter.body.grounded = true;
-        this.playerCharacter.setPos(pos);
-    }
-
     public stateExited(): void {
-        this.updateStandard();
+        this.updateStandardBody();
         const jumpHeight = 25;
         const exitVerticalSpeed = -5;
         this.playerCharacter.body.pos.y -= jumpHeight;
-        this.playerCharacter.body.velocity = { x: this.body.velocity.x, y: exitVerticalSpeed };
+        this.playerCharacter.body.velocity = new Vector(this.body.velocity.x, exitVerticalSpeed);
+    }
+
+    public getHeadCollision(body: GameObject): boolean {
+        return body.collision(this.head);
+    }
+
+    public getBodyCollision(body: GameObject): boolean {
+        return body.collision(this.body);
+    }
+
+    public getLegsCollision(body: GameObject): boolean {
+        return body.collision(this.legs);
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {
         const x = bodyPart.pos.x + (this.width - this.playerCharacter.drawSize) / 2;
         const y = bodyPart.pos.y + (this.height - this.playerCharacter.drawSize) / 2;
-        return { x, y };
+        return new Vector(x, y);
     }
 
     public draw(): void {
-        this.spriteSheet.draw(8, 0, this.getDrawPos(this.head), this.playerCharacter.drawSize, this.head.isFlip(), this.headAngle);
-        this.spriteSheet.draw(9, 0, this.getDrawPos(this.legs), this.playerCharacter.drawSize, this.head.isFlip(), this.legsAngle);
+        this.playerCharacter.animator.drawRagdoll(
+            this.getDrawPos(this.head),
+            this.getDrawPos(this.legs),
+            this.playerCharacter.drawSize,
+            this.headAngle,
+            this.legsAngle,
+            this.head.isFlip()
+        );
     }
 }
 

@@ -6,10 +6,10 @@ class VectorUtility {
         const result = [];
         for (let i = 0; i < amountOfPoints; i++) {
             const angle = i * 2 * Math.PI / amountOfPoints
-            const currentPoint = {
-                x: center.x + Math.cos(angle) * radius,
-                y: center.y + Math.sin(angle) * radius 
-            };
+            const currentPoint = new Vector(
+                center.x + Math.cos(angle) * radius,
+                center.y + Math.sin(angle) * radius
+            )
             result.push(currentPoint);
         }
         return result;

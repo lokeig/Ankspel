@@ -1,8 +1,8 @@
 import { IItem, ItemManager, ItemType, IFirearm, IExplosive } from "@game/Item";
 import { DynamicObject } from "@core";
-import { ThrowType } from "./throwType";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
+import { InputMode, ThrowType } from "@common";
 
 class PlayerItemManager {
     private playerCharacter: DynamicObject;
@@ -20,14 +20,8 @@ class PlayerItemManager {
 
     public update(deltaTime: number) {
         this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
-<<<<<<< HEAD:src/Game/Player/Character/playerItemHolder.ts
-        if (this.controls.pickup()) {
-            if (this.holding) {
-=======
-        const press = true;
-        if (this.controls.pickup(press)) {
+        if (this.controls.pickup(InputMode.Press)) {
             if (this.equipment.isHolding()) {
->>>>>>> 8d7c288f463b044635f0d6e387eb9b539c948159:src/Game/Player/Character/playerItemManager.ts
                 this.throw(this.getThrowType());
             } else {
                 const nextItem = this.getNearbyItem();
@@ -37,14 +31,9 @@ class PlayerItemManager {
             }
         }
 
-<<<<<<< HEAD:src/Game/Player/Character/playerItemHolder.ts
-        if (this.holding && this.controls.shoot()) {
-            switch (this.holding.common.getType()) {
-=======
-        if (this.equipment.isHolding() && this.controls.shoot(press)) {
+        if (this.equipment.isHolding() && this.controls.shoot(InputMode.Press)) {
             const item = this.equipment.getHolding();
             switch (item.common.getType()) {
->>>>>>> 8d7c288f463b044635f0d6e387eb9b539c948159:src/Game/Player/Character/playerItemManager.ts
                 case (ItemType.fireArm): {
                     const knockback = (item as IFirearm).shoot();
                     this.playerCharacter.velocity.x -= knockback.x;

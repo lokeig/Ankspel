@@ -1,9 +1,6 @@
 import { GameServer, GMsgType, ILobbyList } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
-import { PlayerManager } from "@player";
-import { MapManager } from "@game/Map";
-import { GameLoopUtility } from "@game/GameLoop/gameLoopUtility";
 
 class LobbyListCSS implements ILobbyList {
     private mainDiv: HTMLElement;

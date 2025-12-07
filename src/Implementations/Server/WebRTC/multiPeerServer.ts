@@ -106,7 +106,6 @@ class MultiPeerServer implements ServerIF {
                 break;
 
             case SMsgType.connected:
-                console.log("Connected with ID:", data.clientID);
                 this.myID = data.clientID;
                 this.emitter.publish(GMsgType.newPlayer, { local: true, id: data.clientID });
                 break;

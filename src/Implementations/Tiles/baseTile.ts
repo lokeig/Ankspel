@@ -1,7 +1,7 @@
 import { Vector, SpriteSheet, Side, Direction } from "@common";
 import { StaticObject } from "@core";
-import { ITile } from "../../Game/StaticObjects/Tiles/ITile";
 import { lipLeftLookup, lipRightLookup, spriteLookup } from "./spriteLookup";
+import { ITile } from "@game/StaticObjects/Tiles";
 
 abstract class BaseTile implements ITile {
     public body: StaticObject;

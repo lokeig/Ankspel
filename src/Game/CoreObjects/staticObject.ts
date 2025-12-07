@@ -21,7 +21,7 @@ class StaticObject extends GameObject {
         }
     }
 
-    public getLip(direction: Side) {
+    public getLip(direction: Side): boolean {
         if (direction === Side.left) {
             return this.lipLeft;
         } else {
@@ -29,17 +29,17 @@ class StaticObject extends GameObject {
         }
     }
 
-    public getLipDrawPos(side: Side) {
+    public getLipDrawPos(side: Side): Vector {
         if (side === Side.left) {
-            return {
-                x: this.pos.x - this.width,
-                y: this.pos.y
-            };
+            return new Vector(
+                this.pos.x - this.width,
+                this.pos.y
+            )
         } else {
-            return {
-                x: this.pos.x + this.width,
-                y: this.pos.y
-            };
+            return new Vector(
+                this.pos.x + this.width,
+                this.pos.y
+            )
         }
     }
 

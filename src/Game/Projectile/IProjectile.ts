@@ -1,5 +1,6 @@
 import { DynamicObject } from "@core";
 import { ITrail } from "./ITrail";
+import { Vector } from "@common";
 
 interface IProjectile {
     body: DynamicObject;
@@ -9,4 +10,7 @@ interface IProjectile {
     shouldBeDeleted(): boolean;
 }
 
-export type { IProjectile };
+type ProjecttileConstructor = new (pos: Vector) => IProjectile;
+
+
+export type { IProjectile, ProjecttileConstructor };

@@ -5,7 +5,7 @@ import { PlayerItemManager } from "./playerItemManager";
 import { PlayerJump } from "./playerJump";
 import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
-import { playerAnimation } from "./playerAnimation";
+import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
 
 class PlayerCharacter {
@@ -15,7 +15,7 @@ class PlayerCharacter {
     public static readonly standardWidth: number = 18;
 
     public body: DynamicObject;
-    public animator: playerAnimation;
+    public animator: PlayerAnimation;
     public armFront = new PlayerArm();
     public dead: boolean = false;
 
@@ -27,7 +27,7 @@ class PlayerCharacter {
 
     constructor(pos: Vector) {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
-        this.animator = new playerAnimation();
+        this.animator = new PlayerAnimation();
         this.equipment = new PlayerEquipment();
     }
 
@@ -39,7 +39,7 @@ class PlayerCharacter {
     }
 
     private setArmPos(): void {
-        let offset = { x: 0, y: 0 };
+        let offset = new Vector();
         if (this.equipment.isHolding()) {
             offset = this.equipment.getHolding().common.handOffset;
         }
@@ -55,10 +55,7 @@ class PlayerCharacter {
         item.body.setCenterToPos(this.armFront.getCenter());
         item.body.direction = this.body.direction;
         item.angle = this.armFront.angle;
-        const offset = Utility.Angle.rotateForce(
-            { x: item.holdOffset.x, y: item.holdOffset.y },
-            item.angle
-        );
+        const offset = Utility.Angle.rotateForce(item.holdOffset, item.angle);
         item.body.pos.x += offset.x * this.body.getDirectionMultiplier();
         item.body.pos.y += offset.y;
     }
@@ -108,14 +105,14 @@ class PlayerCharacter {
             return false;
         }
         const item = this.equipment.getHolding().common;
-        const tempItemPos = {
-            x: item.body.pos.x,
-            y: item.body.pos.y
-        };
+        const tempItemPos = item.body.pos.clone();
+
         item.body.setCenterToPos(this.armFront.getCenter());
         item.body.pos.x += item.holdOffset.x * this.body.getDirectionMultiplier();
         item.body.pos.y += item.holdOffset.y;
+
         const collision = item.body.getHorizontalTileCollision();
+        
         item.body.pos = tempItemPos;
 
         return collision !== undefined;
@@ -139,7 +136,7 @@ class PlayerCharacter {
     public getDrawPos(): Vector {
         const x = this.body.pos.x + ((this.body.width - this.drawSize) / 2);
         const y = this.body.pos.y + (this.body.height - this.drawSize);
-        return { x, y };
+        return new Vector(x, y);
     }
 
     public draw(): void {

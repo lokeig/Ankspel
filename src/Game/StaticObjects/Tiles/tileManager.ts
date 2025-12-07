@@ -38,12 +38,11 @@ class TileManager {
 
         for (let x = startX; x < endX; x += Grid.size) {
             for (let y = startY; y < endY; y += Grid.size) {
-                const gridPos = Grid.getGridPos({ x, y });
+                const gridPos = Grid.getGridPos(new Vector(x, y));
 
                 this.processTile(gridPos, result);
             }
         }
-
         return result;
     }
 
@@ -58,13 +57,13 @@ class TileManager {
         accumulatedCollidable.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
 
         if (tile.body.getLip(Side.left)) {
-            const lipLeft = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
+            const lipLeft = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
             lipLeft.pos.x -= tileObj.getLipWidth();
             accumulatedCollidable.push({ gameObject: lipLeft, platform: true });
         }
 
         if (tile.body.getLip(Side.right)) {
-            const lipRight = new GameObject({...tileObj.pos}, tileObj.getLipWidth(), tileObj.height);
+            const lipRight = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
             lipRight.pos.x += tileObj.width;
             accumulatedCollidable.push({ gameObject: lipRight, platform: true });
         }
@@ -76,14 +75,14 @@ class TileManager {
 
     private static shift(gridPos: Vector, direction: Direction): Vector {
         switch (direction) {
-            case Direction.left: return { x: gridPos.x - 1, y: gridPos.y };
-            case Direction.right: return { x: gridPos.x + 1, y: gridPos.y };
-            case Direction.top: return { x: gridPos.x, y: gridPos.y - 1 };
-            case Direction.bot: return { x: gridPos.x, y: gridPos.y + 1 };
-            case Direction.topLeft: return { x: gridPos.x - 1, y: gridPos.y - 1 };
-            case Direction.topRight: return { x: gridPos.x + 1, y: gridPos.y - 1 };
-            case Direction.botLeft: return { x: gridPos.x - 1, y: gridPos.y + 1 };
-            case Direction.botRight: return { x: gridPos.x + 1, y: gridPos.y + 1 };
+            case Direction.left: return new Vector(gridPos.x - 1, gridPos.y);
+            case Direction.right: return new Vector(gridPos.x + 1, gridPos.y);
+            case Direction.top: return new Vector(gridPos.x, gridPos.y - 1);
+            case Direction.bot: return new Vector(gridPos.x, gridPos.y + 1);
+            case Direction.topLeft: return new Vector(gridPos.x - 1, gridPos.y - 1);
+            case Direction.topRight: return new Vector(gridPos.x + 1, gridPos.y - 1);
+            case Direction.botLeft: return new Vector(gridPos.x - 1, gridPos.y + 1);
+            case Direction.botRight: return new Vector(gridPos.x + 1, gridPos.y + 1);
         }
     }
 

@@ -30,7 +30,6 @@ class ProjectileManager {
                 projectile.update(deltaTime);
             }
         }
-
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }
 
@@ -61,8 +60,7 @@ class ProjectileManager {
 
         for (let x = startX; x < endX; x += Grid.size) {
             for (let y = startY; y < endY; y += Grid.size) {
-                const gridPos = Grid.getGridPos({ x, y });
-
+                const gridPos = Grid.getGridPos(new Vector(x, y));
                 this.processProjectileSet(gridPos, result);
             }
         }

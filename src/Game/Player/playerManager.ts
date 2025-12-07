@@ -46,7 +46,7 @@ class PlayerManager {
     }
 
     public static addPlayer(local: boolean, id: string): Player {
-        const pos = { x: 0, y: 0 };
+        const pos = new Vector();
         const player = new Player(local);
 
         const playerSet = this.getPlayerSet(pos);

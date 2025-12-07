@@ -1,4 +1,4 @@
 export type { ITrail } from "./ITrail";
-export type { IProjectile as ProjectileInterface } from "./IProjectile";
+export type { IProjectile, ProjecttileConstructor } from "./IProjectile";
 export { ProjectileManager } from "./projectileManager";
 export { ProjectileCollision } from "./projectileCollision";

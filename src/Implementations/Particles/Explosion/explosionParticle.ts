@@ -36,11 +36,7 @@ class ExplosionParticle {
     }
 
     private getDrawPos(): Vector {
-        return {
-            x: this.pos.x - (this.drawSize / 2),
-            y: this.pos.y - (this.drawSize / 2)
-        };
-
+        return this.pos.clone().subtract(this.drawSize / 2);
     }
 
     public draw(): void {

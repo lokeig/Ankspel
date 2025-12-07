@@ -59,6 +59,22 @@
         }
       ]
     },
+    "upperRagdoll": {
+      "frames": [
+        {
+          "row": 8,
+          "col": 0
+        }
+      ]
+    },
+    "lowerRagdoll": {
+      "frames": [
+        {
+          "row": 9,
+          "col": 0
+        }
+      ]
+    },
     "itemHolding": {
       "frames": [
         {

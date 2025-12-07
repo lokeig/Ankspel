@@ -1,3 +1,4 @@
+import { NetworkHandler } from "@game/GameLoop/networkHandler";
 import { Vector } from "../Types/vector";
 
 class Input {
@@ -5,7 +6,9 @@ class Input {
     private static keysPressed: Set<string> = new Set();
     private static mouseClickBool: boolean = false;
     private static mouseDownBool: boolean = false;
-    private static mousePos: Vector = { x: 0, y: 0 }
+    private static mousePos: Vector = new Vector();
+
+    private static quickStartAllowed: boolean = true;
 
     static init() {
 
@@ -18,6 +21,11 @@ class Input {
             if ((e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
                 e.preventDefault();
             }
+
+            if (e.key === "q" && this.quickStartAllowed) {
+                NetworkHandler.quickStart();
+                this.quickStartAllowed = false;
+            }
         });
 
         window.addEventListener('keyup', e => {
@@ -28,7 +36,7 @@ class Input {
         window.addEventListener("mousedown", (e) => {
             this.mouseClickBool = true;
             this.mouseDownBool = true;
-            this.mousePos = { x: e.clientX, y: e.clientY };
+            this.mousePos = new Vector(e.clientX, e.clientY);
         });
 
         window.addEventListener("mouseup", () => {
@@ -36,7 +44,7 @@ class Input {
         });
 
         window.addEventListener("mousemove", (e) => {
-            this.mousePos = { x: e.clientX, y: e.clientY }
+            this.mousePos = new Vector(e.clientX, e.clientY);
         });
     }
 

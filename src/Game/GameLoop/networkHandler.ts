@@ -7,7 +7,7 @@ import { Grid, PlayerState, Utility } from "@common";
 
 class NetworkHandler {
     private static readyCount = 0;
-    private static onStart: (t: number) => void = () => {};
+    private static onStart: (t: number) => void = () => { };
     static init() {
         const emitter = GameServer.get().emitter;
 
@@ -51,7 +51,6 @@ class NetworkHandler {
         emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
-                console.log("Sending non existing playerID: ", id);
                 return;
             }
             player.character.setPos(pos);
@@ -66,7 +65,14 @@ class NetworkHandler {
             player.character.armFront.angle = armAngle;
         });
 
-        emitter.subscribe(GMsgType.startGame, ({ time }) => {this.onStart(time) });
+        emitter.subscribe(GMsgType.startGame, ({ time }) => { this.onStart(time) });
+    }
+
+    public static quickStart(): void {
+        const map = MapManager.getMap("defaultMap");
+        this.loadMap(map);
+        this.hostInitializeMap(map);
+        this.onStart(0);
     }
 
     public static setStart(e: (t: number) => void) {
@@ -121,25 +127,12 @@ class NetworkHandler {
         }
     }
 
-    public static quickLoadForTest(): void {
-        const map = MapManager.getMap("defaultMap");
-        this.loadMap(map);
-        this.loadMapItems(map);
-        PlayerManager.addPlayer(true, "0");
-        const player = PlayerManager.getPlayerFromID("0")!;
-        const spawns = map.getRandomSpawnLocations(1);
-        const controls = Utility.File.getControls("players", 0);
-        player.character.setPos(spawns[0]);
-        player.setControls(controls);
-    }
-
     private static loadMapItems(map: GameMap): void {
         const items = map.getItems();
         for (const item of items) {
             const worldPos = Grid.getWorldPos(item.gridPos);
             const newItem = ItemManager.create(item.type, worldPos);
             if (!newItem) {
-                console.log("Could not find: " + item.type);
                 continue;
             }
             newItem.common.body.pos.x += (newItem.common.body.width - Grid.size) / 2;

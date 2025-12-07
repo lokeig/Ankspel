@@ -16,8 +16,6 @@ class GameLoop {
         this.stateMachine = new StateMachine(initalState);
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
         NetworkHandler.setStart((time: number) => { this.startGame(time); })
-        //   NetworkHandler.quickLoadForTest();
-        //  this.startGame(Date.now());
     }
 
     private startGame(time: number): void {
