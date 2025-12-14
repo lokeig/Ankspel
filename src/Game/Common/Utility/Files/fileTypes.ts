@@ -1,16 +1,24 @@
-import { ControlConfigJSON, ImageConfigJSON, AnimationConfigJSON } from "@config";
+import { controlConfigJSON, imageConfigJSON, animationConfigJSON, frameConfigJSON, tileLookupConfigJSON } from "@config";
 import { Controls } from "../../Types/controls";
-import { Frame } from "@game/Common/Sprite/Animation/frame";
+import { Frame } from "../../Sprite/Animation/frame";
+
+const imageTable: Record<string, ImageDefinition> = imageConfigJSON;
+const controlArray: Record<string, Array<Record<string, Controls>>> = controlConfigJSON;
+const animations: Record<string, Record<string, AnimationConfig>> = animationConfigJSON;
+const frames: Record<string, Record<string, Frame>> = frameConfigJSON;
+const tileLookup: TileLookupConfig = tileLookupConfigJSON;
+
+type TileLookupConfig = {
+    tileLookup: Record<string, number[]>;
+    lipLeft: number[];
+    lipRight: number[];
+};
 
 type ImageDefinition = {
     src: string;
     frameWidth: number;
     frameHeight: number;
 };
-
-const imageTable: Record<string, ImageDefinition> = ImageConfigJSON;
-const controlArray: Record<string, Array<Record<string, Controls>>> = ControlConfigJSON;
-const animations: Record<string, Record<string, AnimationConfig>> = AnimationConfigJSON;
 
 type AnimationConfig = {
     frameCount?: number;
@@ -23,9 +31,10 @@ type AnimationConfig = {
         rowCount: number;
         startCol: number;
         colCount: number;
+        exclude?: number;
     };
 };
 
 export type { ImageDefinition, Controls, AnimationConfig };
-export { imageTable, controlArray, animations };
+export { imageTable, controlArray, animations, frames, tileLookup };
 

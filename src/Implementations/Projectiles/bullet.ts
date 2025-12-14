@@ -1,49 +1,47 @@
-import { Countdown, Vector } from "@common";
+import { Countdown, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
 import { Render } from "@render";
-import { TileManager } from "@game/StaticObjects/Tiles";
-import { StaticTrail } from "./Trails/staticTrail";
+import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 
-class Bullet implements IProjectile {
-    private angle: number;
-    public body: DynamicObject;
+abstract class Bullet implements IProjectile {
+    private angle!: number;
+    public body!: DynamicObject;
     private lifespan!: Countdown;
-    public trail: StaticTrail;
+    public trail!: BulletTrail;
+    private delete: boolean = false;
 
-    constructor(pos: Vector, velocity: Vector, lifespan: number) {
+    constructor(pos: Vector, angle: number, speed: number, lifespan: number) {
+        const velocity = Utility.Angle.rotateForce(new Vector(speed, 0), angle);
         const size = 2;
-        this.body = new DynamicObject(pos, size, size);
+        this.body = new DynamicObject(pos.clone(), size, size);
         this.lifespan = new Countdown(lifespan);
 
         this.angle = Math.atan2(velocity.y, velocity.x);
         this.body.velocity = velocity.clone();
+        this.body.ignoreGravity = true;
+        this.body.ignoreFriction = true;
 
         const trailLength = 100;
         const trailPos = pos.clone().add(size / 2);
-        this.trail = new StaticTrail(trailPos, velocity.clone(), trailLength, size);
+        this.trail = new BulletTrail(trailPos, velocity.clone(), trailLength, size);
         this.trail.setTarget(trailPos);
     }
 
-    public getTrail(): StaticTrail {
+    public getTrail(): BulletTrail {
         return this.trail;
     }
 
     public update(deltaTime: number): void {
-        const prevPos: Vector = this.body.pos.clone();
-        this.body.collidableObjects = TileManager.getNearbyTiles(this.body.pos, this.body.width, this.body.height);
-        this.body.pos.x += this.body.velocity.x * deltaTime;
-        this.body.pos.y += this.body.velocity.y * deltaTime;
-
-        const dx = this.body.pos.x - prevPos.x;
-        const dy = this.body.pos.y - prevPos.y;
-        this.angle = Math.atan2(dy, dx);
-
+        this.body.update(deltaTime);
+        if (this.body.collided()) {
+            this.delete = true;
+        }
         this.lifespan.update(deltaTime);
     }
 
     public shouldBeDeleted(): boolean {
-        return this.body.getHorizontalTileCollision() !== undefined || this.lifespan.isDone();
+        return this.delete || this.lifespan.isDone();
     }
 
     public draw(): void {

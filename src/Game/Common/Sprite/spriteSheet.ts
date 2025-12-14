@@ -1,5 +1,6 @@
 import { DrawInfo, Rect, Render } from "@render";
 import { Vector } from "../Types/vector";
+import { Frame } from "./Animation/frame";
 
 class SpriteSheet {
     imageSrc: string;
@@ -12,7 +13,7 @@ class SpriteSheet {
         this.frameHeight = frameHeight;
     }
   
-    private getFrame(row: number, col: number): Rect {
+    private getSource(row: number, col: number): Rect {
         return {
             x: col * this.frameWidth,
             y: row * this.frameHeight,
@@ -21,10 +22,10 @@ class SpriteSheet {
         };
     }
 
-    public draw(row: number, col: number, pos: Vector, size: number, flip: boolean, angle: number): void {
+    public draw(frame: Frame, pos: Vector, size: number, flip: boolean, angle: number): void {
         const drawInfo: DrawInfo = {
             imageSrc: this.imageSrc,
-            source: this.getFrame(row, col),
+            source: this.getSource(frame.row, frame.col),
             world: { x: pos.x, y: pos.y, width: size, height: size },
             flip: flip,
             angle: angle
@@ -32,8 +33,8 @@ class SpriteSheet {
         Render.get().draw(drawInfo);
     }
 
-    public drawLine(row: number, col: number, pos1: Vector, pos2: Vector, width: number): void {
-        const source = this.getFrame(row, col);
+    public drawLine(frame: Frame, pos1: Vector, pos2: Vector, width: number): void {
+        const source = this.getSource(frame.row, frame.col);
         Render.get().drawLine(this.imageSrc, pos1.x, pos1.y, pos2.x, pos2.y, width, source);
     }
 }

@@ -1,7 +1,7 @@
-import { SpriteSheet, images, Vector, Utility } from "@common";
+import { SpriteSheet, images, Vector, Utility, Frame } from "@common";
 import { ITrail } from "@projectile";
 
-class StaticTrail implements ITrail {
+class BulletTrail implements ITrail {
     private spriteSheet: SpriteSheet;
     private startingLocation: Vector;
     private target!: Vector;
@@ -10,6 +10,7 @@ class StaticTrail implements ITrail {
     private speed: Vector;
     private removing: boolean = false;
     private setToRemove: boolean = false;
+    private frames = { default: new Frame() };
 
     constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
         const spriteInfo = Utility.File.getImage(images.trail);
@@ -18,19 +19,18 @@ class StaticTrail implements ITrail {
         this.maxLength = length;
         this.size = size;
         this.speed = speed;
+        Utility.File.setFrames("trail", this.frames);
     }
 
     public update(deltaTime: number) {
         if (this.removing) {
             this.removeUpdate(deltaTime);
-        } else {
-            this.setTarget(this.target.clone().add(this.speed.clone().multiply(deltaTime)));
         }
     }
 
     private removeUpdate(deltaTime: number) {
-        const nextX = this.startingLocation.x + this.speed.x * deltaTime;
-        const nextY = this.startingLocation.y + this.speed.y * deltaTime;
+        const nextX = this.startingLocation.x + this.speed.x * deltaTime * 60;
+        const nextY = this.startingLocation.y + this.speed.y * deltaTime * 60;
         const goingRight = this.speed.x > 0;
         const goingDown = this.speed.y > 0;
         const passedTargetX = goingRight ? nextX > this.target.x : nextX < this.target.x;
@@ -66,8 +66,8 @@ class StaticTrail implements ITrail {
     }
 
     public draw(): void {
-        this.spriteSheet.drawLine(0, 0, this.startingLocation, this.target, this.size);
+        this.spriteSheet.drawLine(this.frames.default, this.startingLocation, this.target, this.size);
     }
 }
 
-export { StaticTrail };
+export { BulletTrail };

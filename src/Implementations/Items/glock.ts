@@ -5,17 +5,19 @@ import { FirearmInfo } from "./firearmInfo";
 
 class Glock implements IFirearm {
     public common!: ItemLogic;
-    private defaultAnimation = new Animation();
-    private shootAnimation = new Animation();
+    private animations: Record<string, Animation> = {
+        default: new Animation(),
+        shoot: new Animation()
+    };
     private animator: SpriteAnimator;
     private firearmInfo!: FirearmInfo;
 
     constructor(pos: Vector) {
         const spriteInfo = Utility.File.getImage(images.glock);
-        this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.defaultAnimation);
+        Utility.File.setAnimations("glock", this.animations);
+        this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animations.default);
         this.setupCommon(pos);
         this.setupFirearmInfo();
-        this.setupAnimations();
     }
 
     private setupCommon(pos: Vector): void {
@@ -37,25 +39,17 @@ class Glock implements IFirearm {
         this.firearmInfo.pipeOffset = new Vector(14, -6);
     }
 
-    private setupAnimations(): void {
-        this.defaultAnimation.addFrame({ row: 0, col: 0 });
-        this.shootAnimation.addFrame({ row: 0, col: 1 });
-        this.shootAnimation.addFrame({ row: 0, col: 2 });
-        this.shootAnimation.addFrame({ row: 0, col: 3 });
-        this.shootAnimation.fps = 24;
-    }
-
     public update(deltaTime: number): void {
         this.common.update(deltaTime);
         this.animator.update(deltaTime);
         if (this.animator.animationDone()) {
-            this.animator.setAnimation(this.defaultAnimation);
+            this.animator.setAnimation(this.animations.default);
         }
     }
 
     public shoot(): Vector {
         this.animator.reset();
-        this.animator.setAnimation(this.shootAnimation);
+        this.animator.setAnimation(this.animations.shoot);
         return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip());
     }
 

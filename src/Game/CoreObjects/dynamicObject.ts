@@ -4,7 +4,7 @@ import { CollisionObject } from "./collisionObject";
 import { GameObject } from "./gameObject";
 
 class DynamicObject extends GameObject {
-    public collidableObjects: Array<CollisionObject> = [];
+    private collidableObjects: Array<CollisionObject> = [];
     public grounded: boolean = false;
     public collisions: Record<string, boolean> = {
         up: false,
@@ -31,6 +31,10 @@ class DynamicObject extends GameObject {
 
     public isFlip(): boolean {
         return this.direction === Side.left;
+    }
+
+    public collided(): boolean {
+        return this.grounded || this.collisions.side || this.collisions.up;
     }
 
     private handleTopCollision(gameObject: GameObject) {
@@ -125,18 +129,18 @@ class DynamicObject extends GameObject {
         this.velocity.y = Math.max(Math.min(this.velocity.y, maxSpeed), -maxSpeed);
     }
 
-    public updatePositions() {
+    public updatePositions(deltaTime: number) {
         this.collisions.up = false;
         this.collisions.side = false;
 
-        this.pos.x += this.velocity.x;
+        this.pos.x += this.velocity.x * deltaTime * 60;
         const horizontalCollidingTile = this.getHorizontalTileCollision();
         if (horizontalCollidingTile) {
             this.handleSideCollision(horizontalCollidingTile);
             this.collisions.side = true;
         }
 
-        this.pos.y += this.velocity.y;
+        this.pos.y += this.velocity.y * deltaTime * 60;
         const verticalCollidingTile = this.getVerticalTileCollision();
         if (verticalCollidingTile) {
             if (this.velocity.y > 0) {
@@ -152,7 +156,7 @@ class DynamicObject extends GameObject {
     public update(deltaTime: number) {
         this.setNewCollidableObjects();
         this.velocityPhysicsUpdate(deltaTime);
-        this.updatePositions();
+        this.updatePositions(deltaTime);
     }
 
     public onPlatform(): boolean {

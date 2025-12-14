@@ -1,14 +1,19 @@
 import { Grid, Vector } from "@common";
-import { IProjectile } from "./IProjectile";
+import { IProjectile, ProjectileConstructor } from "./IProjectile";
 import { ITrail } from "./ITrail";
+import { GameServer, GMsgType } from "@server";
 
 class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
+    private static IDToProjectile: Map<number, IProjectile> = new Map();
+    private static projectileToID: Map<IProjectile, number> = new Map();
     private static trails: Set<ITrail> = new Set();
+
+    private static register: Map<string, ProjectileConstructor> = new Map();
+    private static projectileIndex = 0;
 
     public static update(deltaTime: number) {
         this.updateMapPositions(deltaTime);
-
         for (const trail of this.trails) {
             trail.update(deltaTime);
             if (trail.shouldBeDeleted()) {
@@ -20,26 +25,55 @@ class ProjectileManager {
     private static updateMapPositions(deltaTime: number) {
         for (const projectileSet of this.projectiles.values()) {
             for (const projectile of projectileSet) {
-
                 if (projectile.shouldBeDeleted()) {
                     projectileSet.delete(projectile);
                     projectile.getTrail().setToDelete();
                     continue;
                 }
-
+                projectile.getTrail().setTarget(projectile.body.getCenter());
                 projectile.update(deltaTime);
             }
         }
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }
 
+    public static registerProjectile(type: string, constructor: ProjectileConstructor): void {
+        this.register.set(type, constructor);
+    }
+
+    private static setProjectileID(item: IProjectile, id: number) {
+        this.projectileToID.set(item, id);
+        this.IDToProjectile.set(id, item);
+    }
+
+    public static create(type: string, pos: Vector, angle: number): IProjectile | null {
+        const constructor = this.register.get(type);
+        if (!constructor) {
+            return null;
+        }
+        const result = new constructor(pos, angle);
+        this.addProjectile(result);
+        this.setProjectileID(result, this.projectileIndex++);
+        GameServer.get().sendMessage(GMsgType.spawnProjectile, { id: this.projectileIndex, location: pos, type, angle });
+        return result;
+    }
+
+    public static spawn(type: string, pos: Vector, angle: number, id: number): void {
+        pos = new Vector(pos.x, pos.y);
+        const constructor = this.register.get(type);
+        if (!constructor) {
+            return;
+        }
+        const newProjectile = new constructor(pos, angle);
+        this.addProjectile(newProjectile);
+        this.setProjectileID(newProjectile, id);
+    }
 
     public static getProjectiles(pos: Vector): Set<IProjectile> | undefined {
         return this.projectiles.get(Grid.key(pos));
     }
 
-
-    public static addProjectile(newProjectile: IProjectile) {
+    private static addProjectile(newProjectile: IProjectile) {
         const gridPos = Grid.getGridPos(newProjectile.body.pos);
         const projectileSet = this.getProjectiles(gridPos);
         if (!projectileSet) {
@@ -47,7 +81,14 @@ class ProjectileManager {
         }
         this.getProjectiles(gridPos)!.add(newProjectile);
         this.trails.add(newProjectile.getTrail());
+    }
 
+    public static getProjectileFromID(id: number): IProjectile | undefined {
+        return this.IDToProjectile.get(id);
+    }
+
+    public static getProjectileID(item: IProjectile): number | undefined {
+        return this.projectileToID.get(item);
     }
 
     public static getNearbyProjectiles(pos: Vector, width: number, height: number): IProjectile[] {
@@ -64,7 +105,6 @@ class ProjectileManager {
                 this.processProjectileSet(gridPos, result);
             }
         }
-
         return result;
     }
 
@@ -81,13 +121,13 @@ class ProjectileManager {
     }
 
     public static draw() {
+        for (const trail of this.trails.values()) {
+            trail.draw();
+        }
         for (const projectileArray of this.projectiles.values()) {
             for (const projectile of projectileArray) {
                 projectile.draw();
             }
-        }
-        for (const trail of this.trails.values()) {
-            trail.draw();
         }
     }
 }

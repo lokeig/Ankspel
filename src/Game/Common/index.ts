@@ -5,10 +5,10 @@ export { lerpTriangle } from "./Lerp/Functions/lerpTriangle";
 export { lerpStandard } from "./Lerp/Functions/lerpStandard";
 
 // Sprite
-export { SpriteSheet } from "./Sprite/sprite";
+export { SpriteSheet } from "./Sprite/spriteSheet";
 export { SpriteAnimator } from "./Sprite/spriteAnimator";
 export { Animation } from "./Sprite/Animation/animation";
-export type { Frame } from "./Sprite/Animation/frame";
+export { Frame } from "./Sprite/Animation/frame";
 
 // StateMachine
 export { StateMachine } from "./StateMachine/stateMachine";

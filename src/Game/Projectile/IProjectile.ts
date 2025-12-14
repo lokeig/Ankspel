@@ -10,7 +10,6 @@ interface IProjectile {
     shouldBeDeleted(): boolean;
 }
 
-type ProjecttileConstructor = new (pos: Vector) => IProjectile;
+type ProjectileConstructor = new (pos: Vector, angle: number) => IProjectile;
 
-
-export type { IProjectile, ProjecttileConstructor };
+export type { IProjectile, ProjectileConstructor };

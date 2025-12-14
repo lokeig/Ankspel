@@ -30,7 +30,9 @@ class Player {
     }
 
     public setState(state: PlayerState): void {
-        this.stateMachine.forceState(state);
+        if (state !== this.stateMachine.getState()) {
+            this.stateMachine.forceState(state);
+        }
     }
 
     public getState(): PlayerState {

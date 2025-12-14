@@ -8,7 +8,7 @@ class ExplosionParticle {
     private drawSize: number = 128;
 
     private animator: SpriteAnimator;
-    private animation = new Animation;
+    private animations: Record<string, Animation> = { animation: new Animation };
     public setToDelete: boolean = false;
 
     constructor(pos: Vector, rotation: number, scale: number) {
@@ -17,10 +17,8 @@ class ExplosionParticle {
         this.angle = rotation;
 
         const spriteInfo = Utility.File.getImage(images.explosion);
-        this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animation);
-        this.animation.fps = 24;
-        const framesWide = 4;
-        this.animation.addSegment(0, 10, framesWide);
+        this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animations.animation);
+        Utility.File.setAnimations("explosive", this.animations);
     }
 
 

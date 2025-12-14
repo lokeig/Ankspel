@@ -121,8 +121,11 @@
         "startRow": 0,
         "rowCount": 3,
         "startCol": 0,
-        "colCount": 4
-      }
+        "colCount": 4,
+        "exclude": 1
+      },
+
+      "fps": 24
     }
   }
 }

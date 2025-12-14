@@ -1,16 +1,14 @@
 import { Vector, Utility } from "@common";
 import { ProjectileManager } from "@game/Projectile";
-import { Bullet } from "@impl/Projectiles";
 
 class FirearmInfo {
 
     public knockback = new Vector();
     public bulletAngleVariation: number = 0;
-    public bulletSpeed: number = 2300;
     public pipeOffset = new Vector();
-    public bulletLifespan: number = 0.2;
     public ammo: number = 10;
     public bulletCount: number = 1;
+    public projectile!: string;
 
     public shoot(centerPos: Vector, angle: number, flip: boolean): Vector {
         if (this.ammo < 1) {
@@ -24,10 +22,9 @@ class FirearmInfo {
             centerPos.y + offset.y
         );
         for (let i = 0; i < this.bulletCount; i++) {
-            const shotAngle = angle + Utility.Random.getRandomNumber(-this.bulletAngleVariation, this.bulletAngleVariation);
-            const speed = Utility.Angle.rotateForce(new Vector(this.bulletSpeed, 0), shotAngle);
-            speed.x *= direcMult;
-            ProjectileManager.addProjectile(new Bullet(pos.clone(), speed, this.bulletLifespan));
+            let shotAngle = angle + Utility.Random.getRandomNumber(-this.bulletAngleVariation, this.bulletAngleVariation);
+            shotAngle = flip ? Math.PI - shotAngle : shotAngle;
+            ProjectileManager.create(this.projectile, pos, shotAngle);
         }
         return this.getKnockback(angle, flip);
     }

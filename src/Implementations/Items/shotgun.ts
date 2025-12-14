@@ -1,4 +1,4 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame } from "@common";
 import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
@@ -8,6 +8,11 @@ class Shotgun implements IFirearm {
     private handleOffset: number = 0;
     private maxHandleOffset: number = -4;
     private handleLerp = new Lerp(6, lerpTriangle)
+    
+    private frames = {
+        gun: new Frame(),
+        handle: new Frame()
+    }
 
     private currentState: ShotgunState = ShotgunState.loaded;
     private spriteSheet: SpriteSheet;
@@ -16,6 +21,7 @@ class Shotgun implements IFirearm {
     constructor(pos: Vector) {
         const spriteInfo = Utility.File.getImage(images.shotgun);
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        Utility.File.setFrames("shotgun", this.frames);
         this.setCommonInfo(pos);
         this.setupFirearmInfo();
     }
@@ -31,12 +37,10 @@ class Shotgun implements IFirearm {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
-        this.firearmInfo = new FirearmInfo();
-        this.firearmInfo = new FirearmInfo;
+        this.firearmInfo.projectile = "shotgunBullet";
         this.firearmInfo.ammo = 2;
         this.firearmInfo.bulletCount = 10;
         this.firearmInfo.bulletAngleVariation = Math.PI / 12;
-        this.firearmInfo.bulletLifespan = 0.11;
         this.firearmInfo.pipeOffset = new Vector(28, -10);
         this.firearmInfo.knockback = new Vector(12, 4);
     }
@@ -74,14 +78,14 @@ class Shotgun implements IFirearm {
     public draw(): void {
         const drawSize = 64;
         const drawPos = this.common.getDrawPos(drawSize);
-        this.spriteSheet.draw(0, 0, drawPos, drawSize, this.common.isFlip(), this.common.angle);
+        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.common.isFlip(), this.common.angle);
 
         const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.common.angle);
         const handleDrawPos = new Vector(
             drawPos.x + handleOffsetRotated.x * this.common.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        this.spriteSheet.draw(1, 0, handleDrawPos, drawSize, this.common.isFlip(), this.common.angle);
+        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.common.isFlip(), this.common.angle);
     }
 
     public shouldBeDeleted(): boolean {

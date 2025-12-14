@@ -1,4 +1,4 @@
-import { Vector, Lerp, lerpAngle, Utility } from "@common";
+import { Vector, Lerp, lerpAngle, Utility, ThrowType } from "@common";
 import { DynamicObject, GameObject } from "@core";
 import { ItemType } from "./itemType";
 
@@ -62,6 +62,39 @@ class ItemLogic {
         }
 
         this.angle += this.rotateSpeed * deltaTime;
+    }
+
+    public throw(throwType: ThrowType): void {
+        this.body.grounded = false;
+        const direcMult = this.body.getDirectionMultiplier();
+
+        switch (throwType) {
+            case (ThrowType.light): {
+                this.body.velocity = new Vector(3.5 * direcMult, -3.5);
+                this.rotateSpeed = 10;
+                break;
+            }
+            case (ThrowType.hard): {
+                this.body.velocity = new Vector(15 * direcMult, -5);
+                this.rotateSpeed = 15;
+                break;
+            }
+            case (ThrowType.hardDiagonal): {
+                this.body.velocity = new Vector(15 * direcMult, -10);
+                this.rotateSpeed = 15;
+                break;
+            }
+            case (ThrowType.drop): {
+                this.body.velocity = new Vector(0 * direcMult, 0);
+                this.rotateSpeed = 5;
+                break;
+            }
+            case (ThrowType.upwards): {
+                this.body.velocity = new Vector(0 * direcMult, -10);
+                this.rotateSpeed = 8;
+                break;
+            }
+        }
     }
 
     public getPickupHitbox(): GameObject {

@@ -1,4 +1,4 @@
-import { SpriteSheet, images, Countdown, Vector, Utility } from "@common";
+import { SpriteSheet, images, Countdown, Vector, Utility, Frame } from "@common";
 import { IExplosive, ItemLogic, ItemType } from "@game/Item";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
@@ -10,7 +10,7 @@ class Grenade implements IExplosive {
     private spriteSheet: SpriteSheet;
     private drawSize: number = 32;
     private setToDelete: boolean = false;
-
+    private frames = { pinned: new Frame(), default: new Frame() };
     private explosionDelay = new Countdown(2);
     private activated: boolean = false;
 
@@ -24,6 +24,7 @@ class Grenade implements IExplosive {
 
         this.common.holdOffset = new Vector(12, -6)
         this.common.setHitboxOffset(new Vector(30, 30));
+        Utility.File.setFrames("grenade", this.frames);
     }
 
     public update(deltaTime: number): void {
@@ -53,8 +54,8 @@ class Grenade implements IExplosive {
     }
 
     public draw(): void {
-        const col = this.activated ? 1 : 0;
-        this.spriteSheet.draw(0, col, this.common.getDrawPos(this.drawSize), this.drawSize, this.common.isFlip(), this.common.angle)
+        const frame = this.activated ? this.frames.pinned : this.frames.default;
+        this.spriteSheet.draw(frame, this.common.getDrawPos(this.drawSize), this.drawSize, this.common.isFlip(), this.common.angle)
     }
 
     public shouldBeDeleted(): boolean {

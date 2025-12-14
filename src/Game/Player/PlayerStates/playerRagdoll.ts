@@ -24,13 +24,17 @@ class PlayerRagdoll implements IPlayerState {
 
         this.head = new DynamicObject(new Vector(), this.width, this.height);
         this.legs = new DynamicObject(new Vector(), this.width, this.height);
-        this.body = new DynamicObject(new Vector(), this.width, this.height);
+        this.body = new DynamicObject(new Vector(), this.width, this.width);
 
         const bounceFactor = 0.5;
-        this.legs.bounceFactor = bounceFactor; this.head.bounceFactor = bounceFactor; this.body.bounceFactor = bounceFactor;
+        this.head.bounceFactor = bounceFactor; 
+        this.body.bounceFactor = bounceFactor;
+        this.legs.bounceFactor = bounceFactor; 
         this.body.ignorePlatforms = true;
         const friction = 8;
-        this.body.friction = friction; this.head.friction = friction; this.legs.friction = friction;
+        this.head.friction = friction; 
+        this.body.friction = friction; 
+        this.legs.friction = friction;
     }
 
     private handleInputs(deltaTime: number): void {
@@ -41,11 +45,11 @@ class PlayerRagdoll implements IPlayerState {
         const otherBodyCenter = head ? this.head.getCenter() : this.legs.getCenter();
         const DX = bodyCenter.x - otherBodyCenter.x;
         const DY = bodyCenter.y - otherBodyCenter.y;
-        const angle = (Math.atan2(DY, DX) - Math.PI / 2) * this.legs.getDirectionMultiplier();;
+        const angle = Math.atan2(DY, DX);
         if (head) {
-            this.headAngle = angle;
+            this.headAngle = (angle - (Math.PI / 2)) * this.head.getDirectionMultiplier();
         } else {
-            this.legsAngle = angle;
+            this.legsAngle = (angle + (Math.PI / 2)) * this.legs.getDirectionMultiplier();
         }
     }
 
@@ -77,16 +81,16 @@ class PlayerRagdoll implements IPlayerState {
         }
         const diff = (distance - distanceBetweenBodies) / distance;
         const impulse = new Vector(DX * diff * 0.5, DY * diff * 0.5);
-
+        const body1Vel = bodyPart1.velocity.clone();
+        const body2Vel = bodyPart2.velocity.clone();
         bodyPart1.velocity = impulse.clone();
-        bodyPart2.velocity = impulse.clone();
-
+        bodyPart2.velocity = impulse.clone().multiply(-1);
         bodyPart1.updatePositions();
         bodyPart2.updatePositions();
         bodyPart1.grounded = prevGrounded1;
         bodyPart2.grounded = prevGrounded2;
-        bodyPart1.velocity.add(impulse);
-        bodyPart2.velocity.subtract(impulse);
+        bodyPart1.velocity = body1Vel.add(impulse);
+        bodyPart2.velocity = body2Vel.subtract(impulse);
     }
 
     public stateEntered(): void {

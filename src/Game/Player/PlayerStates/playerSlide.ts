@@ -19,10 +19,12 @@ class PlayerSlide implements IPlayerState {
 
     public stateEntered(): void {
         this.platformIgnoreTime.setToReady();
-        this.playerCharacter.movement.moveEnabled = false;
+        if (this.playerCharacter.movement) {
+            this.playerCharacter.movement.moveEnabled = false;
+            this.playerCharacter.itemManager.forcedThrowType = ThrowType.drop;
+        }
         this.playerCharacter.body.height = this.newHeight;
         this.playerCharacter.body.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.body.height;
-        this.playerCharacter.itemManager.forcedThrowType = ThrowType.drop;
 
         let armOffset = new Vector(16, 42);
         if (this.crouch) {
@@ -106,10 +108,10 @@ class PlayerSlide implements IPlayerState {
 
         this.platformIgnoreTime.reset();
         this.playerCharacter.body.ignorePlatforms = false;
-        this.playerCharacter.jump.jumpEnabled = true;
-        this.playerCharacter.movement.moveEnabled = true;
-
-        this.playerCharacter.itemManager.forcedThrowType = null;
+        if (this.playerCharacter.movement) {
+            this.playerCharacter.movement.moveEnabled = true;
+            this.playerCharacter.itemManager.forcedThrowType = null;
+        }
         this.playerCharacter.body.frictionMultiplier = 1;
     }
 

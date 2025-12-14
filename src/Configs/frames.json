@@ -1,0 +1,28 @@
+{
+  "shotgun": {
+    "gun": {
+      "row": 0,
+      "col": 0
+    },
+    "handle": {
+      "row": 1,
+      "col": 0
+    }
+  },
+  "grenade": {
+    "default": {
+      "row": 0,
+      "col": 0
+    },
+    "pinned": {
+      "row": 0,
+      "col": 1
+    }
+  },
+  "trail": {
+    "default": {
+      "row": 0,
+      "col": 0
+    }
+  }
+}

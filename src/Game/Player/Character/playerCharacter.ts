@@ -7,6 +7,7 @@ import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
+import { off } from "process";
 
 class PlayerCharacter {
 
@@ -51,10 +52,10 @@ class PlayerCharacter {
             return;
         }
         const item = this.equipment.getHolding().common;
-
         item.body.setCenterToPos(this.armFront.getCenter());
         item.body.direction = this.body.direction;
         item.angle = this.armFront.angle;
+        
         const offset = Utility.Angle.rotateForce(item.holdOffset, item.angle);
         item.body.pos.x += offset.x * this.body.getDirectionMultiplier();
         item.body.pos.y += offset.y;
@@ -83,8 +84,8 @@ class PlayerCharacter {
 
     public update(deltaTime: number): void {
         this.body.update(deltaTime);
-        this.setArmPos();
         this.updateControllers(deltaTime);
+        this.setArmPos();
         this.setHoldingPosition();
         this.animator.update(deltaTime, this.equipment.isHolding());
     }

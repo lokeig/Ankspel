@@ -1,2 +1,3 @@
 export { Bullet } from "./bullet";
-export { StaticTrail } from "./Trails/staticTrail";
+export { ShotgunBullet } from "./shotgunBullet";
+export { BulletTrail } from "./Trails/bulletTrail";

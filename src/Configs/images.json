@@ -31,7 +31,7 @@
             "frameHeight": 16
         },
         "trail": {
-            "src": "/assets/bullet.png",
+            "src": "/assets/trail.png",
             "frameWidth": 8,
             "frameHeight": 1
         },

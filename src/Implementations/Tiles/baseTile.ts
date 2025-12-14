@@ -1,14 +1,17 @@
-import { Vector, SpriteSheet, Side, Direction } from "@common";
+import { Vector, SpriteSheet, Side, Direction, Utility } from "@common";
 import { StaticObject } from "@core";
-import { lipLeftLookup, lipRightLookup, spriteLookup } from "./spriteLookup";
 import { ITile } from "@game/StaticObjects/Tiles";
+import { SpriteLookup } from "./spriteLookup";
 
 abstract class BaseTile implements ITile {
     public body: StaticObject;
     private spriteIndex: number = 0;
-    private static lookup = spriteLookup;
+    private static lookup: SpriteLookup = (() => {
+        const config = Utility.File.getTileLookup();
+        return new SpriteLookup(config.tiles, config.lipLeft, config.lipRight);
+    })();
     protected sprite!: SpriteSheet;
-    
+
     constructor(pos: Vector, size: number) {
         const platform = false;
         this.body = new StaticObject(pos, size, platform);
@@ -62,7 +65,7 @@ abstract class BaseTile implements ITile {
         }
     }
 
-    setLip() {
+    public setLip(): void {
         const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.getNeighbours();
 
         let hasLipLeft = false;
@@ -94,24 +97,17 @@ abstract class BaseTile implements ITile {
     }
 
     public draw(): void {
-        const lookup = BaseTile.lookup[this.spriteIndex];
-        const row = lookup ? lookup[0] : 0;
-        const col = lookup ? lookup[1] : 0;
         const drawSize = 32;
         const flip = false;
         const angle = 0;
 
-        this.sprite.draw(row, col, this.body.pos, drawSize, flip, angle);
+        this.sprite.draw(BaseTile.lookup.tile(this.spriteIndex), this.body.pos, drawSize, flip, angle);
 
         if (this.body.getLip(Side.left)) {
-            const lipRow = lipLeftLookup[0];
-            const lipCol = lipLeftLookup[1];
-            this.sprite.draw(lipRow, lipCol, this.body.getLipDrawPos(Side.left), drawSize, flip, angle);
+            this.sprite.draw(BaseTile.lookup.getLip(Side.left), this.body.getLipDrawPos(Side.left), drawSize, flip, angle);
         }
         if (this.body.getLip(Side.right)) {
-            const lipRow = lipRightLookup[0];
-            const lipCol = lipRightLookup[1];
-            this.sprite.draw(lipRow, lipCol, this.body.getLipDrawPos(Side.right), drawSize, flip, angle);
+            this.sprite.draw(BaseTile.lookup.getLip(Side.right), this.body.getLipDrawPos(Side.right), drawSize, flip, angle);
         }
     }
 }

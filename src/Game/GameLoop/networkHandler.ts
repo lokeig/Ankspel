@@ -1,9 +1,10 @@
 import { GameMap, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
-import { GameServer, GMsgType } from "@game/Server";
+import { GameServer, GMsgType, NetworkVector } from "@game/Server";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { ItemManager } from "@item";
-import { Grid, PlayerState, Utility } from "@common";
+import { Grid, Utility, Vector } from "@common";
+import { ProjectileManager } from "@projectile";
 
 class NetworkHandler {
     private static readyCount = 0;
@@ -41,19 +42,23 @@ class NetworkHandler {
         });
 
         emitter.subscribe(GMsgType.playerSpawn, ({ id, location }) => {
-            PlayerManager.getPlayerFromID(id)!.character.setPos(location);
+            PlayerManager.getPlayerFromID(id)!.character.setPos(this.convertVector(location));
         });
 
-        emitter.subscribe(GMsgType.spawnItem, ({ itemType, id, location }) => {
-            ItemManager.spawn(itemType, location, id);
+        emitter.subscribe(GMsgType.spawnItem, ({ type, id, location }) => {
+            ItemManager.spawn(type, this.convertVector(location), id);
         });
+
+        emitter.subscribe(GMsgType.spawnProjectile, ({ type, id, location, angle }) => {
+            ProjectileManager.spawn(type, this.convertVector(location), angle, id);
+        })
 
         emitter.subscribe(GMsgType.playerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
                 return;
             }
-            player.character.setPos(pos);
+            player.character.setPos(this.convertVector(pos));
             if (holding) {
                 player.character.equipment.setHolding(ItemManager.getItemFromID(holding)!);
             } else {
@@ -66,6 +71,10 @@ class NetworkHandler {
         });
 
         emitter.subscribe(GMsgType.startGame, ({ time }) => { this.onStart(time) });
+    }
+
+    private static convertVector(vector: NetworkVector): Vector {
+        return new Vector(vector.x, vector.y);
     }
 
     public static quickStart(): void {
@@ -91,7 +100,7 @@ class NetworkHandler {
             GameServer.get().sendMessage(GMsgType.playerInfo, {
                 id,
                 pos: player.character.body.pos,
-                state: PlayerState.Standard,
+                state: player.getState(),
                 holding: itemID,
                 anim: player.character.animator.getCurrentAnimation(),
                 side: player.character.body.direction,
@@ -141,7 +150,7 @@ class NetworkHandler {
             const id = ItemManager.getItemID(newItem)!;
             GameServer.get().sendMessage(GMsgType.spawnItem, {
                 id,
-                itemType: item.type,
+                type: item.type,
                 location: newItem.common.body.pos
             });
         }

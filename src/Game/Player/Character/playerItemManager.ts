@@ -2,7 +2,8 @@ import { IItem, ItemManager, ItemType, IFirearm, IExplosive } from "@game/Item";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
-import { InputMode, ThrowType } from "@common";
+import { InputMode, ThrowType, Vector } from "@common";
+import { GameServer, GMsgType } from "@server";
 
 class PlayerItemManager {
     private playerCharacter: DynamicObject;
@@ -19,6 +20,7 @@ class PlayerItemManager {
     }
 
     public update(deltaTime: number) {
+        this.
         this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
         if (this.controls.pickup(InputMode.Press)) {
             if (this.equipment.isHolding()) {
@@ -103,38 +105,16 @@ class PlayerItemManager {
             return;
         }
 
-        const itemLogic = this.equipment.getHolding().common;
+        const item = this.equipment.getHolding();
         this.equipment.setHolding(null);
-        itemLogic.body.grounded = false;
-        const direcMult = itemLogic.body.getDirectionMultiplier();
+        item.common.body.grounded = false;
+        item.common.throw(throwType);
 
-        switch (throwType) {
-            case (ThrowType.light): {
-                itemLogic.body.velocity = { x: 3.5 * direcMult, y: -3.5 };
-                itemLogic.rotateSpeed = 10;
-                break;
-            }
-            case (ThrowType.hard): {
-                itemLogic.body.velocity = { x: 15 * direcMult, y: -5 };
-                itemLogic.rotateSpeed = 15;
-                break;
-            }
-            case (ThrowType.hardDiagonal): {
-                itemLogic.body.velocity = { x: 15 * direcMult, y: -10 };
-                itemLogic.rotateSpeed = 15;
-                break;
-            }
-            case (ThrowType.drop): {
-                itemLogic.body.velocity = { x: 0 * direcMult, y: 0 };
-                itemLogic.rotateSpeed = 5;
-                break;
-            }
-            case (ThrowType.upwards): {
-                itemLogic.body.velocity = { x: 0 * direcMult, y: -10 };
-                itemLogic.rotateSpeed = 8;
-                break;
-            }
-        }
+        GameServer.get().sendMessage(GMsgType.throwItem, { 
+            itemID: ItemManager.getItemID(item)!,
+            pos: { x: item.common.body.pos.x, y: item.common.body.pos.y },
+            throwType
+        });
     }
 }
 
