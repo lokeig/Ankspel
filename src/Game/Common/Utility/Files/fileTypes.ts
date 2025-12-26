@@ -3,10 +3,15 @@ import { Controls } from "../../Types/controls";
 import { Frame } from "../../Sprite/Animation/frame";
 
 const imageTable: Record<string, ImageDefinition> = imageConfigJSON;
-const controlArray: Record<string, Array<Record<string, Controls>>> = controlConfigJSON;
+const controlArray: ControllerConfig[] = controlConfigJSON;
 const animations: Record<string, Record<string, AnimationConfig>> = animationConfigJSON;
 const frames: Record<string, Record<string, Frame>> = frameConfigJSON;
 const tileLookup: TileLookupConfig = tileLookupConfigJSON;
+
+type ControllerConfig = {
+    keyboard: Controls;
+    controller?: Controls;
+}
 
 type TileLookupConfig = {
     tileLookup: Record<string, number[]>;

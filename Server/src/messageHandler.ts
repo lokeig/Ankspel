@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
-import { ClientMessage, ForwardMessage, LobbyMessageData, CMsgType, SMsgType, ServerMessage, ForwardedMessage } from "../../Shared";
+import { ClientMessage, ForwardMessage, LobbyMessageData, CMsgType, ServerMessage, ServerMessageMap, ForwardedMessage } from "../../Shared";
 import { ServerInfo } from "./serverInfo";
 
 export class MessageHandler {
@@ -45,21 +45,17 @@ export class MessageHandler {
         const target = serverInfo.users.get(data.to);
         if (target && target.readyState === WebSocket.OPEN) {
             const msg: ForwardedMessage = {
-                type: SMsgType.forwarded,
                 from: serverInfo.clientID,
                 msg: data.msg
             };
-            target.send(JSON.stringify(msg));
+            target.send(JSON.stringify({ msg, type: ServerMessage.forwarded }));
         }
     }
 
     private join(serverInfo: ServerInfo) {
         serverInfo.users.set(serverInfo.clientID, serverInfo.clientSocket);
-        const msg: ServerMessage = {
-            type: SMsgType.connected,
-            clientID: serverInfo.clientID
-        };
-        this.sendTo(serverInfo.clientSocket, msg);
+        const msg = { clientID: serverInfo.clientID };
+        this.sendTo(ServerMessage.connected, msg, serverInfo.clientSocket);
     }
 
     private listUsers(serverInfo: ServerInfo) {
@@ -74,14 +70,10 @@ export class MessageHandler {
             }
         });
 
-        const msg: ServerMessage = {
-            type: SMsgType.userList,
-            users: userArray
-        };
-        this.sendTo(serverInfo.clientSocket, msg);
+        this.sendTo(ServerMessage.userList, { users: userArray }, serverInfo.clientSocket);
     }
 
-    private getLobbiesMsg(serverInfo: ServerInfo): { type: SMsgType.lobbyList, lobbies: LobbyMessageData[] } {
+    private allLobbies(serverInfo: ServerInfo): LobbyMessageData[] {
         const lobbies = serverInfo.lobbyManager.getLobbies();
         const lobbyArray: LobbyMessageData[] = [];
         for (const [key, lobby] of lobbies.entries()) {
@@ -95,14 +87,11 @@ export class MessageHandler {
             };
             lobbyArray.push(msg);
         }
-        return {
-            type: SMsgType.lobbyList,
-            lobbies: lobbyArray
-        };
+        return lobbyArray;
     }
 
     private listLobbies(serverInfo: ServerInfo) {
-        this.sendTo(serverInfo.clientSocket, this.getLobbiesMsg(serverInfo));
+        this.sendTo(ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) }, serverInfo.clientSocket);
     }
 
     private joinLobby(serverInfo: ServerInfo, lobbyID: string) {
@@ -112,52 +101,32 @@ export class MessageHandler {
         if (!lobby || lobby.isClosed() || alreadyConnected || full) {
             return;
         }
-
         const prevLobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
         if (prevLobby) {
             this.leaveLobby(serverInfo);
         }
-
         serverInfo.lobbyManager.addUser(lobbyID, serverInfo.clientID);
-        const joinMsg: ServerMessage = { type: SMsgType.joinSuccess, lobbyID }
-        this.sendTo(serverInfo.clientSocket, joinMsg);
-
-        const userJoinedMsg: ServerMessage = {
-            type: SMsgType.userJoined,
-            userID: serverInfo.clientID
-        };
-        this.broadcastToLobby(serverInfo, userJoinedMsg, serverInfo.clientSocket);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        this.sendTo(ServerMessage.joinSuccess, { lobbyID }, serverInfo.clientSocket);
+        this.broadcastToLobby(serverInfo, ServerMessage.userJoined, { userID: serverInfo.clientID });
+        this.broadcast(serverInfo, ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
 
     private leaveLobby(serverInfo: ServerInfo) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
         const lobbyID = serverInfo.lobbyManager.getUserLobbyID(serverInfo.clientID)
-
         if (!lobby) {
             return;
         }
-
-        const userLeftMsg: ServerMessage = {
-            type: SMsgType.userLeft,
-            userID: serverInfo.clientID
-        };
-        this.broadcastToLobby(serverInfo, userLeftMsg);
+        this.broadcastToLobby(serverInfo, ServerMessage.userLeft, { userID: serverInfo.clientID });
 
         const oldHost = lobby.getHost();
         serverInfo.lobbyManager.removeUserFromLobby(lobbyID!, serverInfo.clientID);
 
         if (serverInfo.clientID === oldHost) {
-            const newHostMsg: ServerMessage = {
-                type: SMsgType.newHost,
-                hostID: lobby.getHost()
-            };
-            this.broadcast(serverInfo, newHostMsg);
+            this.broadcast(serverInfo, ServerMessage.newHost, { hostID: lobby.getHost() });
         }
-
-        const leftMsg: ServerMessage = { type: SMsgType.leaveSuccess };
-        this.sendTo(serverInfo.clientSocket, leftMsg);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        this.sendTo(ServerMessage.leaveSuccess, {}, serverInfo.clientSocket);
+        this.broadcast(serverInfo, ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
 
     private hostLobby(serverInfo: ServerInfo, lobbyName: string, lobbySize: number) {
@@ -165,17 +134,11 @@ export class MessageHandler {
         if (prevLobby) {
             this.leaveLobby(serverInfo);
         }
-
         const lobbyID = uuidv4();
         serverInfo.lobbyManager.createLobby(lobbyID, lobbyName, lobbySize, serverInfo.clientID);
-
-        const hostMsg: ServerMessage = {
-            type: SMsgType.hostSuccess,
-            lobbyID: lobbyID
-        }
-        this.sendTo(serverInfo.clientSocket, hostMsg);
-
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        console.log("lobby id is: " + lobbyID);
+        this.sendTo(ServerMessage.hostSuccess, { lobbyID }, serverInfo.clientSocket);
+        this.broadcast(serverInfo, ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
 
     private startLobby(serverInfo: ServerInfo) {
@@ -183,20 +146,22 @@ export class MessageHandler {
         if (!lobby) {
             return;
         }
+        let index = 0;
+        lobby.getUsers().forEach(user => {
+            this.sendTo(ServerMessage.startGame, { userID: index++ }, serverInfo.users.get(user)!);
+        });
+        this.broadcast(serverInfo, ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
         lobby.setClosed(true);
-        const startMsg: ServerMessage = { type: SMsgType.startGame };
-        this.sendTo(serverInfo.clientSocket, startMsg);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
     }
 
-    private sendTo(client: WebSocket, msg: ServerMessage) {
+    private sendTo<T extends keyof ServerMessageMap>(type: T, msg: ServerMessageMap[T], client: WebSocket) {
         if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(msg));
+            client.send(JSON.stringify({ msg, type }));
         }
     }
 
-    private broadcast(serverInfo: ServerInfo, msg: ServerMessage, exclude: WebSocket | null = null) {
-        const text = JSON.stringify(msg);
+    private broadcast<T extends ServerMessage>(serverInfo: ServerInfo, type: T, msg: ServerMessageMap[T], exclude: WebSocket | null = null) {
+        const text = JSON.stringify({ msg, type });
 
         for (const userID of serverInfo.users.keys()) {
             const userSocket = serverInfo.users.get(userID)!;
@@ -206,12 +171,12 @@ export class MessageHandler {
         }
     }
 
-    private broadcastToLobby(serverInfo: ServerInfo, msg: ServerMessage, exclude: WebSocket | null = null) {
+    private broadcastToLobby<T extends ServerMessage>(serverInfo: ServerInfo, type: T, msg: ServerMessageMap[T], exclude: WebSocket | null = null) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
         if (!lobby) {
             return;
         }
-        const text = JSON.stringify(msg);
+        const text = JSON.stringify({ msg, type });
         for (const userID of lobby.getUsers().values()) {
             const userSocket = serverInfo.users.get(userID)!;
             if (userSocket !== exclude && userSocket.readyState === WebSocket.OPEN) {

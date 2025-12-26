@@ -8,8 +8,9 @@ class FileUtility {
         return imageTable[name];
     }
 
-    public getControls(type: string, number: number): Controls {
-        return controlArray[type][number].keyboard;
+    public getControls(number: number): Controls {
+        let index = Math.min(number, controlArray.length-1);
+        return controlArray[index].keyboard;
     }
 
     public getTileLookup(): { tiles: Record<number, Frame>, lipLeft: Frame, lipRight: Frame } {

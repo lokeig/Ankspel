@@ -29,8 +29,8 @@ class BulletTrail implements ITrail {
     }
 
     private removeUpdate(deltaTime: number) {
-        const nextX = this.startingLocation.x + this.speed.x * deltaTime * 60;
-        const nextY = this.startingLocation.y + this.speed.y * deltaTime * 60;
+        const nextX = this.startingLocation.x + this.speed.x * deltaTime;
+        const nextY = this.startingLocation.y + this.speed.y * deltaTime;
         const goingRight = this.speed.x > 0;
         const goingDown = this.speed.y > 0;
         const passedTargetX = goingRight ? nextX > this.target.x : nextX < this.target.x;

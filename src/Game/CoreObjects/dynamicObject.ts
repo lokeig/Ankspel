@@ -1,4 +1,4 @@
-import { Vector, Grid, Side } from "@common";
+import { Vector, Side } from "@common";
 import { TileManager } from "../StaticObjects/Tiles";
 import { CollisionObject } from "./collisionObject";
 import { GameObject } from "./gameObject";
@@ -10,13 +10,12 @@ class DynamicObject extends GameObject {
         up: false,
         side: false,
     }
-
     public friction: number = 10;
     public frictionMultiplier = 1;
     public ignoreFriction: boolean = false;
 
     public velocity = new Vector();
-    public gravity: number = 27;
+    public gravity: number = 1200;
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 
@@ -71,41 +70,32 @@ class DynamicObject extends GameObject {
     }
 
     public getHorizontalTileCollision(): GameObject | undefined {
-        for (const collidable of this.collidableObjects.values()) {
+        for (const collidable of this.collidableObjects) {
             if (!this.collision(collidable.gameObject)) {
                 continue;
             }
-
             if (collidable.platform) {
                 continue;
             }
-
             return collidable.gameObject
         }
     }
 
-    public getVerticalTileCollision(): GameObject | undefined {
+    public getVerticalTileCollision(deltaTime: number): GameObject | undefined {
         this.grounded = false;
-        for (const collidable of this.collidableObjects.values()) {
+        for (const collidable of this.collidableObjects) {
             if (!this.collision(collidable.gameObject)) {
                 continue;
             }
-
-            if (collidable.platform) {
-
-                if (this.ignorePlatforms || this.velocity.y < 0) {
-                    continue;
-                }
-
-                const objectTop = collidable.gameObject.pos.y;
-                const ourBottom = this.pos.y + this.height;
-                const offset = 5;
-                if (ourBottom < objectTop + this.velocity.y + offset) {
-                    return collidable.gameObject;
-                }
+            if (!collidable.platform) {
+                return collidable.gameObject;
+            }
+            if (this.ignorePlatforms || this.velocity.y < 0) {
                 continue;
             }
-
+            if (this.pos.y + this.height > collidable.gameObject.pos.y + 5 + (this.velocity.y * deltaTime)) {
+                continue;
+            }
             return collidable.gameObject;
         }
     }
@@ -124,24 +114,21 @@ class DynamicObject extends GameObject {
         if (Math.abs(this.velocity.x) < 0.01) {
             this.velocity.x = 0;
         }
-        const maxSpeed = Grid.size;
-        this.velocity.x = Math.max(Math.min(this.velocity.x, maxSpeed), -maxSpeed);
-        this.velocity.y = Math.max(Math.min(this.velocity.y, maxSpeed), -maxSpeed);
     }
 
     public updatePositions(deltaTime: number) {
         this.collisions.up = false;
         this.collisions.side = false;
 
-        this.pos.x += this.velocity.x * deltaTime * 60;
+        this.pos.x += this.velocity.x * deltaTime;
         const horizontalCollidingTile = this.getHorizontalTileCollision();
         if (horizontalCollidingTile) {
             this.handleSideCollision(horizontalCollidingTile);
             this.collisions.side = true;
         }
 
-        this.pos.y += this.velocity.y * deltaTime * 60;
-        const verticalCollidingTile = this.getVerticalTileCollision();
+        this.pos.y += this.velocity.y * deltaTime;
+        const verticalCollidingTile = this.getVerticalTileCollision(deltaTime);
         if (verticalCollidingTile) {
             if (this.velocity.y > 0) {
                 this.handleBotCollision(verticalCollidingTile);

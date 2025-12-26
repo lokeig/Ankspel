@@ -8,7 +8,7 @@ class GameMap {
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
 
-    public setTile(tile: TileConstructor, gridPos: Vector) {
+    public setTile(tile: TileConstructor, gridPos: Vector): void {
         const pos = Grid.getWorldPos(gridPos);
         const newTile = new tile(pos, Grid.size);
         this.tiles.push(newTile);
@@ -18,9 +18,19 @@ class GameMap {
         return this.tiles;
     }
 
-    public setItem(type: string, gridPos: Vector) {;
+    public fillArea(tile: TileConstructor, x: number, y: number, width: number, height: number): void {
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                this.setTile(tile, new Vector(x + i, y + j));
+            }
+        }
+    }
+
+    public setItem(type: string, gridPos: Vector): void {
+        ;
         this.items.push({ type, gridPos });
     }
+
 
     public getItems(): ItemDescription[] {
         return this.items;

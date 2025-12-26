@@ -7,7 +7,6 @@ import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
-import { off } from "process";
 
 class PlayerCharacter {
 
@@ -30,6 +29,10 @@ class PlayerCharacter {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
         this.animator = new PlayerAnimation();
         this.equipment = new PlayerEquipment();
+    }
+
+    public isLocal(): boolean {
+        return this.controls !== undefined;
     }
 
     public setControls(controls: Controls) {

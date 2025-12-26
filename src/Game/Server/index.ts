@@ -1,7 +1,9 @@
-export { GameServer } from "./gameServer";
+export type { IServer } from "./IServer";
+export { Connection } from "./servers";
 export { Emitter } from "./emitter";
-export type { ServerIF } from "./serverIF";
-export { LobbyList } from "./Lobby/lobbyList";
+
 export type { ILobbyList } from "./Lobby/ILobbyList";
-export type { GameMessage, NetworkVector } from "./gameMessage";
-export { GMsgType } from "./gameMessage";
+export { LobbyList } from "./Lobby/lobbyList";
+
+export type { NetworkVector, GameMessageMap } from "./gameMessage";
+export { GameMessage } from "./gameMessage";

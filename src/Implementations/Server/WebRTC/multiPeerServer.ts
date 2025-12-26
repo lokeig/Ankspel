@@ -1,11 +1,12 @@
-import { Emitter, GameMessage, GMsgType, ServerIF } from "@game/Server";
 import { PeerConnectionManager } from "./peerConnectionManager";
-import { ClientMessage, CMsgType, ForwardedMessage, SMsgType, ServerMessage } from "@shared";
+import { Emitter, GameMessage, IServer } from "@game/Server";
+import { ClientMessage, CMsgType, ForwardedMessage, ServerMessage, ServerMessageMap } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessageMap } from "@game/Server/gameMessage";
 
-class MultiPeerServer implements ServerIF {
-    public emitter: Emitter = new Emitter();
+class MultiPeerServer implements IServer {
+    public gameEvent: Emitter<GameMessageMap> = new Emitter();
+    public serverEvent: Emitter<ServerMessageMap> = new Emitter();
     private peers: Map<string, PeerConnectionManager> = new Map();
     private myID!: string;
     private socket: WebSocket;
@@ -13,7 +14,6 @@ class MultiPeerServer implements ServerIF {
 
     constructor(socket: WebSocket) {
         this.socket = socket;
-
         this.socket.onmessage = (e: MessageEvent) => this.handleMessage(e);
         this.socket.onopen = () => {
             console.log("Connected to signaling server");
@@ -32,10 +32,6 @@ class MultiPeerServer implements ServerIF {
         return this.myID;
     }
 
-    public sendToServer(message: ClientMessage): void {
-        this.socket.send(JSON.stringify(message));
-    }
-
     private cleanupAllPeers(): void {
         console.log("Cleaning up all peer connections");
         this.peers.forEach((peer: PeerConnectionManager, peerId: string) => {
@@ -45,32 +41,27 @@ class MultiPeerServer implements ServerIF {
         this.peers.clear();
     }
 
-    private addPeer(peerId: string) {
+    private addPeer(peerId: string): void {
         if (peerId === this.myID || this.peers.has(peerId)) {
             return;
         }
-
         console.log(`Creating new peer connection to: ${peerId}`);
         const peer = new PeerConnectionManager(peerId, this.socket);
         this.peers.set(peerId, peer);
 
-        peer.setOnMessage((type: GMsgType, msg: GameMessage) => {
+        peer.setOnMessage((type: GameMessage, msg: GameMessage) => {
             console.log("Received message " + type + ":", msg);
-            this.emitter.publish(type, msg);
+            this.gameEvent.publish(type, msg);
         });
-
         const isInitiator = peerId < this.myID!;
-
         if (isInitiator) {
             console.log(`Initiating connection to ${peerId}`);
             peer.createDataChannel();
             peer.createOffer();
         }
-
-        this.emitter.publish(GMsgType.newPlayer, { local: false, id: peerId });
     }
 
-    private removePeer(peerID: string) {
+    private removePeer(peerID: string): void {
         const peer = this.peers.get(peerID);
         peer?.close();
         this.peers.delete(peerID);
@@ -97,83 +88,101 @@ class MultiPeerServer implements ServerIF {
         }
     }
 
-    private handleMessage(event: MessageEvent) {
-        const data: ServerMessage = JSON.parse(event.data);
+    private handleMessage(event: MessageEvent): void {
+        const parsed = JSON.parse(event.data);
+        const type: ServerMessage = parsed.type;
+        this.serverEvent.publish(type, parsed.msg as ServerMessageMap[typeof type]);
 
-        switch (data.type) {
-            case SMsgType.forwarded:
+        switch (type) {
+            case ServerMessage.forwarded: {
+                const data = parsed.msg;
                 this.handleForwardedMessage(data as ForwardedMessage<WebRTCMessage>);
                 break;
+            }
 
-            case SMsgType.connected:
+            case ServerMessage.connected: {
+                const data = parsed.msg as ServerMessageMap[typeof type];
                 this.myID = data.clientID;
-                this.emitter.publish(GMsgType.newPlayer, { local: true, id: data.clientID });
                 break;
+            }
 
-            case SMsgType.userJoined:
-                console.log(`New user joined: ${data.userID}, connecting...`);
+            case ServerMessage.userJoined: {
+                const data = parsed.msg as ServerMessageMap[typeof type];
+                console.log(`New user joined: ${data.userID}`);
                 this.addPeer(data.userID);
                 break;
+            }
 
-            case SMsgType.userLeft:
+            case ServerMessage.userLeft: {
+                const data = parsed.msg as ServerMessageMap[typeof type];
                 console.log(`User left: ${data.userID}`);
                 this.removePeer(data.userID);
                 break;
+            }
 
-            case SMsgType.userList:
+            case ServerMessage.userList: {
+                const data = parsed.msg as ServerMessageMap[typeof type];
                 console.log("Here are all other users:", data.users);
-                for (const user of data.users.values()) {
+                for (const user of data.users) {
                     this.addPeer(user);
                 }
                 break;
+            }
 
-            case SMsgType.lobbyList:
+            case ServerMessage.lobbyList: {
                 console.log("Got a new lobby-list");
-                this.emitter.publish(GMsgType.refreshLobbies, { lobbies: data.lobbies });
                 break;
+            }
 
-            case SMsgType.joinSuccess:
-                console.log(`Joined lobby: ${data.lobbyID}`);
-                this.emitter.publish(GMsgType.inLobby, { lobbyID: data.lobbyID });
+            case ServerMessage.joinSuccess: {
+                console.log(`Joined lobby: ${parsed.lobbyID}`);
                 const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
                 this.socket.send(JSON.stringify(listUsersMsg));
                 break;
+            }
 
-            case SMsgType.leaveSuccess:
+            case ServerMessage.leaveSuccess: {
                 console.log(`Left lobby`);
                 this.cleanupAllPeers();
-                this.emitter.publish(GMsgType.noLobby, {});
                 this.host = false;
                 break;
+            }
 
-            case SMsgType.hostSuccess:
-                console.log(`Hosted lobby: ${data.lobbyID}`);
+            case ServerMessage.hostSuccess: {
+                console.log(`Hosted lobby: ${parsed.lobbyID}`);
                 this.host = true;
-                this.emitter.publish(GMsgType.hostingLobby, { lobbyID: data.lobbyID });
                 break;
+            }
 
-            case SMsgType.newHost:
-                console.log(`New host: ${data.hostID}`);
-                if (data.hostID === this.myID) {
+            case ServerMessage.newHost: {
+                console.log(`New host: ${parsed.hostID}`);
+                if (parsed.hostID === this.myID) {
                     this.host = true;
-                    this.emitter.publish(GMsgType.hostingLobby, { lobbyID: null });
-                    console.log("You are host!");
+                    console.log("You are host");
                 }
                 break;
+            }
 
-            case SMsgType.startGame:
-                const map = "defaultMap";
-                this.sendMessage(GMsgType.loadMap, { name: map });
-                this.emitter.publish(GMsgType.loadMap, { name: map });
+            case ServerMessage.startGame: {
+                console.log("Starting game");
                 break;
+            }
         }
     }
 
-    public sendMessage<T extends GMsgType>(type: T, msg: GameMessageMap[T]) {
+    public sendGameMessage<T extends GameMessage>(type: T, msg: GameMessageMap[T]): void {
+        // console.log("Sending message: " + type, msg);
         this.peers.forEach((peer: PeerConnectionManager) => {
             peer.sendMessage(type, msg);
         });
     }
+
+    public sendClientMessage(message: ClientMessage): void {
+        // console.log("Sending to server: ", message);
+        this.socket.send(JSON.stringify(message));
+    }
+
+    public  
 }
 
 export { MultiPeerServer };

@@ -42,7 +42,7 @@ class Shotgun implements IFirearm {
         this.firearmInfo.bulletCount = 10;
         this.firearmInfo.bulletAngleVariation = Math.PI / 12;
         this.firearmInfo.pipeOffset = new Vector(28, -10);
-        this.firearmInfo.knockback = new Vector(12, 4);
+        this.firearmInfo.knockback = new Vector(720, 240);
     }
 
     public update(deltaTime: number): void {

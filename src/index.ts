@@ -1,5 +1,5 @@
 import { Input } from "@common";
-import { GameServer, LobbyList } from "@game/Server";
+import { Connection, LobbyList } from "@game/Server";
 import { Render } from "@render";
 import { GameLoop } from "@game/GameLoop";
 
@@ -14,6 +14,6 @@ Input.init();
 Render.set(new CanvasRender("gameCanvas"));
 MapManager.addMap("defaultMap", defaultMap);
 RegisterItems();
-GameServer.set(new MultiPeerServer(new WebSocket("ws://localhost:3000")));
+Connection.set(new MultiPeerServer(new WebSocket("ws://localhost:3000")));
 LobbyList.set(new LobbyListCSS());
 new GameLoop();

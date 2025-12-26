@@ -1,7 +1,7 @@
 import { Grid, Vector } from "@common";
 import { IProjectile, ProjectileConstructor } from "./IProjectile";
 import { ITrail } from "./ITrail";
-import { GameServer, GMsgType } from "@server";
+import { Connection, GameMessage } from "@server";
 
 class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
@@ -54,7 +54,7 @@ class ProjectileManager {
         const result = new constructor(pos, angle);
         this.addProjectile(result);
         this.setProjectileID(result, this.projectileIndex++);
-        GameServer.get().sendMessage(GMsgType.spawnProjectile, { id: this.projectileIndex, location: pos, type, angle });
+        Connection.get().sendGameMessage(GameMessage.spawnProjectile, { id: this.projectileIndex, location: pos, type, angle });
         return result;
     }
 

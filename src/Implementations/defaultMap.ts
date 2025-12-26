@@ -1,33 +1,26 @@
 import { IceTile } from "@impl/Tiles";
 import { GameMap } from "@game/Map/map";
+import { Vector } from "@common";
 
 const defaultMap = new GameMap();
 
-function fillArea(x: number, y: number, width: number, height: number) {
-    for (let i = 0; i < width; i++) {
-        for (let j = 0; j < height; j++) {
-            defaultMap.setTile(IceTile, { x: x + i, y: y + j });
-        }
-    }
-}
+defaultMap.fillArea(IceTile, 5, 14, 25, 2);
+defaultMap.fillArea(IceTile, 23, 5, 6, 8);
+defaultMap.fillArea(IceTile, 3, 8, 2, 8);
+defaultMap.fillArea(IceTile, 9, 11, 2, 4);
+defaultMap.fillArea(IceTile, 9, 5, 2, 4);
+defaultMap.fillArea(IceTile, 15, 7, 3, 3);
 
-fillArea(5, 14, 25, 2);
-fillArea(23, 5, 6, 8);
-fillArea(3, 8, 2, 8);
-fillArea(9, 11, 2, 4);
-fillArea(9, 5, 2, 4);
-fillArea(15, 7, 3, 3);
+defaultMap.setPlayerSpawn(new Vector(8, 14));
+defaultMap.setPlayerSpawn(new Vector(15, 14));
+defaultMap.setPlayerSpawn(new Vector(15, 4));
+defaultMap.setPlayerSpawn(new Vector(16, 14));
 
-defaultMap.setPlayerSpawn({ x: 8, y: 14 });
-defaultMap.setPlayerSpawn({ x: 15, y: 14 });
-defaultMap.setPlayerSpawn({ x: 15, y: 4 });
-defaultMap.setPlayerSpawn({ x: 16, y: 14 });
+defaultMap.setTile(IceTile, new Vector(15, 6));
 
-defaultMap.setTile(IceTile, { x: 15, y: 6 });
-
-defaultMap.setItem("shotgun", { x: 10, y: 2 });
-defaultMap.setItem("shotgun", { x: 20, y: 14 });
-defaultMap.setItem("glock", { x: 21, y: 12 });
-defaultMap.setItem("grenade", { x: 19, y: 12 });
+defaultMap.setItem("shotgun", new Vector(10, 1));
+defaultMap.setItem("shotgun", new Vector(20, 14));
+defaultMap.setItem("glock", new Vector(21, 12));
+defaultMap.setItem("grenade", new Vector(19, 12));
 
 export { defaultMap };

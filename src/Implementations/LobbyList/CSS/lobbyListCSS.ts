@@ -1,6 +1,6 @@
-import { GameServer, GMsgType, ILobbyList } from "@game/Server";
+import { Connection, ILobbyList } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
-import { ClientMessage, LobbyMessageData, CMsgType } from "@shared";
+import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
 
 class LobbyListCSS implements ILobbyList {
     private mainDiv: HTMLElement;
@@ -38,19 +38,19 @@ class LobbyListCSS implements ILobbyList {
         this.leavebutton.disabled = true;
         this.joinbutton.disabled = true;
 
-        const emitter = GameServer.get().emitter;
+        const lobbyEvent = Connection.get().serverEvent;
 
-        emitter.subscribe(GMsgType.refreshLobbies, ({ lobbies }) => {
+        lobbyEvent.subscribe(ServerMessage.lobbyList, ({ lobbies }) => {
             this.refresh(lobbies);
         });
 
-        emitter.subscribe(GMsgType.inLobby, ({ lobbyID }) => {
+        lobbyEvent.subscribe(ServerMessage.joinSuccess, ({ lobbyID }) => {
             this.connectedLobby = lobbyID;
             this.leavebutton.disabled = false;
             this.refresh(this.lastLobbies);
         });
 
-        emitter.subscribe(GMsgType.noLobby, () => {
+        lobbyEvent.subscribe(ServerMessage.leaveSuccess, () => {
             this.connectedLobby = null;
             this.hosting = false;
             this.leavebutton.disabled = true;
@@ -60,11 +60,18 @@ class LobbyListCSS implements ILobbyList {
             this.refresh(this.lastLobbies);
         });
 
-        emitter.subscribe(GMsgType.hostingLobby, ({ lobbyID }) => {
-            this.hosting = true;
-            if (lobbyID) {
-                this.connectedLobby = lobbyID;
+        lobbyEvent.subscribe(ServerMessage.newHost, ({ hostID }) => {
+            if (hostID !== Connection.get().getID()) {
+                return;
             }
+            this.hosting = true;
+            this.startbutton.disabled = false;
+            this.refresh(this.lastLobbies);
+        });
+
+        lobbyEvent.subscribe(ServerMessage.hostSuccess, ({ lobbyID }) => {
+            this.hosting = true;
+            this.connectedLobby = lobbyID;
             this.leavebutton.disabled = false;
             this.startbutton.disabled = false;
             this.refresh(this.lastLobbies);
@@ -152,7 +159,7 @@ class LobbyListCSS implements ILobbyList {
         const leaveMsg: ClientMessage = {
             type: CMsgType.leaveLobby
         };
-        GameServer.get().sendToServer(leaveMsg);
+        Connection.get().sendClientMessage(leaveMsg);
     }
 
     private onJoin(): void {
@@ -163,7 +170,7 @@ class LobbyListCSS implements ILobbyList {
             type: CMsgType.joinLobby,
             lobbyID: this.selectedLobbyId
         };
-        GameServer.get().sendToServer(joinMsg);
+        Connection.get().sendClientMessage(joinMsg);
         this.clearSelection();
     }
 
@@ -171,7 +178,7 @@ class LobbyListCSS implements ILobbyList {
         const startMsg: ClientMessage = {
             type: CMsgType.startLobby,
         };
-        GameServer.get().sendToServer(startMsg);
+        Connection.get().sendClientMessage(startMsg);
     }
 }
 

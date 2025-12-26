@@ -1,4 +1,4 @@
-import { GameServer } from "@game/Server";
+import { Connection } from "@game/Server";
 import { ClientMessage, CMsgType } from "@shared";
 
 class HostMenu {
@@ -41,7 +41,7 @@ class HostMenu {
                 lobbySize: maxPlayers, 
                 lobbyName: this.nameInput.value 
             };
-            GameServer.get().sendToServer(hostLobbyMsg);
+            Connection.get().sendClientMessage(hostLobbyMsg);
 
             this.nameInput.value = "";
             this.maxPlayersInput.value = "4";

@@ -66,7 +66,7 @@ class PlayerRagdoll implements IPlayerState {
         return this.head.grounded || this.legs.grounded || this.body.grounded;
     }
 
-    private keepBodiesTogether(bodyPart1: DynamicObject, bodyPart2: DynamicObject, distanceBetweenBodies: number, allowLongerDistance: boolean): void {
+    private keepBodiesTogether(deltaTime: number, bodyPart1: DynamicObject, bodyPart2: DynamicObject, distanceBetweenBodies: number, allowLongerDistance: boolean): void {
         const prevGrounded1 = bodyPart1.grounded;
         const prevGrounded2 = bodyPart2.grounded;
 
@@ -80,13 +80,13 @@ class PlayerRagdoll implements IPlayerState {
             return;
         }
         const diff = (distance - distanceBetweenBodies) / distance;
-        const impulse = new Vector(DX * diff * 0.5, DY * diff * 0.5);
+        const impulse = new Vector(DX * diff, DY * diff).divide(2 * deltaTime);
         const body1Vel = bodyPart1.velocity.clone();
         const body2Vel = bodyPart2.velocity.clone();
         bodyPart1.velocity = impulse.clone();
         bodyPart2.velocity = impulse.clone().multiply(-1);
-        bodyPart1.updatePositions();
-        bodyPart2.updatePositions();
+        bodyPart1.updatePositions(deltaTime);
+        bodyPart2.updatePositions(deltaTime);
         bodyPart1.grounded = prevGrounded1;
         bodyPart2.grounded = prevGrounded2;
         bodyPart1.velocity = body1Vel.add(impulse);
@@ -133,12 +133,12 @@ class PlayerRagdoll implements IPlayerState {
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
 
-        this.keepBodiesTogether(this.head, this.body, this.height - 1, false);
-        this.keepBodiesTogether(this.legs, this.body, this.height - 1, false);
-        this.keepBodiesTogether(this.head, this.legs, this.height * 1.5, true);
+        this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
 
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
-            this.head.velocity.x = Utility.Random.getRandomNumber(-0.1, 0.1);
+            this.head.velocity.x = Utility.Random.getRandomNumber(-3, 3);
         }
         if (!this.playerCharacter.dead) {
             this.handleInputs(deltaTime);
@@ -148,7 +148,7 @@ class PlayerRagdoll implements IPlayerState {
         this.setAngle(!head);
     }
 
-    public offlineUpdate(deltaTime: number): void {
+    public nonLocalUpdate(deltaTime: number): void {
     }
 
     public stateChange(): PlayerState {
@@ -166,7 +166,7 @@ class PlayerRagdoll implements IPlayerState {
     public stateExited(): void {
         this.updateStandardBody();
         const jumpHeight = 25;
-        const exitVerticalSpeed = -5;
+        const exitVerticalSpeed = -250;
         this.playerCharacter.body.pos.y -= jumpHeight;
         this.playerCharacter.body.velocity = new Vector(this.body.velocity.x, exitVerticalSpeed);
     }

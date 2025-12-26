@@ -4,7 +4,7 @@ import { PlayerControls } from "./playerControls";
 
 class PlayerMove {
     public moveEnabled: boolean = true;
-    private movespeed: number = 50;
+    private movespeed: number = 3000;
     private playerCharacter: DynamicObject;
     private controls: PlayerControls;
 

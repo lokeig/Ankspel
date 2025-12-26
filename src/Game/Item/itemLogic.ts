@@ -70,17 +70,17 @@ class ItemLogic {
 
         switch (throwType) {
             case (ThrowType.light): {
-                this.body.velocity = new Vector(3.5 * direcMult, -3.5);
+                this.body.velocity = new Vector(210 * direcMult, -210);
                 this.rotateSpeed = 10;
                 break;
             }
             case (ThrowType.hard): {
-                this.body.velocity = new Vector(15 * direcMult, -5);
+                this.body.velocity = new Vector(900 * direcMult, -300);
                 this.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.hardDiagonal): {
-                this.body.velocity = new Vector(15 * direcMult, -10);
+                this.body.velocity = new Vector(900 * direcMult, -600);
                 this.rotateSpeed = 15;
                 break;
             }
@@ -90,7 +90,7 @@ class ItemLogic {
                 break;
             }
             case (ThrowType.upwards): {
-                this.body.velocity = new Vector(0 * direcMult, -10);
+                this.body.velocity = new Vector(0 * direcMult, -600);
                 this.rotateSpeed = 8;
                 break;
             }

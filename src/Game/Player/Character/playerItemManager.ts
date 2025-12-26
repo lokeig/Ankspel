@@ -3,7 +3,7 @@ import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Vector } from "@common";
-import { GameServer, GMsgType } from "@server";
+import { Connection, GameMessage } from "@server";
 
 class PlayerItemManager {
     private playerCharacter: DynamicObject;
@@ -20,7 +20,6 @@ class PlayerItemManager {
     }
 
     public update(deltaTime: number) {
-        this.
         this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
         if (this.controls.pickup(InputMode.Press)) {
             if (this.equipment.isHolding()) {
@@ -110,9 +109,10 @@ class PlayerItemManager {
         item.common.body.grounded = false;
         item.common.throw(throwType);
 
-        GameServer.get().sendMessage(GMsgType.throwItem, { 
+        Connection.get().sendGameMessage(GameMessage.throwItem, { 
             itemID: ItemManager.getItemID(item)!,
             pos: { x: item.common.body.pos.x, y: item.common.body.pos.y },
+            direction: item.common.body.direction,
             throwType
         });
     }

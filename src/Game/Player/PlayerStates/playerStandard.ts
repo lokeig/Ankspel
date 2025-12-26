@@ -42,7 +42,7 @@ class PlayerStandard implements IPlayerState {
         this.setCurrentAnimation();
     }
 
-    public offlineUpdate(deltaTime: number): void {
+    public nonLocalUpdate(deltaTime: number): void {
         this.playerCharacter.offlineUpdate(deltaTime);
     }
 

@@ -1,4 +1,4 @@
-export type Controls = {
+type Controls = {
     jump: string;
     left: string;
     right: string;
@@ -10,3 +10,5 @@ export type Controls = {
     strafe: string;
     menu: string;
 };
+
+export type { Controls };

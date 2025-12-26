@@ -37,20 +37,16 @@ class MessageHandler {
         const target = serverInfo.users.get(data.to);
         if (target && target.readyState === ws_1.WebSocket.OPEN) {
             const msg = {
-                type: Shared_1.SMsgType.forwarded,
                 from: serverInfo.clientID,
                 msg: data.msg
             };
-            target.send(JSON.stringify(msg));
+            target.send(JSON.stringify({ msg, type: Shared_1.ServerMessage.forwarded }));
         }
     }
     join(serverInfo) {
         serverInfo.users.set(serverInfo.clientID, serverInfo.clientSocket);
-        const msg = {
-            type: Shared_1.SMsgType.connected,
-            clientID: serverInfo.clientID
-        };
-        this.sendTo(serverInfo.clientSocket, msg);
+        const msg = { clientID: serverInfo.clientID };
+        this.sendTo(Shared_1.ServerMessage.connected, msg, serverInfo.clientSocket);
     }
     listUsers(serverInfo) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
@@ -63,13 +59,9 @@ class MessageHandler {
                 userArray.push(e);
             }
         });
-        const msg = {
-            type: Shared_1.SMsgType.userList,
-            users: userArray
-        };
-        this.sendTo(serverInfo.clientSocket, msg);
+        this.sendTo(Shared_1.ServerMessage.userList, { users: userArray }, serverInfo.clientSocket);
     }
-    getLobbiesMsg(serverInfo) {
+    allLobbies(serverInfo) {
         const lobbies = serverInfo.lobbyManager.getLobbies();
         const lobbyArray = [];
         for (const [key, lobby] of lobbies.entries()) {
@@ -83,13 +75,10 @@ class MessageHandler {
             };
             lobbyArray.push(msg);
         }
-        return {
-            type: Shared_1.SMsgType.lobbyList,
-            lobbies: lobbyArray
-        };
+        return lobbyArray;
     }
     listLobbies(serverInfo) {
-        this.sendTo(serverInfo.clientSocket, this.getLobbiesMsg(serverInfo));
+        this.sendTo(Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) }, serverInfo.clientSocket);
     }
     joinLobby(serverInfo, lobbyID) {
         const lobby = serverInfo.lobbyManager.getLobby(lobbyID);
@@ -103,14 +92,9 @@ class MessageHandler {
             this.leaveLobby(serverInfo);
         }
         serverInfo.lobbyManager.addUser(lobbyID, serverInfo.clientID);
-        const joinMsg = { type: Shared_1.SMsgType.joinSuccess, lobbyID };
-        this.sendTo(serverInfo.clientSocket, joinMsg);
-        const userJoinedMsg = {
-            type: Shared_1.SMsgType.userJoined,
-            userID: serverInfo.clientID
-        };
-        this.broadcastToLobby(serverInfo, userJoinedMsg, serverInfo.clientSocket);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        this.sendTo(Shared_1.ServerMessage.joinSuccess, { lobbyID }, serverInfo.clientSocket);
+        this.broadcastToLobby(serverInfo, Shared_1.ServerMessage.userJoined, { userID: serverInfo.clientID });
+        this.broadcast(serverInfo, Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
     leaveLobby(serverInfo) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
@@ -118,23 +102,14 @@ class MessageHandler {
         if (!lobby) {
             return;
         }
-        const userLeftMsg = {
-            type: Shared_1.SMsgType.userLeft,
-            userID: serverInfo.clientID
-        };
-        this.broadcastToLobby(serverInfo, userLeftMsg);
+        this.broadcastToLobby(serverInfo, Shared_1.ServerMessage.userLeft, { userID: serverInfo.clientID });
         const oldHost = lobby.getHost();
         serverInfo.lobbyManager.removeUserFromLobby(lobbyID, serverInfo.clientID);
         if (serverInfo.clientID === oldHost) {
-            const newHostMsg = {
-                type: Shared_1.SMsgType.newHost,
-                hostID: lobby.getHost()
-            };
-            this.broadcast(serverInfo, newHostMsg);
+            this.broadcast(serverInfo, Shared_1.ServerMessage.newHost, { hostID: lobby.getHost() });
         }
-        const leftMsg = { type: Shared_1.SMsgType.leaveSuccess };
-        this.sendTo(serverInfo.clientSocket, leftMsg);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        this.sendTo(Shared_1.ServerMessage.leaveSuccess, {}, serverInfo.clientSocket);
+        this.broadcast(serverInfo, Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
     hostLobby(serverInfo, lobbyName, lobbySize) {
         const prevLobby = serverInfo.lobbyManager.getUserLobbyID(serverInfo.clientID);
@@ -143,30 +118,28 @@ class MessageHandler {
         }
         const lobbyID = (0, uuid_1.v4)();
         serverInfo.lobbyManager.createLobby(lobbyID, lobbyName, lobbySize, serverInfo.clientID);
-        const hostMsg = {
-            type: Shared_1.SMsgType.hostSuccess,
-            lobbyID: lobbyID
-        };
-        this.sendTo(serverInfo.clientSocket, hostMsg);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
+        this.sendTo(Shared_1.ServerMessage.hostSuccess, { lobbyID }, serverInfo.clientSocket);
+        this.broadcast(serverInfo, Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }
     startLobby(serverInfo) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
         if (!lobby) {
             return;
         }
+        let index = 0;
+        lobby.getUsers().forEach(user => {
+            this.sendTo(Shared_1.ServerMessage.startGame, { userID: index++ }, serverInfo.users.get(user));
+        });
+        this.broadcast(serverInfo, Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
         lobby.setClosed(true);
-        const startMsg = { type: Shared_1.SMsgType.startGame };
-        this.sendTo(serverInfo.clientSocket, startMsg);
-        this.broadcast(serverInfo, this.getLobbiesMsg(serverInfo));
     }
-    sendTo(client, msg) {
+    sendTo(type, msg, client) {
         if (client.readyState === ws_1.WebSocket.OPEN) {
-            client.send(JSON.stringify(msg));
+            client.send(JSON.stringify({ msg, type }));
         }
     }
-    broadcast(serverInfo, msg, exclude = null) {
-        const text = JSON.stringify(msg);
+    broadcast(serverInfo, type, msg, exclude = null) {
+        const text = JSON.stringify({ msg, type });
         for (const userID of serverInfo.users.keys()) {
             const userSocket = serverInfo.users.get(userID);
             if (userSocket !== exclude && userSocket.readyState === ws_1.WebSocket.OPEN) {
@@ -174,12 +147,12 @@ class MessageHandler {
             }
         }
     }
-    broadcastToLobby(serverInfo, msg, exclude = null) {
+    broadcastToLobby(serverInfo, type, msg, exclude = null) {
         const lobby = serverInfo.lobbyManager.getUsersLobby(serverInfo.clientID);
         if (!lobby) {
             return;
         }
-        const text = JSON.stringify(msg);
+        const text = JSON.stringify({ msg, type });
         for (const userID of lobby.getUsers().values()) {
             const userSocket = serverInfo.users.get(userID);
             if (userSocket !== exclude && userSocket.readyState === ws_1.WebSocket.OPEN) {

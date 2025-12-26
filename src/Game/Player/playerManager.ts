@@ -1,66 +1,61 @@
-import { Grid, Vector } from "@common";
+import { Grid, Utility, Vector } from "@common";
 import { Player } from "./player";
+import { IDManager } from "@game/Common/IDManager/idManager";
+import { Connection, GameMessage } from "@server";
 
 class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
-
-    private static localPlayers: Player[] = [];
-    private static currentLocalCount = 0;
-
-    private static IDToPlayer: Map<string, Player> = new Map();
-    private static playerToID: Map<Player, string> = new Map();
+    private static idManager = new IDManager<Player>();
+    private static localPlayerCount = 0;
 
     static update(deltaTime: number) {
-        for (const playerSet of this.players.values()) {
-            for (const player of playerSet) {
-                player.update(deltaTime);
-                if (!player.character.equipment.isHolding()) {
-                    continue;
-                }
-                if (player.character.equipment.getHolding().shouldBeDeleted()) {
-                    player.character.equipment.setHolding(null);
-                }
+        this.players.forEach(playerSet => playerSet.forEach(player => {
+            player.update(deltaTime);
+            if (!player.character.equipment.isHolding()) {
+                return;
             }
-        }
-
+            if (player.character.equipment.getHolding().shouldBeDeleted()) {
+                player.character.equipment.setHolding(null);
+            }
+        }));
         Grid.updateMapPositions<Player>(this.players, e => e.character.body.pos);
     }
 
-    private static getPlayerSet(pos: Vector): Set<Player> | undefined {
-        return this.players.get(Grid.key(pos));
-    }
-
     public static getLocal(): Player[] {
-        return this.localPlayers;
+        const result: Player[] = [];
+        this.players.forEach(playerSet => { playerSet.forEach(player => { if (player.character.isLocal()) { result.push(player); } }) });
+        return result;
     }
 
     public static getPlayers(): Player[] {
         const result: Player[] = [];
-
-        for (const playerSet of this.players.values()) {
-            for (const player of playerSet) {
-                result.push(player);
-            }
-        }
+        this.players.forEach(playerSet => { playerSet.forEach(player => { result.push(player); }) });
         return result;
     }
 
-    public static addPlayer(local: boolean, id: string): Player {
-        const pos = new Vector();
-        const player = new Player(local);
-
-        const playerSet = this.getPlayerSet(pos);
-        if (!playerSet) {
-            this.players.set(Grid.key(pos), new Set());
-        }
-        this.getPlayerSet(pos)!.add(player);
-
-        if (local) {
-            this.localPlayers[this.currentLocalCount++] = player;
-        }
-        this.IDToPlayer.set(id, player);
-        this.playerToID.set(player, id);
+    public static create(): Player {
+        const player = new Player();
+        const id = this.idManager.add(player);
+        this.addPlayer(player);
+        player.setControls(Utility.File.getControls(this.localPlayerCount++));
+        Connection.get().sendGameMessage(GameMessage.newPlayer, ({ id }));
         return player;
+    }
+
+    public static spawn(id: number): Player {
+        const player = new Player();
+        this.idManager.setID(player, id);
+        this.addPlayer(player);
+        return player;
+    }
+
+    private static addPlayer(player: Player) {
+        const pos = Grid.key(new Vector());
+        const playerSet = this.players.get(pos);
+        if (!playerSet) {
+            this.players.set(pos, new Set());
+        }
+        this.players.get(pos)!.add(player);
     }
 
     public static draw() {
@@ -71,12 +66,12 @@ class PlayerManager {
         }
     }
 
-    public static getPlayerFromID(ID: string): Player | undefined {
-        return this.IDToPlayer.get(ID);
+    public static getPlayerFromID(ID: number): Player | undefined {
+        return this.idManager.get(ID);
     }
 
-    public static getPlayerID(player: Player): string | undefined {
-        return this.playerToID.get(player);
+    public static getPlayerID(player: Player): number | undefined {
+        return this.idManager.object(player);
     }
 }
 

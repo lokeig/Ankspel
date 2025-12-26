@@ -1,24 +1,21 @@
 import { Grid, Vector } from "@common";
 import { ItemConstructor, IItem } from "./IItem";
+import { IDManager } from "@game/Common/IDManager/idManager";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
-    private static IDToItem: Map<number, IItem> = new Map();
-    private static ItemToID: Map<IItem, number> = new Map();
-
     private static register: Map<string, ItemConstructor> = new Map();
+    private static idManager = new IDManager<IItem>();
     private static itemIndex = 0;
 
     public static update(deltaTime: number) {
-        for (const itemSet of this.items.values()) {
-            for (const item of itemSet) {
-                if (item.shouldBeDeleted()) {
-                    itemSet.delete(item);
-                    continue;
-                }
+        this.items.forEach(itemSet => itemSet.forEach(item => {
+            if (item.shouldBeDeleted()) {
+                itemSet.delete(item);
+            } else {
                 item.update(deltaTime);
             }
-        }
+        }));
         Grid.updateMapPositions<IItem>(this.items, e => e.common.body.pos);
     }
 
@@ -33,7 +30,7 @@ class ItemManager {
         }
         const result = new constructor(pos);
         this.addItem(result);
-        this.setItemID(result, this.itemIndex++);
+        this.idManager.setID(result, this.itemIndex++);
         return result;
     }
 
@@ -44,12 +41,7 @@ class ItemManager {
         }
         const newItem = new constructor(pos);
         this.addItem(newItem);
-        this.setItemID(newItem, id);
-    }
-
-    private static setItemID(item: IItem, id: number) {
-        this.ItemToID.set(item, id);
-        this.IDToItem.set(id, item);
+        this.idManager.setID(newItem, id);
     }
 
     public static getItems(pos: Vector): Set<IItem> | undefined {
@@ -93,21 +85,19 @@ class ItemManager {
     }
 
     public static getItemFromID(id: number): IItem | undefined {
-        return this.IDToItem.get(id);
+        return this.idManager.get(id);
     }
 
     public static getItemID(item: IItem): number | undefined {
-        return this.ItemToID.get(item);
+        return this.idManager.object(item);
     }
 
     public static draw() {
-        for (const itemSet of this.items.values()) {
-            for (const item of itemSet) {
-                if (!item.common.owned) {
-                    item.draw();
-                }
+        this.items.forEach(itemSet => itemSet.forEach(item => {
+            if (!item.common.owned) {
+                item.draw();
             }
-        }
+        }));
     }
 }
 

@@ -33,3 +33,5 @@ export { Input } from "./Other/input";
 export { InputMode } from "./Other/inputMode";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";
+
+export { IDManager } from "./IDManager/idManager"

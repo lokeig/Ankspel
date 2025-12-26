@@ -2,7 +2,6 @@ import { Vector, Utility } from "@common";
 import { ProjectileManager } from "@game/Projectile";
 
 class FirearmInfo {
-
     public knockback = new Vector();
     public bulletAngleVariation: number = 0;
     public pipeOffset = new Vector();

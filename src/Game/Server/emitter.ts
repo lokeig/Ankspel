@@ -1,26 +1,30 @@
-import { GameMessageMap, GMsgType } from "./gameMessage";
+type ListenFunction<TMessageMap, TKey extends keyof TMessageMap> = (msg: TMessageMap[TKey]) => void;
 
-type ListenFunction<T extends GMsgType> = (msg: GameMessageMap[T]) => void;
-
-class Emitter {
-    private subscribers: { [K in GMsgType]: Set<ListenFunction<K>> };
+class Emitter<TMessageMap> {
+    private subscribers: { [K in keyof TMessageMap]: Set<ListenFunction<TMessageMap, K>> };
 
     constructor() {
-        this.subscribers = {} as { [K in GMsgType]: Set<ListenFunction<K>> };
-        for (const key of Object.values(GMsgType)) {
-            this.subscribers[key] = new Set<ListenFunction<typeof key>>();
-        }
+        this.subscribers = {} as { [K in keyof TMessageMap]: Set<ListenFunction<TMessageMap, K>> };
     }
 
-    public subscribe<T extends GMsgType>(type: T, listenFunction: ListenFunction<T>): void {
+    public subscribe<TKey extends keyof TMessageMap>(type: TKey, listenFunction: ListenFunction<TMessageMap, TKey>): void {
+        if (!this.subscribers[type]) {
+            this.subscribers[type] = new Set();
+        }
         this.subscribers[type].add(listenFunction);
     }
 
-    public unsubscribe<T extends GMsgType>(type: T, listenFunction: ListenFunction<T>): void {
+    public unsubscribe<TKey extends keyof TMessageMap>(type: TKey, listenFunction: ListenFunction<TMessageMap, TKey>): void {
+        if (!this.subscribers[type]) {
+            return;
+        }
         this.subscribers[type].delete(listenFunction);
     }
 
-    public publish<T extends GMsgType>(type: T, message: GameMessageMap[T]): void {
+    public publish<T extends keyof TMessageMap>(type: T, message: TMessageMap[T]): void {
+        if (!this.subscribers[type]) {
+            return;
+        }
         for (const listenFunction of this.subscribers[type].values()) {
             listenFunction(message);
         }

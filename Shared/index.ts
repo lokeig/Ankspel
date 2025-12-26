@@ -3,5 +3,5 @@ export type { LobbyMessageData } from "./lobbyMessageData";
 export type { ClientMessage, ForwardMessage } from "./clientMessage";
 export { CMsgType } from "./clientMessage";
 
-export type { ServerMessage, ForwardedMessage } from "./serverMessage";
-export { SMsgType } from "./serverMessage";
+export type { ServerMessageMap, ForwardedMessage } from "./serverMessage";
+export { ServerMessage } from "./serverMessage";

@@ -6,7 +6,7 @@ import { GameObject } from "@core";
 
 class PlayerFlap implements IPlayerState {
     private playerCharacter: PlayerCharacter;
-    private flapSpeed: number = 1.5;
+    private flapSpeed: number = 90;
 
     constructor(playerCharacter: PlayerCharacter) {
         this.playerCharacter = playerCharacter;
@@ -46,7 +46,7 @@ class PlayerFlap implements IPlayerState {
     public stateExited(): void {
     }
 
-    public offlineUpdate(deltaTime: number): void {
+    public nonLocalUpdate(deltaTime: number): void {
         this.playerCharacter.offlineUpdate(deltaTime);
     }
 

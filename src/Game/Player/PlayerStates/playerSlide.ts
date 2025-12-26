@@ -19,7 +19,7 @@ class PlayerSlide implements IPlayerState {
 
     public stateEntered(): void {
         this.platformIgnoreTime.setToReady();
-        if (this.playerCharacter.movement) {
+        if (this.playerCharacter.isLocal()) {
             this.playerCharacter.movement.moveEnabled = false;
             this.playerCharacter.itemManager.forcedThrowType = ThrowType.drop;
         }
@@ -62,7 +62,7 @@ class PlayerSlide implements IPlayerState {
         this.playerCharacter.update(deltaTime);
     }
 
-    public offlineUpdate(deltaTime: number): void {
+    public nonLocalUpdate(deltaTime: number): void {
         this.playerCharacter.offlineUpdate(deltaTime);
     }
 
@@ -108,7 +108,7 @@ class PlayerSlide implements IPlayerState {
 
         this.platformIgnoreTime.reset();
         this.playerCharacter.body.ignorePlatforms = false;
-        if (this.playerCharacter.movement) {
+        if (this.playerCharacter.isLocal()) {
             this.playerCharacter.movement.moveEnabled = true;
             this.playerCharacter.itemManager.forcedThrowType = null;
         }

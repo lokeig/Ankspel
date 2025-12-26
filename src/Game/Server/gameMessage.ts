@@ -1,28 +1,19 @@
 import { PlayerState, PlayerAnim, Side, ThrowType } from "@common";
-import { LobbyMessageData } from "@shared"
 
-enum GMsgType {
-    // Lobby interface
-    refreshLobbies = "refreshLobbies",
-    inLobby = "inLobby",
-    hostingLobby = "hostingLobby",
-    noLobby = "noLobby",
-   
+enum GameMessage {
     // Player
     playerInfo = "playerInfo",
     newPlayer = "newPlayer",
     throwItem = "throwItem",
-   
     // Spawns
     spawnItem = "spawnItem",
     spawnProjectile = "spawnProjectile",
-    
-    // Map
     playerSpawn = "playerSpawn",
+    // Map
     loadMap = "loadMap",
     dataDone = "dataDone",
-    readyToStart = "readyToStart",
-    startGame = "startGame",
+    readyForMap = "readyForMap",
+    startMap = "startMap",
 };
 
 type NetworkVector = {
@@ -31,15 +22,9 @@ type NetworkVector = {
 };
 
 interface GameMessageMap {
-    // Lobby interface
-    [GMsgType.refreshLobbies]: { lobbies: LobbyMessageData[] };
-    [GMsgType.inLobby]: { lobbyID: string };
-    [GMsgType.hostingLobby]: { lobbyID: string | null };
-    [GMsgType.noLobby]: {};
-
     // Player
-    [GMsgType.playerInfo]: {
-        id: string,
+    [GameMessage.playerInfo]: {
+        id: number,
         pos: NetworkVector,
         holding: number | null,
         state: PlayerState,
@@ -47,22 +32,20 @@ interface GameMessageMap {
         side: Side,
         armAngle: number
     };
-    [GMsgType.newPlayer]: { local: boolean, id: string };
-    [GMsgType.throwItem]: { itemID: number, pos: NetworkVector, throwType: ThrowType }
+    [GameMessage.newPlayer]: { id: number };
+    [GameMessage.throwItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType }
 
     // Spawns
-    [GMsgType.spawnItem]: { id: number, location: NetworkVector, type: string };
-    [GMsgType.spawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
+    [GameMessage.spawnItem]: { id: number, location: NetworkVector, type: string };
+    [GameMessage.spawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
+    [GameMessage.playerSpawn]: { id: number, location: NetworkVector };
 
     // Map
-    [GMsgType.loadMap]: { name: string };
-    [GMsgType.playerSpawn]: { id: string, location: NetworkVector };
-    [GMsgType.dataDone]: {};
-    [GMsgType.readyToStart]: {};
-    [GMsgType.startGame]: { time: number };
+    [GameMessage.loadMap]: { name: string };
+    [GameMessage.dataDone]: {};
+    [GameMessage.readyForMap]: {};
+    [GameMessage.startMap]: { time: number };
 }
 
-type GameMessage = GameMessageMap[GMsgType];
-
-export { GMsgType };
-export type { GameMessageMap, GameMessage, NetworkVector };
+export { GameMessage };
+export type { GameMessageMap, NetworkVector };

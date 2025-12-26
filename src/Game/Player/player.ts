@@ -2,14 +2,14 @@ import { Controls, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { IPlayerState } from "./IPlayerState";
+import { TileManager } from "@game/StaticObjects/Tiles";
+import { Render } from "@render";
 
 class Player {
     public character!: PlayerCharacter;
     private stateMachine: StateMachine<PlayerState, IPlayerState>;
-    private local: boolean;
 
-    constructor(local: boolean) {
-        this.local = local;
+    constructor() {
         this.stateMachine = new StateMachine<PlayerState, IPlayerState>(PlayerState.Standard);
         this.character = new PlayerCharacter(new Vector());
         this.setupStateMachine();
@@ -40,18 +40,18 @@ class Player {
     }
 
     public update(deltaTime: number): void {
-        if (this.local) {
+        console.log(this.character.body.velocity.y);
+        if (this.character.isLocal()) {
             this.stateMachine.update(deltaTime);
         } else {
-            this.stateMachine.getIState().offlineUpdate(deltaTime);
+            this.stateMachine.getIState().nonLocalUpdate(deltaTime);
         }
     };
 
-    public isLocal(): boolean {
-        return this.isLocal();
-    }
-
     public draw(): void {
+        TileManager.getNearbyTiles(this.character.body.pos, this.character.body.width, this.character.body.height).forEach(tile => {
+            Render.get().drawSquare({ x: tile.gameObject.pos.x, y: tile.gameObject.pos.y, width: tile.gameObject.width, height: tile.gameObject.height }, 0, "green");
+        });
         this.stateMachine.getIState().draw();
     }
 }
