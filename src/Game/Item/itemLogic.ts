@@ -14,6 +14,7 @@ class ItemLogic {
     public rotateSpeed: number = 0;
     private rotateLerp = new Lerp(15, lerpAngle);
     private itemType: ItemType;
+    private delete: boolean = false;
 
     constructor(pos: Vector, width: number, height: number, itemType: ItemType) {
         this.body = new DynamicObject(pos, width, height);
@@ -110,6 +111,14 @@ class ItemLogic {
 
     public isFlip(): boolean {
         return this.body.isFlip();
+    }
+
+    public setToDelete(): void {
+        this.delete = true;
+    }
+
+    public shouldBeDeleted(): boolean {
+        return this.delete;
     }
 
     public deletable(): boolean {

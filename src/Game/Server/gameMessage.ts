@@ -1,19 +1,23 @@
 import { PlayerState, PlayerAnim, Side, ThrowType } from "@common";
 
 enum GameMessage {
+    readyToPlay,
     // Player
-    playerInfo = "playerInfo",
-    newPlayer = "newPlayer",
-    throwItem = "throwItem",
-    // Spawns
-    spawnItem = "spawnItem",
-    spawnProjectile = "spawnProjectile",
-    playerSpawn = "playerSpawn",
+    playerInfo,
+    newPlayer,
+    throwItem,
+    playerSpawn,
+    // Projectile
+    spawnProjectile,
+    // Items
+    spawnItem,
+    deleteItem,
+    activateItem,
     // Map
-    loadMap = "loadMap",
-    dataDone = "dataDone",
-    readyForMap = "readyForMap",
-    startMap = "startMap",
+    loadMap,
+    dataDone,
+    readyForMap,
+    startMap,
 };
 
 type NetworkVector = {
@@ -22,6 +26,7 @@ type NetworkVector = {
 };
 
 interface GameMessageMap {
+    [GameMessage.readyToPlay]: {};
     // Player
     [GameMessage.playerInfo]: {
         id: number,
@@ -33,19 +38,22 @@ interface GameMessageMap {
         armAngle: number
     };
     [GameMessage.newPlayer]: { id: number };
-    [GameMessage.throwItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType }
-
-    // Spawns
-    [GameMessage.spawnItem]: { id: number, location: NetworkVector, type: string };
-    [GameMessage.spawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
     [GameMessage.playerSpawn]: { id: number, location: NetworkVector };
-
+    //Projectile
+    [GameMessage.spawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
+    // Items
+    [GameMessage.throwItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
+    [GameMessage.spawnItem]: { id: number, location: NetworkVector, type: string };
+    [GameMessage.deleteItem]: { id: number };
+    [GameMessage.activateItem]: { id: number, action: number, angle: number, seed: number };
     // Map
     [GameMessage.loadMap]: { name: string };
     [GameMessage.dataDone]: {};
     [GameMessage.readyForMap]: {};
     [GameMessage.startMap]: { time: number };
 }
+
+const test: GameMessageMap[GameMessage] = {}
 
 export { GameMessage };
 export type { GameMessageMap, NetworkVector };

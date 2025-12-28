@@ -40,7 +40,6 @@ class Player {
     }
 
     public update(deltaTime: number): void {
-        console.log(this.character.body.velocity.y);
         if (this.character.isLocal()) {
             this.stateMachine.update(deltaTime);
         } else {

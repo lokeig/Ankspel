@@ -4,7 +4,6 @@ import { LobbyList } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
 import { InMatchLoop } from "./inMatchLoop";
 import { NetworkHandler } from "./networkHandler";
-import { PlayerManager } from "@player";
 
 class GameLoop {
     private lastTime = 0;

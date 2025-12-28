@@ -2,7 +2,6 @@ import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility } from 
 import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { FirearmInfo } from "./firearmInfo";
 
-
 class Glock implements IFirearm {
     public common!: ItemLogic;
     private animations: Record<string, Animation> = {
@@ -31,12 +30,11 @@ class Glock implements IFirearm {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
-        this.firearmInfo.bulletSpeed = 5;
-        this.firearmInfo.bulletLifespan = 15;
         this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
-        this.firearmInfo.knockback = new Vector(9, 2);
+        this.firearmInfo.knockback = new Vector(360, 120);
         this.firearmInfo.pipeOffset = new Vector(14, -6);
+        this.firearmInfo.projectile = "glockBullet";
     }
 
     public update(deltaTime: number): void {

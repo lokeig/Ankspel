@@ -14,14 +14,23 @@ class NetworkHandler {
         Connection.get().serverEvent.subscribe(ServerMessage.startGame, ({ userID }) => {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
-            if (Connection.get().isHost()) {
+            Connection.get().sendGameMessage(GameMessage.readyToPlay, {});
+            if (Connection.get().connectionCount() === 0) {
+                this.startNewMap("defaultMap");
+            }
+        });
+
+        const gameEvent = Connection.get().gameEvent;
+
+        gameEvent.subscribe(GameMessage.readyToPlay, () => {
+            this.readyCount++;
+            if (Connection.get().isHost() && this.readyCount === Connection.get().connectionCount()) {
+                this.readyCount = 0;
                 const mapName = "defaultMap";
                 this.startNewMap(mapName);
                 Connection.get().sendGameMessage(GameMessage.loadMap, { name: mapName });
             }
         });
-
-        const gameEvent = Connection.get().gameEvent;
 
         gameEvent.subscribe(GameMessage.newPlayer, ({ id }) => {
             PlayerManager.spawn(id);
@@ -52,6 +61,18 @@ class NetworkHandler {
             ItemManager.spawn(type, this.convertVector(location), id);
         });
 
+        gameEvent.subscribe(GameMessage.deleteItem, ({ id }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                return;
+            }
+            item.common.setToDelete();
+        });
+
+        gameEvent.subscribe(GameMessage.activateItem, ({ id }) => {
+            
+        })
+
         gameEvent.subscribe(GameMessage.spawnProjectile, ({ type, id, location, angle }) => {
             ProjectileManager.spawn(type, this.convertVector(location), angle, id);
         });
@@ -77,7 +98,7 @@ class NetworkHandler {
                 return;
             }
             player.character.setPos(this.convertVector(pos));
-            if (holding) {
+            if (holding !== null && ItemManager.getItemFromID(holding)) {
                 player.character.equipment.setHolding(ItemManager.getItemFromID(holding)!);
             } else {
                 player.character.equipment.setHolding(null);

@@ -1,7 +1,7 @@
 import { AngleUtility } from "./angleUtility";
 import { DirectionUtility } from "./directionUtility";
 import { FileUtility } from "./Files/fileUtility";
-import { RandomUtility } from "./randomUtility";
+import { RandomUtility } from "./Random/randomUtility";
 import { VectorUtility } from "./vectorUtility";
 
 class Utility {

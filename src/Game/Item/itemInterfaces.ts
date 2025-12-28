@@ -2,7 +2,7 @@ import { Vector } from "@common";
 import { IItem } from "./IItem";
 
 interface IFirearm extends IItem {
-    shoot(): Vector;
+    shoot(seed: number): Vector;
 }
 
 interface IExplosive extends IItem {

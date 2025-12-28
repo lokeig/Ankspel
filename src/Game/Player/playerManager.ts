@@ -67,11 +67,11 @@ class PlayerManager {
     }
 
     public static getPlayerFromID(ID: number): Player | undefined {
-        return this.idManager.get(ID);
+        return this.idManager.getObject(ID);
     }
 
     public static getPlayerID(player: Player): number | undefined {
-        return this.idManager.object(player);
+        return this.idManager.getID(player);
     }
 }
 

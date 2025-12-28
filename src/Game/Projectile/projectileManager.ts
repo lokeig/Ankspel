@@ -14,26 +14,23 @@ class ProjectileManager {
 
     public static update(deltaTime: number) {
         this.updateMapPositions(deltaTime);
-        for (const trail of this.trails) {
+        this.trails.forEach(trail => {
             trail.update(deltaTime);
             if (trail.shouldBeDeleted()) {
                 this.trails.delete(trail);
             }
-        }
+        });
     }
 
     private static updateMapPositions(deltaTime: number) {
-        for (const projectileSet of this.projectiles.values()) {
-            for (const projectile of projectileSet) {
-                if (projectile.shouldBeDeleted()) {
-                    projectileSet.delete(projectile);
-                    projectile.getTrail().setToDelete();
-                    continue;
-                }
+        this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
+            if (!projectile.shouldBeDeleted()) {
                 projectile.getTrail().setTarget(projectile.body.getCenter());
                 projectile.update(deltaTime);
             }
-        }
+            projectileSet.delete(projectile);
+            projectile.getTrail().setToDelete();
+        }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }
 
@@ -110,25 +107,19 @@ class ProjectileManager {
 
     private static processProjectileSet(gridPos: Vector, accumulatedItems: Array<IProjectile>): void {
         const projectilSet = this.getProjectiles(gridPos);
-
         if (!projectilSet) {
             return;
         }
-
-        for (const item of projectilSet.values()) {
-            accumulatedItems.push(item);
-        }
+        projectilSet.forEach(projectile => {
+            accumulatedItems.push(projectile);
+        });
     }
 
     public static draw() {
-        for (const trail of this.trails.values()) {
-            trail.draw();
-        }
-        for (const projectileArray of this.projectiles.values()) {
-            for (const projectile of projectileArray) {
-                projectile.draw();
-            }
-        }
+        this.trails.forEach(trail => { trail.draw(); });
+        this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
+            projectile.draw();
+        }));
     }
 }
 

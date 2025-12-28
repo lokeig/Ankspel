@@ -49,8 +49,8 @@ class MultiPeerServer implements IServer {
         const peer = new PeerConnectionManager(peerId, this.socket);
         this.peers.set(peerId, peer);
 
-        peer.setOnMessage((type: GameMessage, msg: GameMessage) => {
-            console.log("Received message " + type + ":", msg);
+        peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
+            console.log("Received message " + GameMessage[type] + ":", msg);
             this.gameEvent.publish(type, msg);
         });
         const isInitiator = peerId < this.myID!;
@@ -171,18 +171,20 @@ class MultiPeerServer implements IServer {
     }
 
     public sendGameMessage<T extends GameMessage>(type: T, msg: GameMessageMap[T]): void {
-        // console.log("Sending message: " + type, msg);
+        console.log("Sending message: " + GameMessage[type], msg);
         this.peers.forEach((peer: PeerConnectionManager) => {
             peer.sendMessage(type, msg);
         });
     }
 
     public sendClientMessage(message: ClientMessage): void {
-        // console.log("Sending to server: ", message);
+        console.log("Sending to server: ", message);
         this.socket.send(JSON.stringify(message));
     }
 
-    public  
+    public connectionCount(): number {
+        return this.peers.size;
+    }
 }
 
 export { MultiPeerServer };

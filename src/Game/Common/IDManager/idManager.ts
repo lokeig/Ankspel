@@ -21,13 +21,24 @@ class IDManager<T> {
         return index;
     }
 
-    public removeObject(object: T): void {
+    public removeObject(object: T): number | undefined {
         const id = this.objectToID.get(object);
         if (!id) {
-            return;
+            return undefined;
         }
         this.objectToID.delete(object);
         this.idToObject.delete(id);
+        return id;
+    }
+
+    public removeID(id: number): T | undefined {
+        const object = this.idToObject.get(id);
+        if (!object) {
+            return undefined;
+        }
+        this.objectToID.delete(object);
+        this.idToObject.delete(id);
+        return object;
     }
 
     public setID(object: T, id: number): void {
@@ -35,11 +46,11 @@ class IDManager<T> {
         this.idToObject.set(id, object);
     }
 
-    public get(id: number): T | undefined {
+    public getObject(id: number): T | undefined {
         return this.idToObject.get(id);
     }
 
-    public object(object: T): number | undefined {
+    public getID(object: T): number | undefined {
         return this.objectToID.get(object);
     }
 }

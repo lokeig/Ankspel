@@ -1,4 +1,4 @@
-import { Vector, Utility } from "@common";
+import { Vector, Utility, SeededRNG } from "@common";
 import { ProjectileManager } from "@game/Projectile";
 
 class FirearmInfo {
@@ -9,7 +9,8 @@ class FirearmInfo {
     public bulletCount: number = 1;
     public projectile!: string;
 
-    public shoot(centerPos: Vector, angle: number, flip: boolean): Vector {
+    public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number): Vector {
+        const rng = new SeededRNG(seed);
         if (this.ammo < 1) {
             return new Vector();
         }
@@ -21,7 +22,7 @@ class FirearmInfo {
             centerPos.y + offset.y
         );
         for (let i = 0; i < this.bulletCount; i++) {
-            let shotAngle = angle + Utility.Random.getRandomNumber(-this.bulletAngleVariation, this.bulletAngleVariation);
+            let shotAngle = angle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             shotAngle = flip ? Math.PI - shotAngle : shotAngle;
             ProjectileManager.create(this.projectile, pos, shotAngle);
         }

@@ -15,7 +15,7 @@ class DynamicObject extends GameObject {
     public ignoreFriction: boolean = false;
 
     public velocity = new Vector();
-    public gravity: number = 1200;
+    public gravity: number = 1260;
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 

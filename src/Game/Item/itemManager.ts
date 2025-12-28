@@ -1,6 +1,7 @@
-import { Grid, Vector } from "@common";
+import { Grid, Utility, Vector } from "@common";
 import { ItemConstructor, IItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
+import { Connection, GameMessage } from "@server";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
@@ -10,8 +11,10 @@ class ItemManager {
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (item.shouldBeDeleted()) {
+            if (item.shouldBeDeleted() || item.common.shouldBeDeleted()) {
                 itemSet.delete(item);
+                const id = this.idManager.removeObject(item)!;
+                Connection.get().sendGameMessage(GameMessage.deleteItem, { id });
             } else {
                 item.update(deltaTime);
             }
@@ -84,12 +87,19 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
+    public static activateItem(item: IItem, action: number): number {
+        const seed = Utility.Random.getRandomSeed();
+        const id = this.idManager.getID(item)!;
+        Connection.get().sendGameMessage(GameMessage.activateItem, { id, action, angle: item.common.angle, seed });
+        return seed;
+    }
+
     public static getItemFromID(id: number): IItem | undefined {
-        return this.idManager.get(id);
+        return this.idManager.getObject(id);
     }
 
     public static getItemID(item: IItem): number | undefined {
-        return this.idManager.object(item);
+        return this.idManager.getID(item);
     }
 
     public static draw() {

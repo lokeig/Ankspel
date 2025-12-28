@@ -1,4 +1,4 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, SeededRNG } from "@common";
 import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
@@ -8,7 +8,7 @@ class Shotgun implements IFirearm {
     private handleOffset: number = 0;
     private maxHandleOffset: number = -4;
     private handleLerp = new Lerp(6, lerpTriangle)
-    
+
     private frames = {
         gun: new Frame(),
         handle: new Frame()
@@ -52,9 +52,9 @@ class Shotgun implements IFirearm {
         }
     }
 
-    public shoot(): Vector {
+    public shoot(seed: number): Vector {
         if (this.currentState === ShotgunState.loaded) {
-            return this.fire();
+            return this.fire(seed);
         } else if (this.currentState === ShotgunState.reloadable) {
             return this.reload();
         } else {
@@ -62,11 +62,11 @@ class Shotgun implements IFirearm {
         }
     }
 
-    private fire(): Vector {
+    private fire(seed: number): Vector {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.reloadable;
-        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip());
+        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip(), seed);
     }
 
     private reload(): Vector {

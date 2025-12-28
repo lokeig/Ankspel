@@ -26,6 +26,7 @@ export { PlayerAnim } from "./Types/playerAnim";
 
 // Utility
 export { Utility } from "./Utility/utility";
+export { SeededRNG } from "./Utility/Random/seed";
 
 // Other
 export { images } from "./Utility/Files/images";

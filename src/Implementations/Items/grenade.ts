@@ -4,6 +4,7 @@ import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Bullet } from "@impl/Projectiles";
+import { GrenadeBullet } from "@impl/Projectiles/grenadeBullet";
 
 class Grenade implements IExplosive {
     public common: ItemLogic;
@@ -34,17 +35,14 @@ class Grenade implements IExplosive {
         this.common.update(deltaTime);
 
         if (this.explosionDelay.isDone()) {
-
             ParticleManager.addParticle(new ExplosionVFX(this.common.body.getCenter()));
             this.setToDelete = true;
 
             const amountOfBullets = 16;
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
-                const speed = Utility.Angle.rotateForce(new Vector(2000, 0), angle);
-                const lifespan = 0.06;
                 const pos = this.common.body.pos;
-                ProjectileManager.addProjectile(new Bullet(pos.clone(), speed, lifespan));
+                ProjectileManager.create("grenadeBullet", pos, angle);
             }
         }
     }
