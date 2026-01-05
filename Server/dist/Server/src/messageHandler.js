@@ -118,6 +118,7 @@ class MessageHandler {
         }
         const lobbyID = (0, uuid_1.v4)();
         serverInfo.lobbyManager.createLobby(lobbyID, lobbyName, lobbySize, serverInfo.clientID);
+        console.log("lobby id is: " + lobbyID);
         this.sendTo(Shared_1.ServerMessage.hostSuccess, { lobbyID }, serverInfo.clientSocket);
         this.broadcast(serverInfo, Shared_1.ServerMessage.lobbyList, { lobbies: this.allLobbies(serverInfo) });
     }

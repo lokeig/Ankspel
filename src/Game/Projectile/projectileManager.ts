@@ -24,12 +24,13 @@ class ProjectileManager {
 
     private static updateMapPositions(deltaTime: number) {
         this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
-            if (!projectile.shouldBeDeleted()) {
+            if (projectile.shouldBeDeleted()) {
+                projectileSet.delete(projectile);
+                projectile.getTrail().setToDelete();
+            } else {
                 projectile.getTrail().setTarget(projectile.body.getCenter());
                 projectile.update(deltaTime);
             }
-            projectileSet.delete(projectile);
-            projectile.getTrail().setToDelete();
         }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }
@@ -51,7 +52,6 @@ class ProjectileManager {
         const result = new constructor(pos, angle);
         this.addProjectile(result);
         this.setProjectileID(result, this.projectileIndex++);
-        Connection.get().sendGameMessage(GameMessage.spawnProjectile, { id: this.projectileIndex, location: pos, type, angle });
         return result;
     }
 

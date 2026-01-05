@@ -1,4 +1,4 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, SeededRNG } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame } from "@common";
 import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "./firearmInfo";
@@ -14,7 +14,7 @@ class Shotgun implements IFirearm {
         handle: new Frame()
     }
 
-    private currentState: ShotgunState = ShotgunState.loaded;
+    private currentState: ShotgunState = ShotgunState.Loaded;
     private spriteSheet: SpriteSheet;
     private firearmInfo!: FirearmInfo;
 
@@ -29,7 +29,7 @@ class Shotgun implements IFirearm {
     private setCommonInfo(pos: Vector): void {
         const width = 30;
         const height = 15;
-        this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
+        this.common = new ItemLogic(pos, width, height, ItemType.Firearm);
         this.common.holdOffset = new Vector(14, -4);
         this.common.handOffset = new Vector(4, 0);
         this.common.setHitboxOffset(new Vector(30, 8));
@@ -53,9 +53,9 @@ class Shotgun implements IFirearm {
     }
 
     public shoot(seed: number): Vector {
-        if (this.currentState === ShotgunState.loaded) {
+        if (this.currentState === ShotgunState.Loaded) {
             return this.fire(seed);
-        } else if (this.currentState === ShotgunState.reloadable) {
+        } else if (this.currentState === ShotgunState.Reloadable) {
             return this.reload();
         } else {
             return new Vector();
@@ -65,13 +65,13 @@ class Shotgun implements IFirearm {
     private fire(seed: number): Vector {
         this.handleLerp.cancel();
         this.handleOffset = 0;
-        this.currentState = ShotgunState.reloadable;
+        this.currentState = ShotgunState.Reloadable;
         return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip(), seed);
     }
 
     private reload(): Vector {
         this.handleLerp.startLerp(0, this.maxHandleOffset);
-        this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.empty : ShotgunState.loaded;
+        this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
         return new Vector();
     }
 
@@ -89,7 +89,7 @@ class Shotgun implements IFirearm {
     }
 
     public shouldBeDeleted(): boolean {
-        return this.common.deletable() && this.currentState === ShotgunState.empty;
+        return this.common.deletable() && this.currentState === ShotgunState.Empty;
     }
 
 }

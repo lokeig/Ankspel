@@ -1,7 +1,7 @@
 enum ShotgunState {
-    loaded,
-    reloadable,
-    empty
+    Loaded,
+    Reloadable,
+    Empty
 }
 
 export { ShotgunState };

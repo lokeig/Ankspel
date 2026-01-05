@@ -2,7 +2,7 @@ import { GameMap, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage, NetworkVector } from "@game/Server";
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { ItemManager } from "@item";
+import { IExplosive, IFirearm, ItemManager, ItemType } from "@item";
 import { Grid, IDManager, Vector } from "@common";
 import { ProjectileManager } from "@projectile";
 import { ServerMessage } from "@shared";
@@ -14,7 +14,7 @@ class NetworkHandler {
         Connection.get().serverEvent.subscribe(ServerMessage.startGame, ({ userID }) => {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
-            Connection.get().sendGameMessage(GameMessage.readyToPlay, {});
+            Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
             if (Connection.get().connectionCount() === 0) {
                 this.startNewMap("defaultMap");
             }
@@ -22,34 +22,34 @@ class NetworkHandler {
 
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.readyToPlay, () => {
+        gameEvent.subscribe(GameMessage.ReadyToPlay, () => {
             this.readyCount++;
             if (Connection.get().isHost() && this.readyCount === Connection.get().connectionCount()) {
                 this.readyCount = 0;
                 const mapName = "defaultMap";
                 this.startNewMap(mapName);
-                Connection.get().sendGameMessage(GameMessage.loadMap, { name: mapName });
+                Connection.get().sendGameMessage(GameMessage.LoadMap, { name: mapName });
             }
         });
 
-        gameEvent.subscribe(GameMessage.newPlayer, ({ id }) => {
+        gameEvent.subscribe(GameMessage.NewPlayer, ({ id }) => {
             PlayerManager.spawn(id);
         });
 
-        gameEvent.subscribe(GameMessage.loadMap, ({ name }) => {
+        gameEvent.subscribe(GameMessage.LoadMap, ({ name }) => {
             this.startNewMap(name);
         });
 
-        gameEvent.subscribe(GameMessage.dataDone, () => {
-            Connection.get().sendGameMessage(GameMessage.readyForMap, {});
+        gameEvent.subscribe(GameMessage.DataDone, () => {
+            Connection.get().sendGameMessage(GameMessage.ReadyForMap, {});
         });
 
-        gameEvent.subscribe(GameMessage.readyForMap, () => {
+        gameEvent.subscribe(GameMessage.ReadyForMap, () => {
             this.readyCount++;
             this.checkReadyToStart();
         });
 
-        gameEvent.subscribe(GameMessage.playerSpawn, ({ id, location }) => {
+        gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, location }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
                 throw new Error("Player with id: " + id + " not found");
@@ -57,11 +57,11 @@ class NetworkHandler {
             player.character.setPos(this.convertVector(location));
         });
 
-        gameEvent.subscribe(GameMessage.spawnItem, ({ type, id, location }) => {
+        gameEvent.subscribe(GameMessage.SpawnItem, ({ type, id, location }) => {
             ItemManager.spawn(type, this.convertVector(location), id);
         });
 
-        gameEvent.subscribe(GameMessage.deleteItem, ({ id }) => {
+        gameEvent.subscribe(GameMessage.DeleteItem, ({ id }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
                 return;
@@ -69,15 +69,37 @@ class NetworkHandler {
             item.common.setToDelete();
         });
 
-        gameEvent.subscribe(GameMessage.activateItem, ({ id }) => {
-            
+        gameEvent.subscribe(GameMessage.ActivateItem, ({ id, action, seed, position, direction, angle }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                return;
+            }
+            item.common.angle = angle;
+            item.common.body.pos = this.convertVector(position);
+            item.common.body.direction = direction;
+
+            console.log("activatzio111n");
+
+
+            switch (item.common.getType()) {
+                case (ItemType.Firearm): {
+                    (item as IFirearm).shoot(seed);
+                    break;
+                }
+                case (ItemType.Explosive): {
+                    console.log("activatzion");
+                    (item as IExplosive).activate();
+                    break;
+                }
+            }
+
         })
 
-        gameEvent.subscribe(GameMessage.spawnProjectile, ({ type, id, location, angle }) => {
+        gameEvent.subscribe(GameMessage.SpawnProjectile, ({ type, id, location, angle }) => {
             ProjectileManager.spawn(type, this.convertVector(location), angle, id);
         });
 
-        gameEvent.subscribe(GameMessage.throwItem, ({ itemID, pos, direction, throwType }) => {
+        gameEvent.subscribe(GameMessage.ThrowItem, ({ itemID, pos, direction, throwType }) => {
             const item = ItemManager.getItemFromID(itemID);
             if (!item) {
                 return;
@@ -92,7 +114,7 @@ class NetworkHandler {
             item.common.throw(throwType);
         });
 
-        gameEvent.subscribe(GameMessage.playerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
+        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
             const player = PlayerManager.getPlayerFromID(id);
             if (!player) {
                 return;
@@ -109,7 +131,7 @@ class NetworkHandler {
             player.character.armFront.angle = armAngle;
         });
 
-        gameEvent.subscribe(GameMessage.startMap, ({ time }) => { this.onStart(time) });
+        gameEvent.subscribe(GameMessage.StartMap, ({ time }) => { this.onStart(time) });
     }
 
     private static convertVector(vector: NetworkVector): Vector {
@@ -144,7 +166,7 @@ class NetworkHandler {
             if (holding) {
                 itemID = ItemManager.getItemID(holding)!;
             }
-            Connection.get().sendGameMessage(GameMessage.playerInfo, {
+            Connection.get().sendGameMessage(GameMessage.PlayerInfo, {
                 id,
                 pos: player.character.body.pos,
                 state: player.getState(),
@@ -168,7 +190,7 @@ class NetworkHandler {
         if (PlayerManager.getPlayers().length === 1) {
             this.onStart(Date.now() + 500);
         }
-        Connection.get().sendGameMessage(GameMessage.dataDone, {});
+        Connection.get().sendGameMessage(GameMessage.DataDone, {});
     }
 
     private static loadMapPlayerSpawns(map: GameMap): void {
@@ -176,7 +198,7 @@ class NetworkHandler {
         const spawns = map.getRandomSpawnLocations(players.length);
         for (let i = 0; i < players.length; i++) {
             players[i].character.setPos(spawns[i]);
-            Connection.get().sendGameMessage(GameMessage.playerSpawn, {
+            Connection.get().sendGameMessage(GameMessage.PlayerSpawn, {
                 id: PlayerManager.getPlayerID(players[i])!,
                 location: spawns[i],
             });
@@ -195,7 +217,7 @@ class NetworkHandler {
             newItem.common.body.pos.y += newItem.common.body.height;
 
             const id = ItemManager.getItemID(newItem)!;
-            Connection.get().sendGameMessage(GameMessage.spawnItem, {
+            Connection.get().sendGameMessage(GameMessage.SpawnItem, {
                 id,
                 type: item.type,
                 location: newItem.common.body.pos
@@ -207,7 +229,7 @@ class NetworkHandler {
         const totalPlayers = PlayerManager.getPlayers().length;
         if (this.readyCount === totalPlayers - 1) {
             const timeToStart = Date.now() + 500;
-            Connection.get().sendGameMessage(GameMessage.startMap, {
+            Connection.get().sendGameMessage(GameMessage.StartMap, {
                 time: timeToStart
             });
             this.onStart(timeToStart);

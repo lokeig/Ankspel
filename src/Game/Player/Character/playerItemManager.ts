@@ -2,7 +2,7 @@ import { IItem, ItemManager, ItemType, IFirearm, IExplosive } from "@game/Item";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
-import { InputMode, ThrowType, Vector } from "@common";
+import { InputMode, ThrowType, Utility } from "@common";
 import { Connection, GameMessage } from "@server";
 
 class PlayerItemManager {
@@ -34,39 +34,41 @@ class PlayerItemManager {
 
         if (this.equipment.isHolding() && this.controls.shoot(InputMode.Press)) {
             const item = this.equipment.getHolding();
+            const seed = Utility.Random.getRandomSeed();
+            const pos = item.common.body.pos;
             switch (item.common.getType()) {
-                case (ItemType.fireArm): {
-                    const knockback = (item as IFirearm).shoot();
-                    this.playerCharacter.velocity.x -= knockback.x;
-                    this.playerCharacter.velocity.y -= knockback.y;
+                case (ItemType.Firearm): {
+                    const knockback = (item as IFirearm).shoot(seed);
+                    this.playerCharacter.velocity.subtract(knockback);
+
                     break;
                 }
 
-                case (ItemType.explosive): {
+                case (ItemType.Explosive): {
                     (item as IExplosive).activate();
                     break;
                 }
             }
+
+            Connection.get().sendGameMessage(GameMessage.ActivateItem, {
+                id: ItemManager.getItemID(item)!, action: 0, seed, position: { x: pos.x, y: pos.y }, direction: item.common.body.direction, angle: item.common.angle
+            });
         }
     }
 
     private getNearbyItem(): IItem | null {
         let fallbackItem: IItem | null = null;
-
         for (const item of this.nearbyItems.values()) {
             if (!this.playerCharacter.collision(item.common.getPickupHitbox())) {
                 continue
             }
-
             if (item === this.lastHeldItem) {
                 fallbackItem = this.lastHeldItem;
                 continue;
             }
-
             this.lastHeldItem = item;
             return item;
         }
-
         if (fallbackItem) {
             this.lastHeldItem = fallbackItem;
         }
@@ -84,18 +86,15 @@ class PlayerItemManager {
         if (this.controls.down()) {
             return ThrowType.drop;
         }
-
         if (left || right) {
             if (up) {
                 return ThrowType.hardDiagonal;
             }
             return ThrowType.hard;
         }
-
         if (up) {
             return ThrowType.upwards;
         }
-
         return ThrowType.light;
     }
 
@@ -103,13 +102,12 @@ class PlayerItemManager {
         if (!this.equipment.isHolding()) {
             return;
         }
-
         const item = this.equipment.getHolding();
         this.equipment.setHolding(null);
         item.common.body.grounded = false;
         item.common.throw(throwType);
 
-        Connection.get().sendGameMessage(GameMessage.throwItem, { 
+        Connection.get().sendGameMessage(GameMessage.ThrowItem, {
             itemID: ItemManager.getItemID(item)!,
             pos: { x: item.common.body.pos.x, y: item.common.body.pos.y },
             direction: item.common.body.direction,

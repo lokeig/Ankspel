@@ -38,7 +38,7 @@ class PlayerManager {
         const id = this.idManager.add(player);
         this.addPlayer(player);
         player.setControls(Utility.File.getControls(this.localPlayerCount++));
-        Connection.get().sendGameMessage(GameMessage.newPlayer, ({ id }));
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
         return player;
     }
 

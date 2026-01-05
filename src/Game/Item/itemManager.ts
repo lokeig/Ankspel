@@ -14,7 +14,7 @@ class ItemManager {
             if (item.shouldBeDeleted() || item.common.shouldBeDeleted()) {
                 itemSet.delete(item);
                 const id = this.idManager.removeObject(item)!;
-                Connection.get().sendGameMessage(GameMessage.deleteItem, { id });
+                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id });
             } else {
                 item.update(deltaTime);
             }
@@ -90,7 +90,7 @@ class ItemManager {
     public static activateItem(item: IItem, action: number): number {
         const seed = Utility.Random.getRandomSeed();
         const id = this.idManager.getID(item)!;
-        Connection.get().sendGameMessage(GameMessage.activateItem, { id, action, angle: item.common.angle, seed });
+        Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, action, angle: item.common.angle, seed });
         return seed;
     }
 

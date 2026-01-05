@@ -3,8 +3,6 @@ import { IExplosive, ItemLogic, ItemType } from "@game/Item";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
-import { Bullet } from "@impl/Projectiles";
-import { GrenadeBullet } from "@impl/Projectiles/grenadeBullet";
 
 class Grenade implements IExplosive {
     public common: ItemLogic;
@@ -20,7 +18,7 @@ class Grenade implements IExplosive {
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
         const width = 6;
         const height = 19;
-        this.common = new ItemLogic(pos, width, height, ItemType.explosive);
+        this.common = new ItemLogic(pos, width, height, ItemType.Explosive);
         this.common.body.bounceFactor = 0.3;
 
         this.common.holdOffset = new Vector(12, -6)

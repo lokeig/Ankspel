@@ -22,7 +22,7 @@ class Glock implements IFirearm {
     private setupCommon(pos: Vector): void {
         const width = 30;
         const height = 15;
-        this.common = new ItemLogic(pos, width, height, ItemType.fireArm);
+        this.common = new ItemLogic(pos, width, height, ItemType.Firearm);
         this.common.handOffset = new Vector(2, 2);
         this.common.holdOffset = new Vector(10, -4);
         this.common.setHitboxOffset(new Vector(14, 8));
@@ -45,10 +45,10 @@ class Glock implements IFirearm {
         }
     }
 
-    public shoot(): Vector {
+    public shoot(seed: number): Vector {
         this.animator.reset();
         this.animator.setAnimation(this.animations.shoot);
-        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip());
+        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip(), seed);
     }
 
     public draw(): void {

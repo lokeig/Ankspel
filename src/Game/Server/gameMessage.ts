@@ -1,24 +1,31 @@
 import { PlayerState, PlayerAnim, Side, ThrowType } from "@common";
 
 enum GameMessage {
-    readyToPlay,
-    // Player
-    playerInfo,
-    newPlayer,
-    throwItem,
-    playerSpawn,
-    // Projectile
-    spawnProjectile,
-    // Items
-    spawnItem,
-    deleteItem,
-    activateItem,
-    // Map
-    loadMap,
-    dataDone,
-    readyForMap,
-    startMap,
-};
+    // ─── Connection ─────────────────────────
+    ReadyToPlay,
+    DataDone,
+
+    // ─── Player ─────────────────────────────
+    PlayerInfo,
+    NewPlayer,
+    PlayerSpawn,
+
+    // ─── Items ──────────────────────────────
+    SpawnItem,
+    DeleteItem,
+    ActivateItem,
+    DeactivateItem,
+    ThrowItem,
+
+    // ─── Projectiles ────────────────────────
+    SpawnProjectile,
+
+    // ─── Map ────────────────────────────────
+    LoadMap,
+    ReadyForMap,
+    StartMap,
+}
+
 
 type NetworkVector = {
     x: number,
@@ -26,31 +33,26 @@ type NetworkVector = {
 };
 
 interface GameMessageMap {
-    [GameMessage.readyToPlay]: {};
+    [GameMessage.ReadyToPlay]: {};
     // Player
-    [GameMessage.playerInfo]: {
-        id: number,
-        pos: NetworkVector,
-        holding: number | null,
-        state: PlayerState,
-        anim: PlayerAnim,
-        side: Side,
-        armAngle: number
+    [GameMessage.PlayerInfo]: {
+        id: number, pos: NetworkVector, holding: number | null, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number
     };
-    [GameMessage.newPlayer]: { id: number };
-    [GameMessage.playerSpawn]: { id: number, location: NetworkVector };
+    [GameMessage.NewPlayer]: { id: number };
+    [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
     //Projectile
-    [GameMessage.spawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
+    [GameMessage.SpawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
     // Items
-    [GameMessage.throwItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
-    [GameMessage.spawnItem]: { id: number, location: NetworkVector, type: string };
-    [GameMessage.deleteItem]: { id: number };
-    [GameMessage.activateItem]: { id: number, action: number, angle: number, seed: number };
+    [GameMessage.ThrowItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
+    [GameMessage.SpawnItem]: { id: number, location: NetworkVector, type: string };
+    [GameMessage.DeleteItem]: { id: number };
+    [GameMessage.ActivateItem]: { id: number, position: NetworkVector, angle: number, direction: Side, action: number, seed: number };
+    [GameMessage.DeactivateItem]: { id: number };
     // Map
-    [GameMessage.loadMap]: { name: string };
-    [GameMessage.dataDone]: {};
-    [GameMessage.readyForMap]: {};
-    [GameMessage.startMap]: { time: number };
+    [GameMessage.LoadMap]: { name: string };
+    [GameMessage.DataDone]: {};
+    [GameMessage.ReadyForMap]: {};
+    [GameMessage.StartMap]: { time: number };
 }
 
 const test: GameMessageMap[GameMessage] = {}

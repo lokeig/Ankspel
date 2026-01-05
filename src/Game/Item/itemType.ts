@@ -1,8 +1,8 @@
 enum ItemType {
-    fireArm,
-    mine,
-    explosive,
-    prop
+    Firearm,
+    Mine,
+    Explosive,
+    Prop
 }
 
 export { ItemType };

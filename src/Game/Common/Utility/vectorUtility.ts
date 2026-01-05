@@ -14,6 +14,7 @@ class VectorUtility {
         }
         return result;
     }
+    
     public randomOffsetVectorArray(array: Array<Vector>, maxOffset: number): void {
         for (const value of array.values()) {
             value.x += (Math.random() * maxOffset) * (Math.random() < 0.5 ? -1 : 1);
