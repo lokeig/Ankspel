@@ -2,7 +2,7 @@ import { GameMap, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage, NetworkVector } from "@game/Server";
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { IExplosive, IFirearm, ItemManager, ItemType } from "@item";
+import { ItemManager } from "@item";
 import { Grid, IDManager, Vector } from "@common";
 import { ProjectileManager } from "@projectile";
 import { ServerMessage } from "@shared";
@@ -74,25 +74,9 @@ class NetworkHandler {
             if (!item) {
                 return;
             }
-            item.common.angle = angle;
-            item.common.body.pos = this.convertVector(position);
-            item.common.body.direction = direction;
-
-            console.log("activatzio111n");
-
-
-            switch (item.common.getType()) {
-                case (ItemType.Firearm): {
-                    (item as IFirearm).shoot(seed);
-                    break;
-                }
-                case (ItemType.Explosive): {
-                    console.log("activatzion");
-                    (item as IExplosive).activate();
-                    break;
-                }
-            }
-
+            item.setWorldAngle(angle);
+            item.getBody().pos = this.convertVector(position);
+            item.getBody().direction = direction;
         })
 
         gameEvent.subscribe(GameMessage.SpawnProjectile, ({ type, id, location, angle }) => {
