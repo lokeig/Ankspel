@@ -1,9 +1,9 @@
 import { Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
-import { IItem, ItemControls } from "@item";
+import { IItem, ItemInteractions } from "@item";
 
 abstract class Item implements IItem {
-    interactions = new ItemControls();
+    interactions = new ItemInteractions();
     private owned: boolean = false;
     protected body: DynamicObject;
 
@@ -66,6 +66,10 @@ abstract class Item implements IItem {
 
     public setWorldAngle(to: number): void {
         this.worldAngle = to;
+    }
+
+    public setLocalAngle(angle: number): void {
+        this.localAngle = angle;
     }
 
     public getLocalAngle(): number {

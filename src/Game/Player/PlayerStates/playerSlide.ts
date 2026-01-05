@@ -39,7 +39,7 @@ class PlayerSlide implements IPlayerState {
         
         if (!this.playerCharacter.body.grounded) {
             this.playerCharacter.body.frictionMultiplier = 0.5;
-        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 1.8) {
+        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 120) {
             this.playerCharacter.body.frictionMultiplier = 1 / 5;
         } else {
             this.playerCharacter.body.frictionMultiplier = 1;
@@ -72,7 +72,7 @@ class PlayerSlide implements IPlayerState {
         }
         if (this.playerCharacter.controls.down() || this.playerCharacter.idleCollision()) {
             if (this.crouch) {
-                const maxCrouchSpeed = 3;
+                const maxCrouchSpeed = 180;
                 const validCrouch = !this.playerCharacter.body.grounded
                     || Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed
                     || this.playerCharacter.idleCollision();

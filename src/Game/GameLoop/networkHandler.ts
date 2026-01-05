@@ -2,7 +2,7 @@ import { GameMap, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage, NetworkVector } from "@game/Server";
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { ItemManager } from "@item";
+import { ItemManager, OnItemUseType } from "@item";
 import { Grid, IDManager, Vector } from "@common";
 import { ProjectileManager } from "@projectile";
 import { ServerMessage } from "@shared";
@@ -69,14 +69,23 @@ class NetworkHandler {
             item.setToDelete();
         });
 
-        gameEvent.subscribe(GameMessage.ActivateItem, ({ id, action, seed, position, direction, angle }) => {
+        gameEvent.subscribe(GameMessage.ActivateItem, ({ id, position, angle, direction, action, seed }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
                 return;
             }
+            item.setLocalAngle(0);
             item.setWorldAngle(angle);
             item.getBody().pos = this.convertVector(position);
             item.getBody().direction = direction;
+            const effects = item.interactions.get(action)!(seed);
+            effects.forEach((effect) => {
+                switch (effect.type) {
+                    case (OnItemUseType.Aim): {
+                        break;
+                    }
+                }
+            })
         })
 
         gameEvent.subscribe(GameMessage.SpawnProjectile, ({ type, id, location, angle }) => {

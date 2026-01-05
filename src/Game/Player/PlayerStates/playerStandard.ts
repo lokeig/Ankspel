@@ -22,9 +22,9 @@ class PlayerStandard implements IPlayerState {
             return;
         }
         const left = this.playerCharacter.controls.left(); const right = this.playerCharacter.controls.right();
-        if ((left && this.playerCharacter.body.velocity.x > 0.3) || right && this.playerCharacter.body.velocity.x < -0.3) {
+        if ((left && this.playerCharacter.body.velocity.x > 20) || right && this.playerCharacter.body.velocity.x < -20) {
             animator.setAnimation(PlayerAnim.turn);
-        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 0.3) {
+        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 20) {
             animator.setAnimation(PlayerAnim.walk);
         } else {
             animator.setAnimation(PlayerAnim.idle);
@@ -50,19 +50,16 @@ class PlayerStandard implements IPlayerState {
         if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
             return PlayerState.Ragdoll;
         }
-
         if (this.playerCharacter.controls.jump(InputMode.Press) && !this.playerCharacter.body.grounded && !this.playerCharacter.jump.isJumping) {
             return PlayerState.Flap;
         }
-
         if (this.playerCharacter.controls.down()) {
-            if (Math.abs(this.playerCharacter.body.velocity.x) < 3 || !this.playerCharacter.body.grounded) {
+            if (Math.abs(this.playerCharacter.body.velocity.x) < 180 || !this.playerCharacter.body.grounded) {
                 return PlayerState.Crouch;
             } else {
                 return PlayerState.Slide
             }
         }
-
         return PlayerState.Standard;
     }
 

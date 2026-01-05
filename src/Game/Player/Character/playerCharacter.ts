@@ -1,4 +1,4 @@
-import { Vector, Utility, Controls } from "@common";
+import { Vector, Controls } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemManager } from "./playerItemManager";
@@ -9,7 +9,6 @@ import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
 
 class PlayerCharacter {
-
     public static readonly drawSize: number = 64;
     public static readonly standardHeight: number = 46;
     public static readonly standardWidth: number = 18;
@@ -53,7 +52,7 @@ class PlayerCharacter {
     public setPos(pos: Vector) {
         this.body.pos = pos;
         this.setArmPos();
-        this.itemManager.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
+        this.equipment.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
         this.body.setNewCollidableObjects();
     }
 
@@ -63,7 +62,7 @@ class PlayerCharacter {
         }
         this.jump.update(deltaTime);
         this.movement.update(deltaTime);
-        this.itemManager.update(deltaTime);
+        this.itemManager.handle();
     }
 
     public offlineUpdate(deltaTime: number): void {
@@ -74,7 +73,7 @@ class PlayerCharacter {
         this.body.update(deltaTime);
         this.updateControllers(deltaTime);
         this.setArmPos();
-        this.itemManager.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
+        this.equipment.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
         this.animator.update(deltaTime, this.equipment.isHolding());
     }
 
@@ -82,7 +81,7 @@ class PlayerCharacter {
         if (this.movement.willTurn()) {
             this.armFront.angle *= -1;
         }
-        if (forceup || this.armFront.angle > 0 || this.itemManager.itemNoRotationCollision(this.armFront.getCenter())) {
+        if (forceup || this.armFront.angle > 0 || this.equipment.itemNoRotationCollision(this.armFront.getCenter())) {
             this.armFront.rotateArmUp(deltaTime);
         } else {
             this.armFront.rotateArmDown(deltaTime);

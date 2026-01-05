@@ -87,14 +87,6 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static activateItem(item: IItem, action: number): number {
-        const seed = Utility.Random.getRandomSeed();
-        const id = this.idManager.getID(item)!;
-        const position = { x: item.getBody().pos.x, y: item.getBody().pos.y };
-        Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, position, action, direction: item.getBody().direction, angle: item.getAngle(), seed });
-        return seed;
-    }
-
     public static getItemFromID(id: number): IItem | undefined {
         return this.idManager.getObject(id);
     }

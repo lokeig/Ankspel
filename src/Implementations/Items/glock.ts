@@ -1,4 +1,4 @@
-import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility } from "@common";
+import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility, ItemInteractionInput } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmInfo } from "./firearmInfo";
 import { Item } from "./item";
@@ -24,9 +24,9 @@ class Glock extends Item {
         this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animations.default);
         this.setupFirearmInfo();
 
-        this.interactions.onActivate = ((deltatime: number, seed: number) => {
+        this.interactions.on(ItemInteractionInput.Activate, ((seed: number) => {
             return this.shoot(seed);
-        });
+        }));
     }
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();

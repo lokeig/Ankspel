@@ -1,4 +1,4 @@
-import { SpriteSheet, images, Countdown, Vector, Utility, Frame } from "@common";
+import { SpriteSheet, images, Countdown, Vector, Utility, Frame, ItemInteractionInput } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
@@ -12,7 +12,7 @@ class Grenade extends Item {
     private activated: boolean = false;
 
     constructor(pos: Vector) {
-        const width = 6;
+        const width = 8;
         const height = 19;
         super(pos, width, height);
 
@@ -20,13 +20,13 @@ class Grenade extends Item {
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
         Utility.File.setFrames("grenade", this.frames);
         
-        this.holdOffset = new Vector(12, -6)
+        this.holdOffset = new Vector(11, -6)
         this.body.bounceFactor = 0.3;
 
-        this.interactions.onActivate = (deltaTime: number, seed: number) => {
+        this.interactions.on(ItemInteractionInput.Activate, (seed: number) => {
             this.activate();
             return [];
-        };
+        });
     }
 
     public update(deltaTime: number): void {

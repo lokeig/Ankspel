@@ -1,12 +1,12 @@
 import { ThrowType, Vector } from "@common";
-import { ItemControls } from "./itemControls";
+import { ItemInteractions } from "./itemInteractions";
 import { DynamicObject } from "@core";
 
 interface IItem {
     update(deltaTime: number): void;
     draw(): void;
     getBody(): DynamicObject;
-    interactions: ItemControls;
+    interactions: ItemInteractions;
 
     setOwnership(value: boolean): void;
     isOwned(): boolean;
@@ -17,6 +17,7 @@ interface IItem {
 
     getAngle(): number;
     setWorldAngle(to: number): void;
+    setLocalAngle(angle: number): void;
     getLocalAngle(): number;
 
     getHoldOffset(): Vector;

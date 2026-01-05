@@ -1,4 +1,4 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, ItemInteractionInput } from "@common";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "../firearmInfo";
 import { Item } from "../item";
@@ -31,9 +31,9 @@ class Shotgun extends Item {
         Utility.File.setFrames("shotgun", this.frames);
         this.setupFirearmInfo();
 
-        this.interactions.onActivate = ((deltatime: number, seed: number) => {
+        this.interactions.on(ItemInteractionInput.Activate, ((seed: number) => {
             return this.shoot(seed);
-        });
+        }));
     }
 
     private setupFirearmInfo(): void {

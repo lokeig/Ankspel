@@ -2,13 +2,13 @@ import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType } from "@
 import { DynamicObject, GameObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { IPlayerState } from "../IPlayerState";
+import { IItem, ItemInteractions } from "@item";
 
-class PlayerRagdoll implements IPlayerState {
+class PlayerRagdoll implements IPlayerState, IItem {
     private playerCharacter: PlayerCharacter;
     private head: DynamicObject;
     private body: DynamicObject;
     private legs: DynamicObject;
-
     private headAngle = 0;
     private legsAngle = 0;
 
@@ -16,6 +16,9 @@ class PlayerRagdoll implements IPlayerState {
     private readonly width: number;
 
     private coyoteTime = new Countdown(0.15);
+
+    private owned: boolean = false;
+    public interactions: ItemInteractions = new ItemInteractions;
 
     constructor(playerCharacter: PlayerCharacter) {
         this.playerCharacter = playerCharacter;
@@ -27,13 +30,13 @@ class PlayerRagdoll implements IPlayerState {
         this.body = new DynamicObject(new Vector(), this.width, this.width);
 
         const bounceFactor = 0.5;
-        this.head.bounceFactor = bounceFactor; 
+        this.head.bounceFactor = bounceFactor;
         this.body.bounceFactor = bounceFactor;
-        this.legs.bounceFactor = bounceFactor; 
+        this.legs.bounceFactor = bounceFactor;
         this.body.ignorePlatforms = true;
         const friction = 8;
-        this.head.friction = friction; 
-        this.body.friction = friction; 
+        this.head.friction = friction;
+        this.body.friction = friction;
         this.legs.friction = friction;
     }
 
@@ -198,6 +201,60 @@ class PlayerRagdoll implements IPlayerState {
             this.legsAngle,
             this.head.isFlip()
         );
+    }
+
+    // For IItem
+    public update(deltaTime: number): void {
+        this.stateUpdate(deltaTime);
+    }
+
+    public getBody(): DynamicObject {
+        return this.head;
+    }
+
+    public getAngle(): number {
+        return this.headAngle;
+    }
+
+    public getLocalAngle(): number {
+        return this.headAngle;
+    }
+
+    public setWorldAngle(angle: number): void {
+        this.headAngle = angle;
+    }
+
+    public setLocalAngle(angle: number): void {
+        this.headAngle = angle;
+    }
+
+    public getHandOffset(): Vector {
+        return new Vector();
+    }
+
+    public getHoldOffset(): Vector {
+        return new Vector();
+    }
+
+    public setOwnership(value: boolean): void {
+        this.owned = value;
+    }
+
+    public isOwned(): boolean {
+        return this.owned;
+    }
+
+    public throw(throwType: ThrowType): void {
+        throwType;
+        this.owned = false;
+    }
+
+    public shouldBeDeleted(): boolean {
+        return false;
+    }
+
+    public setToDelete(): void {
+        return;
     }
 }
 
