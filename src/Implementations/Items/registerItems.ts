@@ -1,5 +1,5 @@
 import { ItemManager } from "@item";
-import { Shotgun } from "./shotgun";
+import { Shotgun } from "./Shotgun/shotgun";
 import { Glock } from "./glock";
 import { Grenade } from "./grenade";
 import { ProjectileManager } from "@projectile";

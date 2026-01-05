@@ -184,8 +184,8 @@ class PlayerRagdoll implements IPlayerState {
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {
-        const x = bodyPart.pos.x + (this.width - this.playerCharacter.drawSize) / 2;
-        const y = bodyPart.pos.y + (this.height - this.playerCharacter.drawSize) / 2;
+        const x = bodyPart.pos.x + (this.width - PlayerCharacter.drawSize) / 2;
+        const y = bodyPart.pos.y + (this.height - PlayerCharacter.drawSize) / 2;
         return new Vector(x, y);
     }
 
@@ -193,7 +193,7 @@ class PlayerRagdoll implements IPlayerState {
         this.playerCharacter.animator.drawRagdoll(
             this.getDrawPos(this.head),
             this.getDrawPos(this.legs),
-            this.playerCharacter.drawSize,
+            PlayerCharacter.drawSize,
             this.headAngle,
             this.legsAngle,
             this.head.isFlip()

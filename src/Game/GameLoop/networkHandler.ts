@@ -66,7 +66,7 @@ class NetworkHandler {
             if (!item) {
                 return;
             }
-            item.common.setToDelete();
+            item.setToDelete();
         });
 
         gameEvent.subscribe(GameMessage.activateItem, ({ id }) => {
@@ -87,9 +87,9 @@ class NetworkHandler {
                     player.character.equipment.setHolding(null);
                 }
             }
-            item.common.body.pos = this.convertVector(pos);
-            item.common.body.direction = direction;
-            item.common.throw(throwType);
+            item.getBody().pos = this.convertVector(pos);
+            item.getBody().direction = direction;
+            item.throw(throwType);
         });
 
         gameEvent.subscribe(GameMessage.playerInfo, ({ id, pos, state, holding, anim, side, armAngle }) => {
@@ -191,14 +191,14 @@ class NetworkHandler {
             if (!newItem) {
                 continue;
             }
-            newItem.common.body.pos.x += (newItem.common.body.width - Grid.size) / 2;
-            newItem.common.body.pos.y += newItem.common.body.height;
+            newItem.getBody().pos.x += (newItem.getBody().width - Grid.size) / 2;
+            newItem.getBody().pos.y += newItem.getBody().height;
 
             const id = ItemManager.getItemID(newItem)!;
             Connection.get().sendGameMessage(GameMessage.spawnItem, {
                 id,
                 type: item.type,
-                location: newItem.common.body.pos
+                location: newItem.getBody().pos
             });
         }
     }

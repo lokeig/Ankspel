@@ -16,11 +16,11 @@ class PlayerEquipment {
 
     public setHolding(item: IItem | null): void {
         if (!item && this.holding) {
-            this.holding.common.owned = false;
+            this.holding.setOwnership(false);
         }
         this.holding = item;
         if (item) {
-            item.common.owned = true;
+            this.holding!.setOwnership(true);
         }
     }
 }

@@ -11,7 +11,7 @@ class ItemManager {
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (item.shouldBeDeleted() || item.common.shouldBeDeleted()) {
+            if (item.shouldBeDeleted()) {
                 itemSet.delete(item);
                 const id = this.idManager.removeObject(item)!;
                 Connection.get().sendGameMessage(GameMessage.deleteItem, { id });
@@ -19,7 +19,7 @@ class ItemManager {
                 item.update(deltaTime);
             }
         }));
-        Grid.updateMapPositions<IItem>(this.items, e => e.common.body.pos);
+        Grid.updateMapPositions<IItem>(this.items, e => e.getBody().pos);
     }
 
     public static registerItem(type: string, constructor: ItemConstructor): void {
@@ -79,7 +79,7 @@ class ItemManager {
     }
 
     private static addItem(item: IItem) {
-        const gridPos = item.common.body.pos;
+        const gridPos = item.getBody().pos;
         const itemSet = this.getItems(gridPos);
         if (!itemSet) {
             this.items.set(Grid.key(gridPos), new Set());
@@ -90,7 +90,7 @@ class ItemManager {
     public static activateItem(item: IItem, action: number): number {
         const seed = Utility.Random.getRandomSeed();
         const id = this.idManager.getID(item)!;
-        Connection.get().sendGameMessage(GameMessage.activateItem, { id, action, angle: item.common.angle, seed });
+        Connection.get().sendGameMessage(GameMessage.activateItem, { id, action, angle: item.getAngle(), seed });
         return seed;
     }
 
@@ -104,7 +104,7 @@ class ItemManager {
 
     public static draw() {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (!item.common.owned) {
+            if (!item.isOwned()) {
                 item.draw();
             }
         }));

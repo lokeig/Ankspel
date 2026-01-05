@@ -1,7 +1,7 @@
 import { Grid, Vector } from "@common";
 import { IProjectile, ProjectileConstructor } from "./IProjectile";
-import { ITrail } from "./ITrail";
 import { Connection, GameMessage } from "@server";
+import { ITrail } from "./ITrail";
 
 class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
@@ -24,12 +24,13 @@ class ProjectileManager {
 
     private static updateMapPositions(deltaTime: number) {
         this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
-            if (!projectile.shouldBeDeleted()) {
-                projectile.getTrail().setTarget(projectile.body.getCenter());
-                projectile.update(deltaTime);
+            if (projectile.shouldBeDeleted()) {
+                projectileSet.delete(projectile);
+                projectile.getTrail().setToDelete();
+                return;
             }
-            projectileSet.delete(projectile);
-            projectile.getTrail().setToDelete();
+            projectile.getTrail().setTarget(projectile.body.getCenter());
+            projectile.update(deltaTime);
         }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }

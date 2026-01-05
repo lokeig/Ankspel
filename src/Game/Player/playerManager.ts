@@ -59,11 +59,7 @@ class PlayerManager {
     }
 
     public static draw() {
-        for (const playerSet of this.players.values()) {
-            for (const player of playerSet.values()) {
-                player.draw();
-            }
-        }
+        this.players.forEach(playerSet => { playerSet.forEach(player => { player.draw(); }) });
     }
 
     public static getPlayerFromID(ID: number): Player | undefined {
