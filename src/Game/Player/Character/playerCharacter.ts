@@ -10,7 +10,7 @@ import { PlayerEquipment } from "./playerEquipment";
 
 class PlayerCharacter {
 
-    public readonly drawSize: number = 64;
+    public static readonly drawSize: number = 64;
     public static readonly standardHeight: number = 46;
     public static readonly standardWidth: number = 18;
 
@@ -45,32 +45,17 @@ class PlayerCharacter {
     private setArmPos(): void {
         let offset = new Vector();
         if (this.equipment.isHolding()) {
-            offset = this.equipment.getHolding().common.handOffset;
+            offset = this.equipment.getHolding().getHandOffset();
         }
-        this.armFront.setPosition(this.getDrawPos(), this.drawSize, offset, this.body.isFlip());
-    }
-
-    private setHoldingPosition(): void {
-        if (!this.equipment.isHolding()) {
-            return;
-        }
-        const item = this.equipment.getHolding().common;
-        item.body.setCenterToPos(this.armFront.getCenter());
-        item.body.direction = this.body.direction;
-        item.angle = this.armFront.angle;
-        
-        const offset = Utility.Angle.rotateForce(item.holdOffset, item.angle);
-        item.body.pos.x += offset.x * this.body.getDirectionMultiplier();
-        item.body.pos.y += offset.y;
+        this.armFront.setPosition(this.getDrawPos(), PlayerCharacter.drawSize, offset, this.body.isFlip());
     }
 
     public setPos(pos: Vector) {
         this.body.pos = pos;
         this.setArmPos();
-        this.setHoldingPosition();
+        this.itemManager.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
         this.body.setNewCollidableObjects();
     }
-
 
     private updateControllers(deltaTime: number): void {
         if (this.body.collisions.up) {
@@ -89,7 +74,7 @@ class PlayerCharacter {
         this.body.update(deltaTime);
         this.updateControllers(deltaTime);
         this.setArmPos();
-        this.setHoldingPosition();
+        this.itemManager.setHoldingBody(this.armFront.getCenter(), this.body.direction, this.armFront.angle);
         this.animator.update(deltaTime, this.equipment.isHolding());
     }
 
@@ -97,29 +82,11 @@ class PlayerCharacter {
         if (this.movement.willTurn()) {
             this.armFront.angle *= -1;
         }
-        if (forceup || this.armFront.angle > 0 || this.itemNoRotationCollision()) {
+        if (forceup || this.armFront.angle > 0 || this.itemManager.itemNoRotationCollision(this.armFront.getCenter())) {
             this.armFront.rotateArmUp(deltaTime);
         } else {
             this.armFront.rotateArmDown(deltaTime);
         }
-    }
-
-    private itemNoRotationCollision(): boolean {
-        if (!this.equipment.isHolding()) {
-            return false;
-        }
-        const item = this.equipment.getHolding().common;
-        const tempItemPos = item.body.pos.clone();
-
-        item.body.setCenterToPos(this.armFront.getCenter());
-        item.body.pos.x += item.holdOffset.x * this.body.getDirectionMultiplier();
-        item.body.pos.y += item.holdOffset.y;
-
-        const collision = item.body.getHorizontalTileCollision();
-        
-        item.body.pos = tempItemPos;
-
-        return collision !== undefined;
     }
 
     public idleCollision(): boolean {
@@ -137,14 +104,14 @@ class PlayerCharacter {
         return returnValue !== undefined;
     }
 
-    public getDrawPos(): Vector {
-        const x = this.body.pos.x + ((this.body.width - this.drawSize) / 2);
-        const y = this.body.pos.y + (this.body.height - this.drawSize);
+    private getDrawPos(): Vector {
+        const x = this.body.pos.x + ((this.body.width - PlayerCharacter.drawSize) / 2);
+        const y = this.body.pos.y + (this.body.height - PlayerCharacter.drawSize);
         return new Vector(x, y);
     }
 
     public draw(): void {
-        this.animator.drawBody(this.getDrawPos(), this.drawSize, this.body.isFlip());
+        this.animator.drawBody(this.getDrawPos(), PlayerCharacter.drawSize, this.body.isFlip());
         if (this.equipment.isHolding()) {
             this.equipment.getHolding().draw();
         }

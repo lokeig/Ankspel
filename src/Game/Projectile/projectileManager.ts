@@ -1,7 +1,6 @@
 import { Grid, Vector } from "@common";
 import { IProjectile, ProjectileConstructor } from "./IProjectile";
 import { ITrail } from "./ITrail";
-import { Connection, GameMessage } from "@server";
 
 class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
@@ -27,10 +26,10 @@ class ProjectileManager {
             if (projectile.shouldBeDeleted()) {
                 projectileSet.delete(projectile);
                 projectile.getTrail().setToDelete();
-            } else {
-                projectile.getTrail().setTarget(projectile.body.getCenter());
-                projectile.update(deltaTime);
+                return;
             }
+            projectile.getTrail().setTarget(projectile.body.getCenter());
+            projectile.update(deltaTime);
         }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
     }

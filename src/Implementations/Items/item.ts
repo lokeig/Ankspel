@@ -1,25 +1,24 @@
-import { Vector, Lerp, lerpAngle, Utility, ThrowType } from "@common";
-import { DynamicObject, GameObject } from "@core";
+import { Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
+import { DynamicObject } from "@core";
+import { IItem, ItemControls } from "@item";
 
-class ItemLogic {
-    public body: DynamicObject;
-    public owned: boolean = false;
+abstract class Item implements IItem {
+    interactions = new ItemControls();
+    private owned: boolean = false;
+    protected body: DynamicObject;
 
-    public handOffset = new Vector();
-    public holdOffset = new Vector();
-    private hitboxOffset = new Vector();
-
-    public angle: number = 0;
-    public rotateSpeed: number = 0;
+    protected localAngle: number = 0;
+    private worldAngle: number = 0;
+    private rotateSpeed: number = 0;
     private rotateLerp = new Lerp(15, lerpAngle);
+
+    protected holdOffset = new Vector;
+    protected handOffset = new Vector;
+
     private delete: boolean = false;
 
     constructor(pos: Vector, width: number, height: number) {
         this.body = new DynamicObject(pos, width, height);
-    }
-
-    public setHitboxOffset(offset: Vector) {
-        this.hitboxOffset = offset;
     }
 
     public update(deltaTime: number): void {
@@ -38,24 +37,62 @@ class ItemLogic {
         if (this.body.collisions.side) {
             this.rotateSpeed *= 0.5;
         }
-
     }
 
     private updateAngle(deltaTime: number): void {
-        const normalized = Utility.Angle.normalizeAngle(this.angle);
+        const angle = this.worldAngle + this.localAngle;
+        const normalized = Utility.Angle.normalizeAngle(angle);
         if (this.body.grounded && normalized !== 0 && normalized !== -Math.PI) {
             this.rotateSpeed = 0;
             if (!this.rotateLerp.isActive()) {
                 const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
-
                 this.rotateLerp.startLerp(normalized, target);
             }
         }
         if (this.rotateLerp.isActive()) {
-            this.angle = this.rotateLerp.update(deltaTime);
+            this.worldAngle = this.rotateLerp.update(deltaTime);
         }
 
-        this.angle += this.rotateSpeed * deltaTime;
+        this.worldAngle += this.rotateSpeed * deltaTime;
+    }
+
+    public getBody(): DynamicObject {
+        return this.body;
+    }
+
+    public getAngle(): number {
+        return this.worldAngle + this.localAngle;
+    }
+
+    public setWorldAngle(to: number): void {
+        this.worldAngle = to;
+    }
+
+    public getLocalAngle(): number {
+        return this.localAngle;
+    }
+
+    public getHandOffset(): Vector {
+        return this.handOffset;
+    }
+
+    public getHoldOffset(): Vector {
+        return this.holdOffset;
+    }
+
+    public setOwnership(value: boolean): void {
+        this.owned = value;
+    }
+
+    public isOwned(): boolean {
+        return this.owned;
+    }
+
+    protected getDrawPos(drawSize: number): Vector {
+        return new Vector(
+            this.body.pos.x + ((this.body.width - drawSize) / 2),
+            this.body.pos.y + ((this.body.height - drawSize) / 2)
+        );
     }
 
     public throw(throwType: ThrowType): void {
@@ -91,28 +128,23 @@ class ItemLogic {
         }
     }
 
-    public getPickupHitbox(): GameObject {
-        return this.body.scale(this.hitboxOffset.x, this.hitboxOffset.y);
-    }
+    public shouldBeDeleted(): boolean {
+        return this.delete;
+    };
 
-    public getDrawPos(drawSize: number): Vector {
-        return new Vector(
-            this.body.pos.x + ((this.body.width - drawSize) / 2),
-            this.body.pos.y + ((this.body.height - drawSize) / 2)
-        );
+    protected deleteHelper(): boolean {
+        return !this.owned && Math.abs(this.body.velocity.x) < 50 && this.body.grounded;
     }
 
     public setToDelete(): void {
         this.delete = true;
+    };
+
+    protected angle(): number {
+        return this.worldAngle + this.localAngle;
     }
 
-    public shouldBeDeleted(): boolean {
-        return this.delete;
-    }
-
-    public deletable(): boolean {
-        return !this.owned && this.body.grounded && Math.abs(this.body.velocity.x) < 0.3;
-    }
+    public abstract draw(): void;
 }
 
-export { ItemLogic };
+export { Item };

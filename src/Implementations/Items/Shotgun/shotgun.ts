@@ -1,12 +1,12 @@
 import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame } from "@common";
-import { ItemLogic, IFirearm, ItemType } from "@game/Item";
 import { ShotgunState } from "./shotgunState";
-import { FirearmInfo } from "./firearmInfo";
+import { FirearmInfo } from "../firearmInfo";
+import { Item } from "../item";
+import { OnItemUseEffect } from "@item";
 
-class Shotgun implements IFirearm {
-    public common!: ItemLogic;
+class Shotgun extends Item {
     private handleOffset: number = 0;
-    private maxHandleOffset: number = -4;
+    private maxHandleOffset: number = -8;
     private handleLerp = new Lerp(6, lerpTriangle)
 
     private frames = {
@@ -19,20 +19,21 @@ class Shotgun implements IFirearm {
     private firearmInfo!: FirearmInfo;
 
     constructor(pos: Vector) {
+        const width = 30;
+        const height = 15;
+        super(pos, width, height);
+
+        this.holdOffset = new Vector(14, -4);
+        this.handOffset = new Vector(4, 0);
+
         const spriteInfo = Utility.File.getImage(images.shotgun);
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
         Utility.File.setFrames("shotgun", this.frames);
-        this.setCommonInfo(pos);
         this.setupFirearmInfo();
-    }
 
-    private setCommonInfo(pos: Vector): void {
-        const width = 30;
-        const height = 15;
-        this.common = new ItemLogic(pos, width, height, ItemType.Firearm);
-        this.common.holdOffset = new Vector(14, -4);
-        this.common.handOffset = new Vector(4, 0);
-        this.common.setHitboxOffset(new Vector(30, 8));
+        this.interactions.onActivate = ((deltatime: number, seed: number) => {
+            return this.shoot(seed);
+        });
     }
 
     private setupFirearmInfo(): void {
@@ -46,50 +47,50 @@ class Shotgun implements IFirearm {
     }
 
     public update(deltaTime: number): void {
-        this.common.update(deltaTime);
+        super.update(deltaTime);
         if (this.handleLerp.isActive()) {
             this.handleOffset = this.handleLerp.update(deltaTime);
         }
     }
 
-    public shoot(seed: number): Vector {
+    private shoot(seed: number): OnItemUseEffect[] {
         if (this.currentState === ShotgunState.Loaded) {
             return this.fire(seed);
         } else if (this.currentState === ShotgunState.Reloadable) {
             return this.reload();
         } else {
-            return new Vector();
+            return [];
         }
     }
 
-    private fire(seed: number): Vector {
+    private fire(seed: number): OnItemUseEffect[] {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.Reloadable;
-        return this.firearmInfo.shoot(this.common.body.getCenter(), this.common.angle, this.common.isFlip(), seed);
+        return this.firearmInfo.shoot(this.body.getCenter(), this.localAngle, this.body.isFlip(), seed);
     }
 
-    private reload(): Vector {
+    private reload(): OnItemUseEffect[] {
         this.handleLerp.startLerp(0, this.maxHandleOffset);
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
-        return new Vector();
+        return [];
     }
 
     public draw(): void {
         const drawSize = 64;
-        const drawPos = this.common.getDrawPos(drawSize);
-        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.common.isFlip(), this.common.angle);
+        const drawPos = this.getDrawPos(drawSize);
+        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.body.isFlip(), this.angle());
 
-        const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.common.angle);
+        const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.angle());
         const handleDrawPos = new Vector(
-            drawPos.x + handleOffsetRotated.x * this.common.body.getDirectionMultiplier(),
+            drawPos.x + handleOffsetRotated.x * this.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.common.isFlip(), this.common.angle);
+        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.angle());
     }
 
     public shouldBeDeleted(): boolean {
-        return this.common.deletable() && this.currentState === ShotgunState.Empty;
+        return super.shouldBeDeleted() || (this.deleteHelper() && this.currentState === ShotgunState.Empty);
     }
 
 }

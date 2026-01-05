@@ -1,66 +1,88 @@
-import { IItem, ItemManager, ItemType, IFirearm, IExplosive } from "@game/Item";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
-import { InputMode, ThrowType, Utility } from "@common";
+import { InputMode, Side, ThrowType, Utility, Vector } from "@common";
 import { Connection, GameMessage } from "@server";
+import { IItem, ItemManager, OnItemUseEffect, OnItemUseType, useFunction } from "@item";
 
 class PlayerItemManager {
-    private playerCharacter: DynamicObject;
+    private playerBody: DynamicObject;
     private controls: PlayerControls;
     private equipment: PlayerEquipment;
     private nearbyItems: Array<IItem> = [];
     private lastHeldItem: IItem | null = null;
     public forcedThrowType: null | ThrowType = null;
 
-    constructor(object: DynamicObject, controls: PlayerControls, equipment: PlayerEquipment) {
-        this.playerCharacter = object;
+    constructor(body: DynamicObject, controls: PlayerControls, equipment: PlayerEquipment) {
+        this.playerBody = body;
         this.controls = controls;
         this.equipment = equipment;
     }
 
     public update(deltaTime: number) {
-        this.nearbyItems = ItemManager.getNearby(this.playerCharacter.pos, this.playerCharacter.width, this.playerCharacter.height);
+        this.nearbyItems = ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height);
         if (this.controls.pickup(InputMode.Press)) {
-            if (this.equipment.isHolding()) {
-                this.throw(this.getThrowType());
-            } else {
-                const nextItem = this.getNearbyItem();
-                if (nextItem) {
-                    this.equipment.setHolding(nextItem);
-                }
+            this.handlePickupOrThrow();
+        }
+        if (!this.equipment.isHolding()) {
+            return;
+        }
+        const item = this.equipment.getHolding();
+        this.handleInteractions(item, deltaTime);
+    }
+
+    private handlePickupOrThrow(): void {
+        if (this.equipment.isHolding()) {
+            this.throw(this.getThrowType());
+        } else {
+            const nextItem = this.getNearbyItem();
+            if (nextItem) {
+                this.equipment.setHolding(nextItem);
             }
         }
+    }
 
-        if (this.equipment.isHolding() && this.controls.shoot(InputMode.Press)) {
-            const item = this.equipment.getHolding();
+    private handleInteractions(item: IItem, deltaTime: number): void {
+        const interactions: [() => boolean, useFunction][] = [
+            [() => this.controls.shoot(InputMode.Press), item.interactions.onActivate],
+            [() => this.controls.up(InputMode.Press), item.interactions.onUp],
+            [() => this.controls.down(InputMode.Press), item.interactions.onDown],
+            [() => this.controls.left(InputMode.Press), item.interactions.onLeft],
+            [() => this.controls.right(InputMode.Press), item.interactions.onRight],
+        ];
+        interactions.forEach(([input, onInputFunction]) => {
+            if (!input()) {
+                return;
+            }
             const seed = Utility.Random.getRandomSeed();
-            const pos = item.common.body.pos;
-            switch (item.common.getType()) {
-                case (ItemType.Firearm): {
-                    const knockback = (item as IFirearm).shoot(seed);
-                    this.playerCharacter.velocity.subtract(knockback);
+            const effects = onInputFunction(deltaTime, seed);
+            this.handleEffects(effects);
+        });
+    }
 
+    private handleEffects(effects: OnItemUseEffect[]) {
+        effects.forEach((effect) => {
+            switch (effect.type) {
+                case (OnItemUseType.Aim): {
                     break;
                 }
-
-                case (ItemType.Explosive): {
-                    (item as IExplosive).activate();
+                case (OnItemUseType.Knockback): {
+                    this.playerBody.velocity.subtract(effect.value);
+                    break;
+                }
+                case (OnItemUseType.Position): {
+                    this.playerBody.pos = effect.value;
                     break;
                 }
             }
-
-            Connection.get().sendGameMessage(GameMessage.ActivateItem, {
-                id: ItemManager.getItemID(item)!, action: 0, seed, position: { x: pos.x, y: pos.y }, direction: item.common.body.direction, angle: item.common.angle
-            });
-        }
+        })
     }
 
     private getNearbyItem(): IItem | null {
         let fallbackItem: IItem | null = null;
         for (const item of this.nearbyItems.values()) {
-            if (!this.playerCharacter.collision(item.common.getPickupHitbox())) {
-                continue
+            if (!this.playerBody.collision(item.getBody())) {
+                continue;
             }
             if (item === this.lastHeldItem) {
                 fallbackItem = this.lastHeldItem;
@@ -104,16 +126,48 @@ class PlayerItemManager {
         }
         const item = this.equipment.getHolding();
         this.equipment.setHolding(null);
-        item.common.body.grounded = false;
-        item.common.throw(throwType);
+        item.throw(throwType);
 
         Connection.get().sendGameMessage(GameMessage.ThrowItem, {
             itemID: ItemManager.getItemID(item)!,
-            pos: { x: item.common.body.pos.x, y: item.common.body.pos.y },
-            direction: item.common.body.direction,
+            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
+            direction: item.getBody().direction,
             throwType
         });
     }
+
+    public itemNoRotationCollision(center: Vector): boolean {
+        if (!this.equipment.isHolding()) {
+            return false;
+        }
+        const item = this.equipment.getHolding();
+        const tempItemPos = item.getBody().pos.clone();
+
+        item.getBody().setCenterToPos(center);
+        item.getBody().pos.x += item.getHoldOffset().x * item.getBody().getDirectionMultiplier();
+        item.getBody().pos.y += item.getHoldOffset().y;
+
+        const collision = item.getBody().getHorizontalTileCollision();
+
+        item.getBody().pos = tempItemPos;
+
+        return collision !== undefined;
+    }
+
+    public setHoldingBody(center: Vector, direction: Side, angle: number) {
+        if (!this.equipment.isHolding()) {
+            return;
+        }
+        const item = this.equipment.getHolding();
+        item.getBody().setCenterToPos(center);
+        item.getBody().direction = direction;
+        item.setWorldAngle(angle);
+
+        const offset = Utility.Angle.rotateForce(item.getHoldOffset(), angle + item.getLocalAngle());
+        item.getBody().pos.x += offset.x * item.getBody().getDirectionMultiplier();
+        item.getBody().pos.y += offset.y;
+    }
+
 }
 
 export { PlayerItemManager };
