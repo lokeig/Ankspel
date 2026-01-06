@@ -24,6 +24,7 @@ export { TileType } from "./Types/tileType";
 export { PlayerState } from "./Types/playerState";
 export { PlayerAnim } from "./Types/playerAnim";
 export { ItemInteractionInput } from "./Types/itemInteractionInput";
+export { BodyParts } from "./Types/bodyParts";
 
 // Utility
 export { Utility } from "./Utility/utility";
@@ -35,5 +36,4 @@ export { Input } from "./Other/input";
 export { InputMode } from "./Other/inputMode";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";
-
-export { IDManager } from "./IDManager/idManager"
+export { IDManager } from "./IDManager/idManager";

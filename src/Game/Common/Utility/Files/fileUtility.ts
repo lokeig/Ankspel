@@ -47,7 +47,7 @@ class FileUtility {
         if (!config) {
             throw new Error(type + " not found in config");
         }
-        for (const key in config) {
+        for (let key in config) {
             const configured = config[key];
             const targetAnimation = target[key];
 

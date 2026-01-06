@@ -28,10 +28,10 @@ class ProjectileManager {
                 projectile.getTrail().setToDelete();
                 return;
             }
-            projectile.getTrail().setTarget(projectile.body.getCenter());
+            projectile.getTrail().setTarget(projectile.getBody().getCenter());
             projectile.update(deltaTime);
         }));
-        Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.body.pos);
+        Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getBody().pos);
     }
 
     public static registerProjectile(type: string, constructor: ProjectileConstructor): void {
@@ -70,7 +70,7 @@ class ProjectileManager {
     }
 
     private static addProjectile(newProjectile: IProjectile) {
-        const gridPos = Grid.getGridPos(newProjectile.body.pos);
+        const gridPos = Grid.getGridPos(newProjectile.getBody().pos);
         const projectileSet = this.getProjectiles(gridPos);
         if (!projectileSet) {
             this.projectiles.set(Grid.key(gridPos), new Set());

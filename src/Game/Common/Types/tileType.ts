@@ -1,5 +1,7 @@
 enum TileType {
-    Grass, Ice, Stone
+    Grass, 
+    Ice, 
+    Stone
 }
 
 export { TileType };

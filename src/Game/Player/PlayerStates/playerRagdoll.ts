@@ -97,7 +97,7 @@ class PlayerRagdoll implements IPlayerState, IItem {
     }
 
     public stateEntered(): void {
-        this.playerCharacter.itemManager.throw(ThrowType.drop);
+        this.playerCharacter.itemManager.throw(ThrowType.Drop);
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
         this.legs.direction = this.playerCharacter.body.direction;

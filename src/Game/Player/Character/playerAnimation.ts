@@ -5,22 +5,22 @@ class PlayerAnimation {
     private bodyAnimator: SpriteAnimator;
     private armAnimator: SpriteAnimator;
     private animations: Record<PlayerAnim, Animation> = {
-        [PlayerAnim.idle]: new Animation(),
-        [PlayerAnim.walk]: new Animation(),
-        [PlayerAnim.crouch]: new Animation(),
-        [PlayerAnim.flap]: new Animation(),
-        [PlayerAnim.jump]: new Animation(),
-        [PlayerAnim.fall]: new Animation(),
-        [PlayerAnim.slide]: new Animation(),
-        [PlayerAnim.turn]: new Animation(),
-        [PlayerAnim.itemHolding]: new Animation(),
-        [PlayerAnim.upperRagdoll]: new Animation(),
-        [PlayerAnim.lowerRagdoll]: new Animation()
+        [PlayerAnim.Idle]: new Animation(),
+        [PlayerAnim.Walk]: new Animation(),
+        [PlayerAnim.Crouch]: new Animation(),
+        [PlayerAnim.Flap]: new Animation(),
+        [PlayerAnim.Jump]: new Animation(),
+        [PlayerAnim.Fall]: new Animation(),
+        [PlayerAnim.Slide]: new Animation(),
+        [PlayerAnim.Turn]: new Animation(),
+        [PlayerAnim.ItemHolding]: new Animation(),
+        [PlayerAnim.UpperRagdoll]: new Animation(),
+        [PlayerAnim.LowerRagdoll]: new Animation()
     };
     private holding: boolean = false;
 
     constructor() {
-        this.currAnim = PlayerAnim.idle;
+        this.currAnim = PlayerAnim.Idle;
 
         const bodySpriteInfo = Utility.File.getImage(images.playerImage);
         const bodySprite = new SpriteSheet(bodySpriteInfo.src, bodySpriteInfo.frameHeight, bodySpriteInfo.frameWidth);
@@ -37,7 +37,7 @@ class PlayerAnimation {
         this.currAnim = animation;
         this.bodyAnimator.setAnimation(this.animations[this.currAnim]);
         if (this.holding) {
-            this.armAnimator.setAnimation(this.animations[PlayerAnim.itemHolding]);
+            this.armAnimator.setAnimation(this.animations[PlayerAnim.ItemHolding]);
         } else {
             this.armAnimator.setAnimation(this.animations[this.currAnim]);
         }

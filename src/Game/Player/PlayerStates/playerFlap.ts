@@ -13,7 +13,7 @@ class PlayerFlap implements IPlayerState {
     }
 
     private setCurrentAnimation(): void {
-        this.playerCharacter.animator.setAnimation(PlayerAnim.flap);
+        this.playerCharacter.animator.setAnimation(PlayerAnim.Flap);
     }
 
     public stateEntered(): void {

@@ -3,7 +3,7 @@ import { Render } from "@render";
 import { LobbyList } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
 import { InMatchLoop } from "./inMatchLoop";
-import { NetworkHandler } from "./networkHandler";
+import { NetworkHandler } from "./NetworkHandling/networkHandler";
 
 class GameLoop {
     private lastTime = 0;
@@ -15,7 +15,7 @@ class GameLoop {
         const initalState = GameLoopState.playing;
         this.stateMachine = new StateMachine(initalState);
         this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
-        NetworkHandler.setStart((time: number) => { this.startGame(time); });
+        NetworkHandler.onMapLoad((time: number) => { this.startGame(time); });
     }
 
     private startGame(time: number): void {

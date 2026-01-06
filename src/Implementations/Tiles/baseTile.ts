@@ -22,14 +22,14 @@ abstract class BaseTile implements ITile {
         topRight: boolean, topLeft: boolean, botRight: boolean, botLeft: boolean
     } {
         return {
-            top: this.body.isNeighbour(Direction.top),
-            right: this.body.isNeighbour(Direction.right),
-            left: this.body.isNeighbour(Direction.left),
-            bot: this.body.isNeighbour(Direction.bot),
-            topRight: this.body.isNeighbour(Direction.topRight),
-            topLeft: this.body.isNeighbour(Direction.topLeft),
-            botRight: this.body.isNeighbour(Direction.botRight),
-            botLeft: this.body.isNeighbour(Direction.botLeft)
+            top: this.body.isNeighbour(Direction.Top),
+            right: this.body.isNeighbour(Direction.Right),
+            left: this.body.isNeighbour(Direction.Left),
+            bot: this.body.isNeighbour(Direction.Bot),
+            topRight: this.body.isNeighbour(Direction.TopRight),
+            topLeft: this.body.isNeighbour(Direction.TopLeft),
+            botRight: this.body.isNeighbour(Direction.BotRight),
+            botLeft: this.body.isNeighbour(Direction.BotLeft)
         }
     }
 
@@ -87,8 +87,8 @@ abstract class BaseTile implements ITile {
             }
         }
 
-        this.body.setLip(Side.left, hasLipLeft);
-        this.body.setLip(Side.right, hasLipRight);
+        this.body.setLip(Side.Left, hasLipLeft);
+        this.body.setLip(Side.Right, hasLipRight);
     }
 
     public update(): void {
@@ -103,11 +103,11 @@ abstract class BaseTile implements ITile {
 
         this.sprite.draw(BaseTile.lookup.tile(this.spriteIndex), this.body.pos, drawSize, flip, angle);
 
-        if (this.body.getLip(Side.left)) {
-            this.sprite.draw(BaseTile.lookup.getLip(Side.left), this.body.getLipDrawPos(Side.left), drawSize, flip, angle);
+        if (this.body.getLip(Side.Left)) {
+            this.sprite.draw(BaseTile.lookup.getLip(Side.Left), this.body.getLipDrawPos(Side.Left), drawSize, flip, angle);
         }
-        if (this.body.getLip(Side.right)) {
-            this.sprite.draw(BaseTile.lookup.getLip(Side.right), this.body.getLipDrawPos(Side.right), drawSize, flip, angle);
+        if (this.body.getLip(Side.Right)) {
+            this.sprite.draw(BaseTile.lookup.getLip(Side.Right), this.body.getLipDrawPos(Side.Right), drawSize, flip, angle);
         }
     }
 }

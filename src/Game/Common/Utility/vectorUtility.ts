@@ -1,3 +1,4 @@
+import { NetworkVector } from "@server";
 import { Vector } from "../Types/vector";
 
 class VectorUtility {
@@ -20,6 +21,10 @@ class VectorUtility {
             value.x += (Math.random() * maxOffset) * (Math.random() < 0.5 ? -1 : 1);
             value.y += (Math.random() * maxOffset) * (Math.random() < 0.5 ? -1 : 1);
         }
+    }
+
+    public convertNetwork(vector: NetworkVector): Vector {
+        return new Vector(vector.x, vector.y);
     }
 }
 

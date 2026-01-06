@@ -25,14 +25,14 @@ class PlayerMove {
 
         if (left && right) {
             if (this.controls.left(InputMode.Press)) {
-                this.playerCharacter.direction = Side.left;
+                this.playerCharacter.direction = Side.Left;
             } else if (this.controls.right(InputMode.Press)) {
-                this.playerCharacter.direction = Side.right;
+                this.playerCharacter.direction = Side.Right;
             }
         } else if (left) {
-            this.playerCharacter.direction = Side.left;
+            this.playerCharacter.direction = Side.Left;
         } else if (right) {
-            this.playerCharacter.direction = Side.right;
+            this.playerCharacter.direction = Side.Right;
         }
 
         this.playerCharacter.velocity.x += this.movespeed * this.controls.getMoveDirection() * deltaTime;

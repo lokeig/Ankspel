@@ -19,17 +19,17 @@ class DynamicObject extends GameObject {
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 
-    public direction: Side = Side.left;
+    public direction: Side = Side.Left;
 
     public bounceFactor: number = 0;
     private smallestBounceValue = 1;
 
     public getDirectionMultiplier(): number {
-        return this.direction === Side.left ? -1 : 1;
+        return this.direction === Side.Left ? -1 : 1;
     }
 
     public isFlip(): boolean {
-        return this.direction === Side.left;
+        return this.direction === Side.Left;
     }
 
     public collided(): boolean {

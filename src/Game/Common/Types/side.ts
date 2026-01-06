@@ -1,6 +1,6 @@
 enum Side {
-    left = "left",
-    right = "right",
+    Left = "left",
+    Right = "right",
 };
 
 export { Side };

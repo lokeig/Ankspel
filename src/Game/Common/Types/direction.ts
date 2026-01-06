@@ -1,12 +1,12 @@
 enum Direction {
-    left = "left",
-    right = "right",
-    top = "top",
-    bot = "bot",
-    topLeft = "topLeft",
-    topRight = "topRight",
-    botLeft = "botLeft",
-    botRight = "botRight"
+    Left = "Left",
+    Right = "Right",
+    Top = "Top",
+    Bot = "Bot",
+    TopLeft = "TopLeft",
+    TopRight = "TopRight",
+    BotLeft = "BotLeft",
+    BotRight = "BotRight"
 };
 
 export { Direction };

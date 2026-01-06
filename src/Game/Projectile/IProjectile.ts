@@ -3,11 +3,12 @@ import { ITrail } from "./ITrail";
 import { Vector } from "@common";
 
 interface IProjectile {
-    body: DynamicObject;
     update(deltaTime: number): void;
-    draw(): void;
+    getBody(): DynamicObject;
     getTrail(): ITrail;
+    onHit(): void;
     shouldBeDeleted(): boolean;
+    draw(): void;
 }
 
 type ProjectileConstructor = new (pos: Vector, angle: number) => IProjectile;

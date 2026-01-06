@@ -16,7 +16,7 @@ class SpriteLookup {
     }
 
     public getLip(side: Side): Frame {
-        return side === Side.left ? this.lipLeft : this.lipRight;
+        return side === Side.Left ? this.lipLeft : this.lipRight;
     }
 }
 

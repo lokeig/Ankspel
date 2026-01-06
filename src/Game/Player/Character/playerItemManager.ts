@@ -115,18 +115,18 @@ class PlayerItemManager {
         const up = this.controls.up();
 
         if (this.controls.down()) {
-            return ThrowType.drop;
+            return ThrowType.Drop;
         }
         if (left || right) {
             if (up) {
-                return ThrowType.hardDiagonal;
+                return ThrowType.HardDiagonal;
             }
-            return ThrowType.hard;
+            return ThrowType.Hard;
         }
         if (up) {
-            return ThrowType.upwards;
+            return ThrowType.Upwards;
         }
-        return ThrowType.light;
+        return ThrowType.Light;
     }
 
     public throw(throwType: ThrowType) {

@@ -17,8 +17,8 @@ class ProjectileCollision {
     public check(): void {
         const nearbyProjectiles = ProjectileManager.getNearbyProjectiles(this.affectedBody.pos, this.affectedBody.width, this.affectedBody.height);
         for (const projectile of nearbyProjectiles) {
-            if (this.affectedBody.collision(projectile.body)) {
-                this.onHit(projectile.body.pos);
+            if (this.affectedBody.collision(projectile.getBody())) {
+                this.onHit(projectile.getBody().pos);
             }
         }
     }

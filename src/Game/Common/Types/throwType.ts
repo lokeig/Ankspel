@@ -1,9 +1,9 @@
 enum ThrowType {
-    drop,
-    upwards,
-    light,
-    hard,
-    hardDiagonal
+    Drop,
+    Upwards,
+    Light,
+    Hard,
+    HardDiagonal
 }
 
 export { ThrowType };

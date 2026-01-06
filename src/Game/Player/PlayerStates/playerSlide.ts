@@ -21,7 +21,7 @@ class PlayerSlide implements IPlayerState {
         this.platformIgnoreTime.setToReady();
         if (this.playerCharacter.isLocal()) {
             this.playerCharacter.movement.moveEnabled = false;
-            this.playerCharacter.itemManager.forcedThrowType = ThrowType.drop;
+            this.playerCharacter.itemManager.forcedThrowType = ThrowType.Drop;
         }
         this.playerCharacter.body.height = this.newHeight;
         this.playerCharacter.body.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.body.height;
@@ -34,7 +34,7 @@ class PlayerSlide implements IPlayerState {
     }
 
     public stateUpdate(deltaTime: number): void {
-        const animation = this.crouch ? PlayerAnim.crouch : PlayerAnim.slide;
+        const animation = this.crouch ? PlayerAnim.Crouch : PlayerAnim.Slide;
         this.playerCharacter.animator.setAnimation(animation);
         
         if (!this.playerCharacter.body.grounded) {

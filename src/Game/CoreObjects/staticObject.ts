@@ -14,7 +14,7 @@ class StaticObject extends GameObject {
     }
 
     public setLip(direction: Side, value: boolean): void {
-        if (direction === Side.left) {
+        if (direction === Side.Left) {
             this.lipLeft = value;
         } else {
             this.lipRight = value;
@@ -22,7 +22,7 @@ class StaticObject extends GameObject {
     }
 
     public getLip(direction: Side): boolean {
-        if (direction === Side.left) {
+        if (direction === Side.Left) {
             return this.lipLeft;
         } else {
             return this.lipRight;
@@ -30,7 +30,7 @@ class StaticObject extends GameObject {
     }
 
     public getLipDrawPos(side: Side): Vector {
-        if (side === Side.left) {
+        if (side === Side.Left) {
             return new Vector(
                 this.pos.x - this.width,
                 this.pos.y

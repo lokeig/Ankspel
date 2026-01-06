@@ -104,27 +104,27 @@ abstract class Item implements IItem {
         const direcMult = this.body.getDirectionMultiplier();
 
         switch (throwType) {
-            case (ThrowType.light): {
+            case (ThrowType.Light): {
                 this.body.velocity = new Vector(210 * direcMult, -210);
                 this.rotateSpeed = 10;
                 break;
             }
-            case (ThrowType.hard): {
+            case (ThrowType.Hard): {
                 this.body.velocity = new Vector(900 * direcMult, -300);
                 this.rotateSpeed = 15;
                 break;
             }
-            case (ThrowType.hardDiagonal): {
+            case (ThrowType.HardDiagonal): {
                 this.body.velocity = new Vector(900 * direcMult, -600);
                 this.rotateSpeed = 15;
                 break;
             }
-            case (ThrowType.drop): {
+            case (ThrowType.Drop): {
                 this.body.velocity = new Vector(0 * direcMult, 0);
                 this.rotateSpeed = 5;
                 break;
             }
-            case (ThrowType.upwards): {
+            case (ThrowType.Upwards): {
                 this.body.velocity = new Vector(0 * direcMult, -600);
                 this.rotateSpeed = 8;
                 break;

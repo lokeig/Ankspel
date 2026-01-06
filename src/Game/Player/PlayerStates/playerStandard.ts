@@ -15,19 +15,19 @@ class PlayerStandard implements IPlayerState {
         const animator = this.playerCharacter.animator;
         if (!this.playerCharacter.body.grounded) {
             if (this.playerCharacter.body.velocity.y < 0) {
-                animator.setAnimation(PlayerAnim.jump);
+                animator.setAnimation(PlayerAnim.Jump);
             } else {
-                animator.setAnimation(PlayerAnim.fall);
+                animator.setAnimation(PlayerAnim.Fall);
             }
             return;
         }
         const left = this.playerCharacter.controls.left(); const right = this.playerCharacter.controls.right();
         if ((left && this.playerCharacter.body.velocity.x > 20) || right && this.playerCharacter.body.velocity.x < -20) {
-            animator.setAnimation(PlayerAnim.turn);
+            animator.setAnimation(PlayerAnim.Turn);
         } else if (Math.abs(this.playerCharacter.body.velocity.x) > 20) {
-            animator.setAnimation(PlayerAnim.walk);
+            animator.setAnimation(PlayerAnim.Walk);
         } else {
-            animator.setAnimation(PlayerAnim.idle);
+            animator.setAnimation(PlayerAnim.Idle);
         };
     }
 
