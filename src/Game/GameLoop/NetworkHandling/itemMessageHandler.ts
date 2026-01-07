@@ -28,7 +28,8 @@ class ItemMessageHandler {
             item.setWorldAngle(angle);
             item.getBody().pos = Utility.Vector.convertNetwork(position);
             item.getBody().direction = direction;
-            const effects = item.interactions.get(action)!(seed);
+            const local = false;
+            const effects = item.interactions.get(action)!(seed, local);
             effects.forEach((effect) => {
                 switch (effect.type) {
                     case (OnItemUseType.Aim): {

@@ -1,7 +1,6 @@
 import { Utility } from "@common";
 import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
-import { ProjectileManager } from "@projectile";
 import { Connection, GameMessage } from "@server";
 
 class PlayerMessageHandler {
@@ -37,7 +36,7 @@ class PlayerMessageHandler {
             player.character.armFront.angle = armAngle;
         });
 
-        gameEvent.subscribe(GameMessage.PlayerHit, ({ id, location, projectileType, bodyPart }) => {
+        gameEvent.subscribe(GameMessage.PlayerHit, ({ id, bodyPart }) => {
             const player = PlayerManager.getPlayerFromID(id);
             // const projectile = ProjectileManager.spawn(projectileType, location, 0, 0);
 
@@ -46,7 +45,7 @@ class PlayerMessageHandler {
         gameEvent.subscribe(GameMessage.PlayerDead, ({ id }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             player.character.dead = true;
-        });
+        }); 
     }
 
     public static sendLocalPlayersInfo(): void {

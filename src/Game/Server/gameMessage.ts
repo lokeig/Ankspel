@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteractionInput, BodyParts } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, BodyParts } from "@common";
 
 enum GameMessage {
     // ─── Connection ─────────────────────────
@@ -45,7 +45,7 @@ interface GameMessageMap {
     };
     [GameMessage.NewPlayer]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
-    [GameMessage.PlayerHit]: { id: number, location: NetworkVector, projectileType: string, bodyPart: BodyParts };
+    [GameMessage.PlayerHit]: { id: number, bodyPart: BodyParts };
     [GameMessage.PlayerDead]: { id: number };
 
     // ─── Items ──────────────────────────────
@@ -54,7 +54,7 @@ interface GameMessageMap {
     [GameMessage.DeleteItem]: { id: number };
     [GameMessage.ActivateItem]: {
         id: number, position: NetworkVector, angle: number,
-        direction: Side, action: ItemInteractionInput, seed: number
+        direction: Side, action: ItemInteraction, seed: number
     };
     [GameMessage.DeactivateItem]: { id: number };
 

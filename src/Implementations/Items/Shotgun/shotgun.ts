@@ -1,4 +1,4 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, ItemInteractionInput } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
 import { FirearmInfo } from "../firearmInfo";
 import { Item } from "../item";
@@ -31,8 +31,8 @@ class Shotgun extends Item {
         Utility.File.setFrames("shotgun", this.frames);
         this.setupFirearmInfo();
 
-        this.interactions.on(ItemInteractionInput.Activate, ((seed: number) => {
-            return this.shoot(seed);
+        this.interactions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+            return this.shoot(seed, local);
         }));
     }
 
@@ -53,9 +53,9 @@ class Shotgun extends Item {
         }
     }
 
-    private shoot(seed: number): OnItemUseEffect[] {
+    private shoot(seed: number, local: boolean): OnItemUseEffect[] {
         if (this.currentState === ShotgunState.Loaded) {
-            return this.fire(seed);
+            return this.fire(seed, local);
         } else if (this.currentState === ShotgunState.Reloadable) {
             return this.reload();
         } else {
@@ -63,11 +63,11 @@ class Shotgun extends Item {
         }
     }
 
-    private fire(seed: number): OnItemUseEffect[] {
+    private fire(seed: number, local: boolean): OnItemUseEffect[] {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.Reloadable;
-        return this.firearmInfo.shoot(this.body.getCenter(), this.localAngle, this.body.isFlip(), seed);
+        return this.firearmInfo.shoot(this.body.getCenter(), this.localAngle, this.body.isFlip(), seed, local);
     }
 
     private reload(): OnItemUseEffect[] {
@@ -79,14 +79,14 @@ class Shotgun extends Item {
     public draw(): void {
         const drawSize = 64;
         const drawPos = this.getDrawPos(drawSize);
-        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.body.isFlip(), this.angle());
+        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.body.isFlip(), this.getAngle());
 
-        const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.angle());
+        const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.getAngle());
         const handleDrawPos = new Vector(
             drawPos.x + handleOffsetRotated.x * this.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.angle());
+        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.getAngle());
     }
 
     public shouldBeDeleted(): boolean {

@@ -6,7 +6,10 @@ interface IProjectile {
     update(deltaTime: number): void;
     getBody(): DynamicObject;
     getTrail(): ITrail;
-    onHit(): void;
+    onCollision(): void;
+    isLocal(): boolean;
+    setLocal(): void;
+    setToDelete(): void
     shouldBeDeleted(): boolean;
     draw(): void;
 }

@@ -23,7 +23,7 @@ export { Side } from "./Types/side";
 export { TileType } from "./Types/tileType";
 export { PlayerState } from "./Types/playerState";
 export { PlayerAnim } from "./Types/playerAnim";
-export { ItemInteractionInput } from "./Types/itemInteractionInput";
+export { ItemInteraction } from "./Types/itemInteraction";
 export { BodyParts } from "./Types/bodyParts";
 
 // Utility

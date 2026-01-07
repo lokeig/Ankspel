@@ -1,12 +1,12 @@
-import { ThrowType, Vector } from "@common";
-import { ItemInteractions } from "./itemInteractions";
+import { ItemInteraction, ThrowType, Vector } from "@common";
+import { useFunction } from "./useFunction";
 import { DynamicObject } from "@core";
 
 interface IItem {
     update(deltaTime: number): void;
     draw(): void;
     getBody(): DynamicObject;
-    interactions: ItemInteractions;
+    interactions: Map<ItemInteraction, useFunction>;
 
     setOwnership(value: boolean): void;
     isOwned(): boolean;

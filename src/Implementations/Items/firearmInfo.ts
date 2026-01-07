@@ -10,7 +10,7 @@ class FirearmInfo {
     public bulletCount: number = 1;
     public projectile!: string;
 
-    public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number): OnItemUseEffect[] {
+    public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number, local: boolean): OnItemUseEffect[] {
         const rng = new SeededRNG(seed);
         if (this.ammo < 1) {
             return [];
@@ -25,7 +25,7 @@ class FirearmInfo {
         for (let i = 0; i < this.bulletCount; i++) {
             let shotAngle = angle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             shotAngle = flip ? Math.PI - shotAngle : shotAngle;
-            ProjectileManager.create(this.projectile, pos, shotAngle);
+            ProjectileManager.create(this.projectile, pos, shotAngle, local);
         }
         return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }]; 
     }

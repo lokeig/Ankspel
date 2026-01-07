@@ -9,7 +9,7 @@ class PlayerSlide implements IPlayerState {
     private platformIgnoreTime = new Countdown(0.15);
     private newHeight: number;
     private crouch: boolean;
-    private unstuckSpeed: number = 7;
+    private unstuckSpeed: number = 420;
 
     constructor(playerCharacter: PlayerCharacter, crouch: boolean) {
         this.playerCharacter = playerCharacter;

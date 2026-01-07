@@ -1,28 +1,40 @@
 import { Side, Utility, Vector } from "@common";
-import { IItem } from "@item";
+import { EquipmentSlot, IItem } from "@item";
 
 class PlayerEquipment {
-    private helmet!: IItem;
-    private armor!: IItem;
-    private boots!: IItem;
-    private holding: IItem | null = null;
+    private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
 
     public isHolding(): boolean {
-        return this.holding !== null;
+        return this.equipment.get(EquipmentSlot.Hand) !== undefined;
     }
 
     public getHolding(): IItem {
-        return this.holding!;
+        return this.equipment.get(EquipmentSlot.Hand)!;
     }
 
     public setHolding(item: IItem | null): void {
-        if (!item && this.holding) {
-            this.holding.setOwnership(false);
+        if (!item && this.isHolding()) {
+            this.getHolding().setOwnership(false);
         }
-        this.holding = item;
-        if (item) {
-            this.holding!.setOwnership(true);
+        if (!item) {
+            this.equipment.set(EquipmentSlot.Hand, undefined);
+            return;
         }
+        this.equipment.set(EquipmentSlot.Hand, item);
+        this.getHolding().setOwnership(true);
+    }
+
+    public equip(slot: EquipmentSlot, item: IItem) {
+        this.equipment.set(slot, item);
+    }
+
+    public unequip(slot: EquipmentSlot): IItem | null {
+        const result = this.equipment.get(slot);
+        if (!result) {
+            return null;
+        }
+        this.equipment.delete(slot);
+        return result;
     }
 
     public setHoldingBody(center: Vector, direction: Side, angle: number) {

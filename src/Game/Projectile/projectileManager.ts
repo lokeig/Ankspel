@@ -43,7 +43,7 @@ class ProjectileManager {
         this.IDToProjectile.set(id, item);
     }
 
-    public static create(type: string, pos: Vector, angle: number): IProjectile | null {
+    public static create(type: string, pos: Vector, angle: number, local: boolean): IProjectile | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
@@ -51,6 +51,9 @@ class ProjectileManager {
         const result = new constructor(pos, angle);
         this.addProjectile(result);
         this.setProjectileID(result, this.projectileIndex++);
+        if (local) {
+            result.setLocal();
+        }
         return result;
     }
 

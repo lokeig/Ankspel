@@ -1,9 +1,9 @@
-import { Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
+import { ItemInteraction, Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
-import { IItem, ItemInteractions } from "@item";
+import { IItem, useFunction } from "@item";
 
 abstract class Item implements IItem {
-    interactions = new ItemInteractions();
+    public interactions: Map<ItemInteraction, useFunction> = new Map();
     private owned: boolean = false;
     protected body: DynamicObject;
 
@@ -143,10 +143,6 @@ abstract class Item implements IItem {
     public setToDelete(): void {
         this.delete = true;
     };
-
-    protected angle(): number {
-        return this.worldAngle + this.localAngle;
-    }
 
     public abstract draw(): void;
 }

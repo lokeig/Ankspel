@@ -1,8 +1,8 @@
-import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType } from "@common";
+import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, ItemInteraction } from "@common";
 import { DynamicObject, GameObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { IPlayerState } from "../IPlayerState";
-import { IItem, ItemInteractions } from "@item";
+import { IItem, useFunction } from "@item";
 
 class PlayerRagdoll implements IPlayerState, IItem {
     private playerCharacter: PlayerCharacter;
@@ -18,7 +18,8 @@ class PlayerRagdoll implements IPlayerState, IItem {
     private coyoteTime = new Countdown(0.15);
 
     private owned: boolean = false;
-    public interactions: ItemInteractions = new ItemInteractions;
+    public interactions: Map<ItemInteraction, useFunction> = new Map();
+
 
     constructor(playerCharacter: PlayerCharacter) {
         this.playerCharacter = playerCharacter;

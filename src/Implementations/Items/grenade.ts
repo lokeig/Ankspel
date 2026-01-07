@@ -1,4 +1,4 @@
-import { SpriteSheet, images, Countdown, Vector, Utility, Frame, ItemInteractionInput } from "@common";
+import { SpriteSheet, images, Countdown, Vector, Utility, Frame, ItemInteraction } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
@@ -10,6 +10,7 @@ class Grenade extends Item {
     private frames = { pinned: new Frame(), default: new Frame() };
     private explosionDelay = new Countdown(2);
     private activated: boolean = false;
+    private locallyActivated!: boolean;
 
     constructor(pos: Vector) {
         const width = 8;
@@ -23,8 +24,9 @@ class Grenade extends Item {
         this.holdOffset = new Vector(11, -6)
         this.body.bounceFactor = 0.3;
 
-        this.interactions.on(ItemInteractionInput.Activate, (seed: number) => {
+        this.interactions.set(ItemInteraction.Activate, (seed: number, local: boolean) => {
             this.activate();
+            this.locallyActivated = local;
             return [];
         });
     }
@@ -43,7 +45,7 @@ class Grenade extends Item {
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const pos = this.body.pos;
-                ProjectileManager.create("grenadeBullet", pos, angle);
+                ProjectileManager.create("grenadeBullet", pos, angle, this.locallyActivated);
             }
         }
     }
@@ -54,7 +56,7 @@ class Grenade extends Item {
 
     public draw(): void {
         const frame = this.activated ? this.frames.pinned : this.frames.default;
-        this.spriteSheet.draw(frame, this.getDrawPos(this.drawSize), this.drawSize, this.body.isFlip(), this.angle())
+        this.spriteSheet.draw(frame, this.getDrawPos(this.drawSize), this.drawSize, this.body.isFlip(), this.getAngle())
     }
 }
 

@@ -29,16 +29,17 @@ class Player {
         this.stateMachine.enterState();
     }
 
+    
     public setState(state: PlayerState): void {
         if (state !== this.stateMachine.getState()) {
             this.stateMachine.forceState(state);
         }
     }
-
+    
     public getState(): PlayerState {
         return this.stateMachine.getState();
     }
-
+    
     public update(deltaTime: number): void {
         if (this.character.isLocal()) {
             this.stateMachine.update(deltaTime);
@@ -49,7 +50,12 @@ class Player {
 
     public draw(): void {
         TileManager.getNearbyTiles(this.character.body.pos, this.character.body.width, this.character.body.height).forEach(tile => {
-            Render.get().drawSquare({ x: tile.gameObject.pos.x, y: tile.gameObject.pos.y, width: tile.gameObject.width, height: tile.gameObject.height }, 0, "green");
+            Render.get().drawSquare({
+                x: tile.gameObject.pos.x,
+                y: tile.gameObject.pos.y,
+                width: tile.gameObject.width,
+                height: tile.gameObject.height
+            }, 0, "green");
         });
         this.stateMachine.getIState().draw();
     }

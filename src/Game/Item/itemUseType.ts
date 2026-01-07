@@ -4,12 +4,23 @@ enum OnItemUseType {
     Knockback,
     Position,
     Aim,
+    Equip
+}
+
+enum EquipmentSlot {
+    Hand,
+    Head,
+    Body,
+    Boots,
+    Back,
+    Shield
 }
 
 interface OnItemUseMap {
     [OnItemUseType.Knockback]: Vector ,
     [OnItemUseType.Position]: Vector ,
     [OnItemUseType.Aim]: number,
+    [OnItemUseType.Equip]: EquipmentSlot
 }
 
 type OnItemUseEffect = {
@@ -19,5 +30,5 @@ type OnItemUseEffect = {
     }
 }[OnItemUseType];
 
-export { OnItemUseType };
+export { OnItemUseType, EquipmentSlot };
 export type { OnItemUseMap, OnItemUseEffect };

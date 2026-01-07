@@ -1,4 +1,4 @@
-import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility, ItemInteractionInput } from "@common";
+import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmInfo } from "./firearmInfo";
 import { Item } from "./item";
@@ -24,10 +24,11 @@ class Glock extends Item {
         this.animator = new SpriteAnimator(new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight), this.animations.default);
         this.setupFirearmInfo();
 
-        this.interactions.on(ItemInteractionInput.Activate, ((seed: number) => {
-            return this.shoot(seed);
+        this.interactions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+            return this.shoot(seed, local);
         }));
     }
+
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
         this.firearmInfo.ammo = 9;
@@ -45,15 +46,15 @@ class Glock extends Item {
         }
     }
 
-    public shoot(seed: number): OnItemUseEffect[] {
+    public shoot(seed: number, local: boolean): OnItemUseEffect[] {
         this.animator.reset();
         this.animator.setAnimation(this.animations.shoot);
-        return this.firearmInfo.shoot(this.body.getCenter(), this.angle(), this.body.isFlip(), seed);
+        return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
     public draw(): void {
         const drawSize = 40;
-        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.angle());
+        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
     }
 
     public shouldBeDeleted(): boolean {

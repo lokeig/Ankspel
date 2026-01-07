@@ -1,7 +1,7 @@
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
-import { InputMode, Side, ThrowType, Utility, Vector, ItemInteractionInput } from "@common";
+import { InputMode, ThrowType, Utility, ItemInteraction } from "@common";
 import { Connection, GameMessage } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
 
@@ -43,12 +43,12 @@ class PlayerItemManager {
     }
 
     private handleInteractions(item: IItem): void {
-        const interactions: [() => boolean, ItemInteractionInput][] = [
-            [() => this.controls.shoot(InputMode.Press), ItemInteractionInput.Activate],
-            [() => this.controls.up(InputMode.Press), ItemInteractionInput.Up],
-            [() => this.controls.down(InputMode.Press), ItemInteractionInput.Down],
-            [() => this.controls.left(InputMode.Press), ItemInteractionInput.Left],
-            [() => this.controls.right(InputMode.Press), ItemInteractionInput.Right],
+        const interactions: [() => boolean, ItemInteraction][] = [
+            [() => this.controls.shoot(InputMode.Press), ItemInteraction.Activate],
+            [() => this.controls.up(InputMode.Press), ItemInteraction.Up],
+            [() => this.controls.down(InputMode.Press), ItemInteraction.Down],
+            [() => this.controls.left(InputMode.Press), ItemInteraction.Left],
+            [() => this.controls.right(InputMode.Press), ItemInteraction.Right],
         ];
         interactions.forEach(([input, action]) => {
             if (!input()) {
@@ -59,7 +59,8 @@ class PlayerItemManager {
                 return;
             }
             const seed = Utility.Random.getRandomSeed();
-            this.handleEffects(onInputFunction(seed));
+            const local = true;
+            this.handleEffects(item, onInputFunction(seed, local));
 
             const position = { x: item.getBody().pos.x, y: item.getBody().pos.y };
             const angle = item.getAngle();
@@ -69,7 +70,7 @@ class PlayerItemManager {
         });
     }
 
-    private handleEffects(effects: OnItemUseEffect[]) {
+    private handleEffects(item: IItem, effects: OnItemUseEffect[]) {
         effects.forEach((effect) => {
             switch (effect.type) {
                 case (OnItemUseType.Aim): {
@@ -83,13 +84,20 @@ class PlayerItemManager {
                     this.playerBody.pos = effect.value;
                     break;
                 }
+                case (OnItemUseType.Equip): {
+                    const prev = this.equipment.unequip(effect.value);
+                    if (prev) {
+                        this.throw(ThrowType.Drop);
+                    }
+                    this.equipment.equip(effect.value, item);
+                }
             }
         })
     }
 
     private getNearbyItem(): IItem | null {
         let fallbackItem: IItem | null = null;
-        for (const item of this.nearbyItems.values()) {
+        for (const item of this.nearbyItems) {
             if (!this.playerBody.collision(item.getBody().scale(30, 30))) {
                 continue;
             }
