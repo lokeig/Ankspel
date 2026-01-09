@@ -1,10 +1,10 @@
-import { PlayerState, Vector } from "@common";
+import { IState, PlayerState, Vector } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
-import { IPlayerState } from "../IPlayerState";
 import { GameObject } from "@core";
+import { EquipmentSlot } from "@item";
 
-class PlayerFlap implements IPlayerState {
+class PlayerFlap implements IState<PlayerState> {
     private playerCharacter: PlayerCharacter;
     private flapSpeed: number = 90;
 
@@ -22,11 +22,50 @@ class PlayerFlap implements IPlayerState {
     }
 
     public stateUpdate(deltaTime: number): void {
+        if (!this.playerCharacter.isLocal()) {
+            this.nonLocalUpdate(deltaTime);
+            return;
+        }
         this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
-        const forceRotationUp = this.playerCharacter.equipment.isHolding();
+        const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
         this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
         this.playerCharacter.update(deltaTime);
         this.setCurrentAnimation();
+
+        const center = this.playerCharacter.body.getCenter();
+        const positions: [EquipmentSlot, Vector][] = [
+            [EquipmentSlot.Head, new Vector(0, -21)],
+            [EquipmentSlot.Body, new Vector(2, 1)],
+            [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
+        ];
+        positions.forEach(([slot, offset]) => {
+            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);
+        });
+        this.handleProjectiles();
+    }
+
+    private handleProjectiles(): void {
+        const body = this.playerCharacter.body;
+        const width = PlayerCharacter.standardWidth;
+        const height = PlayerCharacter.standardHeight / 3;
+        const pos = body.pos.clone();
+
+        const head = new GameObject(
+            pos,
+            width,
+            height
+        );
+        const bodySegment = new GameObject(
+            pos.clone().add(new Vector(0, height)),
+            width,
+            height
+        );
+        const legs = new GameObject(
+            pos.clone().add(new Vector(0, height * 2)),
+            width,
+            height
+        );
+        this.playerCharacter.handleProjectileCollisions(head, bodySegment, legs);
     }
 
     public stateChange(): PlayerState {
@@ -47,7 +86,8 @@ class PlayerFlap implements IPlayerState {
     }
 
     public nonLocalUpdate(deltaTime: number): void {
-        this.playerCharacter.offlineUpdate(deltaTime);
+        this.playerCharacter.nonLocalUpdate(deltaTime);
+        this.handleProjectiles();
     }
 
     public getHeadCollision(body: GameObject): boolean {

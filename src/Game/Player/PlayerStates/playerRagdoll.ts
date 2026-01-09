@@ -1,10 +1,9 @@
-import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, ItemInteraction } from "@common";
+import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, ItemInteraction, IState } from "@common";
 import { DynamicObject, GameObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { IPlayerState } from "../IPlayerState";
-import { IItem, useFunction } from "@item";
+import { EquipmentSlot, IItem, Ownership, useFunction } from "@item";
 
-class PlayerRagdoll implements IPlayerState, IItem {
+class PlayerRagdoll implements IState<PlayerState>, IItem {
     private playerCharacter: PlayerCharacter;
     private head: DynamicObject;
     private body: DynamicObject;
@@ -17,7 +16,7 @@ class PlayerRagdoll implements IPlayerState, IItem {
 
     private coyoteTime = new Countdown(0.15);
 
-    private owned: boolean = false;
+    private owned: Ownership = Ownership.None;
     public interactions: Map<ItemInteraction, useFunction> = new Map();
 
 
@@ -98,7 +97,9 @@ class PlayerRagdoll implements IPlayerState, IItem {
     }
 
     public stateEntered(): void {
-        this.playerCharacter.itemManager.throw(ThrowType.Drop);
+        this.playerCharacter.equipment.throw(EquipmentSlot.Hand ,ThrowType.Drop);
+        this.playerCharacter.equipment.throw(EquipmentSlot.Head ,ThrowType.Drop);
+
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
         this.legs.direction = this.playerCharacter.body.direction;
@@ -237,17 +238,17 @@ class PlayerRagdoll implements IPlayerState, IItem {
         return new Vector();
     }
 
-    public setOwnership(value: boolean): void {
+    public setOwnership(value: Ownership): void {
         this.owned = value;
     }
 
-    public isOwned(): boolean {
+    public getOwnership(): Ownership {
         return this.owned;
     }
 
     public throw(throwType: ThrowType): void {
         throwType;
-        this.owned = false;
+        this.owned = Ownership.None;
     }
 
     public shouldBeDeleted(): boolean {

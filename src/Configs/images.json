@@ -25,6 +25,11 @@
             "frameWidth": 20,
             "frameHeight": 20
         },
+        "armor": {
+            "src": "/assets/armor.png",
+            "frameWidth": 16,
+            "frameHeight": 16
+        },
         "grenade": {
             "src": "/assets/grenade.png",
             "frameWidth": 16,

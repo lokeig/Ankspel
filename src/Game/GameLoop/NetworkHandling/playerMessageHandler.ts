@@ -26,9 +26,9 @@ class PlayerMessageHandler {
             }
             player.character.setPos(Utility.Vector.convertNetwork(pos));
             if (holding !== null && ItemManager.getItemFromID(holding)) {
-                player.character.equipment.setHolding(ItemManager.getItemFromID(holding)!);
+                player.character.equipment.equip(ItemManager.getItemFromID(holding)!);
             } else {
-                player.character.equipment.setHolding(null);
+                player.character.equipment.equip(null);
             }
             player.setState(state);
             player.character.body.direction = side;
@@ -51,7 +51,7 @@ class PlayerMessageHandler {
     public static sendLocalPlayersInfo(): void {
         PlayerManager.getLocal().forEach(player => {
             const id = PlayerManager.getPlayerID(player)!;
-            let holding = player.character.equipment.getHolding();
+            let holding = player.character.equipment.getItem();
             let itemID: number | null = null;
             if (holding) {
                 itemID = ItemManager.getItemID(holding)!;

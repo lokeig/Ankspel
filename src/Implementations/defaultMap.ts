@@ -18,6 +18,9 @@ defaultMap.setPlayerSpawn(new Vector(16, 14));
 
 defaultMap.setTile(IceTile, new Vector(15, 6));
 
+defaultMap.setItem("chestplate", new Vector(12, 13));
+defaultMap.setItem("helmet", new Vector(12, 14));
+
 defaultMap.setItem("shotgun", new Vector(10, 1));
 defaultMap.setItem("shotgun", new Vector(20, 14));
 defaultMap.setItem("glock", new Vector(21, 12));

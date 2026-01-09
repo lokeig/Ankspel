@@ -1,7 +1,8 @@
-import { Grid, Utility, Vector } from "@common";
+import { Grid, Vector } from "@common";
 import { ItemConstructor, IItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
+import { Ownership } from "./itemUseType";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
@@ -69,13 +70,15 @@ class ItemManager {
     }
 
     private static processItemArray(gridPos: Vector, accumulatedItems: Array<IItem>): void {
-        const itemArray = this.getItems(gridPos);
-        if (!itemArray) {
+        const itemSet = this.getItems(gridPos);
+        if (!itemSet) {
             return;
         }
-        for (const item of itemArray.values()) {
-            accumulatedItems.push(item);
-        }
+        itemSet.forEach(item => {
+            if (item.getOwnership() === Ownership.None) {
+                accumulatedItems.push(item);
+            }
+        });
     }
 
     private static addItem(item: IItem) {
@@ -97,7 +100,7 @@ class ItemManager {
 
     public static draw() {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (!item.isOwned()) {
+            if (item.getOwnership() === Ownership.None) {
                 item.draw();
             }
         }));

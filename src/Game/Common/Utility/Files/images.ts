@@ -1,4 +1,4 @@
-const images = {
+const images: Record<string, string> = {
     // Player
     playerImage: 'player',
     playerHands: 'playerHands',
@@ -15,11 +15,15 @@ const images = {
     glock: 'glock',
     grenade: 'grenade',
 
+    // Gear
+    armor: 'armor',
+
     // Projectiles
     trail: 'trail',
 
     // Particles
     explosion: 'explosion'
+
 };
 
 export { images };

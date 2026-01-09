@@ -67,7 +67,7 @@ class Shotgun extends Item {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.Reloadable;
-        return this.firearmInfo.shoot(this.body.getCenter(), this.localAngle, this.body.isFlip(), seed, local);
+        return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
     private reload(): OnItemUseEffect[] {

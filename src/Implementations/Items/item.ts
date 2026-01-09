@@ -1,10 +1,10 @@
 import { ItemInteraction, Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
-import { IItem, useFunction } from "@item";
+import { IItem, Ownership, useFunction } from "@item";
 
 abstract class Item implements IItem {
     public interactions: Map<ItemInteraction, useFunction> = new Map();
-    private owned: boolean = false;
+    private ownership: Ownership = Ownership.None;
     protected body: DynamicObject;
 
     protected localAngle: number = 0;
@@ -22,7 +22,7 @@ abstract class Item implements IItem {
     }
 
     public update(deltaTime: number): void {
-        if (!this.owned) {
+        if (this.ownership === Ownership.None) {
             this.updateItemPhysics(deltaTime);
         } else {
             this.body.setNewCollidableObjects();
@@ -68,14 +68,6 @@ abstract class Item implements IItem {
         this.worldAngle = to;
     }
 
-    public setLocalAngle(angle: number): void {
-        this.localAngle = angle;
-    }
-
-    public getLocalAngle(): number {
-        return this.localAngle;
-    }
-
     public getHandOffset(): Vector {
         return this.handOffset;
     }
@@ -84,12 +76,12 @@ abstract class Item implements IItem {
         return this.holdOffset;
     }
 
-    public setOwnership(value: boolean): void {
-        this.owned = value;
+    public setOwnership(value: Ownership): void {
+        this.ownership = value;
     }
 
-    public isOwned(): boolean {
-        return this.owned;
+    public getOwnership(): Ownership {
+        return this.ownership;
     }
 
     protected getDrawPos(drawSize: number): Vector {
@@ -137,7 +129,7 @@ abstract class Item implements IItem {
     };
 
     protected deleteHelper(): boolean {
-        return !this.owned && Math.abs(this.body.velocity.x) < 50 && this.body.grounded;
+        return this.ownership === Ownership.None && Math.abs(this.body.velocity.x) < 50 && this.body.grounded;
     }
 
     public setToDelete(): void {

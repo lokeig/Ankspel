@@ -24,7 +24,6 @@ class ItemMessageHandler {
             if (!item) {
                 return;
             }
-            item.setLocalAngle(0);
             item.setWorldAngle(angle);
             item.getBody().pos = Utility.Vector.convertNetwork(position);
             item.getBody().direction = direction;
@@ -45,8 +44,8 @@ class ItemMessageHandler {
                 return;
             }
             for (const player of PlayerManager.getPlayers()) {
-                if (player.character.equipment.getHolding() === item) {
-                    player.character.equipment.setHolding(null);
+                if (player.character.equipment.getItem() === item) {
+                    player.character.equipment.equip(null);
                 }
             }
             item.getBody().pos = Utility.Vector.convertNetwork(pos);

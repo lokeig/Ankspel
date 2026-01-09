@@ -24,5 +24,25 @@
       "row": 0,
       "col": 0
     }
+  },
+  "helmet": {
+    "default": {
+      "row": 1,
+      "col": 0
+    },
+    "broken": {
+      "row": 1,
+      "col": 1
+    }
+  },
+  "chestplate": {
+    "default": {
+      "row": 0,
+      "col": 0
+    },
+    "equipped": {
+      "row": 0,
+      "col": 1
+    }
   }
 }

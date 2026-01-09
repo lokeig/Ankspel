@@ -16,6 +16,12 @@ enum EquipmentSlot {
     Shield
 }
 
+enum Ownership {
+    Held,
+    Equipped,
+    None
+}
+
 interface OnItemUseMap {
     [OnItemUseType.Knockback]: Vector ,
     [OnItemUseType.Position]: Vector ,
@@ -30,5 +36,5 @@ type OnItemUseEffect = {
     }
 }[OnItemUseType];
 
-export { OnItemUseType, EquipmentSlot };
+export { OnItemUseType, EquipmentSlot, Ownership };
 export type { OnItemUseMap, OnItemUseEffect };

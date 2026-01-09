@@ -1,61 +1,71 @@
-import { Side, Utility, Vector } from "@common";
-import { EquipmentSlot, IItem } from "@item";
+import { Side, ThrowType, Utility, Vector } from "@common";
+import { EquipmentSlot, IItem, ItemManager, Ownership } from "@item";
+import { Connection, GameMessage } from "@server";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
 
-    public isHolding(): boolean {
-        return this.equipment.get(EquipmentSlot.Hand) !== undefined;
+    public hasItem(slot: EquipmentSlot): boolean {
+        return this.equipment.get(slot) !== undefined;
     }
 
-    public getHolding(): IItem {
-        return this.equipment.get(EquipmentSlot.Hand)!;
+    public getItem(slot: EquipmentSlot): IItem {
+        return this.equipment.get(slot)!;
     }
 
-    public setHolding(item: IItem | null): void {
-        if (!item && this.isHolding()) {
-            this.getHolding().setOwnership(false);
-        }
+    public equip(item: IItem | null, slot: EquipmentSlot): void {
+        this.throw(slot, ThrowType.Drop);
         if (!item) {
-            this.equipment.set(EquipmentSlot.Hand, undefined);
             return;
         }
-        this.equipment.set(EquipmentSlot.Hand, item);
-        this.getHolding().setOwnership(true);
-    }
-
-    public equip(slot: EquipmentSlot, item: IItem) {
         this.equipment.set(slot, item);
+        const ownership: Ownership = (slot === EquipmentSlot.Hand) ? Ownership.Held : Ownership.Equipped;
+        this.getItem(slot).setOwnership(ownership);
     }
 
-    public unequip(slot: EquipmentSlot): IItem | null {
-        const result = this.equipment.get(slot);
-        if (!result) {
-            return null;
-        }
-        this.equipment.delete(slot);
-        return result;
-    }
-
-    public setHoldingBody(center: Vector, direction: Side, angle: number) {
-        if (!this.isHolding()) {
+    public throw(slot: EquipmentSlot, throwType: ThrowType) {
+        if (!this.hasItem(slot)) {
             return;
         }
-        const item = this.getHolding();
+        const item = this.getItem(slot);
+        item.throw(throwType);
+        item.setOwnership(Ownership.None);
+
+        this.equipment.set(slot, undefined);
+
+        Connection.get().sendGameMessage(GameMessage.ThrowItem, {
+            itemID: ItemManager.getItemID(item)!,
+            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
+            direction: item.getBody().direction,
+            throwType
+        });
+    }
+
+
+    public setBody(center: Vector, offset: Vector, direction: Side, angle: number, slot: EquipmentSlot) {
+        if (!this.hasItem(slot)) {
+            return;
+        }
+        const item = this.getItem(slot);
         item.getBody().setCenterToPos(center);
         item.getBody().direction = direction;
         item.setWorldAngle(angle);
 
-        const offset = Utility.Angle.rotateForce(item.getHoldOffset(), angle + item.getLocalAngle());
-        item.getBody().pos.x += offset.x * item.getBody().getDirectionMultiplier();
-        item.getBody().pos.y += offset.y;
+        const angledOffset = Utility.Angle.rotateForce(offset, angle);
+        item.getBody().pos.x += angledOffset.x * item.getBody().getDirectionMultiplier();
+        item.getBody().pos.y += angledOffset.y;
     }
 
+    public getAllEquippedItems(): Map<EquipmentSlot, IItem | undefined> {
+        return this.equipment;
+    }
+
+
     public itemNoRotationCollision(center: Vector): boolean {
-        if (!this.isHolding()) {
+        if (!this.hasItem(EquipmentSlot.Hand)) {
             return false;
         }
-        const item = this.getHolding();
+        const item = this.getItem(EquipmentSlot.Hand);
         const tempItemPos = item.getBody().pos.clone();
 
         item.getBody().setCenterToPos(center);

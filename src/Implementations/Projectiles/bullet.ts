@@ -2,7 +2,7 @@ import { Countdown, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
 import { Render } from "@render";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile } from "@projectile";
+import { IProjectile, ProjectileEffect } from "@projectile";
 
 abstract class Bullet implements IProjectile {
     private angle!: number;
@@ -63,6 +63,11 @@ abstract class Bullet implements IProjectile {
 
     public setLocal(): void {
         this.local = true;
+    }
+
+    public onPlayerHit(): ProjectileEffect {
+        this.setToDelete();
+        return ProjectileEffect.Damage;
     }
 
     public draw(): void {

@@ -1,16 +1,17 @@
-import { Controls, StateMachine, Vector } from "@common";
+import { BodyParts, Controls, ItemInteraction, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
-import { IPlayerState } from "./IPlayerState";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { Render } from "@render";
+import { IProjectile, ProjectileEffect, ProjectileManager } from "@projectile";
+import { EquipmentSlot } from "@item";
 
 class Player {
     public character!: PlayerCharacter;
-    private stateMachine: StateMachine<PlayerState, IPlayerState>;
+    private stateMachine: StateMachine<PlayerState>;
 
     constructor() {
-        this.stateMachine = new StateMachine<PlayerState, IPlayerState>(PlayerState.Standard);
+        this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
         this.character = new PlayerCharacter(new Vector());
         this.setupStateMachine();
     }
@@ -29,23 +30,21 @@ class Player {
         this.stateMachine.enterState();
     }
 
-    
+
     public setState(state: PlayerState): void {
         if (state !== this.stateMachine.getState()) {
             this.stateMachine.forceState(state);
         }
     }
-    
+
     public getState(): PlayerState {
         return this.stateMachine.getState();
     }
-    
+
+
+
     public update(deltaTime: number): void {
-        if (this.character.isLocal()) {
-            this.stateMachine.update(deltaTime);
-        } else {
-            this.stateMachine.getIState().nonLocalUpdate(deltaTime);
-        }
+        this.stateMachine.update(deltaTime);
     };
 
     public draw(): void {

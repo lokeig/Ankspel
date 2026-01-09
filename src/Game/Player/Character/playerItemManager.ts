@@ -3,7 +3,7 @@ import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction } from "@common";
 import { Connection, GameMessage } from "@server";
-import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
+import { EquipmentSlot, IItem, ItemManager, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;
@@ -24,20 +24,20 @@ class PlayerItemManager {
         if (this.controls.pickup(InputMode.Press)) {
             this.handlePickupOrThrow();
         }
-        if (!this.equipment.isHolding()) {
+        if (!this.equipment.hasItem(EquipmentSlot.Hand)) {
             return;
         }
-        const item = this.equipment.getHolding();
+        const item = this.equipment.getItem(EquipmentSlot.Hand);
         this.handleInteractions(item);
     }
 
     private handlePickupOrThrow(): void {
-        if (this.equipment.isHolding()) {
-            this.throw(this.getThrowType());
+        if (this.equipment.hasItem(EquipmentSlot.Hand)) {
+            this.equipment.throw(EquipmentSlot.Hand, this.getThrowType());
         } else {
             const nextItem = this.getNearbyItem();
             if (nextItem) {
-                this.equipment.setHolding(nextItem);
+                this.equipment.equip(nextItem, EquipmentSlot.Hand);
             }
         }
     }
@@ -85,11 +85,9 @@ class PlayerItemManager {
                     break;
                 }
                 case (OnItemUseType.Equip): {
-                    const prev = this.equipment.unequip(effect.value);
-                    if (prev) {
-                        this.throw(ThrowType.Drop);
-                    }
-                    this.equipment.equip(effect.value, item);
+                    this.equipment.equip(null, EquipmentSlot.Hand);
+                    this.equipment.equip(item, effect.value);
+                    break;
                 }
             }
         })
@@ -135,22 +133,6 @@ class PlayerItemManager {
             return ThrowType.Upwards;
         }
         return ThrowType.Light;
-    }
-
-    public throw(throwType: ThrowType) {
-        if (!this.equipment.isHolding()) {
-            return;
-        }
-        const item = this.equipment.getHolding();
-        this.equipment.setHolding(null);
-        item.throw(throwType);
-
-        Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-            itemID: ItemManager.getItemID(item)!,
-            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
-            direction: item.getBody().direction,
-            throwType
-        });
     }
 }
 

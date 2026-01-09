@@ -7,7 +7,8 @@ enum ItemInteraction {
     Jump,
     Activate,
     ActivateHold,
-    Hit
+    Hit,
 }
+
 
 export { ItemInteraction };

@@ -11,12 +11,11 @@ class PlayerManager {
     static update(deltaTime: number) {
         this.players.forEach(playerSet => playerSet.forEach(player => {
             player.update(deltaTime);
-            if (!player.character.equipment.isHolding()) {
-                return;
-            }
-            if (player.character.equipment.getHolding().shouldBeDeleted()) {
-                player.character.equipment.setHolding(null);
-            }
+            player.character.equipment.getAllEquippedItems().forEach((item, slot) => {
+                if (item && item.shouldBeDeleted()) {
+                    player.character.equipment.equip(null, slot);
+                }
+            })
         }));
         Grid.updateMapPositions<Player>(this.players, e => e.character.body.pos);
     }
