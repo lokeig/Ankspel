@@ -1,7 +1,6 @@
 import { DynamicObject } from "@core";
 import { ITrail } from "./ITrail";
-import { Vector } from "@common";
-import { ProjectileEffect } from "./projectileEffect";
+import { ProjectileEffect, Vector } from "@common";
 
 interface IProjectile {
     update(deltaTime: number): void;

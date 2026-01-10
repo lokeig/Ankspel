@@ -3,5 +3,5 @@ export type { IItem, ItemConstructor } from "./IItem";
 
 export type { useFunction } from "./useFunction";
 
-export { OnItemUseType, Ownership, EquipmentSlot } from "./itemUseType";
+export { OnItemUseType, Ownership } from "./itemUseType";
 export type { OnItemUseEffect, OnItemUseMap } from "./itemUseType";

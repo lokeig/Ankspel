@@ -1,10 +1,8 @@
-import { BodyParts, Controls, ItemInteraction, StateMachine, Vector } from "@common";
+import { Controls, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { Render } from "@render";
-import { IProjectile, ProjectileEffect, ProjectileManager } from "@projectile";
-import { EquipmentSlot } from "@item";
 
 class Player {
     public character!: PlayerCharacter;
@@ -41,10 +39,9 @@ class Player {
         return this.stateMachine.getState();
     }
 
-
-
     public update(deltaTime: number): void {
-        this.stateMachine.update(deltaTime);
+        const noStateChange = this.character.isLocal() ? false : true;
+        this.stateMachine.update(deltaTime, noStateChange);
     };
 
     public draw(): void {

@@ -1,5 +1,5 @@
-import { Side, ThrowType, Utility, Vector } from "@common";
-import { EquipmentSlot, IItem, ItemManager, Ownership } from "@item";
+import { EquipmentSlot, Side, ThrowType, Utility, Vector } from "@common";
+import { IItem, ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
 
 class PlayerEquipment {

@@ -1,8 +1,8 @@
-import { Countdown, Utility, Vector } from "@common";
+import { Countdown, ProjectileEffect, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
 import { Render } from "@render";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile, ProjectileEffect } from "@projectile";
+import { IProjectile } from "@projectile";
 
 abstract class Bullet implements IProjectile {
     private angle!: number;
@@ -27,6 +27,7 @@ abstract class Bullet implements IProjectile {
         const trailPos = pos.clone().add(size / 2);
         this.trail = new BulletTrail(trailPos, velocity.clone(), trailLength, size);
         this.trail.setTarget(trailPos);
+
     }
 
     public getTrail(): BulletTrail {
@@ -39,6 +40,7 @@ abstract class Bullet implements IProjectile {
             this.delete = true;
         }
         this.lifespan.update(deltaTime);
+
     }
 
     public getBody(): DynamicObject {

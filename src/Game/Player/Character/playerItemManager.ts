@@ -1,9 +1,9 @@
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
-import { InputMode, ThrowType, Utility, ItemInteraction } from "@common";
+import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
 import { Connection, GameMessage } from "@server";
-import { EquipmentSlot, IItem, ItemManager, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
+import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;

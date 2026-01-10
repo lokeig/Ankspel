@@ -1,6 +1,6 @@
-import { EquipmentSlot, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
+import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { Frame, images, ItemInteraction, SpriteSheet, Utility, Vector } from "@common";
+import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility, Vector } from "@common";
 
 class Helmet extends Item {
     private static readonly slot: EquipmentSlot = EquipmentSlot.Head;
