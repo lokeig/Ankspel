@@ -1,4 +1,4 @@
-import { Vector, Controls, BodyParts, ItemInteraction, Utility } from "@common";
+import { Vector, Controls, BodyParts, ItemInteraction, Utility, EquipmentSlot, ProjectileEffect } from "@common";
 import { DynamicObject, GameObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemManager } from "./playerItemManager";
@@ -7,8 +7,7 @@ import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
-import { EquipmentSlot } from "@item";
-import { IProjectile, ProjectileEffect, ProjectileManager } from "@projectile";
+import { IProjectile, ProjectileManager } from "@projectile";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -108,39 +107,48 @@ class PlayerCharacter {
 
     public handleProjectileCollisions(head: GameObject, body: GameObject, legs: GameObject): void {
         ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
+            const seed = Utility.Random.getRandomSeed();
             if (head.collision(projectile.getBody())) {
-                this.handleEffect(projectile, BodyParts.Head);
+                if (!projectile.isLocal()) {
+                    projectile.setToDelete();
+                    return;
+                }
+                const effect = projectile.onPlayerHit();
+                this.handleEffect(effect, seed, BodyParts.Head);
             } else if (body.collision(projectile.getBody())) {
-                this.handleEffect(projectile, BodyParts.Center);
+                if (!projectile.isLocal()) {
+                    projectile.setToDelete();
+                    return;
+                }
+                const effect = projectile.onPlayerHit();
+                this.handleEffect(effect, seed, BodyParts.Center);
             } else if (legs.collision(projectile.getBody())) {
-                this.handleEffect(projectile, BodyParts.Legs);
+                if (!projectile.isLocal()) {
+                    projectile.setToDelete();
+                    return;
+                }
+                const effect = projectile.onPlayerHit();
+                this.handleEffect(effect, seed, BodyParts.Legs);
             }
         });
     }
 
-    private handleEffect(projectile: IProjectile, bodyPart: BodyParts): void {
-        if (!projectile.isLocal()) {
-            projectile.setToDelete();
-            return;
-        }
-        const seed = Utility.Random.getRandomSeed();
-        switch (projectile.onPlayerHit()) {
-            case (ProjectileEffect.Damage): {
-                if (bodyPart === BodyParts.Head) {
-                    if (this.equipment.hasItem(EquipmentSlot.Head)) {
-                        this.equipment.getItem(EquipmentSlot.Head).interactions.get(ItemInteraction.Hit)!(seed, this.isLocal());
-                    } else {
-                        this.dead = true;
-                    }
-                } else if (bodyPart === BodyParts.Center) {
-                    if (this.equipment.hasItem(EquipmentSlot.Body)) {
-                        this.equipment.getItem(EquipmentSlot.Body).interactions.get(ItemInteraction.Hit)!(seed, this.isLocal());
-                    } else {
-                        this.dead = true;
-                    }
+    public handleEffect(effect: ProjectileEffect, seed: number, bodyPart: BodyParts): void {
+        switch (effect) {
+            case ProjectileEffect.Damage: {
+                const partToSlot: Partial<Record<BodyParts, EquipmentSlot>> = {
+                    [BodyParts.Head]: EquipmentSlot.Head,
+                    [BodyParts.Center]: EquipmentSlot.Body,
+                };
+                const item = partToSlot[bodyPart] ? this.equipment.getItem(partToSlot[bodyPart]) : null;
+                console.log(item);
+                if (item) {
+                    item.interactions.get(ItemInteraction.Hit)!(seed, this.isLocal());
                 } else {
                     this.dead = true;
                 }
+
+                break;
             }
         }
     }

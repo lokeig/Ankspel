@@ -1,19 +1,10 @@
-import { Vector } from "@common";
+import { EquipmentSlot, Vector } from "@common";
 
 enum OnItemUseType {
     Knockback,
     Position,
     Aim,
     Equip
-}
-
-enum EquipmentSlot {
-    Hand,
-    Head,
-    Body,
-    Boots,
-    Back,
-    Shield
 }
 
 enum Ownership {

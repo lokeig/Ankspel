@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, BodyParts } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, BodyParts, ProjectileEffect } from "@common";
 
 enum GameMessage {
     // ─── Connection ─────────────────────────
@@ -11,6 +11,7 @@ enum GameMessage {
     PlayerSpawn,
     PlayerHit,
     PlayerDead,
+    PlayerEquipment,
 
     // ─── Items ──────────────────────────────
     SpawnItem,
@@ -39,23 +40,18 @@ interface GameMessageMap {
     [GameMessage.DataDone]: {};
 
     // ─── Player ─────────────────────────────
-    [GameMessage.PlayerInfo]: {
-        id: number, pos: NetworkVector, holding: number | null, state: PlayerState,
-        anim: PlayerAnim, side: Side, armAngle: number
-    };
+    [GameMessage.PlayerInfo]: { id: number, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number };
     [GameMessage.NewPlayer]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
-    [GameMessage.PlayerHit]: { id: number, bodyPart: BodyParts };
+    [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, bodyPart: BodyParts };
     [GameMessage.PlayerDead]: { id: number };
+    [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
 
     // ─── Items ──────────────────────────────
     [GameMessage.ThrowItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
     [GameMessage.SpawnItem]: { id: number, location: NetworkVector, type: string };
     [GameMessage.DeleteItem]: { id: number };
-    [GameMessage.ActivateItem]: {
-        id: number, position: NetworkVector, angle: number,
-        direction: Side, action: ItemInteraction, seed: number
-    };
+    [GameMessage.ActivateItem]: { id: number, position: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
 
     // ─── Projectiles ────────────────────────

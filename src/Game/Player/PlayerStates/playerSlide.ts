@@ -1,8 +1,6 @@
-import { Countdown, Vector, PlayerState, InputMode, PlayerAnim, ThrowType, IState, Side } from "@common";
+import { Countdown, Vector, PlayerState, InputMode, PlayerAnim, ThrowType, IState, Side, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { GameObject } from "@core";
-import { EquipmentSlot } from "@item";
-import { Render } from "@render";
 
 class PlayerSlide implements IState<PlayerState> {
 
@@ -56,27 +54,34 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     private handleProjectiles(): void {
-        const body = this.playerCharacter.body;
-        const width = PlayerCharacter.standardWidth / 3;
-        const height = PlayerSlide.SlideHeight;
-        const pos = body.pos.clone();
+        if (this.crouch) {
+            const height = PlayerSlide.SlideHeight / 3;
+            const center = this.playerCharacter.body.pos.clone();
 
-        const head = new GameObject(
-            pos,
-            width,
-            height
-        );
-        const bodySegment = new GameObject(
-            pos.clone().add(new Vector(width, 0)),
-            width,
-            height
-        );
-        const legs = new GameObject(
-            pos.clone().add(new Vector(width * 2, 0)),
-            width,
-            height
-        );
-        this.playerCharacter.handleProjectileCollisions(head, bodySegment, legs);
+            const createSegment = (i: number): GameObject => {
+                return new GameObject(
+                    new Vector(
+                        center.x,
+                        center.y + i * height
+                    ),
+                    PlayerCharacter.standardWidth,
+                    height
+                );
+            };
+            this.playerCharacter.handleProjectileCollisions(createSegment(-1), createSegment(0), createSegment(1));
+        } else {
+            const width = 40;
+            const createbody = (i: number): GameObject => {
+                return new GameObject(
+                    new Vector(
+                        this.playerCharacter.body.pos.x + i * width / 3 * this.playerCharacter.body.getDirectionMultiplier(),
+                        this.playerCharacter.body.pos.y),
+                    width / 3,
+                    PlayerSlide.SlideHeight
+                );
+            };
+            this.playerCharacter.handleProjectileCollisions(createbody(-1), createbody(1), createbody(1));
+        }
     }
 
 
@@ -185,35 +190,6 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     public draw(): void {
-        const body = this.playerCharacter.body;
-        const width = 14;
-        const height = PlayerSlide.SlideHeight;
-        const pos = body.pos.clone()
-        
-        let head = new GameObject(
-            pos,
-            width,
-            height
-        );
-        const bodySegment = new GameObject(
-            pos.clone().add(new Vector(width, 0)),
-            width,
-            height
-        );
-        let legs = new GameObject(
-            pos.clone().add(new Vector(width * 2, 0)),
-            width,
-            height
-        );
-        if (this.playerCharacter.body.direction === Side.Left) {
-            const temp = head;
-            head = legs;
-            legs = temp; 
-        }
-        Render.get().drawSquare({ x: head.pos.x, y: head.pos.y, width: head.width, height: head.height }, 0, "green");
-        Render.get().drawSquare({ x: bodySegment.pos.x, y: bodySegment.pos.y, width: bodySegment.width, height: bodySegment.height }, 0, "blue");
-        Render.get().drawSquare({ x: legs.pos.x, y: legs.pos.y, width: legs.width, height: legs.height }, 0, "red");
-        
         this.playerCharacter.draw();
     }
 }

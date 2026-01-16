@@ -1,8 +1,7 @@
-import { PlayerState, InputMode, Vector, IState } from "@common";
+import { PlayerState, InputMode, Vector, IState, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
 import { GameObject } from "@core";
-import { EquipmentSlot, Ownership } from "@item";
 
 class PlayerStandard implements IState<PlayerState> {
 
@@ -63,27 +62,20 @@ class PlayerStandard implements IState<PlayerState> {
     }
 
     private handleProjectiles(): void {
-        const body = this.playerCharacter.body;
-        const width = PlayerCharacter.standardWidth;
         const height = PlayerCharacter.standardHeight / 3;
-        const pos = body.pos.clone();
+        const center = this.playerCharacter.body.pos.clone();
 
-        const head = new GameObject(
-            pos,
-            width,
-            height
-        );
-        const bodySegment = new GameObject(
-            pos.clone().add(new Vector(0, height)),
-            width,
-            height
-        );
-        const legs = new GameObject(
-            pos.clone().add(new Vector(0, height * 2)),
-            width,
-            height
-        );
-        this.playerCharacter.handleProjectileCollisions(head, bodySegment, legs);
+        const createSegment = (i: number): GameObject => {
+            return new GameObject(
+                new Vector(
+                    center.x,
+                    center.y + i * height
+                ),
+                PlayerCharacter.standardWidth,
+                height
+            );
+        };
+        this.playerCharacter.handleProjectileCollisions(createSegment(-1), createSegment(0), createSegment(1));
     }
 
     public stateChange(): PlayerState {

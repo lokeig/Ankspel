@@ -35,9 +35,13 @@ class StateMachine<T, S extends IState<T> = IState<T>>  {
         this.getIState().stateEntered();
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number, noStateChange: boolean = false): void {
         const state = this.getIState();
         state.stateUpdate(deltaTime);
+        
+        if (noStateChange) {
+            return;
+        }
         
         const nextState = state.stateChange();
         if (nextState !== this.currentState) {
