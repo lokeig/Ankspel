@@ -37,7 +37,6 @@ class Chestplate extends Item {
         this.spriteSheet.draw(frame, this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
     }
 
-
     private onHitFunction(seed: number, local: boolean): OnItemUseEffect[] {
         this.setToDelete();
         return [];
