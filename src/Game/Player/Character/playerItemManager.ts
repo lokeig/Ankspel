@@ -2,7 +2,7 @@ import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
-import { Connection, GameMessage } from "@server";
+import { Connection, GameMessage, GameMessageMap } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
 
 class PlayerItemManager {
@@ -12,11 +12,13 @@ class PlayerItemManager {
     private nearbyItems: Array<IItem> = [];
     private lastHeldItem: IItem | null = null;
     public forcedThrowType: null | ThrowType = null;
+    private id: number;
 
-    constructor(body: DynamicObject, controls: PlayerControls, equipment: PlayerEquipment) {
+    constructor(body: DynamicObject, controls: PlayerControls, equipment: PlayerEquipment, id: number) {
         this.playerBody = body;
         this.controls = controls;
         this.equipment = equipment;
+        this.id = id;
     }
 
     public handle() {
@@ -32,14 +34,39 @@ class PlayerItemManager {
     }
 
     private handlePickupOrThrow(): void {
-        if (this.equipment.hasItem(EquipmentSlot.Hand)) {
-            this.equipment.throw(EquipmentSlot.Hand, this.getThrowType());
-        } else {
+        if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
+            const item = this.equipment.getItem(EquipmentSlot.Hand)
+            const throwType = this.getThrowType();
+            Connection.get().sendGameMessage(GameMessage.ThrowItem, {
+                itemID: ItemManager.getItemID(item)!,
+                pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
+                direction: item.getBody().direction,
+                throwType
+            });
+            this.equipment.throw(EquipmentSlot.Hand, throwType);
+        } else {  // Pickup item
             const nextItem = this.getNearbyItem();
             if (nextItem) {
                 this.equipment.equip(nextItem, EquipmentSlot.Hand);
             }
         }
+        this.sendMessage();
+    }
+
+    private sendMessage(): void {
+        const equipmentMap: [keyof GameMessageMap[GameMessage.PlayerEquipment], EquipmentSlot][] = [
+            ["holding", EquipmentSlot.Hand],
+            ["head", EquipmentSlot.Head],
+            ["body", EquipmentSlot.Body],
+            ["boots", EquipmentSlot.Boots],
+        ]
+        const message: GameMessageMap[GameMessage.PlayerEquipment] = { id: this.id, holding: null, head: null, body: null, boots: null };
+        equipmentMap.forEach(([type, slot]) => {
+            if (this.equipment.hasItem(slot)) {
+                message[type] = ItemManager.getItemID(this.equipment.getItem(slot))!;
+            }
+        });
+        Connection.get().sendGameMessage(GameMessage.PlayerEquipment, message);
     }
 
     private handleInteractions(item: IItem): void {
@@ -66,7 +93,9 @@ class PlayerItemManager {
             const angle = item.getAngle();
             const direction = item.getBody().direction;
             const id = ItemManager.getItemID(item)!;
-            Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, position, angle, action, direction, seed })
+
+            Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, position, angle, action, direction, seed });
+            this.sendMessage();
         });
     }
 

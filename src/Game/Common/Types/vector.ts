@@ -51,6 +51,10 @@ class Vector {
         return this;
     }
 
+    public length(): number {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+    }
+
     public clone(): Vector {
         return new Vector(this.x, this.y)
     }

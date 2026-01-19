@@ -23,13 +23,13 @@ class ProjectileManager {
 
     private static updateMapPositions(deltaTime: number) {
         this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
+            projectile.getTrail().setTarget(projectile.getBody().getCenter());
+            projectile.update(deltaTime);
             if (projectile.shouldBeDeleted()) {
                 projectileSet.delete(projectile);
                 projectile.getTrail().setToDelete();
                 return;
             }
-            projectile.getTrail().setTarget(projectile.getBody().getCenter());
-            projectile.update(deltaTime);
         }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getBody().pos);
     }

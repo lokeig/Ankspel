@@ -1,6 +1,6 @@
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@game/Server";
-import { IDManager } from "@common";
+import { Countdown, IDManager } from "@common";
 import { ServerMessage } from "@shared";
 import { PlayerMessageHandler } from "./playerMessageHandler";
 import { ItemMessageHandler } from "./itemMessageHandler";
@@ -8,7 +8,8 @@ import { MapMessageHandler } from "./mapMessageHandler";
 import { ProjectileMessageHandler } from "./projectileMessageHandler";
 
 class NetworkHandler {
-    private static readyCount = 0;
+    private static readyCount: number = 0;
+    private static messageTimer = new Countdown(0.05);
     static init() {
         PlayerMessageHandler.init();
         ItemMessageHandler.init();
@@ -46,8 +47,12 @@ class NetworkHandler {
         MapMessageHandler.setStart(e);
     }
 
-    public static update(): void {
-        PlayerMessageHandler.sendLocalPlayersInfo();
+    public static update(deltaTime: number): void {
+        this.messageTimer.update(deltaTime);
+        if (this.messageTimer.isDone()) {
+            PlayerMessageHandler.sendLocalPlayersInfo();
+            this.messageTimer.reset();
+        }
     }
 }
 export { NetworkHandler };

@@ -30,7 +30,10 @@ class PlayerFlap implements IState<PlayerState> {
         this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
         this.playerCharacter.update(deltaTime);
         this.setCurrentAnimation();
+        this.setEquipmentPosition();
+    }
 
+    private setEquipmentPosition(): void {
         const center = this.playerCharacter.body.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -21)],
@@ -40,29 +43,11 @@ class PlayerFlap implements IState<PlayerState> {
         positions.forEach(([slot, offset]) => {
             this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);
         });
-        this.handleProjectiles();
-    }
-
-    private handleProjectiles(): void {
-        const height = PlayerCharacter.standardHeight / 3;
-        const center = this.playerCharacter.body.pos.clone();
-
-        const createSegment = (i: number): GameObject => {
-            return new GameObject(
-                new Vector(
-                    center.x,
-                    center.y + i * height
-                ),
-                PlayerCharacter.standardWidth,
-                height
-            );
-        };
-        this.playerCharacter.handleProjectileCollisions(createSegment(-1), createSegment(0), createSegment(1));
     }
 
     public stateChange(): PlayerState {
         const controls = this.playerCharacter.controls;
-        if (controls.ragdoll() || this.playerCharacter.dead) {
+        if (controls.ragdoll() || this.playerCharacter.isDead()) {
             return PlayerState.Ragdoll;
         }
         if (controls.down()) {
@@ -77,26 +62,9 @@ class PlayerFlap implements IState<PlayerState> {
     public stateExited(): void {
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    private nonLocalUpdate(deltaTime: number): void {
         this.playerCharacter.nonLocalUpdate(deltaTime);
-        this.handleProjectiles();
-    }
-
-    public getHeadCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        return new GameObject(playerBody.pos, playerBody.width, playerBody.height / 3).collision(body);
-    }
-
-    public getBodyCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + playerBody.height / 3);
-        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
-    }
-
-    public getLegsCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + 2 * playerBody.height / 3);
-        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
+        this.setEquipmentPosition();
     }
 
     public draw(): void {

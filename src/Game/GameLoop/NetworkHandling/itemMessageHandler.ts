@@ -43,11 +43,13 @@ class ItemMessageHandler {
             if (!item) {
                 return;
             }
-            for (const player of PlayerManager.getPlayers()) {
-                if (player.character.equipment.getItem() === item) {
-                    player.character.equipment.equip(null);
-                }
-            }
+            PlayerManager.getPlayers().forEach(player => {
+                player.character.equipment.getAllEquippedItems().forEach((key, slot) => {
+                    if (player.character.equipment.getItem(slot) === item) {
+                        player.character.equipment.equip(null, slot);
+                    }
+                })
+            });
             item.getBody().pos = Utility.Vector.convertNetwork(pos);
             item.getBody().direction = direction;
             item.throw(throwType);

@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, BodyParts, ProjectileEffect } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, EquipmentSlot } from "@common";
 
 enum GameMessage {
     // ─── Connection ─────────────────────────
@@ -7,6 +7,7 @@ enum GameMessage {
 
     // ─── Player ─────────────────────────────
     PlayerInfo,
+    PlayerRagdollInfo,
     NewPlayer,
     PlayerSpawn,
     PlayerHit,
@@ -41,9 +42,10 @@ interface GameMessageMap {
 
     // ─── Player ─────────────────────────────
     [GameMessage.PlayerInfo]: { id: number, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number };
+    [GameMessage.PlayerRagdollInfo]: { id: number, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
     [GameMessage.NewPlayer]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
-    [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, bodyPart: BodyParts };
+    [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, slot: EquipmentSlot | null };
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
 

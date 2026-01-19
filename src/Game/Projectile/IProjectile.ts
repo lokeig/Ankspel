@@ -1,17 +1,21 @@
-import { DynamicObject } from "@core";
+import { DynamicObject, GameObject } from "@core";
 import { ITrail } from "./ITrail";
 import { ProjectileEffect, Vector } from "@common";
 
 interface IProjectile {
     update(deltaTime: number): void;
-    getBody(): DynamicObject;
+    onPlayerHit(seed: number): ProjectileEffect, 
+
+    willGoThrough(block: GameObject): { hit: boolean, pos: Vector, normal: Vector };
+    getPos(): Vector;
+
     getTrail(): ITrail;
-    onCollision(): void;
+
     isLocal(): boolean;
     setLocal(): void;
-    onPlayerHit(): ProjectileEffect, 
     setToDelete(): void
     shouldBeDeleted(): boolean;
+
     draw(): void;
 }
 

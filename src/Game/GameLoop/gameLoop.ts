@@ -28,12 +28,11 @@ class GameLoop {
     private gameLoop = (currentTime: number) => {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
-
         Render.get().clear();
         this.stateMachine.update(deltaTime);
         this.stateMachine.draw();
         Input.update();
-        NetworkHandler.update();
+        NetworkHandler.update(deltaTime);
 
         requestAnimationFrame(this.gameLoop);
     };

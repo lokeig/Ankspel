@@ -1,7 +1,6 @@
 import { PlayerState, InputMode, Vector, IState, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
-import { GameObject } from "@core";
 
 class PlayerStandard implements IState<PlayerState> {
 
@@ -44,6 +43,10 @@ class PlayerStandard implements IState<PlayerState> {
         this.playerCharacter.update(deltaTime);
         this.setCurrentAnimation();
 
+        this.setEquipmentLocation();
+    }
+
+    private setEquipmentLocation() {
         const center = this.playerCharacter.body.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -21)],
@@ -53,33 +56,15 @@ class PlayerStandard implements IState<PlayerState> {
         positions.forEach(([slot, offset]) => {
             this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);
         });
-        this.handleProjectiles();
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    private nonLocalUpdate(deltaTime: number): void {
+        this.setEquipmentLocation();
         this.playerCharacter.nonLocalUpdate(deltaTime);
-        this.handleProjectiles();
-    }
-
-    private handleProjectiles(): void {
-        const height = PlayerCharacter.standardHeight / 3;
-        const center = this.playerCharacter.body.pos.clone();
-
-        const createSegment = (i: number): GameObject => {
-            return new GameObject(
-                new Vector(
-                    center.x,
-                    center.y + i * height
-                ),
-                PlayerCharacter.standardWidth,
-                height
-            );
-        };
-        this.playerCharacter.handleProjectileCollisions(createSegment(-1), createSegment(0), createSegment(1));
     }
 
     public stateChange(): PlayerState {
-        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
+        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.isDead()) {
             return PlayerState.Ragdoll;
         }
         if (this.playerCharacter.controls.jump(InputMode.Press) && !this.playerCharacter.body.grounded && !this.playerCharacter.jump.isJumping) {
@@ -97,23 +82,6 @@ class PlayerStandard implements IState<PlayerState> {
 
     public stateExited(): void {
 
-    }
-
-    public getHeadCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        return new GameObject(playerBody.pos, playerBody.width, playerBody.height / 3).collision(body);
-    }
-
-    public getBodyCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + playerBody.height / 3);
-        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
-    }
-
-    public getLegsCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = new Vector(playerBody.pos.x, playerBody.pos.y + 2 * playerBody.height / 3);
-        return new GameObject(posOffset, playerBody.width, playerBody.height / 3).collision(body);
     }
 
     public draw(): void {

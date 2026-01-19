@@ -33,7 +33,7 @@ class PlayerManager {
     }
 
     public static create(): Player {
-        const player = new Player();
+        const player = new Player(this.idManager.getNextID());
         const id = this.idManager.add(player);
         this.addPlayer(player);
         player.setControls(Utility.File.getControls(this.localPlayerCount++));
@@ -42,7 +42,7 @@ class PlayerManager {
     }
 
     public static spawn(id: number): Player {
-        const player = new Player();
+        const player = new Player(id);
         this.idManager.setID(player, id);
         this.addPlayer(player);
         return player;

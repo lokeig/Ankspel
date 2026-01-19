@@ -1,6 +1,6 @@
 interface IState<T> {
     stateUpdate(deltaTime: number): void;
-    stateEntered(): void;
+    stateEntered(from?: T): void;
     stateExited(): void;
     stateChange(): T;
     draw(): void;

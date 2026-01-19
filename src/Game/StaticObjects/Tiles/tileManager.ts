@@ -28,16 +28,18 @@ class TileManager {
         }
     }
 
-    public static getNearbyTiles(pos: Vector, width: number, height: number): CollisionObject[] {
+    public static getNearbyTiles(pos: Vector, width: number, height: number, nextPos: Vector): CollisionObject[] {
         const result: CollisionObject[] = [];
 
-        const startX = pos.x - Grid.size * 2;
-        const endX = pos.x + width + Grid.size * 2;
-        const startY = pos.y - Grid.size * 2;
-        const endY = pos.y + height + Grid.size * 2;
+        const startX = Math.min(pos.x, nextPos.x);
+        const endX = Math.max(pos.x + width, nextPos.x + width);
+        const startY = Math.min(pos.y, nextPos.y);
+        const endY = Math.max(pos.y + height, nextPos.y + height);
 
-        for (let x = startX; x < endX; x += Grid.size) {
-            for (let y = startY; y < endY; y += Grid.size) {
+        const padding = Grid.size;
+
+        for (let x = startX - padding; x <= endX + padding; x += Grid.size) {
+            for (let y = startY - padding; y <= endY + padding; y += Grid.size) {
                 const gridPos = Grid.getGridPos(new Vector(x, y));
 
                 this.processTile(gridPos, result);

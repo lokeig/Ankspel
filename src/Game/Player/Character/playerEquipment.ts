@@ -1,6 +1,6 @@
 import { EquipmentSlot, Side, ThrowType, Utility, Vector } from "@common";
 import { IItem, ItemManager, Ownership } from "@item";
-import { Connection, GameMessage } from "@server";
+import { Connection, GameMessage, GameMessageMap } from "@server";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
@@ -32,13 +32,6 @@ class PlayerEquipment {
         item.setOwnership(Ownership.None);
 
         this.equipment.set(slot, undefined);
-
-        Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-            itemID: ItemManager.getItemID(item)!,
-            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
-            direction: item.getBody().direction,
-            throwType
-        });
     }
 
 

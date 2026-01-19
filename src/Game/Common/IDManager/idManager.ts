@@ -8,6 +8,10 @@ class IDManager<T> {
         this.baseOffset = offset;
     }
 
+    public getNextID(): number {
+        return IDManager.baseOffset + this.currentIndex;
+    }
+
     public reset(): void {
         this.currentIndex = 0;
         this.idToObject.clear();

@@ -1,5 +1,5 @@
-import { Vector, Controls, BodyParts, ItemInteraction, Utility, EquipmentSlot, ProjectileEffect } from "@common";
-import { DynamicObject, GameObject } from "@core";
+import { Vector, Controls, ItemInteraction, Utility, EquipmentSlot, ProjectileEffect } from "@common";
+import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemManager } from "./playerItemManager";
 import { PlayerJump } from "./playerJump";
@@ -7,7 +7,9 @@ import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
-import { IProjectile, ProjectileManager } from "@projectile";
+import { ProjectileManager } from "@projectile";
+import { IItem } from "@item";
+import { Connection, GameMessage } from "@server";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -17,7 +19,7 @@ class PlayerCharacter {
     public body: DynamicObject;
     public animator: PlayerAnimation;
     public armFront = new PlayerArm();
-    public dead: boolean = false;
+    private dead: boolean = false;
 
     public controls!: PlayerControls;
     public jump!: PlayerJump;
@@ -25,10 +27,13 @@ class PlayerCharacter {
     public equipment!: PlayerEquipment;
     public itemManager!: PlayerItemManager;
 
-    constructor(pos: Vector) {
+    private id: number;
+
+    constructor(pos: Vector, id: number) {
         this.body = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
         this.animator = new PlayerAnimation();
         this.equipment = new PlayerEquipment();
+        this.id = id;
     }
 
     public isLocal(): boolean {
@@ -39,7 +44,7 @@ class PlayerCharacter {
         this.controls = new PlayerControls(controls);
         this.movement = new PlayerMove(this.body, this.controls);
         this.jump = new PlayerJump(this.body, this.controls);
-        this.itemManager = new PlayerItemManager(this.body, this.controls, this.equipment);
+        this.itemManager = new PlayerItemManager(this.body, this.controls, this.equipment, this.id);
     }
 
     private setArmPos(): void {
@@ -60,7 +65,7 @@ class PlayerCharacter {
     }
 
     private updateControllers(deltaTime: number): void {
-        if (this.body.collisions.up) {
+        if (this.body.collidingUp) {
             this.jump.isJumping = false;
         }
         this.jump.update(deltaTime);
@@ -70,6 +75,7 @@ class PlayerCharacter {
 
     public nonLocalUpdate(deltaTime: number): void {
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.handleProjectileCollisions();
     }
 
     public update(deltaTime: number): void {
@@ -77,6 +83,7 @@ class PlayerCharacter {
         this.updateControllers(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.handleProjectileCollisions();
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {
@@ -90,6 +97,17 @@ class PlayerCharacter {
         }
     }
 
+    public die(local: boolean = true) {
+        this.dead = true;
+        if (local) {
+            Connection.get().sendGameMessage(GameMessage.PlayerDead, { id: this.id });
+        }
+    }
+
+    public isDead() {
+        return this.dead;
+    }
+
     public idleCollision(): boolean {
         const prevHeight = this.body.height;
         const prevY = this.body.pos.y;
@@ -101,53 +119,38 @@ class PlayerCharacter {
 
         this.body.pos.y = prevY;
         this.body.height = prevHeight;
-
         return returnValue !== undefined;
     }
 
-    public handleProjectileCollisions(head: GameObject, body: GameObject, legs: GameObject): void {
+    private handleProjectileCollisions(): void {
         ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
             const seed = Utility.Random.getRandomSeed();
-            if (head.collision(projectile.getBody())) {
-                if (!projectile.isLocal()) {
-                    projectile.setToDelete();
-                    return;
+            let equipment: IItem | null = null; let slot: EquipmentSlot | null = null;
+
+            this.equipment.getAllEquippedItems().forEach((item, equipSlot) => {
+                if (item && projectile.willGoThrough(item.getBody()).hit) {
+                    equipment = item;
+                    slot = equipSlot;
                 }
-                const effect = projectile.onPlayerHit();
-                this.handleEffect(effect, seed, BodyParts.Head);
-            } else if (body.collision(projectile.getBody())) {
-                if (!projectile.isLocal()) {
-                    projectile.setToDelete();
-                    return;
+            })
+            if (equipment || projectile.willGoThrough(this.body).hit) {
+                const effect = projectile.onPlayerHit(seed);
+                if (projectile.isLocal()) {
+                    Connection.get().sendGameMessage(GameMessage.PlayerHit, { id: this.id, effect, seed, slot });
+                    this.handleEffect(effect, equipment, seed, true);
                 }
-                const effect = projectile.onPlayerHit();
-                this.handleEffect(effect, seed, BodyParts.Center);
-            } else if (legs.collision(projectile.getBody())) {
-                if (!projectile.isLocal()) {
-                    projectile.setToDelete();
-                    return;
-                }
-                const effect = projectile.onPlayerHit();
-                this.handleEffect(effect, seed, BodyParts.Legs);
             }
         });
     }
 
-    public handleEffect(effect: ProjectileEffect, seed: number, bodyPart: BodyParts): void {
+    public handleEffect(effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
         switch (effect) {
             case ProjectileEffect.Damage: {
-                const partToSlot: Partial<Record<BodyParts, EquipmentSlot>> = {
-                    [BodyParts.Head]: EquipmentSlot.Head,
-                    [BodyParts.Center]: EquipmentSlot.Body,
-                };
-                const item = partToSlot[bodyPart] ? this.equipment.getItem(partToSlot[bodyPart]) : null;
-                console.log(item);
-                if (item) {
-                    item.interactions.get(ItemInteraction.Hit)!(seed, this.isLocal());
+                if (equipment && !equipment.shouldBeDeleted() && equipment.interactions.get(ItemInteraction.Hit)) {
+                    equipment.interactions.get(ItemInteraction.Hit)!(seed, local);
                 } else {
-                    this.dead = true;
+                    this.die();
                 }
-
                 break;
             }
         }

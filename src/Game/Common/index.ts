@@ -24,7 +24,6 @@ export { TileType } from "./Types/tileType";
 export { PlayerState } from "./Types/playerState";
 export { PlayerAnim } from "./Types/playerAnim";
 export { ItemInteraction } from "./Types/itemInteraction";
-export { BodyParts } from "./Types/bodyParts";
 export { EquipmentSlot } from "./Types/equipmentSlot";
 export { ProjectileEffect } from "./Types/projectileEffect";
 
@@ -39,3 +38,4 @@ export { InputMode } from "./Other/inputMode";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";
 export { IDManager } from "./IDManager/idManager";
+export { DeltaTime } from "./Other/deltaTime";

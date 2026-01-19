@@ -34,7 +34,7 @@ abstract class Item implements IItem {
 
         this.updateAngle(deltaTime);
         this.body.update(deltaTime);
-        if (this.body.collisions.side) {
+        if (this.body.collidingSide) {
             this.rotateSpeed *= 0.5;
         }
     }

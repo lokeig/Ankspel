@@ -8,9 +8,9 @@ class Player {
     public character!: PlayerCharacter;
     private stateMachine: StateMachine<PlayerState>;
 
-    constructor() {
+    constructor(id: number) {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
-        this.character = new PlayerCharacter(new Vector());
+        this.character = new PlayerCharacter(new Vector(), id);
         this.setupStateMachine();
     }
 
@@ -28,15 +28,24 @@ class Player {
         this.stateMachine.enterState();
     }
 
+    public setRagdoll(head: Vector, body: Vector, legs: Vector) {
+        const ragdoll: PlayerRagdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
+        ragdoll.setBody(head, body, legs);
+    }
+
+    public getRagdoll(): { head: Vector, body: Vector, legs: Vector } {
+        const ragdoll: PlayerRagdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
+        return ragdoll.getBodies();
+    }
 
     public setState(state: PlayerState): void {
-        if (state !== this.stateMachine.getState()) {
+        if (state !== this.stateMachine.getCurrentState()) {
             this.stateMachine.forceState(state);
         }
     }
 
-    public getState(): PlayerState {
-        return this.stateMachine.getState();
+    public getCurrentState(): PlayerState {
+        return this.stateMachine.getCurrentState();
     }
 
     public update(deltaTime: number): void {
@@ -45,15 +54,15 @@ class Player {
     };
 
     public draw(): void {
-        TileManager.getNearbyTiles(this.character.body.pos, this.character.body.width, this.character.body.height).forEach(tile => {
+        this.character.body.getNearbyTiles().forEach(tile => {
             Render.get().drawSquare({
-                x: tile.gameObject.pos.x,
-                y: tile.gameObject.pos.y,
-                width: tile.gameObject.width,
-                height: tile.gameObject.height
+                x: tile.pos.x,
+                y: tile.pos.y,
+                width: tile.width,
+                height: tile.height
             }, 0, "green");
         });
-        this.stateMachine.getIState().draw();
+        this.stateMachine.draw();
     }
 }
 

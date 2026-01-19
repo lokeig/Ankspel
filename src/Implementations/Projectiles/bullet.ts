@@ -1,12 +1,12 @@
 import { Countdown, ProjectileEffect, Utility, Vector } from "@common";
-import { DynamicObject } from "@core";
+import { DynamicObject, GameObject } from "@core";
 import { Render } from "@render";
 import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 
 abstract class Bullet implements IProjectile {
     private angle!: number;
-    private body!: DynamicObject;
+    protected body!: DynamicObject;
     private lifespan!: Countdown;
     public trail!: BulletTrail;
     private delete: boolean = false;
@@ -27,7 +27,6 @@ abstract class Bullet implements IProjectile {
         const trailPos = pos.clone().add(size / 2);
         this.trail = new BulletTrail(trailPos, velocity.clone(), trailLength, size);
         this.trail.setTarget(trailPos);
-
     }
 
     public getTrail(): BulletTrail {
@@ -37,18 +36,19 @@ abstract class Bullet implements IProjectile {
     public update(deltaTime: number): void {
         this.body.update(deltaTime);
         if (this.body.collided()) {
-            this.delete = true;
+            this.body.velocity = new Vector()
+            // this.delete = true;
         }
         this.lifespan.update(deltaTime);
 
     }
 
-    public getBody(): DynamicObject {
-        return this.body;
+    public willGoThrough(block: GameObject): { hit: boolean; pos: Vector; normal: Vector; } {
+        return { hit: false, pos: new Vector, normal: new Vector };
     }
 
-    public onCollision(): void {
-        return;
+    public getPos(): Vector {
+        return this.body.getCenter();
     }
 
     public setToDelete(): void {

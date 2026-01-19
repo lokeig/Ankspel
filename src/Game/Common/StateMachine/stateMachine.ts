@@ -9,15 +9,19 @@ class StateMachine<T, S extends IState<T> = IState<T>>  {
         this.currentState = initialState;
     }
 
-    public getIState(): S {
-        return this.states.get(this.currentState)!
+    private getIState(): S {
+        return this.states.get(this.currentState)!;
+    }
+
+    public getInstance(state: T): S {
+        return this.states.get(state)!;
     }
 
     public addState(key: T, value: S) {
         this.states.set(key, value);
     }
 
-    public getState(): T {
+    public getCurrentState(): T {
         return this.currentState;
     }
 
@@ -27,12 +31,13 @@ class StateMachine<T, S extends IState<T> = IState<T>>  {
 
     private changeState(newState: T): void {
         this.getIState().stateExited();
+        const prevstate = this.currentState;
         this.currentState = newState;
-        this.getIState().stateEntered();
+        this.getIState().stateEntered(prevstate);
     }
 
-    public enterState(): void {
-        this.getIState().stateEntered();
+    public enterState(from?: T): void {
+        this.getIState().stateEntered(from);
     }
 
     public update(deltaTime: number, noStateChange: boolean = false): void {

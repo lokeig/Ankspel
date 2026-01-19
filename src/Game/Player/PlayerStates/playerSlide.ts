@@ -1,6 +1,5 @@
-import { Countdown, Vector, PlayerState, InputMode, PlayerAnim, ThrowType, IState, Side, EquipmentSlot } from "@common";
+import { Countdown, Vector, PlayerState, InputMode, PlayerAnim, ThrowType, IState, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { GameObject } from "@core";
 
 class PlayerSlide implements IState<PlayerState> {
 
@@ -50,40 +49,7 @@ class PlayerSlide implements IState<PlayerState> {
         } else {
             this.setEquipmentPositionsSlide();
         }
-        this.handleProjectiles();
     }
-
-    private handleProjectiles(): void {
-        if (this.crouch) {
-            const height = PlayerSlide.SlideHeight / 3;
-            const center = this.playerCharacter.body.pos.clone();
-
-            const createSegment = (i: number): GameObject => {
-                return new GameObject(
-                    new Vector(
-                        center.x,
-                        center.y + i * height
-                    ),
-                    PlayerCharacter.standardWidth,
-                    height
-                );
-            };
-            this.playerCharacter.handleProjectileCollisions(createSegment(-1), createSegment(0), createSegment(1));
-        } else {
-            const width = 40;
-            const createbody = (i: number): GameObject => {
-                return new GameObject(
-                    new Vector(
-                        this.playerCharacter.body.pos.x + i * width / 3 * this.playerCharacter.body.getDirectionMultiplier(),
-                        this.playerCharacter.body.pos.y),
-                    width / 3,
-                    PlayerSlide.SlideHeight
-                );
-            };
-            this.playerCharacter.handleProjectileCollisions(createbody(-1), createbody(1), createbody(1));
-        }
-    }
-
 
     private setEquipmentPositionsSlide(): void {
         const center = this.playerCharacter.body.getCenter();
@@ -135,13 +101,17 @@ class PlayerSlide implements IState<PlayerState> {
         this.platformIgnoreTime.update(deltaTime);
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    private nonLocalUpdate(deltaTime: number): void {
         this.playerCharacter.nonLocalUpdate(deltaTime);
-        this.handleProjectiles();
+        if (this.crouch) {
+            this.setEquipmentPositionsCrouch();
+        } else {
+            this.setEquipmentPositionsSlide();
+        }
     }
 
     public stateChange(): PlayerState {
-        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.dead) {
+        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.isDead()) {
             return PlayerState.Ragdoll;
         }
         if (this.playerCharacter.controls.down() || this.playerCharacter.idleCollision()) {
@@ -157,23 +127,6 @@ class PlayerSlide implements IState<PlayerState> {
             return PlayerState.Slide;
         }
         return PlayerState.Standard;
-    }
-
-    public getHeadCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        return body.collision(new GameObject(playerBody.pos, playerBody.width / 3, playerBody.height));
-    }
-
-    public getBodyCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = playerBody.pos.clone().add(new Vector(playerBody.width / 3, 0));
-        return body.collision(new GameObject(posOffset, playerBody.width / 3, playerBody.height));
-    }
-
-    public getLegsCollision(body: GameObject): boolean {
-        const playerBody = this.playerCharacter.body;
-        const posOffset = playerBody.pos.clone().add(new Vector(2 * playerBody.width / 3, 0));
-        return body.collision(new GameObject(posOffset, playerBody.width / 3, playerBody.height));
     }
 
     public stateExited(): void {

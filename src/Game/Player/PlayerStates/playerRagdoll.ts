@@ -1,5 +1,5 @@
 import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, ItemInteraction, IState, EquipmentSlot } from "@common";
-import { DynamicObject, GameObject } from "@core";
+import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { IItem, Ownership, useFunction } from "@item";
 
@@ -56,7 +56,17 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
     }
 
-    public updateStandardBody(): void {
+    public setBody(head: Vector, body: Vector, legs: Vector): void {
+        this.head.pos = head;
+        this.body.pos = body;
+        this.legs.pos = legs;
+    }
+
+    public getBodies(): { head: Vector, body: Vector, legs: Vector } {
+        return { head: this.head.pos, body: this.body.pos, legs: this.legs.pos };
+    }
+
+    private updateStandardBody(): void {
         const pos = new Vector(
             this.legs.pos.x,
             this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
@@ -96,25 +106,35 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         bodyPart2.velocity = body2Vel.subtract(impulse);
     }
 
-    public stateEntered(): void {
-        this.playerCharacter.equipment.throw(EquipmentSlot.Hand ,ThrowType.Drop);
-        this.playerCharacter.equipment.throw(EquipmentSlot.Head ,ThrowType.Drop);
+    public stateEntered(from: PlayerState): void {
+        this.playerCharacter.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
+        this.playerCharacter.equipment.throw(EquipmentSlot.Head, ThrowType.Drop);
 
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
         this.legs.direction = this.playerCharacter.body.direction;
 
         const pos = this.playerCharacter.body.pos;
-        this.head.pos = pos.clone();
-        this.body.pos = pos.clone().add(new Vector(0, this.height));
-        this.legs.pos = pos.clone().add(new Vector(0, this.height * 2));
+        if (from === PlayerState.Slide) {
+            const offset = (index: number): Vector => {
+                return new Vector(this.playerCharacter.body.getCenter().x + (index * this.width / 3), pos.y + this.height)
+            }
+            const mult = this.playerCharacter.body.getDirectionMultiplier();
+            this.head.pos = offset(-1 * mult);
+            this.body.pos = offset(0 * mult);
+            this.legs.pos = offset(1 * mult);
+        } else {
+            this.head.pos = pos.clone();
+            this.body.pos = pos.clone().add(new Vector(0, this.height));
+            this.legs.pos = pos.clone().add(new Vector(0, this.height * 2));
+        }
 
         const velocity = this.playerCharacter.body.velocity;
         this.head.velocity = velocity.clone();
         this.body.velocity = velocity.clone();
         this.legs.velocity = velocity.clone();
 
-        if (this.playerCharacter.jump.isJumping) {
+        if (this.playerCharacter.isLocal() && this.playerCharacter.jump.isJumping) {
             const jumpLeft = this.playerCharacter.jump.getJumpRemaining();
             const jumpCharge = this.playerCharacter.jump.getJumpForce() / 5;
             this.body.velocity.y -= jumpLeft * jumpCharge;
@@ -126,6 +146,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
+        if (!this.playerCharacter.isLocal()) {
+            this.nonLocalUpdate(deltaTime);
+            return;
+        }
         this.coyoteTime.update(deltaTime);
         if (this.isGrounded()) {
             this.coyoteTime.reset();
@@ -145,7 +169,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
             this.head.velocity.x = Utility.Random.getRandomNumber(-3, 3);
         }
-        if (!this.playerCharacter.dead) {
+        if (!this.playerCharacter.isDead()) {
             this.handleInputs(deltaTime);
         }
         const head = true;
@@ -153,11 +177,14 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.setAngle(!head);
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    private nonLocalUpdate(deltaTime: number): void {
+        const head = true;
+        this.setAngle(head)
+        this.setAngle(!head);
     }
 
     public stateChange(): PlayerState {
-        if (this.playerCharacter.dead) {
+        if (this.playerCharacter.isDead()) {
             return PlayerState.Ragdoll;
         }
         this.updateStandardBody();
@@ -174,18 +201,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         const exitVerticalSpeed = -250;
         this.playerCharacter.body.pos.y -= jumpHeight;
         this.playerCharacter.body.velocity = new Vector(this.body.velocity.x, exitVerticalSpeed);
-    }
-
-    public getHeadCollision(body: GameObject): boolean {
-        return body.collision(this.head);
-    }
-
-    public getBodyCollision(body: GameObject): boolean {
-        return body.collision(this.body);
-    }
-
-    public getLegsCollision(body: GameObject): boolean {
-        return body.collision(this.legs);
     }
 
     private getDrawPos(bodyPart: DynamicObject): Vector {
