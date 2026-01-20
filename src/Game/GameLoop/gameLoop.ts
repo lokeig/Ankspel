@@ -29,6 +29,7 @@ class GameLoop {
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         Render.get().clear();
+
         this.stateMachine.update(deltaTime);
         this.stateMachine.draw();
         Input.update();

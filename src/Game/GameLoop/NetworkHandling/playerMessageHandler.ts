@@ -1,7 +1,7 @@
 import { EquipmentSlot, PlayerState, Utility } from "@common";
 import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
-import { Connection, GameMessage, GameMessageMap } from "@server";
+import { Connection, GameMessage } from "@server";
 
 class PlayerMessageHandler {
     public static init() {

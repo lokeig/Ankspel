@@ -3,8 +3,8 @@ import { Bullet } from "./bullet";
 
 class GrenadeBullet extends Bullet{
     constructor(pos: Vector, angle: number) {
-        const speed = 22;
-        const lifespan = 15;
+        const speed = 2000;
+        const lifespan = 0.08;
         super(pos, angle, speed, lifespan);
     }
 }

@@ -1,6 +1,5 @@
 import { EquipmentSlot, Side, ThrowType, Utility, Vector } from "@common";
-import { IItem, ItemManager, Ownership } from "@item";
-import { Connection, GameMessage, GameMessageMap } from "@server";
+import { IItem, Ownership } from "@item";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
@@ -53,6 +52,17 @@ class PlayerEquipment {
         return this.equipment;
     }
 
+    public drawItems(): void {
+        const draw = (slot: EquipmentSlot): void => {
+            if (this.hasItem(slot)) {
+                this.getItem(slot).draw();
+            }
+        }
+        draw(EquipmentSlot.Head);
+        draw(EquipmentSlot.Body);
+        draw(EquipmentSlot.Boots);
+        draw(EquipmentSlot.Hand);
+    }
 
     public itemNoRotationCollision(center: Vector): boolean {
         if (!this.hasItem(EquipmentSlot.Hand)) {

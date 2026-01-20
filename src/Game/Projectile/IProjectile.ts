@@ -1,4 +1,4 @@
-import { DynamicObject, GameObject } from "@core";
+import { GameObject } from "@core";
 import { ITrail } from "./ITrail";
 import { ProjectileEffect, Vector } from "@common";
 
@@ -6,8 +6,9 @@ interface IProjectile {
     update(deltaTime: number): void;
     onPlayerHit(seed: number): ProjectileEffect, 
 
-    willGoThrough(block: GameObject): { hit: boolean, pos: Vector, normal: Vector };
+    willGoThrough(block: GameObject, deltaTime: number): { collision: boolean, pos: Vector };
     getPos(): Vector;
+    setPos(pos: Vector): void;
 
     getTrail(): ITrail;
 

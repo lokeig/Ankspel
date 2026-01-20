@@ -1,4 +1,4 @@
-const images: Record<string, string> = {
+const images = {
     // Player
     playerImage: 'player',
     playerHands: 'playerHands',

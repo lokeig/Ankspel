@@ -75,7 +75,7 @@ class PlayerCharacter {
 
     public nonLocalUpdate(deltaTime: number): void {
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions();
+        this.handleProjectileCollisions(deltaTime);
     }
 
     public update(deltaTime: number): void {
@@ -83,7 +83,7 @@ class PlayerCharacter {
         this.updateControllers(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions();
+        this.handleProjectileCollisions(deltaTime);
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {
@@ -122,18 +122,18 @@ class PlayerCharacter {
         return returnValue !== undefined;
     }
 
-    private handleProjectileCollisions(): void {
+    private handleProjectileCollisions(deltaTime: number): void {
         ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
             const seed = Utility.Random.getRandomSeed();
             let equipment: IItem | null = null; let slot: EquipmentSlot | null = null;
 
             this.equipment.getAllEquippedItems().forEach((item, equipSlot) => {
-                if (item && projectile.willGoThrough(item.getBody()).hit) {
+                if (item && projectile.willGoThrough(item.getBody(), deltaTime).collision) {
                     equipment = item;
                     slot = equipSlot;
                 }
             })
-            if (equipment || projectile.willGoThrough(this.body).hit) {
+            if (equipment || projectile.willGoThrough(this.body, deltaTime).collision) {
                 const effect = projectile.onPlayerHit(seed);
                 if (projectile.isLocal()) {
                     Connection.get().sendGameMessage(GameMessage.PlayerHit, { id: this.id, effect, seed, slot });
@@ -164,11 +164,7 @@ class PlayerCharacter {
 
     public draw(): void {
         this.animator.drawBody(this.getDrawPos(), PlayerCharacter.drawSize, this.body.isFlip());
-        this.equipment.getAllEquippedItems().forEach(item => {
-            if (item) {
-                item.draw();
-            }
-        });
+        this.equipment.drawItems();
         this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.body.isFlip());
     };
 }

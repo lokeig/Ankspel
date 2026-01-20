@@ -23,7 +23,7 @@ class ProjectileManager {
 
     private static updateMapPositions(deltaTime: number) {
         this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
-            projectile.getTrail().setTarget(projectile.getBody().getCenter());
+            projectile.getTrail().setTarget(projectile.getPos());
             projectile.update(deltaTime);
             if (projectile.shouldBeDeleted()) {
                 projectileSet.delete(projectile);
@@ -31,7 +31,7 @@ class ProjectileManager {
                 return;
             }
         }));
-        Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getBody().pos);
+        Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getPos());
     }
 
     public static registerProjectile(type: string, constructor: ProjectileConstructor): void {
@@ -73,7 +73,7 @@ class ProjectileManager {
     }
 
     private static addProjectile(newProjectile: IProjectile) {
-        const gridPos = Grid.getGridPos(newProjectile.getBody().pos);
+        const gridPos = Grid.getGridPos(newProjectile.getPos());
         const projectileSet = this.getProjectiles(gridPos);
         if (!projectileSet) {
             this.projectiles.set(Grid.key(gridPos), new Set());

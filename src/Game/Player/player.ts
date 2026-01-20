@@ -1,7 +1,6 @@
 import { Controls, StateMachine, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
-import { TileManager } from "@game/StaticObjects/Tiles";
 import { Render } from "@render";
 
 class Player {
@@ -49,6 +48,9 @@ class Player {
     }
 
     public update(deltaTime: number): void {
+        if (this.character.isDead() && this.stateMachine.getCurrentState() !== PlayerState.Ragdoll) {
+            this.stateMachine.forceState(PlayerState.Ragdoll);
+        }
         const noStateChange = this.character.isLocal() ? false : true;
         this.stateMachine.update(deltaTime, noStateChange);
     };

@@ -1,5 +1,6 @@
 import { NetworkVector } from "@server";
 import { Vector } from "../Types/vector";
+import { GameObject } from "@core";
 
 class VectorUtility {
 
@@ -15,7 +16,7 @@ class VectorUtility {
         }
         return result;
     }
-    
+
     public randomOffsetVectorArray(array: Array<Vector>, maxOffset: number): void {
         for (const value of array.values()) {
             value.x += (Math.random() * maxOffset) * (Math.random() < 0.5 ? -1 : 1);
