@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Game</title>
+    <style>
+        body {
+            text-align: center;
+            background: #222;
+            color: white;
+        }
+
+        canvas {
+            background: black;
+            display: block;
+        }
+    </style>
+
+  <script type="module" crossorigin src="/assets/index-D9JOyExo.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C5OC17OO.css">
+</head>
+
+<body>
+    <div style="position: relative; display: inline-block;">
+
+        <canvas id="gameCanvas" width="1200" height="800"></canvas>
+
+        <div id="gameServerList">
+
+            <div class="serverlist-header">
+                <h1>Servers</h1>
+            </div>
+
+            <div class="lobby-desc">
+                <div class="lobbylist-name lobbylist-column">Lobby name:</div>
+                <div class="lobbylist-host lobbylist-column">Host:</div>
+                <div class="lobbylist-players lobbylist-column">Player count:</div>
+                <div class="lobbylist-status lobbylist-column">Status:</div>
+            </div>
+
+            <div id="lobbylist"></div>
+
+            <div class="serverlist-footer">
+                <div class="footer-left">
+                    <button id="hostbutton">Host</button>
+                    <button id="startbutton">Start</button>
+                </div>
+                <div class="footer-right">
+                    <button id="leavebutton">Leave</button>
+                    <button id="joinbutton">Join</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="hostMenu" class="modal hidden">
+            <div class="modal-content">
+                <h2>Create Lobby</h2>
+
+                <div class="input-row">
+                    <label for="lobbyNameInput">Lobby Name: </label>
+                    <input type="text" id="lobbyNameInput" placeholder="Enter lobby name">
+                </div>
+
+                <div class="input-row">
+                    <label for="maxPlayersInput">Max Players: </label>
+                    <input type="number" id="maxPlayersInput" value="4" min="2" max="16">
+                </div>
+
+                <div class="modal-buttons">
+                    <button id="cancelHostbutton">Cancel</button>
+                    <button id="createLobbybutton" disabled>Create</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

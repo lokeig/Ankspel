@@ -6,7 +6,7 @@ import { MessageHandler } from "./messageHandler";
 import { ServerInfo } from "./serverInfo";
 import { ClientMessage } from "../../Shared";
 
-const PORT = 3000;
+const PORT = 80;
 const server = new WebSocketServer({ port: PORT });
 
 const users = new Map<string, WebSocket>();
