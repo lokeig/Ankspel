@@ -28,47 +28,32 @@ class TileManager {
         }
     }
 
-    public static getNearbyTiles(pos: Vector, width: number, height: number, nextPos: Vector): CollisionObject[] {
+    public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): CollisionObject[] {
         const result: CollisionObject[] = [];
 
-        const startX = Math.min(pos.x, nextPos.x);
-        const endX = Math.max(pos.x + width, nextPos.x + width);
-        const startY = Math.min(pos.y, nextPos.y);
-        const endY = Math.max(pos.y + height, nextPos.y + height);
-
-        const padding = Grid.size;
-
-        for (let x = startX - padding; x <= endX + padding; x += Grid.size) {
-            for (let y = startY - padding; y <= endY + padding; y += Grid.size) {
-                const gridPos = Grid.getGridPos(new Vector(x, y));
-
-                this.processTile(gridPos, result);
+        const accumulate = (gridPos: Vector) => {
+            const tile = this.getTile(gridPos);
+            if (!tile) {
+                return;
             }
-        }
+            const tileObj = tile.body;
+
+            result.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
+
+            if (tile.body.getLip(Side.Left)) {
+                const lipLeft = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
+                lipLeft.pos.x -= tileObj.getLipWidth();
+                result.push({ gameObject: lipLeft, platform: true });
+            }
+            if (tile.body.getLip(Side.Right)) {
+                const lipRight = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
+                lipRight.pos.x += tileObj.width;
+                result.push({ gameObject: lipRight, platform: true });
+            }
+        };
+
+        Grid.forNearby(pos, nextPos, width, height, accumulate);
         return result;
-    }
-
-    private static processTile(gridPos: Vector, accumulatedCollidable: Array<CollisionObject>): void {
-
-        const tile = this.getTile(gridPos);
-        if (!tile) {
-            return;
-        }
-        const tileObj = tile.body;
-
-        accumulatedCollidable.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
-
-        if (tile.body.getLip(Side.Left)) {
-            const lipLeft = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
-            lipLeft.pos.x -= tileObj.getLipWidth();
-            accumulatedCollidable.push({ gameObject: lipLeft, platform: true });
-        }
-
-        if (tile.body.getLip(Side.Right)) {
-            const lipRight = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
-            lipRight.pos.x += tileObj.width;
-            accumulatedCollidable.push({ gameObject: lipRight, platform: true });
-        }
     }
 
     private static tilesMatch(a: ITile, b: ITile): boolean {

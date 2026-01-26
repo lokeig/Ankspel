@@ -6,8 +6,8 @@ class ProjectileMessageHandler {
     static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.SpawnProjectile, ({ type, id, location, angle }) => {
-            ProjectileManager.spawn(type, Utility.Vector.convertNetwork(location), angle, id);
+        gameEvent.subscribe(GameMessage.SpawnProjectile, ({ type, seed, location, angle }) => {
+            ProjectileManager.spawn(type, Utility.Vector.convertNetwork(location), angle, seed);
         });
     }
 }

@@ -31,7 +31,7 @@ class Glock extends Item {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmInfo();
-        this.firearmInfo.ammo = 9;
+        this.firearmInfo.ammo = 1119;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
         this.firearmInfo.knockback = new Vector(450, 120);
         this.firearmInfo.pipeOffset = new Vector(20, -6);

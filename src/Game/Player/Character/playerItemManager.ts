@@ -21,8 +21,11 @@ class PlayerItemManager {
         this.id = id;
     }
 
+    public setNearbyItems(items: IItem[]): void {
+        this.nearbyItems = items;
+    }
+
     public handle() {
-        this.nearbyItems = ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height);
         if (this.controls.pickup(InputMode.Press)) {
             this.handlePickupOrThrow();
         }

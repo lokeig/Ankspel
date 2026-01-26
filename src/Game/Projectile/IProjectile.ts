@@ -6,7 +6,7 @@ interface IProjectile {
     update(deltaTime: number): void;
     onPlayerHit(seed: number): ProjectileEffect, 
 
-    willGoThrough(block: GameObject, deltaTime: number): { collision: boolean, pos: Vector };
+    wentThrough(block: GameObject): { collision: boolean, pos: Vector };
     getPos(): Vector;
     setPos(pos: Vector): void;
 
@@ -20,6 +20,6 @@ interface IProjectile {
     draw(): void;
 }
 
-type ProjectileConstructor = new (pos: Vector, angle: number) => IProjectile;
+type ProjectileConstructor = new (pos: Vector, angle: number, seed?: number) => IProjectile;
 
 export type { IProjectile, ProjectileConstructor };

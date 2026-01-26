@@ -1,11 +1,12 @@
-import { Vector } from "@common";
+import { SeededRNG, Vector } from "@common";
 import { Bullet } from "./bullet";
 
-class ShotgunBullet extends Bullet{
-    constructor(pos: Vector, angle: number) {
-        const speed = 2000;
-        const lifespan = 0.07;
-        super(pos, angle, speed, lifespan);
+class ShotgunBullet extends Bullet {
+    constructor(pos: Vector, angle: number, seed: number) {
+        const speed = 2600;
+        const rng = new SeededRNG(seed);
+        const distance = rng.getInRange(7, 9);
+        super(pos, angle, speed, distance);
     }
 }
 

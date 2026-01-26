@@ -1,30 +1,40 @@
-import { Countdown, ProjectileEffect, Utility, Vector } from "@common";
-import { GameObject } from "@core";
+import { Countdown, Grid, ProjectileEffect, Utility, Vector } from "@common";
+import { CollisionObject, GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
+import { ParticleManager } from "@game/Particles";
+import { ExplosionVFX } from "@impl/Particles";
 
 abstract class Bullet implements IProjectile {
+    private pos: Vector;
+
     private angle: number;
     private lifespan!: Countdown;
     public trail!: BulletTrail;
+
     private delete: boolean = false;
+
     private local: boolean = false;
-    private pos: Vector;
     private velocity: Vector;
-    private delay: boolean = true;
-    constructor(pos: Vector, angle: number, speed: number, lifespan: number) {
+
+    private prevPos: Vector;
+
+    private minDistance: number = 0;
+
+    constructor(pos: Vector, angle: number, speed: number, blockRange: number) {
+        const lifespan = blockRange * Grid.size / speed;
         const velocity = Utility.Angle.rotateForce(new Vector(speed, 0), angle);
         const size = 2;
         this.lifespan = new Countdown(lifespan);
 
-        this.pos = pos;
+        this.pos = pos.clone();
+        this.prevPos = pos.clone();
         this.velocity = velocity;
         this.angle = Math.atan2(velocity.y, velocity.x);
 
-        const trailLength = 100;
         const trailPos = pos.clone().add(size / 2);
-        this.trail = new BulletTrail(trailPos, velocity.clone(), trailLength, size);
+        this.trail = new BulletTrail(trailPos, velocity.clone(), blockRange * Grid.size, size);
         this.trail.setTarget(trailPos);
     }
 
@@ -33,31 +43,55 @@ abstract class Bullet implements IProjectile {
     }
 
     public update(deltaTime: number): void {
-        if (this.delay) {
-            this.delay = false;
-            return;
-        }
-        const nextPos = this.pos.clone().add(this.velocity.clone().multiply(deltaTime));
-        const nearbyTiles = TileManager.getNearbyTiles(this.pos, 1, 1, nextPos);
-        nearbyTiles.forEach(tile => {
-            if (tile.platform && tile.gameObject.pos.y > this.pos.y) {
-                return;
-            }
-            const collisionStatus = this.willGoThrough(tile.gameObject, deltaTime);
-            if (collisionStatus.collision) {
-                this.setToDelete();
-            }
-        });
-        this.pos = nextPos;
+        this.prevPos = this.pos.clone();
+        this.pos.add(this.velocity.clone().multiply(deltaTime));
 
         this.lifespan.update(deltaTime);
+
+        const nearbyTiles = TileManager.getNearby(this.prevPos, 1, 1);
+        const colliding = this.getCollidingPositions(nearbyTiles);
+
+        let closest: Vector | undefined;
+        let minDistance = Infinity;
+
+        colliding.forEach(pos => {
+            const distance = pos.distanceToSquared(this.prevPos);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = pos;
+            }
+        });
+        this.minDistance = minDistance;
+        if (closest) {
+            this.pos = closest.clone();
+            this.setToDelete();
+        }
     }
 
-    public willGoThrough(block: GameObject, deltaTime: number): { collision: boolean; pos: Vector } {
-        const start = this.pos;
-        const end = start.clone().add(this.velocity.clone().multiply(deltaTime));
+    private getCollidingPositions(tiles: CollisionObject[]): Vector[] {
+        const result: Vector[] = [];
+        tiles.forEach(tile => {
+            if (tile.platform) {
+                return;
+            }
+            const status = this.collision(tile.gameObject);
+            if (status.collision) {
+                result.push(status.pos);
+            }
+        });
+        return result;
+    }
 
+    private collision(block: GameObject): { collision: boolean; pos: Vector } {
+        const start = this.prevPos;
+        const end = this.pos;
         return block.lineCollision(start, end);
+    }
+
+    public wentThrough(block: GameObject): { collision: boolean; pos: Vector } {
+        const status = this.collision(block);
+        let closer = status.pos.distanceToSquared(this.prevPos) < this.minDistance;
+        return { collision: status.collision && closer, pos: status.pos };
     }
 
     public getPos(): Vector {

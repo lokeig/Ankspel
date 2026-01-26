@@ -1,6 +1,5 @@
 import { NetworkVector } from "@server";
 import { Vector } from "../Types/vector";
-import { GameObject } from "@core";
 
 class VectorUtility {
 
@@ -26,6 +25,10 @@ class VectorUtility {
 
     public convertNetwork(vector: NetworkVector): Vector {
         return new Vector(vector.x, vector.y);
+    }
+
+    public convertToNetwork(vector: Vector): NetworkVector  {
+        return { x: vector.x, y: vector.y };
     }
 }
 

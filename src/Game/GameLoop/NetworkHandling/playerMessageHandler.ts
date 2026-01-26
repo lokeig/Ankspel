@@ -16,12 +16,13 @@ class PlayerMessageHandler {
             player.character.setPos(Utility.Vector.convertNetwork(location));
         });
 
-        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, state, anim, side, armAngle }) => {
+        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, velocity, state, anim, side, armAngle }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             if (state !== player.getCurrentState()) {
                 player.setState(state);
             }
-            player.character.setPos(Utility.Vector.convertNetwork(pos));
+            player.character.body.pos = Utility.Vector.convertNetwork(pos);
+            player.character.body.velocity = Utility.Vector.convertNetwork(velocity);
             player.character.body.direction = side;
             player.character.animator.setAnimation(anim);
             player.character.armFront.angle = armAngle;
@@ -59,12 +60,17 @@ class PlayerMessageHandler {
             player.character.die(false);
         });
 
-        gameEvent.subscribe(GameMessage.PlayerRagdollInfo, ({ id, head, legs, body }) => {
+        gameEvent.subscribe(GameMessage.PlayerRagdollInfo, ({ id, head, legs, body, velocity }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             if (player.getCurrentState() !== PlayerState.Ragdoll) {
                 player.setState(PlayerState.Ragdoll);
             }
-            player.setRagdoll(Utility.Vector.convertNetwork(head), Utility.Vector.convertNetwork(body), Utility.Vector.convertNetwork(legs));
+            player.setRagdoll(
+                Utility.Vector.convertNetwork(head),
+                Utility.Vector.convertNetwork(body),
+                Utility.Vector.convertNetwork(legs),
+                Utility.Vector.convertNetwork(velocity)
+            );
         });
     }
 
@@ -72,17 +78,19 @@ class PlayerMessageHandler {
         PlayerManager.getLocal().forEach(player => {
             const id = PlayerManager.getPlayerID(player)!;
             if (player.getCurrentState() === PlayerState.Ragdoll) {
-                const positions = player.getRagdoll();
+                const ragdollInfo = player.getRagdollInfo();
                 Connection.get().sendGameMessage(GameMessage.PlayerRagdollInfo, {
                     id,
-                    head: { x: positions.head.x, y: positions.head.y },
-                    body: { x: positions.body.x, y: positions.body.y },
-                    legs: { x: positions.legs.x, y: positions.legs.y }
+                    head: Utility.Vector.convertToNetwork(ragdollInfo.head),
+                    body: Utility.Vector.convertToNetwork(ragdollInfo.body),
+                    legs: Utility.Vector.convertToNetwork(ragdollInfo.legs),
+                    velocity: Utility.Vector.convertNetwork(ragdollInfo.velocity)
                 });
             } else {
                 Connection.get().sendGameMessage(GameMessage.PlayerInfo, {
                     id,
-                    pos: player.character.body.pos,
+                    pos: Utility.Vector.convertToNetwork(player.character.body.pos),
+                    velocity: Utility.Vector.convertToNetwork(player.character.body.velocity),
                     state: player.getCurrentState(),
                     anim: player.character.animator.getCurrentAnimation(),
                     side: player.character.body.direction,
