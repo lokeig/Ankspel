@@ -1,4 +1,4 @@
-enum ProjectileEffect {
+    enum ProjectileEffect {
     Damage,
     Explosion,
     Poison,

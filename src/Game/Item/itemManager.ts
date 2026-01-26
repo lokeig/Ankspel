@@ -52,31 +52,32 @@ class ItemManager {
         return this.items.get(Grid.key(pos));
     }
 
-    public static getNearby(pos: Vector, width: number, height: number): IItem[] {
+    public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): IItem[] {
         const result: IItem[] = [];
-
-        const startX = pos.x - Grid.size * 2;
-        const endX = pos.x + width + Grid.size * 2;
-        const startY = pos.y - Grid.size * 2;
-        const endY = pos.y + height + Grid.size * 2;
-
-        for (let x = startX; x < endX; x += Grid.size) {
-            for (let y = startY; y < endY; y += Grid.size) {
-                const gridPos = Grid.getGridPos(new Vector(x, y));
-                this.processItemArray(gridPos, result);
+        const accumulate = (gridPos: Vector) => {
+            const itemSet = this.getItems(gridPos);
+            if (!itemSet) {
+                return;
             }
+            itemSet.forEach(item => {
+                if (item.getOwnership() === Ownership.None) {
+                    result.push(item);
+                }
+            });
         }
+        
+        Grid.forNearby(pos, nextPos, width, height, accumulate);
         return result;
     }
 
-    private static processItemArray(gridPos: Vector, accumulatedItems: Array<IItem>): void {
+    private static processItemArray(gridPos: Vector, result: Array<IItem>): void {
         const itemSet = this.getItems(gridPos);
         if (!itemSet) {
             return;
         }
         itemSet.forEach(item => {
             if (item.getOwnership() === Ownership.None) {
-                accumulatedItems.push(item);
+                result.push(item);
             }
         });
     }

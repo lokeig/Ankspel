@@ -25,9 +25,9 @@ class GameLoopUtility {
     }
 
     private static gameUpdate(deltaTime: number): void {
+        ProjectileManager.update(deltaTime);
         ItemManager.update(deltaTime);
         PlayerManager.update(deltaTime);
-        ProjectileManager.update(deltaTime);
         ParticleManager.update(deltaTime);
     }
 

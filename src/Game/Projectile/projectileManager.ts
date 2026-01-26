@@ -4,32 +4,34 @@ import { ITrail } from "./ITrail";
 
 class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
-    private static IDToProjectile: Map<number, IProjectile> = new Map();
-    private static projectileToID: Map<IProjectile, number> = new Map();
+    private static pending: IProjectile[] = [];
     private static trails: Set<ITrail> = new Set();
-
     private static register: Map<string, ProjectileConstructor> = new Map();
-    private static projectileIndex = 0;
 
     public static update(deltaTime: number) {
+        this.pending.forEach(projectile => {
+            this.getProjectiles(Grid.getGridPos(projectile.getPos()))!.add(projectile);
+        });
+        this.pending = [];
         this.updateMapPositions(deltaTime);
         this.trails.forEach(trail => {
-            trail.update(deltaTime);
             if (trail.shouldBeDeleted()) {
                 this.trails.delete(trail);
+            } else {
+                trail.update(deltaTime);
             }
         });
     }
 
     private static updateMapPositions(deltaTime: number) {
         this.projectiles.forEach(projectileSet => projectileSet.forEach(projectile => {
-            projectile.getTrail().setTarget(projectile.getPos());
-            projectile.update(deltaTime);
             if (projectile.shouldBeDeleted()) {
                 projectileSet.delete(projectile);
                 projectile.getTrail().setToDelete();
                 return;
             }
+            projectile.update(deltaTime);
+            projectile.getTrail().setTarget(projectile.getPos());
         }));
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getPos());
     }
@@ -38,34 +40,27 @@ class ProjectileManager {
         this.register.set(type, constructor);
     }
 
-    private static setProjectileID(item: IProjectile, id: number) {
-        this.projectileToID.set(item, id);
-        this.IDToProjectile.set(id, item);
-    }
-
-    public static create(type: string, pos: Vector, angle: number, local: boolean): IProjectile | null {
+    public static create(type: string, pos: Vector, angle: number, local: boolean, seed?: number): IProjectile | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
         }
-        const result = new constructor(pos, angle);
+        const result = new constructor(pos, angle, seed);
         this.addProjectile(result);
-        this.setProjectileID(result, this.projectileIndex++);
         if (local) {
             result.setLocal();
         }
         return result;
     }
 
-    public static spawn(type: string, pos: Vector, angle: number, id: number): void {
+    public static spawn(type: string, pos: Vector, angle: number, seed: number): void {
         pos = new Vector(pos.x, pos.y);
         const constructor = this.register.get(type);
         if (!constructor) {
             return;
         }
-        const newProjectile = new constructor(pos, angle);
+        const newProjectile = new constructor(pos, angle, seed);
         this.addProjectile(newProjectile);
-        this.setProjectileID(newProjectile, id);
     }
 
     public static getProjectiles(pos: Vector): Set<IProjectile> | undefined {
@@ -78,43 +73,25 @@ class ProjectileManager {
         if (!projectileSet) {
             this.projectiles.set(Grid.key(gridPos), new Set());
         }
-        this.getProjectiles(gridPos)!.add(newProjectile);
+        this.pending.push(newProjectile);
         this.trails.add(newProjectile.getTrail());
     }
 
-    public static getProjectileFromID(id: number): IProjectile | undefined {
-        return this.IDToProjectile.get(id);
-    }
-
-    public static getProjectileID(item: IProjectile): number | undefined {
-        return this.projectileToID.get(item);
-    }
-
-    public static getNearbyProjectiles(pos: Vector, width: number, height: number): IProjectile[] {
+    public static getNearbyProjectiles(pos: Vector, width: number, height: number, nextPos: Vector = pos): IProjectile[] {
         const result: IProjectile[] = [];
 
-        const startX = pos.x - Grid.size * 2;
-        const endX = pos.x + width + Grid.size * 2;
-        const startY = pos.y - Grid.size * 2;
-        const endY = pos.y + height + Grid.size * 2;
-
-        for (let x = startX; x < endX; x += Grid.size) {
-            for (let y = startY; y < endY; y += Grid.size) {
-                const gridPos = Grid.getGridPos(new Vector(x, y));
-                this.processProjectileSet(gridPos, result);
+        const accumulate = (gridPos: Vector) => {
+            const projectilSet = this.getProjectiles(gridPos);
+            if (!projectilSet) {
+                return;
             }
+            projectilSet.forEach(projectile => {
+                result.push(projectile);
+            });
         }
-        return result;
-    }
 
-    private static processProjectileSet(gridPos: Vector, accumulatedItems: Array<IProjectile>): void {
-        const projectilSet = this.getProjectiles(gridPos);
-        if (!projectilSet) {
-            return;
-        }
-        projectilSet.forEach(projectile => {
-            accumulatedItems.push(projectile);
-        });
+        Grid.forNearby(pos, nextPos, width, height, accumulate);
+        return result;
     }
 
     public static draw() {

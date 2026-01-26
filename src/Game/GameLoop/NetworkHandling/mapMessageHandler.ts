@@ -26,6 +26,7 @@ class MapMessageHandler {
 
     public static quickStart(): void {
         PlayerManager.create();
+
         const map = MapManager.getMap("defaultMap");
         this.loadMapTiles(map);
         this.hostInitializeMap(map);

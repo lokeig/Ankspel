@@ -42,7 +42,7 @@ class DynamicObject extends GameObject {
     public update(deltaTime: number) {
         this.velocityPhysicsUpdate(deltaTime);
         const nextpos = this.pos.clone().add(this.velocity.clone().multiply(deltaTime));
-        this.collidableObjects = TileManager.getNearbyTiles(this.pos, this.width, this.height, nextpos);
+        this.collidableObjects = TileManager.getNearby(this.pos, this.width, this.height, nextpos);
         this.updatePositions(deltaTime);
     }
 
@@ -146,7 +146,7 @@ class DynamicObject extends GameObject {
     }
 
     public setNewCollidableObjects() {
-        this.collidableObjects = TileManager.getNearbyTiles(this.pos, this.width, this.height, this.pos);
+        this.collidableObjects = TileManager.getNearby(this.pos, this.width, this.height);
     }
 
     public onPlatform(): boolean {

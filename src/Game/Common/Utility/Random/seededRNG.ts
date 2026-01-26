@@ -10,6 +10,10 @@ class SeededRNG {
         return this.state / 0x100000000;
     }
 
+    public getNewSeed(): number {
+        return Math.floor(this.next() * 0xffffffff);
+    }
+
     public getInRange(min: number, max: number) {
         return min + (max - min) * this.next();
     }

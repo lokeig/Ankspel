@@ -97,27 +97,27 @@ abstract class Item implements IItem {
 
         switch (throwType) {
             case (ThrowType.Light): {
-                this.body.velocity = new Vector(210 * direcMult, -210);
+                this.body.velocity.set(210 * direcMult, -210);
                 this.rotateSpeed = 10;
                 break;
             }
             case (ThrowType.Hard): {
-                this.body.velocity = new Vector(900 * direcMult, -300);
+                this.body.velocity.set(900 * direcMult, -300);
                 this.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.HardDiagonal): {
-                this.body.velocity = new Vector(900 * direcMult, -600);
+                this.body.velocity.set(900 * direcMult, -600);
                 this.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.Drop): {
-                this.body.velocity = new Vector(0 * direcMult, 0);
+                this.body.velocity.set(0 * direcMult, 0);
                 this.rotateSpeed = 5;
                 break;
             }
             case (ThrowType.Upwards): {
-                this.body.velocity = new Vector(0 * direcMult, -600);
+                this.body.velocity.set(0 * direcMult, -600);
                 this.rotateSpeed = 8;
                 break;
             }

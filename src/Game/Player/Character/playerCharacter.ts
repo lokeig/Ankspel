@@ -74,8 +74,10 @@ class PlayerCharacter {
     }
 
     public nonLocalUpdate(deltaTime: number): void {
+        this.body.update(deltaTime);
+        this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions(deltaTime);
+        this.handleProjectileCollisions();
     }
 
     public update(deltaTime: number): void {
@@ -83,11 +85,11 @@ class PlayerCharacter {
         this.updateControllers(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions(deltaTime);
+        this.handleProjectileCollisions();
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {
-        if (this.movement.willTurn()) {
+        if (this.isLocal() && this.movement.willTurn()) {
             this.armFront.angle *= -1;
         }
         if (forceup || this.armFront.angle > 0 || this.equipment.itemNoRotationCollision(this.armFront.getCenter())) {
@@ -122,18 +124,18 @@ class PlayerCharacter {
         return returnValue !== undefined;
     }
 
-    private handleProjectileCollisions(deltaTime: number): void {
+    private handleProjectileCollisions(): void {
         ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
             const seed = Utility.Random.getRandomSeed();
             let equipment: IItem | null = null; let slot: EquipmentSlot | null = null;
 
             this.equipment.getAllEquippedItems().forEach((item, equipSlot) => {
-                if (item && projectile.willGoThrough(item.getBody(), deltaTime).collision) {
+                if (item && projectile.wentThrough(item.getBody()).collision) {
                     equipment = item;
                     slot = equipSlot;
                 }
             })
-            if (equipment || projectile.willGoThrough(this.body, deltaTime).collision) {
+            if (equipment || projectile.wentThrough(this.body).collision) {
                 const effect = projectile.onPlayerHit(seed);
                 if (projectile.isLocal()) {
                     Connection.get().sendGameMessage(GameMessage.PlayerHit, { id: this.id, effect, seed, slot });
@@ -164,7 +166,7 @@ class PlayerCharacter {
 
     public draw(): void {
         this.animator.drawBody(this.getDrawPos(), PlayerCharacter.drawSize, this.body.isFlip());
-        this.equipment.drawItems();
+        this.animator.drawItems(this.equipment);
         this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.body.isFlip());
     };
 }

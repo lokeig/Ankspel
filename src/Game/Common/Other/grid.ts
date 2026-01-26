@@ -2,7 +2,7 @@ import { Vector } from "../Types/vector";
 
 class Grid {
     public static size: number = 32;
-    
+
     public static updateMapPositions<T>(objects: Map<string, Set<T>>, getPos: (e: T) => Vector) {
         const movedObjects: Map<string, Set<T>> = new Map();
 
@@ -32,6 +32,23 @@ class Grid {
             }
             for (const projectile of objectSet) {
                 objects.get(newKey)!.add(projectile);
+            }
+        }
+    }
+
+    public static forNearby(pos: Vector, nextPos: Vector, width: number, height: number, callback: (gridPos: Vector) => void): void {
+        const padding = this.size;
+        const startX = Math.min(pos.x, nextPos.x) - padding;
+        const endX = Math.max(pos.x + width, nextPos.x + width) + padding;
+        const startY = Math.min(pos.y, nextPos.y) - padding;
+        const endY = Math.max(pos.y + height, nextPos.y + height) + padding;
+
+        const minGrid = this.getGridPos(new Vector(startX, startY));
+        const maxGrid = this.getGridPos(new Vector(endX, endY));
+
+        for (let x = minGrid.x; x <= maxGrid.x; x++) {
+            for (let y = minGrid.y; y <= maxGrid.y; y++) {
+                callback(new Vector(x, y));
             }
         }
     }

@@ -1,7 +1,9 @@
-import { Grid, Utility, Vector } from "@common";
+import { Grid, PlayerState, Utility, Vector } from "@common";
 import { Player } from "./player";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
+import { IItem, ItemManager, Ownership } from "@item";
+import { PlayerRagdoll } from "./PlayerStates";
 
 class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
@@ -9,15 +11,28 @@ class PlayerManager {
     private static localPlayerCount = 0;
 
     static update(deltaTime: number) {
-        this.players.forEach(playerSet => playerSet.forEach(player => {
+        const pending: Player[] = [];
+
+        const updatePlayer = (player: Player) => {
+            if (player.character.isLocal()) {
+                this.setNearbyItems(player);
+            }
             player.update(deltaTime);
             player.character.equipment.getAllEquippedItems().forEach((item, slot) => {
                 if (item && item.shouldBeDeleted()) {
                     player.character.equipment.equip(null, slot);
                 }
             })
-        }));
-        Grid.updateMapPositions<Player>(this.players, e => e.character.body.pos);
+        };
+        this.getPlayers().forEach(player => {
+            if (player.held()) {
+                pending.push(player);
+                return;
+            }
+            updatePlayer(player);
+        });
+        pending.forEach(updatePlayer);
+        Grid.updateMapPositions<Player>(this.players, player => player.character.body.pos);
     }
 
     public static getLocal(): Player[] {
@@ -30,6 +45,16 @@ class PlayerManager {
         const result: Player[] = [];
         this.players.forEach(playerSet => { playerSet.forEach(player => { result.push(player); }) });
         return result;
+    }
+
+    private static setNearbyItems(player: Player): void {
+        const items: IItem[] = ItemManager.getNearby(player.character.body.pos, player.character.body.width, player.character.body.height);
+        this.getPlayers().forEach(player => {
+            if (player.getCurrentState() === PlayerState.Ragdoll) {
+                items.push(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
+            }
+        })
+        player.setNearbyItems(items);
     }
 
     public static create(): Player {
@@ -58,7 +83,11 @@ class PlayerManager {
     }
 
     public static draw() {
-        this.players.forEach(playerSet => { playerSet.forEach(player => { player.draw(); }) });
+        this.getPlayers().forEach(player => {
+            if (!player.held()) {
+                player.draw();
+            }
+        })
     }
 
     public static getPlayerFromID(ID: number): Player | undefined {

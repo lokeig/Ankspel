@@ -25,7 +25,7 @@ class FirearmInfo {
         for (let i = 0; i < this.bulletCount; i++) {
             let shotAngle = angle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             shotAngle = flip ? Math.PI - shotAngle : shotAngle;
-            ProjectileManager.create(this.projectile, pos, shotAngle, local);
+            ProjectileManager.create(this.projectile, pos.clone(), shotAngle, local, rng.getNewSeed());
         }
         return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }]; 
     }

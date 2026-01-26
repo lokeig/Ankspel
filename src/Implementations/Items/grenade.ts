@@ -45,7 +45,7 @@ class Grenade extends Item {
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const pos = this.body.pos;
-                ProjectileManager.create("grenadeBullet", pos, angle, this.locallyActivated);
+                ProjectileManager.create("grenadeBullet", pos.clone(), angle, this.locallyActivated);
             }
         }
     }

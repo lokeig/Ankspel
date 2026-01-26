@@ -51,6 +51,16 @@ class PlayerSlide implements IState<PlayerState> {
         }
     }
 
+    private nonLocalUpdate(deltaTime: number): void {
+        this.playerCharacter.rotateArm(deltaTime);
+        this.playerCharacter.nonLocalUpdate(deltaTime);
+        if (this.crouch) {
+            this.setEquipmentPositionsCrouch();
+        } else {
+            this.setEquipmentPositionsSlide();
+        }
+    }
+
     private setEquipmentPositionsSlide(): void {
         const center = this.playerCharacter.body.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
@@ -101,14 +111,6 @@ class PlayerSlide implements IState<PlayerState> {
         this.platformIgnoreTime.update(deltaTime);
     }
 
-    private nonLocalUpdate(deltaTime: number): void {
-        this.playerCharacter.nonLocalUpdate(deltaTime);
-        if (this.crouch) {
-            this.setEquipmentPositionsCrouch();
-        } else {
-            this.setEquipmentPositionsSlide();
-        }
-    }
 
     public stateChange(): PlayerState {
         if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.isDead()) {
@@ -116,9 +118,9 @@ class PlayerSlide implements IState<PlayerState> {
         }
         if (this.playerCharacter.controls.down() || this.playerCharacter.idleCollision()) {
             if (this.crouch) {
-                const maxCrouchSpeed = 180;
-                const validCrouch = !this.playerCharacter.body.grounded
-                    || Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed
+                const maxCrouchSpeed = 400;
+                const validCrouch =
+                    Math.abs(this.playerCharacter.body.velocity.x) < maxCrouchSpeed
                     || this.playerCharacter.idleCollision();
                 if (validCrouch) {
                     return PlayerState.Crouch;

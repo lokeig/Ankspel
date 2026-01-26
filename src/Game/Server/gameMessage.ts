@@ -41,8 +41,8 @@ interface GameMessageMap {
     [GameMessage.DataDone]: {};
 
     // ─── Player ─────────────────────────────
-    [GameMessage.PlayerInfo]: { id: number, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number };
-    [GameMessage.PlayerRagdollInfo]: { id: number, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
+    [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number };
+    [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
     [GameMessage.NewPlayer]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
     [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, slot: EquipmentSlot | null };
@@ -57,7 +57,7 @@ interface GameMessageMap {
     [GameMessage.DeactivateItem]: { id: number };
 
     // ─── Projectiles ────────────────────────
-    [GameMessage.SpawnProjectile]: { id: number, location: NetworkVector, angle: number, type: string };
+    [GameMessage.SpawnProjectile]: { seed: number, location: NetworkVector, angle: number, type: string };
 
     // ─── Map ────────────────────────────────
     [GameMessage.LoadMap]: { name: string };

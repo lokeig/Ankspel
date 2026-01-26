@@ -56,14 +56,15 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
     }
 
-    public setBody(head: Vector, body: Vector, legs: Vector): void {
+    public setBody(head: Vector, body: Vector, legs: Vector, velocity: Vector): void {
         this.head.pos = head;
         this.body.pos = body;
         this.legs.pos = legs;
+        this.body.velocity = velocity;
     }
 
-    public getBodies(): { head: Vector, body: Vector, legs: Vector } {
-        return { head: this.head.pos, body: this.body.pos, legs: this.legs.pos };
+    public getBodies(): { head: Vector, body: Vector, legs: Vector, velocity: Vector } {
+        return { head: this.head.pos, body: this.body.pos, legs: this.legs.pos, velocity: this.body.velocity };
     }
 
     private updateStandardBody(): void {
@@ -108,7 +109,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public stateEntered(from: PlayerState): void {
         this.playerCharacter.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
-        this.playerCharacter.equipment.throw(EquipmentSlot.Head, ThrowType.Drop);
+        // this.playerCharacter.equipment.throw(EquipmentSlot.Head, ThrowType.Drop);
 
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
@@ -146,8 +147,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.playerCharacter.isLocal()) {
-            this.nonLocalUpdate(deltaTime);
+        if (this.getOwnership() === Ownership.Held) {
+            this.ownedUpdate(deltaTime);
             return;
         }
         this.coyoteTime.update(deltaTime);
@@ -161,30 +162,45 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.head.update(deltaTime);
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
-
-        this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
-        this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
-        this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
+        
+        for (let i = 0; i < 500; i++) {
+            this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
+            this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
+            this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
+        }
 
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
             this.head.velocity.x = Utility.Random.getRandomNumber(-3, 3);
         }
-        if (!this.playerCharacter.isDead()) {
+        if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);
         }
         const head = true;
         this.setAngle(head);
         this.setAngle(!head);
+
+        this.setEquipmentLocation();
     }
 
-    private nonLocalUpdate(deltaTime: number): void {
+    private ownedUpdate(deltaTime: number): void {
+        if (this.legs.direction !== this.head.direction) {
+            this.body.velocity.add(1000 * this.head.getDirectionMultiplier());
+        }
+        this.legs.direction = this.head.direction;
+        this.body.update(deltaTime);
+        this.legs.update(deltaTime);
+
+        this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.3, true);
+
         const head = true;
-        this.setAngle(head)
+        this.setAngle(head);
         this.setAngle(!head);
     }
 
     public stateChange(): PlayerState {
-        if (this.playerCharacter.isDead()) {
+        if (this.playerCharacter.isDead() || this.getOwnership() === Ownership.Held) {
             return PlayerState.Ragdoll;
         }
         this.updateStandardBody();
@@ -203,6 +219,11 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.playerCharacter.body.velocity = new Vector(this.body.velocity.x, exitVerticalSpeed);
     }
 
+    private setEquipmentLocation() {
+        this.playerCharacter.equipment.setBody(this.head.getCenter(), new Vector(0, -4), this.head.direction, this.headAngle, EquipmentSlot.Head);
+        this.playerCharacter.equipment.setBody(this.head.getCenter(), new Vector(0, 16), this.head.direction, this.headAngle, EquipmentSlot.Body);
+
+    }
     private getDrawPos(bodyPart: DynamicObject): Vector {
         const x = bodyPart.pos.x + (this.width - PlayerCharacter.drawSize) / 2;
         const y = bodyPart.pos.y + (this.height - PlayerCharacter.drawSize) / 2;
@@ -218,6 +239,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             this.legsAngle,
             this.head.isFlip()
         );
+        this.playerCharacter.animator.drawItems(this.playerCharacter.equipment);
+
     }
 
     // For IItem
@@ -238,11 +261,11 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public setWorldAngle(angle: number): void {
-        this.headAngle = angle;
+
     }
 
     public setLocalAngle(angle: number): void {
-        this.headAngle = angle;
+
     }
 
     public getHandOffset(): Vector {
@@ -262,8 +285,31 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public throw(throwType: ThrowType): void {
-        throwType;
-        this.owned = Ownership.None;
+        const direcMult = this.head.getDirectionMultiplier();
+        this.head.velocity.set(0, 0);
+        this.legs.velocity.set(0, 0);
+        switch (throwType) {
+            case (ThrowType.Light): {
+                this.body.velocity.set(600 * direcMult, -210);
+                break;
+            }
+            case (ThrowType.Hard): {
+                this.body.velocity.set(2000 * direcMult, -300);
+                break;
+            }
+            case (ThrowType.HardDiagonal): {
+                this.body.velocity.set(2000 * direcMult, -600);
+                break;
+            }
+            case (ThrowType.Drop): {
+                this.body.velocity.set(0 * direcMult, 0);
+                break;
+            }
+            case (ThrowType.Upwards): {
+                this.body.velocity.set(0 * direcMult, -1600);
+                break;
+            }
+        }
     }
 
     public shouldBeDeleted(): boolean {

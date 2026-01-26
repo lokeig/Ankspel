@@ -1,4 +1,5 @@
-import { Animation, images, SpriteAnimator, SpriteSheet, Utility, Vector, PlayerAnim } from "@common";
+import { Animation, images, SpriteAnimator, SpriteSheet, Utility, Vector, PlayerAnim, EquipmentSlot } from "@common";
+import { PlayerEquipment } from "./playerEquipment";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;
@@ -47,6 +48,18 @@ class PlayerAnimation {
         return this.currAnim;
     }
 
+    public drawItems(equipment: PlayerEquipment): void {
+        const draw = (slot: EquipmentSlot): void => {
+            if (equipment.hasItem(slot)) {
+                equipment.getItem(slot).draw();
+            }
+        }
+        draw(EquipmentSlot.Head);
+        draw(EquipmentSlot.Body);
+        draw(EquipmentSlot.Boots);
+        draw(EquipmentSlot.Hand);
+    }
+
     public drawBody(pos: Vector, drawSize: number, flip: boolean): void {
         const angle = 0;
         this.bodyAnimator.draw(pos, drawSize, flip, angle);
@@ -61,7 +74,6 @@ class PlayerAnimation {
         this.bodyAnimator.draw(headPos, drawSize, flip, headAngle);
         this.bodyAnimator.setAnimation(this.animations.lowerRagdoll);
         this.bodyAnimator.draw(legsPos, drawSize, flip, legsAngle);
-    
     }
 
     public update(deltaTime: number, holding: boolean): void {

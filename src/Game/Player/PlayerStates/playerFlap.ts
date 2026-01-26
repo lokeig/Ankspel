@@ -1,7 +1,6 @@
 import { EquipmentSlot, IState, PlayerState, Vector } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
-import { GameObject } from "@core";
 
 class PlayerFlap implements IState<PlayerState> {
     private playerCharacter: PlayerCharacter;
@@ -63,6 +62,9 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     private nonLocalUpdate(deltaTime: number): void {
+        this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
+        const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
+        this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
         this.playerCharacter.nonLocalUpdate(deltaTime);
         this.setEquipmentPosition();
     }

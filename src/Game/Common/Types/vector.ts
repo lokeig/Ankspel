@@ -51,8 +51,17 @@ class Vector {
         return this;
     }
 
+    public distanceToSquared(end: Vector): number {
+        return Math.pow(end.x - this.x, 2) + Math.pow(end.y - this.y, 2);
+    }
+
+    public set(x: number, y: number): void {
+        this.x = x;
+        this.y = y;
+    }
+
     public clone(): Vector {
-        return new Vector(this.x, this.y)
+        return new Vector(this.x, this.y);
     }
 }
 
