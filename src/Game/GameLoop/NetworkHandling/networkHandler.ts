@@ -9,7 +9,7 @@ import { ProjectileMessageHandler } from "./projectileMessageHandler";
 
 class NetworkHandler {
     private static readyCount: number = 0;
-    private static messageTimer = new Countdown(0.05);
+    private static messageTimer = new Countdown(0.00);
     static init() {
         PlayerMessageHandler.init();
         ItemMessageHandler.init();

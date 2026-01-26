@@ -6,7 +6,7 @@ import { MessageHandler } from "./messageHandler";
 import { ServerInfo } from "./serverInfo";
 import { ClientMessage } from "../../Shared";
 
-const PORT = 80;
+const PORT = 3000;
 const server = new WebSocketServer({ port: PORT });
 
 const users = new Map<string, WebSocket>();
@@ -43,6 +43,3 @@ server.on("connection", (socket: WebSocket) => {
     });
 });
 
-console.log(
-    `WebSocket signaling server running on ws://localhost:${PORT}`
-);

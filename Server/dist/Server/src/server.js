@@ -33,4 +33,3 @@ server.on("connection", (socket) => {
         messageHandler.cleanup(serverInfo);
     });
 });
-console.log(`WebSocket signaling server running on ws://localhost:${PORT}`);
