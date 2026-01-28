@@ -1,6 +1,6 @@
 import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
-import { FirearmInfo } from "../firearmInfo";
+import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
 
@@ -16,7 +16,7 @@ class Shotgun extends Item {
 
     private currentState: ShotgunState = ShotgunState.Loaded;
     private spriteSheet: SpriteSheet;
-    private firearmInfo!: FirearmInfo;
+    private firearmInfo!: FirearmHelper;
 
     constructor(pos: Vector) {
         const width = 30;
@@ -37,13 +37,15 @@ class Shotgun extends Item {
     }
 
     private setupFirearmInfo(): void {
-        this.firearmInfo = new FirearmInfo();
-        this.firearmInfo.projectile = "shotgunBullet";
+        this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 2;
         this.firearmInfo.bulletCount = 14;
         this.firearmInfo.bulletAngleVariation = Math.PI / 20;
         this.firearmInfo.pipeOffset = new Vector(28, -10);
         this.firearmInfo.knockback = new Vector(720, 240);
+        this.firearmInfo.bulletRange = 8;
+        this.firearmInfo.bulletRangeVariation = 1;
+        this.firearmInfo.bulletSpeed = 2400;
     }
 
     public update(deltaTime: number): void {

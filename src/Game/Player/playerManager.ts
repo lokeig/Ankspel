@@ -61,6 +61,9 @@ class PlayerManager {
         const player = new Player(this.idManager.getNextID());
         const id = this.idManager.add(player);
         this.addPlayer(player);
+
+        ItemManager.addID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
+
         player.setControls(Utility.File.getControls(this.localPlayerCount++));
         Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
         return player;

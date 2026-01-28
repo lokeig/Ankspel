@@ -1,6 +1,6 @@
 import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
-import { FirearmInfo } from "./firearmInfo";
+import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 
 class Glock extends Item {
@@ -9,7 +9,7 @@ class Glock extends Item {
         shoot: new Animation()
     };
     private animator: SpriteAnimator;
-    private firearmInfo!: FirearmInfo;
+    private firearmInfo!: FirearmHelper;
 
     constructor(pos: Vector) {
         const width = 30;
@@ -30,12 +30,13 @@ class Glock extends Item {
     }
 
     private setupFirearmInfo(): void {
-        this.firearmInfo = new FirearmInfo();
+        this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 1119;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
         this.firearmInfo.knockback = new Vector(450, 120);
         this.firearmInfo.pipeOffset = new Vector(20, -6);
-        this.firearmInfo.projectile = "glockBullet";
+        this.firearmInfo.bulletRange = 16;
+        this.firearmInfo.bulletSpeed = 2400;
     }
 
     public update(deltaTime: number): void {

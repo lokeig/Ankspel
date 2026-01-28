@@ -1,14 +1,17 @@
 import { Vector, Utility, SeededRNG } from "@common";
 import { ProjectileManager } from "@game/Projectile";
+import { Bullet } from "@impl/Projectiles";
 import { OnItemUseEffect, OnItemUseType } from "@item";
 
-class FirearmInfo {
+class FirearmHelper {
     public knockback = new Vector();
     public bulletAngleVariation: number = 0;
     public pipeOffset = new Vector();
     public ammo: number = 10;
     public bulletCount: number = 1;
-    public projectile!: string;
+    public bulletSpeed: number = 1000;
+    public bulletRange: number = 10;
+    public bulletRangeVariation: number = 0;
 
     public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number, local: boolean): OnItemUseEffect[] {
         const rng = new SeededRNG(seed);
@@ -25,7 +28,9 @@ class FirearmInfo {
         for (let i = 0; i < this.bulletCount; i++) {
             let shotAngle = angle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             shotAngle = flip ? Math.PI - shotAngle : shotAngle;
-            ProjectileManager.create(this.projectile, pos.clone(), shotAngle, local, rng.getNewSeed());
+            const range = this.bulletRange + rng.getInRange(-this.bulletRangeVariation, this.bulletRangeVariation);
+            const bullet = new Bullet(pos.clone(), shotAngle, this.bulletSpeed, range);
+            ProjectileManager.addProjectile(bullet, local);
         }
         return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }]; 
     }
@@ -42,4 +47,4 @@ class FirearmInfo {
     }
 }
 
-export { FirearmInfo };
+export { FirearmHelper };

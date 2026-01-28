@@ -3,10 +3,8 @@ import { CollisionObject, GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { ParticleManager } from "@game/Particles";
-import { ExplosionVFX } from "@impl/Particles";
 
-abstract class Bullet implements IProjectile {
+class Bullet implements IProjectile {
     private pos: Vector;
 
     private angle: number;

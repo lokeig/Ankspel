@@ -8,7 +8,6 @@ class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
     private static idManager = new IDManager<IItem>();
-    private static itemIndex = 0;
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
@@ -33,8 +32,8 @@ class ItemManager {
             return null;
         }
         const result = new constructor(pos);
-        this.addItem(result);
-        this.idManager.setID(result, this.itemIndex++);
+        this.addToMap(result);
+        this.idManager.add(result);
         return result;
     }
 
@@ -44,7 +43,7 @@ class ItemManager {
             return;
         }
         const newItem = new constructor(pos);
-        this.addItem(newItem);
+        this.addToMap(newItem);
         this.idManager.setID(newItem, id);
     }
 
@@ -70,25 +69,17 @@ class ItemManager {
         return result;
     }
 
-    private static processItemArray(gridPos: Vector, result: Array<IItem>): void {
-        const itemSet = this.getItems(gridPos);
-        if (!itemSet) {
-            return;
-        }
-        itemSet.forEach(item => {
-            if (item.getOwnership() === Ownership.None) {
-                result.push(item);
-            }
-        });
-    }
-
-    private static addItem(item: IItem) {
+    private static addToMap(item: IItem) {
         const gridPos = item.getBody().pos;
         const itemSet = this.getItems(gridPos);
         if (!itemSet) {
             this.items.set(Grid.key(gridPos), new Set());
         }
         this.getItems(gridPos)!.add(item);
+    }
+
+    public static addID(item: IItem): void {
+        this.idManager.add(item);
     }
 
     public static getItemFromID(id: number): IItem | undefined {

@@ -6,7 +6,6 @@ class ProjectileManager {
     private static projectiles: Map<string, Set<IProjectile>> = new Map();
     private static pending: IProjectile[] = [];
     private static trails: Set<ITrail> = new Set();
-    private static register: Map<string, ProjectileConstructor> = new Map();
 
     public static update(deltaTime: number) {
         this.pending.forEach(projectile => {
@@ -36,40 +35,16 @@ class ProjectileManager {
         Grid.updateMapPositions<IProjectile>(this.projectiles, e => e.getPos());
     }
 
-    public static registerProjectile(type: string, constructor: ProjectileConstructor): void {
-        this.register.set(type, constructor);
-    }
-
-    public static create(type: string, pos: Vector, angle: number, local: boolean, seed?: number): IProjectile | null {
-        const constructor = this.register.get(type);
-        if (!constructor) {
-            return null;
-        }
-        const result = new constructor(pos, angle, seed);
-        this.addProjectile(result);
-        if (local) {
-            result.setLocal();
-        }
-        return result;
-    }
-
-    public static spawn(type: string, pos: Vector, angle: number, seed: number): void {
-        pos = new Vector(pos.x, pos.y);
-        const constructor = this.register.get(type);
-        if (!constructor) {
-            return;
-        }
-        const newProjectile = new constructor(pos, angle, seed);
-        this.addProjectile(newProjectile);
-    }
-
     public static getProjectiles(pos: Vector): Set<IProjectile> | undefined {
         return this.projectiles.get(Grid.key(pos));
     }
 
-    private static addProjectile(newProjectile: IProjectile) {
+    public static addProjectile(newProjectile: IProjectile, local: boolean) {
         const gridPos = Grid.getGridPos(newProjectile.getPos());
         const projectileSet = this.getProjectiles(gridPos);
+        if (local) {
+            newProjectile.setLocal();
+        }
         if (!projectileSet) {
             this.projectiles.set(Grid.key(gridPos), new Set());
         }

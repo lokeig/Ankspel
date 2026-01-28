@@ -3,6 +3,7 @@ import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
+import { Bullet } from "@impl/Projectiles";
 
 class Grenade extends Item {
     private spriteSheet: SpriteSheet;
@@ -45,7 +46,8 @@ class Grenade extends Item {
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const pos = this.body.pos;
-                ProjectileManager.create("grenadeBullet", pos.clone(), angle, this.locallyActivated);
+                const bullet = new Bullet(pos, angle, 2400, 10);
+                ProjectileManager.addProjectile(bullet, this.locallyActivated);
             }
         }
     }
