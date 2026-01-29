@@ -126,7 +126,7 @@ class PlayerCharacter {
 
     private handleProjectileCollisions(): void {
         ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
-            const seed = Utility.Random.getRandomSeed();
+            const seed = Utility.Random.getSeed();
             let equipment: IItem | null = null; let slot: EquipmentSlot | null = null;
 
             this.equipment.getAllEquippedItems().forEach((item, equipSlot) => {

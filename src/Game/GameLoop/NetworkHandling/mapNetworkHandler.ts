@@ -5,15 +5,15 @@ import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
-class MapMessageHandler {
+class MapNetworkHandler {
     private static readyCount: number = 0;
     private static onStart: (t: number) => void;
 
     public static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.LoadMap, ({ name }) => {
-            this.startNewMap(name);
+        gameEvent.subscribe(GameMessage.DataDone, () => {
+            Connection.get().sendGameMessage(GameMessage.ReadyForMap, {});
         });
 
         gameEvent.subscribe(GameMessage.ReadyForMap, () => {
@@ -21,7 +21,12 @@ class MapMessageHandler {
             this.checkReadyToStart();
         });
 
+        gameEvent.subscribe(GameMessage.LoadMap, ({ name }) => {
+            this.startNewMap(MapManager.getMap(name));
+        });
+
         gameEvent.subscribe(GameMessage.StartMap, ({ time }) => { this.onStart(time) });
+
     }
 
     public static quickStart(): void {
@@ -33,8 +38,7 @@ class MapMessageHandler {
         this.onStart(0);
     }
 
-    public static startNewMap(mapName: string): void {
-        const map = MapManager.getMap(mapName);
+    public static startNewMap(map: GameMap): void {
         this.loadMapTiles(map);
         if (Connection.get().isHost()) {
             this.hostInitializeMap(map);
@@ -105,4 +109,4 @@ class MapMessageHandler {
     }
 }
 
-export { MapMessageHandler };
+export { MapNetworkHandler };

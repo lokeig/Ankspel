@@ -78,8 +78,12 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static addID(item: IItem): void {
-        this.idManager.add(item);
+    public static addID(item: IItem): number {
+        return this.idManager.add(item);
+    }
+
+    public static addWithID(item: IItem, id: number): void {
+        this.idManager.setID(item, id);
     }
 
     public static getItemFromID(id: number): IItem | undefined {

@@ -41,9 +41,9 @@ interface GameMessageMap {
     [GameMessage.DataDone]: {};
 
     // ─── Player ─────────────────────────────
-    [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side, armAngle: number };
+    [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
-    [GameMessage.NewPlayer]: { id: number };
+    [GameMessage.NewPlayer]: { id: number, ragdollId: number };
     [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
     [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, slot: EquipmentSlot | null };
     [GameMessage.PlayerDead]: { id: number };

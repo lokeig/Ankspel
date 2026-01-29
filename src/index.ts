@@ -7,12 +7,18 @@ import { LobbyListCSS } from "@impl/LobbyList/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
 import { MapManager } from "@game/Map";
-import { defaultMap } from "@impl/defaultMap";
 import { RegisterItems } from "@impl/Items/registerItems";
+import { defaultMap, defaultMap2, defaultMap3, defaultMap4 } from "@impl/Maps";
 
 Input.init();
 Render.set(new CanvasRender("gameCanvas"));
+
 MapManager.addMap("defaultMap", defaultMap);
+MapManager.addMap("defaultMap2", defaultMap2);
+MapManager.addMap("defaultMap3", defaultMap3);
+MapManager.addMap("defaultMap4", defaultMap4);
+
+
 RegisterItems();
 Connection.set(new MultiPeerServer(new WebSocket("ws://localhost:3000")));
 LobbyList.set(new LobbyListCSS());

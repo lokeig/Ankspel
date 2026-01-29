@@ -109,7 +109,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public stateEntered(from: PlayerState): void {
         this.playerCharacter.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
-        // this.playerCharacter.equipment.throw(EquipmentSlot.Head, ThrowType.Drop);
 
         this.coyoteTime.setToReady();
         this.head.direction = this.playerCharacter.body.direction;
@@ -170,7 +169,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
 
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
-            this.head.velocity.x = Utility.Random.getRandomNumber(-3, 3);
+            this.head.velocity.x = Utility.Random.getNumber(-3, 3);
         }
         if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);

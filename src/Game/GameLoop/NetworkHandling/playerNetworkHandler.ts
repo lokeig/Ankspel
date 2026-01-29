@@ -3,12 +3,12 @@ import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
-class PlayerMessageHandler {
+class PlayerNetworkHandler {
     public static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.NewPlayer, ({ id }) => {
-            PlayerManager.spawn(id);
+        gameEvent.subscribe(GameMessage.NewPlayer, ({ id, ragdollId }) => {
+            PlayerManager.spawn(id, ragdollId);
         });
 
         gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, location }) => {
@@ -16,7 +16,7 @@ class PlayerMessageHandler {
             player.character.setPos(Utility.Vector.convertNetwork(location));
         });
 
-        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, velocity, state, anim, side, armAngle }) => {
+        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, velocity, state, anim, side }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             if (state !== player.getCurrentState()) {
                 player.setState(state);
@@ -25,7 +25,6 @@ class PlayerMessageHandler {
             player.character.body.velocity = Utility.Vector.convertNetwork(velocity);
             player.character.body.direction = side;
             player.character.animator.setAnimation(anim);
-            player.character.armFront.angle = armAngle;
         });
 
         gameEvent.subscribe(GameMessage.PlayerHit, ({ id, effect, slot, seed }) => {
@@ -94,11 +93,10 @@ class PlayerMessageHandler {
                     state: player.getCurrentState(),
                     anim: player.character.animator.getCurrentAnimation(),
                     side: player.character.body.direction,
-                    armAngle: player.character.armFront.angle,
                 });
             }
         })
     }
 }
 
-export { PlayerMessageHandler };
+export { PlayerNetworkHandler };

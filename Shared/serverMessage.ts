@@ -1,17 +1,17 @@
 import { LobbyMessageData } from "./lobbyMessageData";
 
 enum ServerMessage {
-    forwarded = "forwarded",
-    connected = "connected",
-    joinSuccess = "joinSuccess",
-    leaveSuccess = "leaveSuccess",
-    hostSuccess = "hostSuccess",
-    newHost = "newHost",
-    startGame = "startGame",
-    lobbyList = "lobbyList",
-    userList = "userList",
-    userJoined = "userJoined",
-    userLeft = "userLeft",
+    Forwarded = "Forwarded",
+    Connected = "Connected",
+    JoinSuccess = "JoinSuccess",
+    LeaveSuccess = "LeaveSuccess",
+    HostSuccess = "HostSuccess",
+    NewHost = "NewHost",
+    StartGame = "StartGame",
+    LobbyList = "LobbyList",
+    UserList = "UserList",
+    UserJoined = "UserJoined",
+    UserLeft = "UserLeft",
 }
 
 type ForwardedMessage<T = unknown> = {
@@ -20,17 +20,17 @@ type ForwardedMessage<T = unknown> = {
 };
 
 interface ServerMessageMap {
-    [ServerMessage.forwarded]: { from: string, msg: ForwardedMessage };
-    [ServerMessage.connected]: { clientID: string };
-    [ServerMessage.joinSuccess]: { lobbyID: string };
-    [ServerMessage.leaveSuccess]: {};
-    [ServerMessage.hostSuccess]: { lobbyID: string };
-    [ServerMessage.newHost]: { hostID: string };
-    [ServerMessage.startGame]: { userID: number };
-    [ServerMessage.lobbyList]: { lobbies: LobbyMessageData[] };
-    [ServerMessage.userList]: { users: string[] };
-    [ServerMessage.userJoined]: { userID: string };
-    [ServerMessage.userLeft]: { userID: string };
+    [ServerMessage.Forwarded]: { from: string, msg: ForwardedMessage };
+    [ServerMessage.Connected]: { clientID: string };
+    [ServerMessage.JoinSuccess]: { lobbyID: string };
+    [ServerMessage.LeaveSuccess]: {};
+    [ServerMessage.HostSuccess]: { lobbyID: string };
+    [ServerMessage.NewHost]: { hostID: string };
+    [ServerMessage.StartGame]: { userID: number };
+    [ServerMessage.LobbyList]: { lobbies: LobbyMessageData[] };
+    [ServerMessage.UserList]: { users: string[] };
+    [ServerMessage.UserJoined]: { userID: string };
+    [ServerMessage.UserLeft]: { userID: string };
 }
 
 export type { ServerMessageMap, ForwardedMessage };

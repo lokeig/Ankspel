@@ -1,3 +1,4 @@
+import { Utility } from "@common";
 import { GameMap } from "./map";
 
 class MapManager {
@@ -9,6 +10,12 @@ class MapManager {
 
     public static getMap(name: string): GameMap {
         return this.maps.get(name)!;
+    }
+
+    public static getRandomMap(): [string, GameMap] {
+        const mapsArray = Array.from(this.maps);
+        const index = Utility.Random.getNumber(0, mapsArray.length - 1);
+        return mapsArray[index];
     }
 }
 

@@ -50,7 +50,7 @@ class MultiPeerServer implements IServer {
         this.peers.set(peerId, peer);
 
         peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
-            console.log("Received message " + GameMessage[type] + ":", msg);
+            // console.log("Received message " + GameMessage[type] + ":", msg);
             this.gameEvent.publish(type, msg);
         });
         const isInitiator = peerId < this.myID!;
@@ -94,33 +94,33 @@ class MultiPeerServer implements IServer {
         this.serverEvent.publish(type, parsed.msg as ServerMessageMap[typeof type]);
 
         switch (type) {
-            case ServerMessage.forwarded: {
+            case ServerMessage.Forwarded: {
                 const data = parsed.msg;
                 this.handleForwardedMessage(data as ForwardedMessage<WebRTCMessage>);
                 break;
             }
 
-            case ServerMessage.connected: {
+            case ServerMessage.Connected: {
                 const data = parsed.msg as ServerMessageMap[typeof type];
                 this.myID = data.clientID;
                 break;
             }
 
-            case ServerMessage.userJoined: {
+            case ServerMessage.UserJoined: {
                 const data = parsed.msg as ServerMessageMap[typeof type];
                 console.log(`New user joined: ${data.userID}`);
                 this.addPeer(data.userID);
                 break;
             }
 
-            case ServerMessage.userLeft: {
+            case ServerMessage.UserLeft: {
                 const data = parsed.msg as ServerMessageMap[typeof type];
                 console.log(`User left: ${data.userID}`);
                 this.removePeer(data.userID);
                 break;
             }
 
-            case ServerMessage.userList: {
+            case ServerMessage.UserList: {
                 const data = parsed.msg as ServerMessageMap[typeof type];
                 console.log("Here are all other users:", data.users);
                 for (const user of data.users) {
@@ -129,32 +129,32 @@ class MultiPeerServer implements IServer {
                 break;
             }
 
-            case ServerMessage.lobbyList: {
+            case ServerMessage.LobbyList: {
                 console.log("Got a new lobby-list");
                 break;
             }
 
-            case ServerMessage.joinSuccess: {
+            case ServerMessage.JoinSuccess: {
                 console.log(`Joined lobby: ${parsed.lobbyID}`);
                 const listUsersMsg: ClientMessage = { type: CMsgType.listUsers };
                 this.socket.send(JSON.stringify(listUsersMsg));
                 break;
             }
 
-            case ServerMessage.leaveSuccess: {
+            case ServerMessage.LeaveSuccess: {
                 console.log(`Left lobby`);
                 this.cleanupAllPeers();
                 this.host = false;
                 break;
             }
 
-            case ServerMessage.hostSuccess: {
+            case ServerMessage.HostSuccess: {
                 console.log(`Hosted lobby: ${parsed.lobbyID}`);
                 this.host = true;
                 break;
             }
 
-            case ServerMessage.newHost: {
+            case ServerMessage.NewHost: {
                 console.log(`New host: ${parsed.hostID}`);
                 if (parsed.hostID === this.myID) {
                     this.host = true;
@@ -163,7 +163,7 @@ class MultiPeerServer implements IServer {
                 break;
             }
 
-            case ServerMessage.startGame: {
+            case ServerMessage.StartGame: {
                 console.log("Starting game");
                 break;
             }

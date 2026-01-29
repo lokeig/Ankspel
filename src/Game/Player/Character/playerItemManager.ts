@@ -88,7 +88,7 @@ class PlayerItemManager {
             if (!onInputFunction) {
                 return;
             }
-            const seed = Utility.Random.getRandomSeed();
+            const seed = Utility.Random.getSeed();
             const local = true;
             this.handleEffects(item, onInputFunction(seed, local));
 

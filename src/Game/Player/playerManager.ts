@@ -60,19 +60,23 @@ class PlayerManager {
     public static create(): Player {
         const player = new Player(this.idManager.getNextID());
         const id = this.idManager.add(player);
+        const ragdollId = ItemManager.addID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
         this.addPlayer(player);
 
-        ItemManager.addID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
-
         player.setControls(Utility.File.getControls(this.localPlayerCount++));
-        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, ragdollId }));
+
+
         return player;
     }
 
-    public static spawn(id: number): Player {
+    public static spawn(id: number, ragdollId: number): Player {
         const player = new Player(id);
         this.idManager.setID(player, id);
         this.addPlayer(player);
+
+        ItemManager.addWithID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll, ragdollId);
+
         return player;
     }
 

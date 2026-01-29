@@ -62,7 +62,7 @@ class GameObject {
         let tMax = 1;
 
         const checkAxis = (start: number, delta: number, min: number, max: number): boolean => {
-            if (Math.abs(delta) < 0.0001) {
+            if (Math.abs(delta) < 0.00001) {
                 return start >= min && start <= max;
             }
             const t1 = (min - start) / delta;

@@ -40,17 +40,17 @@ class LobbyListCSS implements ILobbyList {
 
         const lobbyEvent = Connection.get().serverEvent;
 
-        lobbyEvent.subscribe(ServerMessage.lobbyList, ({ lobbies }) => {
+        lobbyEvent.subscribe(ServerMessage.LobbyList, ({ lobbies }) => {
             this.refresh(lobbies);
         });
 
-        lobbyEvent.subscribe(ServerMessage.joinSuccess, ({ lobbyID }) => {
+        lobbyEvent.subscribe(ServerMessage.JoinSuccess, ({ lobbyID }) => {
             this.connectedLobby = lobbyID;
             this.leavebutton.disabled = false;
             this.refresh(this.lastLobbies);
         });
 
-        lobbyEvent.subscribe(ServerMessage.leaveSuccess, () => {
+        lobbyEvent.subscribe(ServerMessage.LeaveSuccess, () => {
             this.connectedLobby = null;
             this.hosting = false;
             this.leavebutton.disabled = true;
@@ -60,7 +60,7 @@ class LobbyListCSS implements ILobbyList {
             this.refresh(this.lastLobbies);
         });
 
-        lobbyEvent.subscribe(ServerMessage.newHost, ({ hostID }) => {
+        lobbyEvent.subscribe(ServerMessage.NewHost, ({ hostID }) => {
             if (hostID !== Connection.get().getID()) {
                 return;
             }
@@ -69,7 +69,7 @@ class LobbyListCSS implements ILobbyList {
             this.refresh(this.lastLobbies);
         });
 
-        lobbyEvent.subscribe(ServerMessage.hostSuccess, ({ lobbyID }) => {
+        lobbyEvent.subscribe(ServerMessage.HostSuccess, ({ lobbyID }) => {
             this.hosting = true;
             this.connectedLobby = lobbyID;
             this.leavebutton.disabled = false;

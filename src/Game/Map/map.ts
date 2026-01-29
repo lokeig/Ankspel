@@ -49,7 +49,7 @@ class GameMap {
         const base = Math.floor(amount / spawnCount);
         const extra = amount % spawnCount;
 
-        const order = Utility.Random.getRandomArray(spawnCount);
+        const order = Utility.Random.getArray(spawnCount);
         const result: Vector[] = new Array(amount);
 
         let index = 0;

@@ -1,5 +1,5 @@
 import { Vector } from "../Types/vector";
-import { MapMessageHandler } from "@game/GameLoop/NetworkHandling/mapMessageHandler";
+import { MapNetworkHandler } from "@game/GameLoop/NetworkHandling/mapNetworkHandler";
 
 class Input {
     private static keysDown: Set<string> = new Set();
@@ -23,7 +23,7 @@ class Input {
             }
 
             if (e.key === "q" && this.quickStartAllowed) {
-                MapMessageHandler.quickStart();
+                MapNetworkHandler.quickStart();
                 this.quickStartAllowed = false;
             }
         });
