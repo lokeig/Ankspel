@@ -37,7 +37,7 @@ class PlayerCharacter {
     }
 
     public isLocal(): boolean {
-        return this.controls !== undefined;
+        return !!this.controls;
     }
 
     public setControls(controls: Controls) {
@@ -56,6 +56,15 @@ class PlayerCharacter {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) {
             this.equipment.setBody(this.armFront.getCenter(), this.equipment.getItem(EquipmentSlot.Hand).getHoldOffset(), this.body.direction, this.armFront.angle, EquipmentSlot.Hand);
         }
+    }
+
+    public reset(): void {
+        this.revive();
+        this.equipment.unequipAll();
+        this.animator.reset();
+        this.armFront.angle = 0;
+        this.setPos(new Vector);
+        this.body.velocity = new Vector();
     }
 
     public setPos(pos: Vector) {
@@ -92,7 +101,8 @@ class PlayerCharacter {
         if (this.isLocal() && this.movement.willTurn()) {
             this.armFront.angle *= -1;
         }
-        if (forceup || this.armFront.angle > 0 || this.equipment.itemNoRotationCollision(this.armFront.getCenter())) {
+        const rotateUp = this.armFront.angle > 0 || this.equipment.itemNoRotationCollision(this.armFront.getCenter());
+        if (rotateUp || forceup) {
             this.armFront.rotateArmUp(deltaTime);
         } else {
             this.armFront.rotateArmDown(deltaTime);
@@ -106,6 +116,10 @@ class PlayerCharacter {
         }
     }
 
+    public revive(): void {
+        this.dead = false;
+    }
+
     public isDead() {
         return this.dead;
     }
@@ -117,7 +131,7 @@ class PlayerCharacter {
         this.body.height = PlayerCharacter.standardHeight;
         this.body.pos.y -= PlayerCharacter.standardHeight - prevHeight;
 
-        const returnValue = this.body.getHorizontalTileCollision();
+        const returnValue = this.body.getCollidingTile();
 
         this.body.pos.y = prevY;
         this.body.height = prevHeight;
@@ -125,8 +139,8 @@ class PlayerCharacter {
     }
 
     private handleProjectileCollisions(): void {
-        ProjectileManager.getNearbyProjectiles(this.body.pos, this.body.width, this.body.height).forEach(projectile => {
-            const seed = Utility.Random.getSeed();
+        ProjectileManager.getProjectiles().forEach(projectile => {
+            const seed = Utility.Random.seed();
             let equipment: IItem | null = null; let slot: EquipmentSlot | null = null;
 
             this.equipment.getAllEquippedItems().forEach((item, equipSlot) => {
@@ -148,8 +162,8 @@ class PlayerCharacter {
     public handleEffect(effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
         switch (effect) {
             case ProjectileEffect.Damage: {
-                if (equipment && !equipment.shouldBeDeleted() && equipment.interactions.get(ItemInteraction.Hit)) {
-                    equipment.interactions.get(ItemInteraction.Hit)!(seed, local);
+                if (equipment && !equipment.shouldBeDeleted() && equipment.interactions().get(ItemInteraction.HitByProjectile)) {
+                    equipment.interactions().get(ItemInteraction.HitByProjectile)!(seed, local);
                 } else {
                     this.die();
                 }

@@ -9,7 +9,6 @@ class PlayerItemManager {
     private playerBody: DynamicObject;
     private controls: PlayerControls;
     private equipment: PlayerEquipment;
-    private nearbyItems: Array<IItem> = [];
     private lastHeldItem: IItem | null = null;
     public forcedThrowType: null | ThrowType = null;
     private id: number;
@@ -19,10 +18,6 @@ class PlayerItemManager {
         this.controls = controls;
         this.equipment = equipment;
         this.id = id;
-    }
-
-    public setNearbyItems(items: IItem[]): void {
-        this.nearbyItems = items;
     }
 
     public handle() {
@@ -38,25 +33,28 @@ class PlayerItemManager {
 
     private handlePickupOrThrow(): void {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
-            const item = this.equipment.getItem(EquipmentSlot.Hand)
+            const item = this.equipment.getItem(EquipmentSlot.Hand);
             const throwType = this.getThrowType();
+            this.equipment.throw(EquipmentSlot.Hand, throwType);
+
             Connection.get().sendGameMessage(GameMessage.ThrowItem, {
                 itemID: ItemManager.getItemID(item)!,
                 pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
                 direction: item.getBody().direction,
                 throwType
             });
-            this.equipment.throw(EquipmentSlot.Hand, throwType);
+            this.sendEquipmentMessage();
+            
         } else {  // Pickup item
             const nextItem = this.getNearbyItem();
             if (nextItem) {
                 this.equipment.equip(nextItem, EquipmentSlot.Hand);
+                this.sendEquipmentMessage();
             }
         }
-        this.sendMessage();
     }
 
-    private sendMessage(): void {
+    private sendEquipmentMessage(): void {
         const equipmentMap: [keyof GameMessageMap[GameMessage.PlayerEquipment], EquipmentSlot][] = [
             ["holding", EquipmentSlot.Hand],
             ["head", EquipmentSlot.Head],
@@ -73,34 +71,41 @@ class PlayerItemManager {
     }
 
     private handleInteractions(item: IItem): void {
-        const interactions: [() => boolean, ItemInteraction][] = [
+        const inputInteractions: [() => boolean, ItemInteraction][] = [
             [() => this.controls.shoot(InputMode.Press), ItemInteraction.Activate],
             [() => this.controls.up(InputMode.Press), ItemInteraction.Up],
             [() => this.controls.down(InputMode.Press), ItemInteraction.Down],
             [() => this.controls.left(InputMode.Press), ItemInteraction.Left],
             [() => this.controls.right(InputMode.Press), ItemInteraction.Right],
         ];
-        interactions.forEach(([input, action]) => {
-            if (!input()) {
-                return;
+        inputInteractions.forEach(([input, action]) => {
+            if (input()) {
+                this.triggerInteraction(item, action);
             }
-            const onInputFunction = item.interactions.get(action);
-            if (!onInputFunction) {
-                return;
-            }
-            const seed = Utility.Random.getSeed();
-            const local = true;
-            this.handleEffects(item, onInputFunction(seed, local));
-
-            const position = { x: item.getBody().pos.x, y: item.getBody().pos.y };
-            const angle = item.getAngle();
-            const direction = item.getBody().direction;
-            const id = ItemManager.getItemID(item)!;
-
-            Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, position, angle, action, direction, seed });
-            this.sendMessage();
         });
     }
+
+    private triggerInteraction(item: IItem, action: ItemInteraction): void {
+        const onInputFunction = item.interactions().get(action);
+        if (!onInputFunction) {
+            return;
+        }
+
+        const seed = Utility.Random.seed();
+        const local = true;
+
+        this.handleEffects(item, onInputFunction(seed, local));
+
+        const pos = Utility.Vector.convertToNetwork(item.getBody().pos);
+        const angle = item.getAngle();
+        const direction = item.getBody().direction;
+        const id = ItemManager.getItemID(item)!;
+
+        Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, pos, angle, action, direction, seed });
+
+        this.sendEquipmentMessage();
+    }
+
 
     private handleEffects(item: IItem, effects: OnItemUseEffect[]) {
         effects.forEach((effect) => {
@@ -127,7 +132,7 @@ class PlayerItemManager {
 
     private getNearbyItem(): IItem | null {
         let fallbackItem: IItem | null = null;
-        for (const item of this.nearbyItems) {
+        for (const item of ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height)) {
             if (!this.playerBody.collision(item.getBody().scale(30, 30))) {
                 continue;
             }

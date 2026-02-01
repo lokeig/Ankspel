@@ -6,12 +6,12 @@ class DirectionUtility {
         switch (direction) {
             case Direction.Left: return Direction.Right;
             case Direction.Right: return Direction.Left;
-            case Direction.Top: return Direction.Bot;
-            case Direction.Bot: return Direction.Top;
-            case Direction.TopLeft: return Direction.BotRight;
-            case Direction.TopRight: return Direction.BotLeft;
-            case Direction.BotLeft: return Direction.TopRight;
-            case Direction.BotRight: return Direction.TopLeft;
+            case Direction.Up: return Direction.Down;
+            case Direction.Down: return Direction.Up;
+            case Direction.UpLeft: return Direction.DownRight;
+            case Direction.UpRight: return Direction.DownLeft;
+            case Direction.DownLeft: return Direction.UpRight;
+            case Direction.DownRight: return Direction.UpLeft;
         }
     }
 }

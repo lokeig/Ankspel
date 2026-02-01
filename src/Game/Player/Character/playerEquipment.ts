@@ -1,4 +1,4 @@
-import { EquipmentSlot, Side, ThrowType, Utility, Vector } from "@common";
+import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility, Vector } from "@common";
 import { IItem, Ownership } from "@item";
 
 class PlayerEquipment {
@@ -22,6 +22,20 @@ class PlayerEquipment {
         this.getItem(slot).setOwnership(ownership);
     }
 
+    public unequipAll(): void {
+        this.equipment.forEach((_, slot) => {
+            this.equip(null, slot);
+        })
+    }
+
+    public setAnimation(anim: PlayerAnim): void {
+        this.equipment.forEach((item, slot) => {
+            if (this.hasItem(slot)) {
+                this.getItem(slot).interactions().getOnPlayerAnimation(anim);
+            }
+        })
+    }
+
     public throw(slot: EquipmentSlot, throwType: ThrowType) {
         if (!this.hasItem(slot)) {
             return;
@@ -33,7 +47,6 @@ class PlayerEquipment {
         this.equipment.set(slot, undefined);
     }
 
-
     public setBody(center: Vector, offset: Vector, direction: Side, angle: number, slot: EquipmentSlot) {
         if (!this.hasItem(slot)) {
             return;
@@ -41,7 +54,7 @@ class PlayerEquipment {
         const item = this.getItem(slot);
         item.getBody().setCenterToPos(center);
         item.getBody().direction = direction;
-        item.setWorldAngle(angle);
+        item.setAngle(angle);
 
         const angledOffset = Utility.Angle.rotateForce(offset, angle);
         item.getBody().pos.x += angledOffset.x * item.getBody().getDirectionMultiplier();
@@ -63,7 +76,7 @@ class PlayerEquipment {
         item.getBody().pos.x += item.getHoldOffset().x * item.getBody().getDirectionMultiplier();
         item.getBody().pos.y += item.getHoldOffset().y;
 
-        const collision = item.getBody().getHorizontalTileCollision();
+        const collision = item.getBody().getCollidingTile();
 
         item.getBody().pos = tempItemPos;
 

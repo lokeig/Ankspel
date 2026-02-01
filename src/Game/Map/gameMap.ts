@@ -27,7 +27,6 @@ class GameMap {
     }
 
     public setItem(type: string, gridPos: Vector): void {
-        ;
         this.items.push({ type, gridPos });
     }
 
@@ -36,11 +35,12 @@ class GameMap {
         return this.items;
     }
 
-    public setPlayerSpawn(gridPos: Vector) {
-        const pos = Grid.getWorldPos(gridPos);
-        pos.y -= PlayerCharacter.standardHeight;
-        pos.x -= PlayerCharacter.standardWidth / 2;
-        this.playerSpawns.push(pos);
+    public setPlayerSpawn(gridPos: Vector): void {
+        this.playerSpawns.push(gridPos);
+    }
+
+    public getSpawns(): Vector[] {
+        return this.playerSpawns;
     }
 
     public getRandomSpawnLocations(amount: number): Vector[] {
@@ -49,7 +49,7 @@ class GameMap {
         const base = Math.floor(amount / spawnCount);
         const extra = amount % spawnCount;
 
-        const order = Utility.Random.getArray(spawnCount);
+        const order = Utility.Random.order(spawnCount);
         const result: Vector[] = new Array(amount);
 
         let index = 0;

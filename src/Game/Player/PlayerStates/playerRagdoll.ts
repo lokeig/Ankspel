@@ -1,7 +1,8 @@
-import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, ItemInteraction, IState, EquipmentSlot } from "@common";
+import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { IItem, Ownership, useFunction } from "@item";
+import { IItem, Ownership, ItemUseHandler } from "@item";
+import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
     private playerCharacter: PlayerCharacter;
@@ -17,7 +18,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     private coyoteTime = new Countdown(0.15);
 
     private owned: Ownership = Ownership.None;
-    public interactions: Map<ItemInteraction, useFunction> = new Map();
+
+    public useInteractions = new ItemUseInteractions();
+    private currentState: boolean = false;
 
 
     constructor(playerCharacter: PlayerCharacter) {
@@ -43,7 +46,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     private handleInputs(deltaTime: number): void {
     }
 
-    private setAngle(head: boolean): void {
+    private setBodyPartAngle(head: boolean): void {
         const bodyCenter = this.body.getCenter();
         const otherBodyCenter = head ? this.head.getCenter() : this.legs.getCenter();
         const DX = bodyCenter.x - otherBodyCenter.x;
@@ -108,6 +111,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateEntered(from: PlayerState): void {
+        this.currentState = true;
         this.playerCharacter.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
 
         this.coyoteTime.setToReady();
@@ -161,7 +165,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.head.update(deltaTime);
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
-        
+
         for (let i = 0; i < 500; i++) {
             this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
             this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
@@ -169,14 +173,14 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
 
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
-            this.head.velocity.x = Utility.Random.getNumber(-3, 3);
+            this.head.velocity.x = Utility.Random.getInRange(-3, 3);
         }
         if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);
         }
         const head = true;
-        this.setAngle(head);
-        this.setAngle(!head);
+        this.setBodyPartAngle(head);
+        this.setBodyPartAngle(!head);
 
         this.setEquipmentLocation();
     }
@@ -194,8 +198,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.3, true);
 
         const head = true;
-        this.setAngle(head);
-        this.setAngle(!head);
+        this.setBodyPartAngle(head);
+        this.setBodyPartAngle(!head);
+
+        this.setEquipmentLocation();
     }
 
     public stateChange(): PlayerState {
@@ -211,6 +217,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateExited(): void {
+        this.currentState = false;
         this.updateStandardBody();
         const jumpHeight = 25;
         const exitVerticalSpeed = -250;
@@ -244,7 +251,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     // For IItem
     public update(deltaTime: number): void {
-        this.stateUpdate(deltaTime);
+        
     }
 
     public getBody(): DynamicObject {
@@ -255,16 +262,12 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         return this.headAngle;
     }
 
-    public getLocalAngle(): number {
-        return this.headAngle;
-    }
-
-    public setWorldAngle(angle: number): void {
+    public setAngle(angle: number): void {
 
     }
 
-    public setLocalAngle(angle: number): void {
-
+    public enabled(): boolean {
+        return this.currentState;
     }
 
     public getHandOffset(): Vector {
@@ -281,6 +284,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public getOwnership(): Ownership {
         return this.owned;
+    }
+
+    public interactions(): ItemUseInteractions {
+        return this.useInteractions;
     }
 
     public throw(throwType: ThrowType): void {

@@ -6,6 +6,7 @@ class SpriteAnimator {
     private spriteSheet: SpriteSheet;
     private animation: Animation;
     private currentFrame: number = 0;
+    
     private timer: number = 0;
     private done: boolean = false;
 
@@ -14,7 +15,7 @@ class SpriteAnimator {
         this.animation = animation;
     }
 
-    public update(deltaTime: number) {
+    public update(deltaTime: number): void {
         this.timer += deltaTime;
         const framesAmount = this.animation.getFrameAmount();
         const frameDuration = 1 / this.animation.fps;

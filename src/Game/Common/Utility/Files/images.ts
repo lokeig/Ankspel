@@ -22,8 +22,10 @@ const images = {
     trail: 'trail',
 
     // Particles
-    explosion: 'explosion'
-
+    explosion: 'explosion',
+    smallFlare: 'smallFlare',
+    bulletRebound: 'bulletRebound',
+    bulletGlow: 'bulletGlow',
 };
 
 export { images };

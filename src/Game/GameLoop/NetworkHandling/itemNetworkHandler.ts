@@ -1,5 +1,5 @@
 import { Utility } from "@common";
-import { ItemManager, OnItemUseType } from "@item";
+import { ItemManager, OnItemUseType, Ownership } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
@@ -7,7 +7,7 @@ class ItemMessageHandler {
     static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.SpawnItem, ({ type, id, location }) => {
+        gameEvent.subscribe(GameMessage.SpawnItem, ({ type, id, pos: location }) => {
             ItemManager.spawn(type, Utility.Vector.convertNetwork(location), id);
         });
 
@@ -19,16 +19,16 @@ class ItemMessageHandler {
             item.setToDelete();
         });
 
-        gameEvent.subscribe(GameMessage.ActivateItem, ({ id, position, angle, direction, action, seed }) => {
+        gameEvent.subscribe(GameMessage.ActivateItem, ({ id, pos: position, angle, direction, action, seed }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
                 return;
             }
-            item.setWorldAngle(angle);
+            item.setAngle(angle);
             item.getBody().pos = Utility.Vector.convertNetwork(position);
             item.getBody().direction = direction;
             const local = false;
-            const effects = item.interactions.get(action)!(seed, local);
+            const effects = item.interactions().get(action)!(seed, local);
             effects.forEach((effect) => {
                 switch (effect.type) {
                     case (OnItemUseType.Aim): {
@@ -44,7 +44,7 @@ class ItemMessageHandler {
                 return;
             }
             PlayerManager.getPlayers().forEach(player => {
-                player.character.equipment.getAllEquippedItems().forEach((key, slot) => {
+                player.character.equipment.getAllEquippedItems().forEach((_, slot) => {
                     if (player.character.equipment.getItem(slot) === item) {
                         player.character.equipment.equip(null, slot);
                     }

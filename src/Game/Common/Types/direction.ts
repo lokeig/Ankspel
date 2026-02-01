@@ -1,12 +1,19 @@
+enum AxisDirection {
+    Left,
+    Right,
+    Up,
+    Down
+}
+
 enum Direction {
     Left = "Left",
     Right = "Right",
-    Top = "Top",
-    Bot = "Bot",
-    TopLeft = "TopLeft",
-    TopRight = "TopRight",
-    BotLeft = "BotLeft",
-    BotRight = "BotRight"
+    Up = "Up",
+    Down = "Down",
+    UpLeft = "UpLeft",
+    UpRight = "UpRight",
+    DownLeft = "DownLeft",
+    DownRight = "DownRight"
 };
 
-export { Direction };
+export { Direction, AxisDirection };

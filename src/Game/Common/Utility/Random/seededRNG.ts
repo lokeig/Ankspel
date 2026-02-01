@@ -17,6 +17,15 @@ class SeededRNG {
     public getInRange(min: number, max: number) {
         return min + (max - min) * this.next();
     }
+
+    public order(n: number): number[] {
+        const arr = Array.from({ length: n }, (_, i) => i);
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(this.getInRange(0, i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
 }
 
 export { SeededRNG };

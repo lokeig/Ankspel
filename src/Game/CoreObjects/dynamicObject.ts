@@ -22,7 +22,6 @@ class DynamicObject extends GameObject {
     public bounceFactor: number = 0;
     private smallestBounceValue = 1;
 
-
     constructor(pos: Vector, width: number, height: number) {
         super(pos, width, height);
     }
@@ -60,12 +59,12 @@ class DynamicObject extends GameObject {
 
     public updatePositions(deltaTime: number) {
         this.pos.x = this.pos.x + this.velocity.x * deltaTime;
-        const horizontalCollidingTile = this.getHorizontalTileCollision();
+        const horizontalCollidingTile = this.getCollidingTile();
         if (horizontalCollidingTile) {
             this.handleSideCollision(horizontalCollidingTile);
         }
         this.pos.y = this.pos.y + this.velocity.y * deltaTime;
-        const verticalCollidingTile = this.getVerticalTileCollision();
+        const verticalCollidingTile = this.getVerticalTileCollision(deltaTime);
         if (verticalCollidingTile) {
             if (this.velocity.y > 0) {
                 this.handleBotCollision(verticalCollidingTile);
@@ -75,7 +74,7 @@ class DynamicObject extends GameObject {
         }
     }
 
-    public getHorizontalTileCollision(): GameObject | undefined {
+    public getCollidingTile(): GameObject | undefined {
         this.collidingSide = false;
         for (const collidable of this.collidableObjects) {
             if (!this.collision(collidable.gameObject) || collidable.platform) {
@@ -85,7 +84,7 @@ class DynamicObject extends GameObject {
         }
     }
 
-    public getVerticalTileCollision(): GameObject | undefined {
+    private getVerticalTileCollision(deltaTime: number): GameObject | undefined {
         this.grounded = false;
         this.collidingUp = false;
         for (const collidable of this.collidableObjects) {
@@ -98,7 +97,7 @@ class DynamicObject extends GameObject {
             if (this.ignorePlatforms || this.velocity.y < 0) {
                 continue;
             }
-            if (this.pos.y + this.height > collidable.gameObject.pos.y + 5 + 0) {
+            if (this.pos.y - (this.velocity.y * deltaTime) + this.height> collidable.gameObject.pos.y) {
                 continue;
             }
             return collidable.gameObject;

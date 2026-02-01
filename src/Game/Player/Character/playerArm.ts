@@ -1,10 +1,11 @@
 import { Vector } from "@common";
+import { off } from "process";
 
 class PlayerArm {
     private drawSize: number = 32;
-    public pos: Vector = new Vector();
+    public pos = new Vector();
     public angle: number = 0;
-    private posOffset: Vector = new Vector();
+    private posOffset = new Vector();
     private rotateSpeed: number = 25;
 
     public getCenter(): Vector {
@@ -16,6 +17,7 @@ class PlayerArm {
 
     public setPosition(playerPos: Vector, playerDrawSize: number, offset: Vector, flip: boolean): void {
         const result = playerPos.clone();
+
         if (flip) {
             result.x += playerDrawSize - this.drawSize - this.posOffset.x - offset.x;
         } else {
@@ -23,6 +25,8 @@ class PlayerArm {
         }
         result.y += this.posOffset.y + offset.y;
         this.pos = result;
+
+
     }
 
     public setOffset(offset: Vector): void {

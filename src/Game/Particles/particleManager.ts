@@ -3,6 +3,10 @@ import { IParticle } from "./IParticle";
 class ParticleManager {
     private static particles: Set<IParticle> = new Set();
 
+    public static clear(): void {
+        this.particles = new Set();
+    }
+
     public static update(deltaTime: number): void {
         for (const particle of this.particles.values()) {
             particle.update(deltaTime);

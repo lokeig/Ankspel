@@ -1,23 +1,24 @@
-import { ItemInteraction, ThrowType, Vector } from "@common";
-import { useFunction } from "./useFunction";
+import { ThrowType, Vector } from "@common";
 import { DynamicObject } from "@core";
 import { Ownership } from "./itemUseType";
+import { ItemUseInteractions } from "./itemUseInteractions";
 
 interface IItem {
     update(deltaTime: number): void;
     draw(): void;
     getBody(): DynamicObject;
-    interactions: Map<ItemInteraction, useFunction>;
+    interactions(): ItemUseInteractions;
 
     setOwnership(value: Ownership): void;
     getOwnership(): Ownership;
     throw(throwType: ThrowType): void;
+    enabled(): boolean;
 
     shouldBeDeleted(): boolean;
     setToDelete(): void;
 
     getAngle(): number;
-    setWorldAngle(to: number): void;
+    setAngle(to: number): void;
 
     getHoldOffset(): Vector;
     getHandOffset(): Vector;

@@ -3,7 +3,7 @@ import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEf
 enum GameMessage {
     // ─── Connection ─────────────────────────
     ReadyToPlay,
-    DataDone,
+    StartPlaying,
 
     // ─── Player ─────────────────────────────
     PlayerInfo,
@@ -22,11 +22,10 @@ enum GameMessage {
     ThrowItem,
 
     // ─── Projectiles ────────────────────────
-    SpawnProjectile,
 
     // ─── Map ────────────────────────────────
     LoadMap,
-    ReadyForMap,
+    MapLoaded,
     StartMap,
 }
 
@@ -38,30 +37,29 @@ type NetworkVector = {
 interface GameMessageMap {
     // ─── Connection ─────────────────────────
     [GameMessage.ReadyToPlay]: {};
-    [GameMessage.DataDone]: {};
+    [GameMessage.StartPlaying]: {};
 
     // ─── Player ─────────────────────────────
     [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
-    [GameMessage.NewPlayer]: { id: number, ragdollId: number };
-    [GameMessage.PlayerSpawn]: { id: number, location: NetworkVector };
+    [GameMessage.NewPlayer]: { id: number };
+    [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };
     [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, slot: EquipmentSlot | null };
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
 
     // ─── Items ──────────────────────────────
     [GameMessage.ThrowItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
-    [GameMessage.SpawnItem]: { id: number, location: NetworkVector, type: string };
+    [GameMessage.SpawnItem]: { id: number, pos: NetworkVector, type: string };
     [GameMessage.DeleteItem]: { id: number };
-    [GameMessage.ActivateItem]: { id: number, position: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
+    [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
 
     // ─── Projectiles ────────────────────────
-    [GameMessage.SpawnProjectile]: { seed: number, location: NetworkVector, angle: number, type: string };
 
     // ─── Map ────────────────────────────────
-    [GameMessage.LoadMap]: { name: string };
-    [GameMessage.ReadyForMap]: {};
+    [GameMessage.LoadMap]: { id: number };
+    [GameMessage.MapLoaded]: {};
     [GameMessage.StartMap]: { time: number };
 }
 

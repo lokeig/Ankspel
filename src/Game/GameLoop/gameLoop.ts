@@ -2,8 +2,9 @@ import { StateMachine, Input } from "@common";
 import { Render } from "@render";
 import { LobbyList } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
-import { InMatchLoop } from "./inMatchLoop";
+import { Playing } from "./LoopStates/playing";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
+import { LoadingMap } from "./LoopStates/loadingMap";
 
 class GameLoop {
     private lastTime = 0;
@@ -12,20 +13,28 @@ class GameLoop {
     constructor() {
         NetworkHandler.init();
         LobbyList.get().show();
-        const initalState = GameLoopState.playing;
+
+        const initalState = GameLoopState.LoadingMap;
         this.stateMachine = new StateMachine(initalState);
-        this.stateMachine.addState(GameLoopState.playing, new InMatchLoop());
-        NetworkHandler.onMapLoad((time: number) => { this.startGame(time); });
+
+        this.stateMachine.addState(GameLoopState.Playing, new Playing());
+        this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap());
+
+        NetworkHandler.setOnStart(() => { this.startGame(); });
     }
 
-    private startGame(time: number): void {
-        setTimeout(() => {
-            LobbyList.get().hide();
-            requestAnimationFrame(this.gameLoop);
-        }, Math.max(time - Date.now(), 0));
+    private startGame(): void {
+        LobbyList.get().hide();
+        this.stateMachine.enterState();
+        requestAnimationFrame(this.gameLoop);
     }
 
     private gameLoop = (currentTime: number) => {
+        if (this.lastTime === 0) {
+            this.lastTime = currentTime;
+            requestAnimationFrame(this.gameLoop);
+            return;
+        }
         const deltaTime = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
         Render.get().clear();

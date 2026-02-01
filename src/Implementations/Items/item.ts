@@ -1,9 +1,10 @@
-import { ItemInteraction, Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
+import { Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
 import { DynamicObject } from "@core";
-import { IItem, Ownership, useFunction } from "@item";
+import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
+import { IItem, Ownership } from "@item";
 
 abstract class Item implements IItem {
-    public interactions: Map<ItemInteraction, useFunction> = new Map();
+    protected useInteractions = new ItemUseInteractions;
     private ownership: Ownership = Ownership.None;
     protected body: DynamicObject;
 
@@ -39,6 +40,7 @@ abstract class Item implements IItem {
         }
     }
 
+
     private updateAngle(deltaTime: number): void {
         const angle = this.worldAngle + this.localAngle;
         const normalized = Utility.Angle.normalizeAngle(angle);
@@ -56,6 +58,10 @@ abstract class Item implements IItem {
         this.worldAngle += this.rotateSpeed * deltaTime;
     }
 
+    public interactions(): ItemUseInteractions {
+        return this.useInteractions;
+    }
+
     public getBody(): DynamicObject {
         return this.body;
     }
@@ -64,7 +70,7 @@ abstract class Item implements IItem {
         return this.worldAngle + this.localAngle;
     }
 
-    public setWorldAngle(to: number): void {
+    public setAngle(to: number): void {
         this.worldAngle = to;
     }
 
@@ -89,6 +95,10 @@ abstract class Item implements IItem {
             this.body.pos.x + ((this.body.width - drawSize) / 2),
             this.body.pos.y + ((this.body.height - drawSize) / 2)
         );
+    }
+    
+    public enabled(): boolean {
+        return true;
     }
 
     public throw(throwType: ThrowType): void {

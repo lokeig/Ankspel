@@ -44,5 +44,35 @@
       "row": 0,
       "col": 1
     }
+  },
+  "smallFlare": {
+    "default": {
+      "row": 0,
+      "col": 0
+    }
+  },
+  "bulletRebound": {
+    "f1": {
+      "row": 0,
+      "col": 0
+    },
+    "f2": {
+      "row": 0,
+      "col": 1
+    },
+    "f3": {
+      "row": 0,
+      "col": 2
+    },
+    "f4": {
+      "row": 0,
+      "col": 3
+    }
+  },
+  "bulletGlow": {
+    "default": {
+      "row": 0,
+      "col": 0
+    }
   }
 }

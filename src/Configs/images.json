@@ -44,6 +44,21 @@
             "src": "/assets/explosion.png",
             "frameWidth": 64,
             "frameHeight": 64
+        },
+        "bulletRebound": {
+            "src": "/assets/bulletRebound.png",
+            "frameWidth": 16,
+            "frameHeight": 16
+        },
+        "smallFlare": {
+            "src": "/assets/smallFlare.png",
+            "frameWidth": 11,
+            "frameHeight": 10
+        },
+        "bulletGlow": {
+            "src": "/assets/bulletGlow.png",
+            "frameWidth": 1,
+            "frameHeight": 5
         }
     }
 }

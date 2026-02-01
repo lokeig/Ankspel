@@ -1,14 +1,10 @@
 import { IceTile } from "@impl/Tiles";
-import { GameMap } from "@game/Map/map";
+import { GameMap } from "@game/Map/gameMap";
 import { Vector } from "@common";
 
 const defaultMap2 = new GameMap();
 
 defaultMap2.fillArea(IceTile, 5, 14, 25, 2);
-defaultMap2.fillArea(IceTile, 23, 5, 6, 8);
-defaultMap2.fillArea(IceTile, 3, 8, 2, 8);
-defaultMap2.fillArea(IceTile, 9, 11, 2, 4);
-defaultMap2.fillArea(IceTile, 9, 5, 2, 4);
 defaultMap2.fillArea(IceTile, 15, 7, 3, 3);
 
 defaultMap2.setPlayerSpawn(new Vector(8, 14));

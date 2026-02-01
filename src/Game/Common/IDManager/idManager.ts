@@ -35,16 +35,6 @@ class IDManager<T> {
         return id;
     }
 
-    public removeID(id: number): T | undefined {
-        const object = this.idToObject.get(id);
-        if (!object) {
-            return undefined;
-        }
-        this.objectToID.delete(object);
-        this.idToObject.delete(id);
-        return object;
-    }
-
     public setID(object: T, id: number): void {
         this.objectToID.set(object, id);
         this.idToObject.set(id, object);

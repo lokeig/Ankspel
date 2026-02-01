@@ -1,4 +1,4 @@
-import { Grid, Vector } from "@common";
+import { Grid, Utility, Vector } from "@common";
 import { ItemConstructor, IItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
@@ -8,6 +8,21 @@ class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
     private static idManager = new IDManager<IItem>();
+    private static permanent: [IItem, number | undefined][] = [];
+
+    public static clear(): void {
+        this.items = new Map();
+        this.idManager.reset();
+
+        this.permanent.forEach(item => this.addToMap(item[0]));
+        this.permanent.forEach(([item, id]) => {
+            if (id === undefined) {
+                this.idManager.add(item);
+            } else {
+                this.idManager.setID(item, id)
+            }
+        });
+    }
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
@@ -26,23 +41,32 @@ class ItemManager {
         this.register.set(type, constructor);
     }
 
-    public static create(type: string, pos: Vector): IItem | null {
+    public static create(type: string, gridPos: Vector): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
         }
-        const result = new constructor(pos);
-        this.addToMap(result);
-        this.idManager.add(result);
-        return result;
+        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
+        newItem.getBody().pos.y -= newItem.getBody().height;
+
+        this.addToMap(newItem);
+        const id = this.idManager.add(newItem);
+
+        Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
+
+        return newItem;
     }
 
-    public static spawn(type: string, pos: Vector, id: number): void {
+    public static spawn(type: string, gridPos: Vector, id: number): void {
         const constructor = this.register.get(type);
         if (!constructor) {
             return;
         }
-        const newItem = new constructor(pos);
+        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
+        newItem.getBody().pos.y -= newItem.getBody().height;
+
         this.addToMap(newItem);
         this.idManager.setID(newItem, id);
     }
@@ -59,12 +83,12 @@ class ItemManager {
                 return;
             }
             itemSet.forEach(item => {
-                if (item.getOwnership() === Ownership.None) {
+                if (item.enabled() && item.getOwnership() === Ownership.None) {
                     result.push(item);
                 }
             });
         }
-        
+
         Grid.forNearby(pos, nextPos, width, height, accumulate);
         return result;
     }
@@ -78,12 +102,14 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static addID(item: IItem): number {
-        return this.idManager.add(item);
-    }
-
-    public static addWithID(item: IItem, id: number): void {
-        this.idManager.setID(item, id);
+    public static addPermanent(item: IItem, id?: number): void {
+        this.addToMap(item);
+        this.permanent.push([item, id]);
+        if (id !== undefined) {
+            this.idManager.setID(item, id);
+        } else {
+            this.idManager.add(item);
+        }
     }
 
     public static getItemFromID(id: number): IItem | undefined {
@@ -96,7 +122,7 @@ class ItemManager {
 
     public static draw() {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (item.getOwnership() === Ownership.None) {
+            if (item.enabled() && item.getOwnership() === Ownership.None) {
                 item.draw();
             }
         }));

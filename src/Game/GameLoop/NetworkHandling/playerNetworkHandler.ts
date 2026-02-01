@@ -7,11 +7,11 @@ class PlayerNetworkHandler {
     public static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.NewPlayer, ({ id, ragdollId }) => {
-            PlayerManager.spawn(id, ragdollId);
+        gameEvent.subscribe(GameMessage.NewPlayer, ({ id }) => {
+            PlayerManager.spawn(id);
         });
 
-        gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, location }) => {
+        gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, pos: location }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             player.character.setPos(Utility.Vector.convertNetwork(location));
         });
@@ -23,7 +23,10 @@ class PlayerNetworkHandler {
             }
             player.character.body.pos = Utility.Vector.convertNetwork(pos);
             player.character.body.velocity = Utility.Vector.convertNetwork(velocity);
-            player.character.body.direction = side;
+            if (player.character.body.direction !== side) {
+                player.character.armFront.angle *= -1;
+                player.character.body.direction = side;
+            }
             player.character.animator.setAnimation(anim);
         });
 

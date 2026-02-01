@@ -6,34 +6,37 @@ import { OnItemUseEffect } from "@item";
 
 class Shotgun extends Item {
     private handleOffset: number = 0;
-    private maxHandleOffset: number = -8;
     private handleLerp = new Lerp(6, lerpTriangle)
-
-    private frames = {
+    
+    private static maxHandleOffset: number = -8;
+    private static frames = {
         gun: new Frame(),
         handle: new Frame()
     }
-
-    private currentState: ShotgunState = ShotgunState.Loaded;
-    private spriteSheet: SpriteSheet;
+    private static spriteSheet: SpriteSheet;
     private firearmInfo!: FirearmHelper;
 
+    private currentState: ShotgunState = ShotgunState.Loaded;
+
+    static {
+        const spriteInfo = Utility.File.getImage(images.shotgun);
+        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        Utility.File.setFrames("shotgun", this.frames);
+    }
+    
     constructor(pos: Vector) {
         const width = 30;
         const height = 15;
         super(pos, width, height);
-
+        
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
-
-        const spriteInfo = Utility.File.getImage(images.shotgun);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
-        Utility.File.setFrames("shotgun", this.frames);
-        this.setupFirearmInfo();
-
-        this.interactions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+        
+        
+        this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
+        this.setupFirearmInfo();
     }
 
     private setupFirearmInfo(): void {
@@ -73,7 +76,7 @@ class Shotgun extends Item {
     }
 
     private reload(): OnItemUseEffect[] {
-        this.handleLerp.startLerp(0, this.maxHandleOffset);
+        this.handleLerp.startLerp(0, Shotgun.maxHandleOffset);
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
         return [];
     }
@@ -81,14 +84,14 @@ class Shotgun extends Item {
     public draw(): void {
         const drawSize = 64;
         const drawPos = this.getDrawPos(drawSize);
-        this.spriteSheet.draw(this.frames.gun, drawPos, drawSize, this.body.isFlip(), this.getAngle());
+        Shotgun.spriteSheet.draw(Shotgun.frames.gun, drawPos, drawSize, this.body.isFlip(), this.getAngle());
 
         const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.getAngle());
         const handleDrawPos = new Vector(
             drawPos.x + handleOffsetRotated.x * this.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        this.spriteSheet.draw(this.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.getAngle());
+        Shotgun.spriteSheet.draw(Shotgun.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.getAngle());
     }
 
     public shouldBeDeleted(): boolean {

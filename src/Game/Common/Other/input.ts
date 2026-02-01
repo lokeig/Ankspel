@@ -1,5 +1,4 @@
 import { Vector } from "../Types/vector";
-import { MapNetworkHandler } from "@game/GameLoop/NetworkHandling/mapNetworkHandler";
 
 class Input {
     private static keysDown: Set<string> = new Set();
@@ -7,12 +6,17 @@ class Input {
     private static mouseClickBool: boolean = false;
     private static mouseDownBool: boolean = false;
     private static mousePos: Vector = new Vector();
-
-    private static quickStartAllowed: boolean = true;
+    
+    private static onKeyFunction: Map<string, (() => void)[]> = new Map();
 
     static init() {
 
         window.addEventListener('keydown', e => {
+            const onKeyFunction = this.onKeyFunction.get(e.key);
+            if (onKeyFunction) {
+                onKeyFunction.forEach(fn => fn());
+            }
+
             if (!this.keysDown.has(e.key)) {
                 this.keysPressed.add(e.key);
             }
@@ -20,11 +24,6 @@ class Input {
             this.keysDown.add(e.key);
             if ((e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
                 e.preventDefault();
-            }
-
-            if (e.key === "q" && this.quickStartAllowed) {
-                MapNetworkHandler.quickStart();
-                this.quickStartAllowed = false;
             }
         });
 
@@ -46,6 +45,13 @@ class Input {
         window.addEventListener("mousemove", (e) => {
             this.mousePos = new Vector(e.clientX, e.clientY);
         });
+    }
+
+    static onKey(key: string, e: () => void): void {
+        if (!this.onKeyFunction.get(key)) {
+            this.onKeyFunction.set(key, []);
+        }
+        this.onKeyFunction.get!(key)!.push(e);
     }
 
     static keyDown(key: string): boolean {

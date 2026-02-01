@@ -64,12 +64,12 @@ class TileManager {
         switch (direction) {
             case Direction.Left: return new Vector(gridPos.x - 1, gridPos.y);
             case Direction.Right: return new Vector(gridPos.x + 1, gridPos.y);
-            case Direction.Top: return new Vector(gridPos.x, gridPos.y - 1);
-            case Direction.Bot: return new Vector(gridPos.x, gridPos.y + 1);
-            case Direction.TopLeft: return new Vector(gridPos.x - 1, gridPos.y - 1);
-            case Direction.TopRight: return new Vector(gridPos.x + 1, gridPos.y - 1);
-            case Direction.BotLeft: return new Vector(gridPos.x - 1, gridPos.y + 1);
-            case Direction.BotRight: return new Vector(gridPos.x + 1, gridPos.y + 1);
+            case Direction.Up: return new Vector(gridPos.x, gridPos.y - 1);
+            case Direction.Down: return new Vector(gridPos.x, gridPos.y + 1);
+            case Direction.UpLeft: return new Vector(gridPos.x - 1, gridPos.y - 1);
+            case Direction.UpRight: return new Vector(gridPos.x + 1, gridPos.y - 1);
+            case Direction.DownLeft: return new Vector(gridPos.x - 1, gridPos.y + 1);
+            case Direction.DownRight: return new Vector(gridPos.x + 1, gridPos.y + 1);
         }
     }
 

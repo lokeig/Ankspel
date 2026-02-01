@@ -1,8 +1,11 @@
-import { Countdown, Grid, ProjectileEffect, Utility, Vector } from "@common";
+import { AxisDirection, Countdown, Grid, ProjectileEffect, Utility, Vector } from "@common";
 import { CollisionObject, GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
+import { ParticleManager } from "@game/Particles";
+import { BulletReboundVFX, ExplosionVFX } from "@impl/Particles";
+import { stat } from "fs";
 
 class Bullet implements IProjectile {
     private pos: Vector;
@@ -18,7 +21,7 @@ class Bullet implements IProjectile {
 
     private prevPos: Vector;
 
-    private minDistance: number = 0;
+    private minDistance: number = Infinity;
 
     constructor(pos: Vector, angle: number, speed: number, blockRange: number) {
         const lifespan = blockRange * Grid.size / speed;
@@ -46,38 +49,54 @@ class Bullet implements IProjectile {
 
         this.lifespan.update(deltaTime);
 
-        const nearbyTiles = TileManager.getNearby(this.prevPos, 1, 1);
-        const colliding = this.getCollidingPositions(nearbyTiles);
+        const nearbyTiles = TileManager.getNearby(this.prevPos, 0, 0, this.pos);
+        const status = this.getClosestCollidingTile(nearbyTiles);
+        if (status) {
+            const [tile, pos] = status;
+            this.minDistance = pos.distanceToSquared(this.prevPos);
+            this.pos = pos.clone();
+            const axisDirection = this.getAxis(pos, tile);
 
-        let closest: Vector | undefined;
-        let minDistance = Infinity;
-
-        colliding.forEach(pos => {
-            const distance = pos.distanceToSquared(this.prevPos);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closest = pos;
-            }
-        });
-        this.minDistance = minDistance;
-        if (closest) {
-            this.pos = closest.clone();
+            ParticleManager.addParticle(new BulletReboundVFX(this.pos.clone(), this.angle, axisDirection));
             this.setToDelete();
         }
     }
 
-    private getCollidingPositions(tiles: CollisionObject[]): Vector[] {
-        const result: Vector[] = [];
+    private getAxis(pos: Vector, tile: GameObject): AxisDirection {
+        if (pos.y === tile.pos.y) {
+            return AxisDirection.Up;
+        }
+        if (pos.x === tile.pos.x) {
+            return AxisDirection.Left;
+        }
+        if (pos.y === tile.pos.y + tile.height) {
+            return AxisDirection.Down;
+        }
+        return AxisDirection.Right;
+    }
+
+    private getClosestCollidingTile(tiles: CollisionObject[]): [GameObject, Vector] | null {
+        const colliding: [GameObject, Vector][] = [];
         tiles.forEach(tile => {
             if (tile.platform) {
                 return;
             }
             const status = this.collision(tile.gameObject);
             if (status.collision) {
-                result.push(status.pos);
+                colliding.push([tile.gameObject, status.pos]);
             }
         });
-        return result;
+
+        let closest: [GameObject, Vector] | null = null;
+        let minDistance: number = Infinity;
+        colliding.forEach(([tile, pos]) => {
+            const distance = pos.distanceToSquared(this.prevPos);
+            if (distance < minDistance) {
+                closest = [tile, pos];
+                minDistance = distance;
+            }
+        });
+        return closest;
     }
 
     private collision(block: GameObject): { collision: boolean; pos: Vector } {
@@ -88,8 +107,11 @@ class Bullet implements IProjectile {
 
     public wentThrough(block: GameObject): { collision: boolean; pos: Vector } {
         const status = this.collision(block);
-        let closer = status.pos.distanceToSquared(this.prevPos) < this.minDistance;
-        return { collision: status.collision && closer, pos: status.pos };
+        if (status.collision && status.pos.distanceToSquared(this.prevPos) < this.minDistance) {
+            this.pos = status.pos.clone();
+            return { collision: true, pos: status.pos };
+        }
+        return { collision: false, pos: status.pos };
     }
 
     public getPos(): Vector {
@@ -117,7 +139,6 @@ class Bullet implements IProjectile {
     }
 
     public onPlayerHit(): ProjectileEffect {
-        this.setToDelete();
         return ProjectileEffect.Damage;
     }
 

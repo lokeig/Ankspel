@@ -6,11 +6,14 @@ import { SpriteLookup } from "./spriteLookup";
 abstract class BaseTile implements ITile {
     public body: StaticObject;
     private spriteIndex: number = 0;
-    private static lookup: SpriteLookup = (() => {
-        const config = Utility.File.getTileLookup();
-        return new SpriteLookup(config.tiles, config.lipLeft, config.lipRight);
-    })();
+
+    private static lookup: SpriteLookup;
     protected sprite!: SpriteSheet;
+
+    static {
+        const config = Utility.File.getTileLookup();
+        this.lookup = new SpriteLookup(config.tiles, config.lipLeft, config.lipRight);
+    }
 
     constructor(pos: Vector, size: number) {
         const platform = false;
@@ -22,14 +25,14 @@ abstract class BaseTile implements ITile {
         topRight: boolean, topLeft: boolean, botRight: boolean, botLeft: boolean
     } {
         return {
-            top: this.body.isNeighbour(Direction.Top),
+            top: this.body.isNeighbour(Direction.Up),
             right: this.body.isNeighbour(Direction.Right),
             left: this.body.isNeighbour(Direction.Left),
-            bot: this.body.isNeighbour(Direction.Bot),
-            topRight: this.body.isNeighbour(Direction.TopRight),
-            topLeft: this.body.isNeighbour(Direction.TopLeft),
-            botRight: this.body.isNeighbour(Direction.BotRight),
-            botLeft: this.body.isNeighbour(Direction.BotLeft)
+            bot: this.body.isNeighbour(Direction.Down),
+            topRight: this.body.isNeighbour(Direction.UpRight),
+            topLeft: this.body.isNeighbour(Direction.UpLeft),
+            botRight: this.body.isNeighbour(Direction.DownRight),
+            botLeft: this.body.isNeighbour(Direction.DownLeft)
         }
     }
 

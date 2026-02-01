@@ -3,11 +3,10 @@ enum ItemInteraction {
     Down,
     Left,
     Right,
-    Flap,
-    Jump,
     Activate,
     ActivateHold,
-    Hit,
+    Quack,
+    HitByProjectile,
 }
 
 

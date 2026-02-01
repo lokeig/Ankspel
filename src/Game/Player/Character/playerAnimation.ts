@@ -5,7 +5,7 @@ class PlayerAnimation {
     private currAnim: PlayerAnim;
     private bodyAnimator: SpriteAnimator;
     private armAnimator: SpriteAnimator;
-    private animations: Record<PlayerAnim, Animation> = {
+    private static animations: Record<PlayerAnim, Animation> = {
         [PlayerAnim.Idle]: new Animation(),
         [PlayerAnim.Walk]: new Animation(),
         [PlayerAnim.Crouch]: new Animation(),
@@ -20,28 +20,40 @@ class PlayerAnimation {
     };
     private holding: boolean = false;
 
+    private static bodySprite: SpriteSheet;
+    private static armSprite: SpriteSheet;
+
+
+    static {
+        Utility.File.setAnimations("player", this.animations);
+
+        const bodySpriteInfo = Utility.File.getImage(images.playerImage);
+        this.bodySprite = new SpriteSheet(bodySpriteInfo.src, bodySpriteInfo.frameWidth, bodySpriteInfo.frameHeight);
+
+        const armSpriteInfo = Utility.File.getImage(images.playerHands);
+        this.armSprite = new SpriteSheet(armSpriteInfo.src, armSpriteInfo.frameWidth, armSpriteInfo.frameHeight);
+    }
+
     constructor() {
         this.currAnim = PlayerAnim.Idle;
 
-        const bodySpriteInfo = Utility.File.getImage(images.playerImage);
-        const bodySprite = new SpriteSheet(bodySpriteInfo.src, bodySpriteInfo.frameHeight, bodySpriteInfo.frameWidth);
-        this.bodyAnimator = new SpriteAnimator(bodySprite, this.animations[this.currAnim]);
-
-        const armSpriteInfo = Utility.File.getImage(images.playerHands);
-        const armSprite = new SpriteSheet(armSpriteInfo.src, armSpriteInfo.frameHeight, armSpriteInfo.frameWidth);
-        this.armAnimator = new SpriteAnimator(armSprite, this.animations[this.currAnim]);
-
-        Utility.File.setAnimations("player", this.animations);
+        this.bodyAnimator = new SpriteAnimator(PlayerAnimation.bodySprite, PlayerAnimation.animations[this.currAnim]);
+        this.armAnimator = new SpriteAnimator(PlayerAnimation.armSprite, PlayerAnimation.animations[this.currAnim]);
     }
 
     public setAnimation(animation: PlayerAnim) {
         this.currAnim = animation;
-        this.bodyAnimator.setAnimation(this.animations[this.currAnim]);
+        this.bodyAnimator.setAnimation(PlayerAnimation.animations[this.currAnim]);
         if (this.holding) {
-            this.armAnimator.setAnimation(this.animations[PlayerAnim.ItemHolding]);
+            this.armAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.ItemHolding]);
         } else {
-            this.armAnimator.setAnimation(this.animations[this.currAnim]);
+            this.armAnimator.setAnimation(PlayerAnimation.animations[this.currAnim]);
         }
+    }
+
+    public reset(): void {
+        this.holding = false;
+        this.setAnimation(PlayerAnim.Idle);
     }
 
     public getCurrentAnimation(): PlayerAnim {
@@ -70,9 +82,10 @@ class PlayerAnimation {
     }
 
     public drawRagdoll(headPos: Vector, legsPos: Vector, drawSize: number, headAngle: number, legsAngle: number, flip: boolean) {
-        this.bodyAnimator.setAnimation(this.animations.upperRagdoll);
+        this.bodyAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.UpperRagdoll]);
         this.bodyAnimator.draw(headPos, drawSize, flip, headAngle);
-        this.bodyAnimator.setAnimation(this.animations.lowerRagdoll);
+
+        this.bodyAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.LowerRagdoll]);
         this.bodyAnimator.draw(legsPos, drawSize, flip, legsAngle);
     }
 

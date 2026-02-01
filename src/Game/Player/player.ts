@@ -1,27 +1,42 @@
-import { Controls, IState, StateMachine, Vector } from "@common";
+import { Controls, Grid, IState, StateMachine, Utility, Vector } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
-import { Render } from "@render";
-import { IItem, Ownership } from "@item";
+import { ItemManager, Ownership } from "@item";
+import { Connection, GameMessage } from "@server";
 
 class Player {
     public character!: PlayerCharacter;
     private stateMachine: StateMachine<PlayerState>;
+    private id: number;
 
-    constructor(id: number) {
+    constructor(id: number, controls?: Controls) {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
+        this.id = id;
         this.character = new PlayerCharacter(new Vector(), id);
+        if (controls) {
+            this.character.setControls(controls);
+        }
         this.setupStateMachine();
     }
 
-    public setControls(controls: Controls) {
-        this.character.setControls(controls);
+    public setSpawn(gridPos: Vector): void {
+        const worldPos = Grid.getWorldPos(gridPos);
+        worldPos.y -= this.character.body.height;
+        worldPos.x += (Grid.size - this.character.body.width) / 2;
+        this.character.setPos(worldPos);
+        Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
     }
 
     public held(): boolean {
-        return (this.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll).getOwnership() === Ownership.Held;
-
+        const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll);
+        return ragdoll instanceof PlayerRagdoll && ragdoll.getOwnership() === Ownership.Held;
     }
+
+    public reset(): void {
+        this.stateMachine.forceState(PlayerState.Standard);
+        this.character.reset();
+        this.stateMachine.enterState();
+        }
 
     private setupStateMachine(): void {
         this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
@@ -29,7 +44,14 @@ class Player {
         const crouch = true;
         this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
-        this.stateMachine.addState(PlayerState.Ragdoll, new PlayerRagdoll(this.character));
+
+        const ragdoll = new PlayerRagdoll(this.character);
+        if (this.character.isLocal()) {
+            ItemManager.addPermanent(ragdoll);
+        } else {
+            ItemManager.addPermanent(ragdoll, this.id);
+        }
+        this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.enterState();
     }
 
@@ -47,10 +69,6 @@ class Player {
         return this.stateMachine.getInstance(state);
     }
 
-    public setNearbyItems(items: IItem[]): void {
-        this.character.itemManager.setNearbyItems(items);
-    }
-
     public setState(state: PlayerState): void {
         if (state !== this.stateMachine.getCurrentState()) {
             this.stateMachine.forceState(state);
@@ -62,22 +80,11 @@ class Player {
     }
 
     public update(deltaTime: number): void {
-        if (this.character.isDead() && this.stateMachine.getCurrentState() !== PlayerState.Ragdoll) {
-            this.stateMachine.forceState(PlayerState.Ragdoll);
-        }
-        const noStateChange = this.character.isLocal() ? false : true;
-        this.stateMachine.update(deltaTime, noStateChange);
+        const lockState = !this.character.isLocal();
+        this.stateMachine.update(deltaTime, lockState);
     };
 
     public draw(): void {
-        this.character.body.getNearbyTiles().forEach(tile => {
-            Render.get().drawSquare({
-                x: tile.pos.x,
-                y: tile.pos.y,
-                width: tile.width,
-                height: tile.height
-            }, 0, "green");
-        });
         this.stateMachine.draw();
     }
 }

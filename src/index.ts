@@ -13,10 +13,10 @@ import { defaultMap, defaultMap2, defaultMap3, defaultMap4 } from "@impl/Maps";
 Input.init();
 Render.set(new CanvasRender("gameCanvas"));
 
-MapManager.addMap("defaultMap", defaultMap);
-MapManager.addMap("defaultMap2", defaultMap2);
-MapManager.addMap("defaultMap3", defaultMap3);
-MapManager.addMap("defaultMap4", defaultMap4);
+MapManager.addMap(defaultMap);
+// MapManager.addMap(defaultMap2);
+// MapManager.addMap(defaultMap3);
+// MapManager.addMap(defaultMap4);
 
 
 RegisterItems();

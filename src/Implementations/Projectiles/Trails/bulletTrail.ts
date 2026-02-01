@@ -2,7 +2,10 @@ import { SpriteSheet, images, Vector, Utility, Frame } from "@common";
 import { ITrail } from "@projectile";
 
 class BulletTrail implements ITrail {
-    private spriteSheet: SpriteSheet;
+    private static spriteSheet: SpriteSheet;
+    private static frames = { default: new Frame() };
+
+
     private startingLocation: Vector;
     private target!: Vector;
     private maxLength: number;
@@ -10,16 +13,18 @@ class BulletTrail implements ITrail {
     private speed: Vector;
     private removing: boolean = false;
     private setToRemove: boolean = false;
-    private frames = { default: new Frame() };
 
-    constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
+    static {
         const spriteInfo = Utility.File.getImage(images.trail);
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        Utility.File.setFrames("trail", this.frames);
+    }
+    
+    constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
         this.startingLocation = startingLocation;
         this.maxLength = length;
         this.size = size;
         this.speed = speed;
-        Utility.File.setFrames("trail", this.frames);
     }
 
     public update(deltaTime: number) {
@@ -66,7 +71,7 @@ class BulletTrail implements ITrail {
     }
 
     public draw(): void {
-        this.spriteSheet.drawLine(this.frames.default, this.startingLocation, this.target, this.size);
+        BulletTrail.spriteSheet.drawLine(BulletTrail.frames.default, this.startingLocation, this.target, this.size);
     }
 }
 

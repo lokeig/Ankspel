@@ -1,9 +1,7 @@
-import { Grid, PlayerState, Utility, Vector } from "@common";
+import { Grid, Utility, Vector } from "@common";
 import { Player } from "./player";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
-import { IItem, ItemManager, Ownership } from "@item";
-import { PlayerRagdoll } from "./PlayerStates";
 
 class PlayerManager {
     private static players: Map<string, Set<Player>> = new Map();
@@ -14,9 +12,6 @@ class PlayerManager {
         const pending: Player[] = [];
 
         const updatePlayer = (player: Player) => {
-            if (player.character.isLocal()) {
-                this.setNearbyItems(player);
-            }
             player.update(deltaTime);
             player.character.equipment.getAllEquippedItems().forEach((item, slot) => {
                 if (item && item.shouldBeDeleted()) {
@@ -35,6 +30,12 @@ class PlayerManager {
         Grid.updateMapPositions<Player>(this.players, player => player.character.body.pos);
     }
 
+    public static reset(): void {
+        this.getPlayers().forEach(player => {
+            player.reset();
+        });
+    }
+
     public static getLocal(): Player[] {
         const result: Player[] = [];
         this.players.forEach(playerSet => { playerSet.forEach(player => { if (player.character.isLocal()) { result.push(player); } }) });
@@ -47,36 +48,19 @@ class PlayerManager {
         return result;
     }
 
-    private static setNearbyItems(player: Player): void {
-        const items: IItem[] = ItemManager.getNearby(player.character.body.pos, player.character.body.width, player.character.body.height);
-        this.getPlayers().forEach(player => {
-            if (player.getCurrentState() === PlayerState.Ragdoll) {
-                items.push(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
-            }
-        })
-        player.setNearbyItems(items);
-    }
-
     public static create(): Player {
-        const player = new Player(this.idManager.getNextID());
+        const player = new Player(this.idManager.getNextID(), Utility.File.getControls(this.localPlayerCount++));
         const id = this.idManager.add(player);
-        const ragdollId = ItemManager.addID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll);
         this.addPlayer(player);
-
-        player.setControls(Utility.File.getControls(this.localPlayerCount++));
-        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, ragdollId }));
-
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
 
         return player;
     }
 
-    public static spawn(id: number, ragdollId: number): Player {
+    public static spawn(id: number): Player {
         const player = new Player(id);
         this.idManager.setID(player, id);
         this.addPlayer(player);
-
-        ItemManager.addWithID(player.getStateInstance(PlayerState.Ragdoll) as PlayerRagdoll, ragdollId);
-
         return player;
     }
 

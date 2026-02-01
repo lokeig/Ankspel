@@ -18,7 +18,7 @@ export type { IState } from "./StateMachine/IState";
 export { Vector } from "./Types/vector";
 export type { Controls } from "./Types/controls";
 export { ThrowType } from "./Types/throwType";
-export { Direction } from "./Types/direction";
+export { Direction, AxisDirection } from "./Types/direction";
 export { Side } from "./Types/side";
 export { TileType } from "./Types/tileType";
 export { PlayerState } from "./Types/playerState";

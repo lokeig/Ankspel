@@ -17,26 +17,25 @@ class ExplosionVFX implements IParticle {
         this.particleSpawnLocations = Utility.Vector.getPointsAroundCircle(pos, radius, amount);
         Utility.Vector.randomOffsetVectorArray(this.particleSpawnLocations, 7);
         this.particleSpawnLocations.push(pos.clone());
-        this.order = Utility.Random.getArray(amount + 1);
+        this.order = Utility.Random.order(amount + 1);
         this.nextParticleCountdown.setToReady();
     }
 
     public update(deltaTime: number): void {
-
-        for (const particle of this.particles.values()) {
+        this.particles.forEach(particle => {
             particle.update(deltaTime);
             if (particle.setToDelete) {
                 this.particles.delete(particle);
             }
-        }
+        });
 
         this.nextParticleCountdown.update(deltaTime);
         
         if (this.nextParticleCountdown.isDone() && this.amountOfAddedParticles < this.particleSpawnLocations.length) {
             const positionArrayIndex = this.order[this.amountOfAddedParticles];
             const location = this.particleSpawnLocations[positionArrayIndex];
-            const rotation = Utility.Random.getNumber(-Math.PI, Math.PI);
-            const scale = Utility.Random.getNumber(0.7, 1.2);
+            const rotation = Utility.Random.getInRange(-Math.PI, Math.PI);
+            const scale = Utility.Random.getInRange(0.7, 1.2);
             this.particles.add(new ExplosionParticle(location, rotation, scale));
 
             this.amountOfAddedParticles += 1;

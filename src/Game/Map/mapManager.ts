@@ -1,21 +1,21 @@
 import { Utility } from "@common";
-import { GameMap } from "./map";
+import { GameMap } from "./gameMap";
 
 class MapManager {
-    private static maps: Map<string, GameMap> = new Map;
+    private static maps: GameMap[] = [];
 
-    public static addMap(name: string, map: GameMap) {
-        this.maps.set(name, map);
+    public static addMap(map: GameMap) {
+        this.maps.push(map);
     }
 
-    public static getMap(name: string): GameMap {
-        return this.maps.get(name)!;
+    public static getMap(id: number): GameMap {
+        return this.maps[id];
     }
 
-    public static getRandomMap(): [string, GameMap] {
-        const mapsArray = Array.from(this.maps);
-        const index = Utility.Random.getNumber(0, mapsArray.length - 1);
-        return mapsArray[index];
+    public static getRandomMap(): [number, GameMap] {
+        const index = Math.floor(this.maps.length * Math.random());
+        console.log(index)
+        return [index, this.maps[index]];
     }
 }
 

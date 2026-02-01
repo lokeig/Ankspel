@@ -1,9 +1,10 @@
 enum GameLoopState {
-    lobby,
-    scoreScreen,
-    postMatch,
-    playing,
-    editor
+    Lobby,
+    ScoreScreen,
+    PostMatch,
+    Playing,
+    LoadingMap,
+    Editor
 }
 
 export { GameLoopState };
