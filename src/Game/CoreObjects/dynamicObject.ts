@@ -1,7 +1,8 @@
-import { Vector, Side } from "@common";
+import { Side } from "@common";
 import { TileManager } from "../StaticObjects/Tiles";
 import { CollisionObject } from "./collisionObject";
 import { GameObject } from "./gameObject";
+import { Vector } from "@math";
 
 class DynamicObject extends GameObject {
     private collidableObjects: Array<CollisionObject> = [];
@@ -54,6 +55,9 @@ class DynamicObject extends GameObject {
         }
         if (Math.abs(this.velocity.x) < 0.01) {
             this.velocity.x = 0;
+        }
+        if (Math.abs(this.velocity.y) < 0.01) {
+            this.velocity.y = 0;
         }
     }
 

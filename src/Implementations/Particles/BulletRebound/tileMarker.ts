@@ -1,7 +1,8 @@
-import { AxisDirection, Countdown, Frame, images, SpriteSheet, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { AxisDirection, Countdown, Frame, images, SpriteSheet, Utility } from "@common";
 
 class TileMarker {
-    private lifeTime = new Countdown(10);
+    private lifeTime = new Countdown(0.15);
 
     private pos: Vector;
     private angle: number;
@@ -21,7 +22,6 @@ class TileMarker {
         const imageSrc = Utility.File.getImage(images.bulletRebound);
         this.spriteSheet = new SpriteSheet(imageSrc.src, imageSrc.frameWidth, imageSrc.frameHeight);
     }
-
 
     constructor(pos: Vector, normal: AxisDirection) {
         switch (normal) {
@@ -53,7 +53,8 @@ class TileMarker {
 
     public draw(): void {
         const flip = false;
-        TileMarker.spriteSheet.draw(this.instanceFrame, this.pos, TileMarker.drawSize, flip, this.angle);
+        const opacity = 1 - this.lifeTime.getPercentageReady();
+        TileMarker.spriteSheet.draw(this.pos, TileMarker.drawSize, flip, this.angle, this.instanceFrame, opacity);
     }
 
     public update(deltaTime: number) {

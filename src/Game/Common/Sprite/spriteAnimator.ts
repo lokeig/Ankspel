@@ -1,4 +1,4 @@
-import { Vector } from "../Types/vector";
+import { Vector } from "../../../Math/vector";
 import { Animation } from "./Animation/animation";
 import { SpriteSheet } from "./spriteSheet";
 
@@ -42,7 +42,7 @@ class SpriteAnimator {
 
     public draw(pos: Vector, size: number, flip: boolean, angle: number): void {
         const frame = this.animation.getFrame(this.currentFrame);
-        this.spriteSheet.draw(frame, pos, size, flip, angle);
+        this.spriteSheet.draw(pos, size, flip, angle, frame);
     }
 
     public setAnimation(animation: Animation): void {

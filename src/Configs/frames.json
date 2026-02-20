@@ -19,12 +19,6 @@
       "col": 1
     }
   },
-  "trail": {
-    "default": {
-      "row": 0,
-      "col": 0
-    }
-  },
   "helmet": {
     "default": {
       "row": 1,
@@ -43,12 +37,6 @@
     "equipped": {
       "row": 0,
       "col": 1
-    }
-  },
-  "smallFlare": {
-    "default": {
-      "row": 0,
-      "col": 0
     }
   },
   "bulletRebound": {

@@ -1,6 +1,7 @@
+import { Vector } from "@math";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility, Vector } from "@common";
+import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility } from "@common";
 
 class Helmet extends Item {
     private static readonly slot: EquipmentSlot = EquipmentSlot.Head;
@@ -39,7 +40,7 @@ class Helmet extends Item {
         const frame = this.damaged ? Helmet.frames.broken : Helmet.frames.default;
         const drawSize = 32;
 
-        Helmet.spriteSheet.draw(frame, this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
+        Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
     }
 
 

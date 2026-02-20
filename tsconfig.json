@@ -23,6 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@config": ["src/Configs"],
+      "@math": ["src/Math"],
       "@shared": ["Shared"],
       "@render": ["src/Render"],
       "@common": ["src/Game/Common"],

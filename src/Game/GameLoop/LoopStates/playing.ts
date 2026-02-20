@@ -1,13 +1,18 @@
 import { Countdown, IState } from "@common";
 import { GameLoopState } from "../gameLoopState";
-import { GameLoopUtility } from "../gameLoopUtility";
+import { DuckGame } from "../game";
 import { PlayerManager } from "@player";
 
 class Playing implements IState<GameLoopState> {
     private newMapCountdown = new Countdown(3);
     private startNewMap: boolean = false;
+    private game: DuckGame;
 
-    public stateEntered(): void {
+    public constructor(game: DuckGame) {
+        this.game = game;
+    }
+    
+    public stateEntered(from?: GameLoopState | undefined): void {
         this.startNewMap = false;
     }
 
@@ -15,12 +20,11 @@ class Playing implements IState<GameLoopState> {
         if (this.startNewMap) {
             this.newMapCountdown.update(deltaTime);
         }
-        GameLoopUtility.update(deltaTime);
+        this.game.update(deltaTime);
         if (!this.startNewMap && PlayerManager.getPlayers().filter(player => !player.character.isDead()).length <= 1) {
             if (PlayerManager.getPlayers().length === 1) {
                 return;
             }
-            console.log("round over")
             this.startNewMap = true;
             this.newMapCountdown.reset();
         }
@@ -38,7 +42,7 @@ class Playing implements IState<GameLoopState> {
     }
 
     public draw() {
-        GameLoopUtility.draw();
+        this.game.draw();
     }
 }
 

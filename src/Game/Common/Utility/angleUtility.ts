@@ -1,4 +1,4 @@
-import { Vector } from "../Types/vector";
+import { Vector } from "../../../Math/vector";
 
 class AngleUtility {
 

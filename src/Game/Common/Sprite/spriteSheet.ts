@@ -1,16 +1,22 @@
-import { DrawInfo, Rect, Render } from "@render";
-import { Vector } from "../Types/vector";
+import { DrawInfo, Rect, Render, RenderSpace } from "@render";
+import { Vector } from "../../../Math/vector";
 import { Frame } from "./Animation/frame";
 
 class SpriteSheet {
-    imageSrc: string;
-    frameWidth: number;
-    frameHeight: number;
+    private imageSrc: string;
+    private frameWidth: number;
+    private frameHeight: number;
+    private noFrame = new Frame();
+    private space: RenderSpace = RenderSpace.World;
 
     constructor(imageSrc: string, frameWidth: number, frameHeight: number) {
         this.imageSrc = imageSrc;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
+    }
+
+    public setRenderSpace(space: RenderSpace): void {
+        this.space = space;
     }
   
     private getSource(row: number, col: number): Rect {
@@ -22,20 +28,24 @@ class SpriteSheet {
         };
     }
 
-    public draw(frame: Frame, pos: Vector, size: number, flip: boolean, angle: number): void {
+    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, frame: Frame = this.noFrame, opacity: number = 1): void {
+        const width = size instanceof Vector ? size.x : size;
+        const height = size instanceof Vector ? size.y : size;
+
         const drawInfo: DrawInfo = {
             imageSrc: this.imageSrc,
             source: this.getSource(frame.row, frame.col),
-            world: { x: pos.x, y: pos.y, width: size, height: size },
-            flip: flip,
-            angle: angle
+            world: { x: pos.x, y: pos.y, width, height },
+            flip,
+            angle,
+            opacity
         };
-        Render.get().draw(drawInfo);
+        Render.get().draw(drawInfo, this.space);
     }
 
-    public drawLine(frame: Frame, pos1: Vector, pos2: Vector, width: number): void {
+    public drawLine(start: Vector, end: Vector, width: number, frame: Frame = this.noFrame, opacity: number = 1): void {
         const source = this.getSource(frame.row, frame.col);
-        Render.get().drawLine(this.imageSrc, pos1.x, pos1.y, pos2.x, pos2.y, width, source);
+        Render.get().drawLine(this.imageSrc, start, end, width, source, opacity, this.space);
     }
 }
 

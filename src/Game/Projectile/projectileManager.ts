@@ -3,20 +3,14 @@ import { ITrail } from "./ITrail";
 
 class ProjectileManager {
     private static projectiles: Set<IProjectile> = new Set();
-    private static pending: IProjectile[] = [];
     private static trails: Set<ITrail> = new Set();
 
     public static clear(): void {
         this.projectiles = new Set();
         this.trails = new Set();
-        this.pending = [];
     }
 
     public static update(deltaTime: number) {
-        this.pending.forEach(projectile => {
-            this.projectiles.add(projectile);
-        });
-        this.pending = [];
         this.updateProjectiles(deltaTime);
         this.updateTrails(deltaTime);
     }
@@ -47,7 +41,7 @@ class ProjectileManager {
         if (local) {
             newProjectile.setLocal();
         }
-        this.pending.push(newProjectile);
+        this.projectiles.add(newProjectile);
         this.trails.add(newProjectile.getTrail());
     }
 

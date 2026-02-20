@@ -1,4 +1,4 @@
-import { Vector } from "@common";
+import { Vector } from "@math";
 
 interface ITrail {
     update(deltaTime: number): void;

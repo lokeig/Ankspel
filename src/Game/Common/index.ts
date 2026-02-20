@@ -15,7 +15,6 @@ export { StateMachine } from "./StateMachine/stateMachine";
 export type { IState } from "./StateMachine/IState";
 
 // Types
-export { Vector } from "./Types/vector";
 export type { Controls } from "./Types/controls";
 export { ThrowType } from "./Types/throwType";
 export { Direction, AxisDirection } from "./Types/direction";
@@ -38,4 +37,3 @@ export { InputMode } from "./Other/inputMode";
 export { Grid } from "./Other/grid";
 export { Countdown } from "./Other/countdown";
 export { IDManager } from "./IDManager/idManager";
-export { DeltaTime } from "./Other/deltaTime";

@@ -1,4 +1,5 @@
-import { Lerp, lerpAngle, ThrowType, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { Lerp, lerpAngle, ThrowType, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { IItem, Ownership } from "@item";
@@ -39,7 +40,6 @@ abstract class Item implements IItem {
             this.rotateSpeed *= 0.5;
         }
     }
-
 
     private updateAngle(deltaTime: number): void {
         const angle = this.worldAngle + this.localAngle;

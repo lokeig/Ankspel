@@ -42,11 +42,13 @@ class NetworkHandler {
             this.readyCount = 0;
         });
 
-        Input.onKey("q", this.quickStart.bind(this));
+        Input.onKeyOnce("q", this.quickStart.bind(this));
     }
 
     private static quickStart(): void {
         PlayerManager.create();
+        PlayerManager.create();
+
         const map = MapManager.getRandomMap()[1];
         MapLoader.load(map, true);
         this.onStart();

@@ -1,4 +1,5 @@
-import { EquipmentSlot, Vector } from "@common";
+import { EquipmentSlot } from "@common";
+import { Vector } from "@math";
 
 enum OnItemUseType {
     Knockback,

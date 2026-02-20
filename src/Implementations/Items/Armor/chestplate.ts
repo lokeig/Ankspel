@@ -1,6 +1,7 @@
+import { Vector } from "@math";
+import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility, Vector } from "@common";
 
 class Chestplate extends Item {
     private static readonly slot: EquipmentSlot = EquipmentSlot.Body;
@@ -37,7 +38,7 @@ class Chestplate extends Item {
         const frame = this.getOwnership() === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
         const drawSize = 32;
 
-        Chestplate.spriteSheet.draw(frame, this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
+        Chestplate.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
     }
 
     private onHitFunction(): OnItemUseEffect[] {

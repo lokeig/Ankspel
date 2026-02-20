@@ -2,66 +2,61 @@ import { Controls, Input, InputMode } from "@common";
 
 class PlayerControls {
     private controls: Controls;
+    private enabled: boolean = false;
 
     constructor(controls: Controls) {
         this.controls = controls;
     }
 
-    public left(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.left);
+    public setEnabled(state: boolean) {
+        this.enabled = state;
+    }
+
+    private getKey(key: string, inputMode: InputMode): boolean {
+        if (!this.enabled) {
+            return false;
         }
-        return Input.keyDown(this.controls.left);
+
+        return inputMode === InputMode.Press
+            ? Input.keyPress(key)
+            : Input.keyDown(key);
+    }
+
+
+    public left(inputMode: InputMode = InputMode.Hold): boolean {
+        return this.getKey(this.controls.left, inputMode);
     }
 
     public right(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.right);
-        }
-        return Input.keyDown(this.controls.right);
+        return this.getKey(this.controls.right, inputMode);
     }
 
     public getMoveDirection(): number {
         return Number(this.right()) - Number(this.left());
     }
 
-    public ragdoll(): boolean {
-        return Input.keyPress(this.controls.ragdoll);
+    public ragdoll(inputMode: InputMode = InputMode.Hold): boolean {
+        return this.getKey(this.controls.ragdoll, inputMode);
     }
 
     public down(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.down);
-        }
-        return Input.keyDown(this.controls.down);
+        return this.getKey(this.controls.down, inputMode);
     }
 
     public jump(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.jump);
-        }
-        return Input.keyDown(this.controls.jump);
+        return this.getKey(this.controls.jump, inputMode);
     }
 
     public up(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.up);
-        }
-        return Input.keyDown(this.controls.up);
+        return this.getKey(this.controls.up, inputMode);
     }
 
     public shoot(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.shoot);
-        }
-        return Input.keyDown(this.controls.shoot);
+        return this.getKey(this.controls.shoot, inputMode);
     }
 
     public pickup(inputMode: InputMode = InputMode.Hold): boolean {
-        if (inputMode === InputMode.Press) {
-            return Input.keyPress(this.controls.pickup);
-        }
-        return Input.keyDown(this.controls.pickup);
+        return this.getKey(this.controls.pickup, inputMode);
     }
 }
 

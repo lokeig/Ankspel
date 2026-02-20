@@ -1,5 +1,6 @@
-import { Animation, images, SpriteAnimator, SpriteSheet, Utility, Vector, PlayerAnim, EquipmentSlot } from "@common";
+import { Animation, images, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
+import { Vector } from "@math";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;

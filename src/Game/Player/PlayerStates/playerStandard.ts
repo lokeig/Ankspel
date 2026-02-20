@@ -1,4 +1,5 @@
-import { PlayerState, InputMode, Vector, IState, EquipmentSlot } from "@common";
+import { Vector } from "@math";
+import { PlayerState, InputMode, IState, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
 

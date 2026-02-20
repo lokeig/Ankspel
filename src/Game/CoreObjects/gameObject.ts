@@ -1,4 +1,4 @@
-import { Vector } from "@common";
+import { Vector } from "@math";
 
 class GameObject {
     public pos: Vector;

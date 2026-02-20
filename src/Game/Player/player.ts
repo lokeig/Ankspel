@@ -1,4 +1,5 @@
-import { Controls, Grid, IState, StateMachine, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { Controls, Grid, IState, StateMachine, Utility } from "@common";
 import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
@@ -27,6 +28,10 @@ class Player {
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
     }
 
+    public getId(): number {
+        return this.id;
+    }
+
     public held(): boolean {
         const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll);
         return ragdoll instanceof PlayerRagdoll && ragdoll.getOwnership() === Ownership.Held;
@@ -36,7 +41,7 @@ class Player {
         this.stateMachine.forceState(PlayerState.Standard);
         this.character.reset();
         this.stateMachine.enterState();
-        }
+    }
 
     private setupStateMachine(): void {
         this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
@@ -46,11 +51,9 @@ class Player {
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
 
         const ragdoll = new PlayerRagdoll(this.character);
-        if (this.character.isLocal()) {
-            ItemManager.addPermanent(ragdoll);
-        } else {
-            ItemManager.addPermanent(ragdoll, this.id);
-        }
+
+        ItemManager.addPermanent(ragdoll, this.id);
+        
         this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.enterState();
     }

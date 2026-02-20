@@ -1,7 +1,9 @@
-import { ThrowType, Vector } from "@common";
+import { ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { Ownership } from "./itemUseType";
 import { ItemUseInteractions } from "./itemUseInteractions";
+import { Vector } from "@math";
+
 
 interface IItem {
     update(deltaTime: number): void;
@@ -26,4 +28,9 @@ interface IItem {
 
 type ItemConstructor = new (pos: Vector) => IItem
 
+function isItem(object: any): object is IItem {
+    return 'throw' in object;
+}
+
+export { isItem };
 export type { IItem, ItemConstructor };

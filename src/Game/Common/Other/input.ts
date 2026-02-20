@@ -1,4 +1,4 @@
-import { Vector } from "../Types/vector";
+import { Vector } from "../../../Math/vector";
 
 class Input {
     private static keysDown: Set<string> = new Set();
@@ -7,7 +7,7 @@ class Input {
     private static mouseDownBool: boolean = false;
     private static mousePos: Vector = new Vector();
     
-    private static onKeyFunction: Map<string, (() => void)[]> = new Map();
+    private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
 
     static init() {
 
@@ -49,9 +49,21 @@ class Input {
 
     static onKey(key: string, e: () => void): void {
         if (!this.onKeyFunction.get(key)) {
-            this.onKeyFunction.set(key, []);
+            this.onKeyFunction.set(key, new Set());
         }
-        this.onKeyFunction.get!(key)!.push(e);
+        this.onKeyFunction.get!(key)!.add(e);
+    }
+
+    static onKeyOnce(key: string, e: () => void): void {
+        if (!this.onKeyFunction.get(key)) {
+            this.onKeyFunction.set(key, new Set());
+        }
+        const wrapper = () => {
+            e();
+            this.onKeyFunction.get(key)!.delete(wrapper);
+        }
+
+        this.onKeyFunction.get(key)!.add(wrapper);
     }
 
     static keyDown(key: string): boolean {

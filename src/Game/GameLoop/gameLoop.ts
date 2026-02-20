@@ -5,6 +5,7 @@ import { GameLoopState } from "./gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { LoadingMap } from "./LoopStates/loadingMap";
+import { DuckGame } from "./game";
 
 class GameLoop {
     private lastTime = 0;
@@ -17,8 +18,9 @@ class GameLoop {
         const initalState = GameLoopState.LoadingMap;
         this.stateMachine = new StateMachine(initalState);
 
-        this.stateMachine.addState(GameLoopState.Playing, new Playing());
-        this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap());
+        const game = new DuckGame();
+        this.stateMachine.addState(GameLoopState.Playing, new Playing(game));
+        this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(game));
 
         NetworkHandler.setOnStart(() => { this.startGame(); });
     }

@@ -1,27 +1,21 @@
-import { Grid, Utility, Vector } from "@common";
-import { ItemConstructor, IItem } from "./IItem";
+import { Grid, Utility,  } from "@common";
+import { ItemConstructor, IItem, isItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
 import { Ownership } from "./itemUseType";
+import { Vector } from "@math";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
-    private static idManager = new IDManager<IItem>();
-    private static permanent: [IItem, number | undefined][] = [];
+
+    private static idManager = new IDManager;
+    private static permanent: IItem[] = [];
 
     public static clear(): void {
         this.items = new Map();
+        this.permanent.forEach(item => this.addToMap(item));
         this.idManager.reset();
-
-        this.permanent.forEach(item => this.addToMap(item[0]));
-        this.permanent.forEach(([item, id]) => {
-            if (id === undefined) {
-                this.idManager.add(item);
-            } else {
-                this.idManager.setID(item, id)
-            }
-        });
     }
 
     public static update(deltaTime: number) {
@@ -102,18 +96,16 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static addPermanent(item: IItem, id?: number): void {
-        this.addToMap(item);
-        this.permanent.push([item, id]);
-        if (id !== undefined) {
-            this.idManager.setID(item, id);
-        } else {
-            this.idManager.add(item);
-        }
+    public static addPermanent(item: IItem, id: number): void {
+        this.idManager.setPermanentID(item, id);
+        this.permanent.push(item);
     }
 
     public static getItemFromID(id: number): IItem | undefined {
-        return this.idManager.getObject(id);
+        const obj = this.idManager.getObject(id);
+        if (isItem(obj)) {
+            return obj;
+        }
     }
 
     public static getItemID(item: IItem): number | undefined {

@@ -26,6 +26,9 @@ const images = {
     smallFlare: 'smallFlare',
     bulletRebound: 'bulletRebound',
     bulletGlow: 'bulletGlow',
+
+    ready: 'ready',
+    get: 'get'
 };
 
 export { images };

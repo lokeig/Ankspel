@@ -1,4 +1,4 @@
-import { Vector } from "@common";
+import { Vector } from "@math";
 import { Bullet } from "./bullet";
 
 class GrenadeBullet extends Bullet{

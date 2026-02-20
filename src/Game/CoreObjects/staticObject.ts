@@ -1,5 +1,6 @@
-import { Direction, Side, Vector } from "@common";
+import { Direction, Side } from "@common";
 import { GameObject } from "./gameObject";
+import { Vector } from "@math";
 
 class StaticObject extends GameObject {
 
