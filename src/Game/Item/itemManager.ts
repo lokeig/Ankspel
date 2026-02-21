@@ -8,21 +8,20 @@ class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
     private static idManager = new IDManager<IItem>();
-    private static permanent: [IItem, number | undefined][] = [];
+    private static permanent: Array<{ item: IItem; id: number }> = [];
 
     public static clear(): void {
         this.items = new Map();
         this.idManager.reset();
 
-        this.permanent.forEach(item => this.addToMap(item[0]));
-        this.permanent.forEach(([item, id]) => {
-            if (id === undefined) {
-                this.idManager.add(item);
-            } else {
-                this.idManager.setID(item, id)
-            }
-        });
+        for (const { item, id } of this.permanent) {
+            this.addToMap(item);
+            this.idManager.setID(item, id);
+        }
+
+        this.idManager.recalculateNextID();
     }
+
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
@@ -77,7 +76,7 @@ class ItemManager {
 
     public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): IItem[] {
         const result: IItem[] = [];
-        const accumulate = (gridPos: Vector) => {
+        const accumulate = (gridPos: Vector): void => {
             const itemSet = this.getItems(gridPos);
             if (!itemSet) {
                 return;
@@ -102,15 +101,12 @@ class ItemManager {
         this.getItems(gridPos)!.add(item);
     }
 
-    public static addPermanent(item: IItem, id?: number): void {
+    public static addPermanent(item: IItem, id: number): void {
+        this.permanent.push({ item, id });
         this.addToMap(item);
-        this.permanent.push([item, id]);
-        if (id !== undefined) {
-            this.idManager.setID(item, id);
-        } else {
-            this.idManager.add(item);
-        }
+        this.idManager.setID(item, id);
     }
+
 
     public static getItemFromID(id: number): IItem | undefined {
         return this.idManager.getObject(id);

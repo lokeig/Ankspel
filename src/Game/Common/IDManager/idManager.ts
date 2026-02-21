@@ -35,6 +35,8 @@ class IDManager<T> {
         return id;
     }
 
+    public recalculateNextID(): 
+
     public setID(object: T, id: number): void {
         this.objectToID.set(object, id);
         this.idToObject.set(id, object);
