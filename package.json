@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && npm run copy-assets",
+    "copy-assets": "cpy \"Assets/**/*\" dist/Assets --parents",
     "preview": "vite preview",
     "server": "npm run build --prefix Server && npm start --prefix Server"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
     "@types/ws": "^8.18.1",
+    "cpy-cli": "^7.0.0",
     "typescript": "~5.7.2",
     "vite": "^6.3.1",
     "vite-tsconfig-paths": "^5.1.4"
