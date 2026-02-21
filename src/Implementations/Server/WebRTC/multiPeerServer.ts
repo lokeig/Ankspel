@@ -24,8 +24,10 @@ class MultiPeerServer implements IServer {
         };
 
         this.socket.onerror = () => {
-            console.warn("Failed to connect. Switching to local mode.");
-            this.enableLocalMode();
+            if (!this.localMode) {
+                console.warn("Failed to connect. Switching to local mode.");
+                this.enableLocalMode();
+            }
         };
 
         this.socket.onclose = () => {
