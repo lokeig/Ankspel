@@ -1,4 +1,5 @@
-import { images, SpriteSheet, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { images, SpriteSheet, Utility } from "@common";
 import { BaseTile } from "./baseTile";
 
 class IceTile extends BaseTile {

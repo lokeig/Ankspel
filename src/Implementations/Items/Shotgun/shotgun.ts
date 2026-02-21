@@ -1,4 +1,5 @@
-import { Lerp, lerpTriangle, SpriteSheet, images, Vector, Utility, Frame, ItemInteraction } from "@common";
+import { Vector } from "@math";
+import { Lerp, lerpTriangle, SpriteSheet, images, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
 import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
@@ -44,7 +45,7 @@ class Shotgun extends Item {
         this.firearmInfo.ammo = 2;
         this.firearmInfo.bulletCount = 14;
         this.firearmInfo.bulletAngleVariation = Math.PI / 20;
-        this.firearmInfo.pipeOffset = new Vector(28, -10);
+        this.firearmInfo.muzzleOffset = new Vector(28, -10);
         this.firearmInfo.knockback = new Vector(720, 240);
         this.firearmInfo.bulletRange = 8;
         this.firearmInfo.bulletRangeVariation = 1;
@@ -84,14 +85,14 @@ class Shotgun extends Item {
     public draw(): void {
         const drawSize = 64;
         const drawPos = this.getDrawPos(drawSize);
-        Shotgun.spriteSheet.draw(Shotgun.frames.gun, drawPos, drawSize, this.body.isFlip(), this.getAngle());
+        Shotgun.spriteSheet.draw(drawPos, drawSize, this.body.isFlip(), this.getAngle(), Shotgun.frames.gun);
 
         const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.getAngle());
         const handleDrawPos = new Vector(
             drawPos.x + handleOffsetRotated.x * this.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        Shotgun.spriteSheet.draw(Shotgun.frames.handle, handleDrawPos, drawSize, this.body.isFlip(), this.getAngle());
+        Shotgun.spriteSheet.draw(handleDrawPos, drawSize, this.body.isFlip(), this.getAngle(), Shotgun.frames.handle);
     }
 
     public shouldBeDeleted(): boolean {

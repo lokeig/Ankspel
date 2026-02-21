@@ -1,7 +1,8 @@
-import { Countdown, Vector, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot } from "@common";
+import { Vector } from "@math";
+import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { IItem, Ownership, ItemUseHandler } from "@item";
+import { IItem, Ownership } from "@item";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {

@@ -1,4 +1,5 @@
-import { SpriteSheet, images, Countdown, Vector, Utility, Frame, ItemInteraction } from "@common";
+import { Vector } from "@math";
+import { SpriteSheet, images, Countdown, Utility, Frame, ItemInteraction } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
@@ -62,7 +63,7 @@ class Grenade extends Item {
     public draw(): void {
         const drawSize = 32;
         const frame = this.activated ? Grenade.frames.pinned : Grenade.frames.default;
-        Grenade.spriteSheet.draw(frame, this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle())
+        Grenade.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame)
     }
 }
 

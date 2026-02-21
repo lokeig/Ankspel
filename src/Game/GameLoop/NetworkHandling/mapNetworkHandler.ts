@@ -26,8 +26,7 @@ class MapNetworkHandler {
 
         gameEvent.subscribe(GameMessage.StartMap, ({ time }) => { this.onMapLoad(time) });
 
-        Input.onKey("q", this.quickStart.bind(this));
-
+        Input.onKeyOnce("q", this.quickStart.bind(this));
     }
 
     public static hostInitializeMap(map: [number, GameMap]): void {
@@ -36,6 +35,9 @@ class MapNetworkHandler {
 
         Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
         MapLoader.load(map[1], host);
+        if (PlayerManager.getLocal().length == PlayerManager.getPlayers().length) {
+            this.onMapLoad(Date.now() + 1);
+        }
     }
 
     private static checkReadyToStart(): void {
@@ -54,7 +56,6 @@ class MapNetworkHandler {
     private static quickStart(): void {
         this.onMapLoad(0);
     }
-
 
     public static setMapLoad(e: (t: number) => void): void {
         this.onMapLoad = e;

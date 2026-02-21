@@ -11,18 +11,49 @@ class MultiPeerServer implements IServer {
     private myID!: string;
     private socket: WebSocket;
     private host: boolean = false;
+    private localMode: boolean = false;
 
     constructor(socket: WebSocket) {
         this.socket = socket;
         this.socket.onmessage = (e: MessageEvent) => this.handleMessage(e);
+
+        this.enableLocalMode();
+
         this.socket.onopen = () => {
-            console.log("Connected to signaling server");
-            const connectMsg: ClientMessage = { type: CMsgType.connect };
-            const listLobbiesMsg: ClientMessage = { type: CMsgType.listLobbies };
-            this.socket.send(JSON.stringify(connectMsg));
-            this.socket.send(JSON.stringify(listLobbiesMsg));
+            this.enableOnlineMode();
+        };
+
+        this.socket.onerror = () => {
+            console.warn("Failed to connect. Switching to local mode.");
+            this.enableLocalMode();
+        };
+
+        this.socket.onclose = () => {
+            if (!this.localMode) {
+                console.warn("Connection lost. Switching to local mode.");
+                this.enableLocalMode();
+            }
         };
     }
+
+    private enableOnlineMode(): void {
+        const connectMsg: ClientMessage = { type: CMsgType.connect };
+        const listLobbiesMsg: ClientMessage = { type: CMsgType.listLobbies };
+        this.socket.send(JSON.stringify(connectMsg));
+        this.socket.send(JSON.stringify(listLobbiesMsg));
+
+        console.log("Connected to signaling server");
+    }
+
+    private enableLocalMode(): void {
+        this.localMode = true;
+        this.host = true;
+        this.myID = "local";
+        this.cleanupAllPeers();
+
+        console.log("Running in local mode");
+    }
+
 
     public isHost(): boolean {
         return this.host;

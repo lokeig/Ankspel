@@ -1,4 +1,5 @@
-import { Vector, Countdown, Utility } from "@common";
+import { Vector } from "@math";
+import { Countdown, Utility } from "@common";
 import { IParticle } from "@game/Particles";
 import { ExplosionParticle } from "./explosionParticle";
 

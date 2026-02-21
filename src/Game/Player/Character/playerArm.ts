@@ -1,5 +1,4 @@
-import { Vector } from "@common";
-import { off } from "process";
+import { Vector } from "@math";
 
 class PlayerArm {
     private drawSize: number = 32;

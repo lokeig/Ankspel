@@ -1,7 +1,9 @@
-import { SpriteAnimator, Animation, SpriteSheet, images, Vector, Utility, ItemInteraction } from "@common";
+import { Vector } from "@math";
+import { SpriteAnimator, Animation, SpriteSheet, images, Utility, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
+import { SmallFlare } from "@impl/Particles";
 
 class Glock extends Item {
     private static animations: Record<string, Animation> = {
@@ -12,6 +14,7 @@ class Glock extends Item {
     private firearmInfo!: FirearmHelper;
 
     private static sprite: SpriteSheet;
+    private flare: SmallFlare;
 
     static {
         Utility.File.setAnimations("glock", this.animations);
@@ -26,8 +29,8 @@ class Glock extends Item {
 
         this.handOffset = new Vector(2, 2);
         this.holdOffset = new Vector(10, -4);
-
         this.animator = new SpriteAnimator(Glock.sprite, Glock.animations.default);
+        this.flare = new SmallFlare()
 
         this.setupFirearmInfo();
 
@@ -41,9 +44,9 @@ class Glock extends Item {
         this.firearmInfo.ammo = 11119;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
         this.firearmInfo.knockback = new Vector(450, 120);
-        this.firearmInfo.pipeOffset = new Vector(23, -6);
+        this.firearmInfo.muzzleOffset = new Vector(23, -6);
         this.firearmInfo.bulletRange = 16;
-        this.firearmInfo.bulletSpeed = 2450;
+        this.firearmInfo.bulletSpeed = 3400;
     }
 
     public update(deltaTime: number): void {
@@ -52,17 +55,31 @@ class Glock extends Item {
         if (this.animator.animationDone()) {
             this.animator.setAnimation(Glock.animations.default);
         }
+        this.flare.update(deltaTime);
     }
 
     public shoot(seed: number, local: boolean): OnItemUseEffect[] {
         this.animator.reset();
         this.animator.setAnimation(Glock.animations.shoot);
+        this.flare.reset();
+
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
     public draw(): void {
         const drawSize = 40;
         this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
+        if (this.flare.shouldBeShown()) {
+            this.drawFlare();
+        }
+    }
+
+    private drawFlare(): void {
+        const pos = this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip());
+
+
+        this.flare.draw(pos, this.body.isFlip(), this.getAngle());
+
     }
 
     public shouldBeDeleted(): boolean {

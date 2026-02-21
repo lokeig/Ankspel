@@ -3,10 +3,12 @@ import { ItemManager } from "@game/Item";
 import { PlayerManager } from "@game/Player";
 import { ProjectileManager } from "@game/Projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
+import { Camera } from "@game/Camera";
 
-class GameLoopUtility {
+class DuckGame {
+    private camera = new Camera();
 
-    public static update(deltaTime: number): void {
+    public update(deltaTime: number): void {
         const fixedStep = 0.1;
         const maxIterations = 20;
 
@@ -24,14 +26,20 @@ class GameLoopUtility {
         }
     }
 
-    private static gameUpdate(deltaTime: number): void {
+    public reset(): void {
+        this.camera.initialize();
+    }
+
+    private gameUpdate(deltaTime: number): void {
         ProjectileManager.update(deltaTime);
         ItemManager.update(deltaTime);
         PlayerManager.update(deltaTime);
         ParticleManager.update(deltaTime);
+
+        this.camera.update(deltaTime);
     }
 
-    public static draw(): void {
+    public draw(): void {
         ProjectileManager.draw();
         ItemManager.draw();
         PlayerManager.draw();
@@ -40,4 +48,4 @@ class GameLoopUtility {
     }
 }
 
-export { GameLoopUtility };
+export { DuckGame };

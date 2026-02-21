@@ -78,7 +78,7 @@ class PlayerNetworkHandler {
 
     public static sendLocalPlayersInfo(): void {
         PlayerManager.getLocal().forEach(player => {
-            const id = PlayerManager.getPlayerID(player)!;
+            const id = player.getId();
             if (player.getCurrentState() === PlayerState.Ragdoll) {
                 const ragdollInfo = player.getRagdollInfo();
                 Connection.get().sendGameMessage(GameMessage.PlayerRagdollInfo, {

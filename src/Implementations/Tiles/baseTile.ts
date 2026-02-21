@@ -1,4 +1,5 @@
-import { Vector, SpriteSheet, Side, Direction, Utility } from "@common";
+import { Vector } from "@math";
+import { SpriteSheet, Side, Direction, Utility } from "@common";
 import { StaticObject } from "@core";
 import { ITile } from "@game/StaticObjects/Tiles";
 import { SpriteLookup } from "./spriteLookup";
@@ -104,13 +105,13 @@ abstract class BaseTile implements ITile {
         const flip = false;
         const angle = 0;
 
-        this.sprite.draw(BaseTile.lookup.tile(this.spriteIndex), this.body.pos, drawSize, flip, angle);
+        this.sprite.draw(this.body.pos, drawSize, flip, angle, BaseTile.lookup.tile(this.spriteIndex));
 
         if (this.body.getLip(Side.Left)) {
-            this.sprite.draw(BaseTile.lookup.getLip(Side.Left), this.body.getLipDrawPos(Side.Left), drawSize, flip, angle);
+            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Left));
         }
         if (this.body.getLip(Side.Right)) {
-            this.sprite.draw(BaseTile.lookup.getLip(Side.Right), this.body.getLipDrawPos(Side.Right), drawSize, flip, angle);
+            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Right));
         }
     }
 }

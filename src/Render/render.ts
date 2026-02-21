@@ -1,13 +1,13 @@
-import { RenderIF } from "./renderIF";
+import { IRender } from "./IRender";
 
 class Render {
-    public static renderIF: RenderIF;
+    public static renderIF: IRender;
 
-    public static set(renderIF: RenderIF): void {
+    public static set(renderIF: IRender): void {
         this.renderIF = renderIF;
     }
 
-    public static get(): RenderIF {
+    public static get(): IRender {
         return this.renderIF;
     }
 }

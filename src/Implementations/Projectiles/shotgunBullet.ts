@@ -1,4 +1,5 @@
-import { SeededRNG, Vector } from "@common";
+import { Vector } from "@math";
+import { SeededRNG } from "@common";
 import { Bullet } from "./bullet";
 
 class ShotgunBullet extends Bullet {

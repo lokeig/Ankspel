@@ -1,4 +1,5 @@
-import { Vector, Controls, ItemInteraction, Utility, EquipmentSlot, ProjectileEffect } from "@common";
+import { Controls, ItemInteraction, Utility, EquipmentSlot, ProjectileEffect } from "@common";
+import { Vector } from "@math";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemManager } from "./playerItemManager";
@@ -83,18 +84,18 @@ class PlayerCharacter {
     }
 
     public nonLocalUpdate(deltaTime: number): void {
+        this.handleProjectileCollisions();
         this.body.update(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions();
     }
 
     public update(deltaTime: number): void {
-        this.body.update(deltaTime);
+        this.handleProjectileCollisions();
         this.updateControllers(deltaTime);
+        this.body.update(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-        this.handleProjectileCollisions();
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {

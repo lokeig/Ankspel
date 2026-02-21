@@ -1,7 +1,11 @@
 
-import { DrawInfo, Rect, RenderIF } from "@render";
+import { Vector } from "@math";
+import { DrawInfo, Rect, IRender } from "@render";
+import { RenderSpace } from "src/Render/IRender";
 
-class CanvasRender implements RenderIF {
+class CanvasRender implements IRender {
+    private cameraPos = new Vector;
+    private cameraZoom: number = 1;
 
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
@@ -22,15 +26,17 @@ class CanvasRender implements RenderIF {
         return this.images.get(src)!;
     }
 
-    public draw(drawInfo: DrawInfo): void {
+    public draw(drawInfo: DrawInfo, space?: RenderSpace): void {
         const img = this.loadImage(drawInfo.imageSrc);
-
         if (!img.complete) {
-            img.onload = () => this.draw(drawInfo);
+            img.onload = () => this.draw(drawInfo, space);
             return;
         }
-
         this.ctx.save();
+        if (space === RenderSpace.Screen) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        this.ctx.globalAlpha = drawInfo.opacity;
 
         if (drawInfo.flip) {
             const translateAmount = Math.floor(drawInfo.world.x + drawInfo.world.width / 2)
@@ -53,20 +59,24 @@ class CanvasRender implements RenderIF {
         this.ctx.restore();
     }
 
-    public drawLine(imageSrc: string, x1: number, y1: number, x2: number, y2: number, width: number, sourceRect: Rect): void {
-
+    public drawLine(imageSrc: string, start: Vector, end: Vector, width: number, sourceRect: Rect, opacity: number, space?: RenderSpace): void {
         const img = this.loadImage(imageSrc);
         if (!img.complete) {
-            img.onload = () => this.drawLine(imageSrc, x1, y1, x2, y2, width, sourceRect);
+            img.onload = () => this.drawLine(imageSrc, start, end, width, sourceRect, opacity, space);
             return;
         }
-        const dx = Math.floor(x2 - x1);
-        const dy = Math.floor(y2 - y1);
+
+        const dx = Math.floor(end.x - start.x);
+        const dy = Math.floor(end.y - start.y);
         const length = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
 
         this.ctx.save();
-        this.ctx.translate(x1, y1);
+        if (space === RenderSpace.Screen) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        this.ctx.globalAlpha = opacity;
+        this.ctx.translate(start.x, start.y);
         this.ctx.rotate(angle);
 
         this.ctx.drawImage(
@@ -80,9 +90,11 @@ class CanvasRender implements RenderIF {
         this.ctx.restore();
     }
 
-    drawSquare(rect: Rect, angle: number, color: string): void {
+    public drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
         this.ctx.save();
-
+        if (space === RenderSpace.Screen) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
         this.ctx.fillStyle = color;
         this.ctx.translate(rect.x + rect.width / 2, rect.y + rect.height / 2);
         this.ctx.rotate(angle);
@@ -93,16 +105,42 @@ class CanvasRender implements RenderIF {
     }
 
     public clear() {
+        this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();    
     }
 
-    public setScale(scale: number) {
-        const xOffset = (this.canvas.width - this.canvas.width / scale) / 2;
-        const yOffset = (this.canvas.height - this.canvas.height / scale) / 2;
-        this.ctx.scale(scale, scale);
-        this.ctx.translate(-xOffset, -yOffset);
+    public setCamera(pos: Vector, zoom: number): void {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+        const newWidth = this.canvas.width / zoom;
+        const newHeight = this.canvas.height / zoom;
+
+        const xOffset = newWidth / 2 - pos.x;
+        const yOffset = newHeight / 2 - pos.y;
+
+        this.ctx.scale(zoom, zoom);
+        this.ctx.translate(xOffset, yOffset);
+
+        this.cameraPos = pos.clone();
+        this.cameraZoom = zoom;
+    }
+
+    public getCameraPos(): Vector {
+        return this.cameraPos;
+    }
+
+    public getCameraZoom(): number {
+        return this.cameraZoom;
+    }
+
+    public getWidth(): number {
+        return this.canvas.width;
+    }
+
+    public getHeight(): number {
+        return this.canvas.height;
     }
 }
 

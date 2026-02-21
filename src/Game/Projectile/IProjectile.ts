@@ -1,6 +1,7 @@
+import { Vector } from "@math";
 import { GameObject } from "@core";
 import { ITrail } from "./ITrail";
-import { ProjectileEffect, Vector } from "@common";
+import { ProjectileEffect } from "@common";
 
 interface IProjectile {
     update(deltaTime: number): void;

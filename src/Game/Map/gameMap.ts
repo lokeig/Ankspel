@@ -1,7 +1,8 @@
-import { Grid, Utility, Vector } from "@common";
+import { Grid, Utility } from "@common";
 import { TileConstructor, ITile } from "@game/StaticObjects/Tiles";
-import { PlayerCharacter } from "@player";
 import { ItemDescription } from "./itemDescription";
+import { Vector } from "@math";
+
 
 class GameMap {
     private tiles: ITile[] = [];

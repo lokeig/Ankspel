@@ -1,13 +1,17 @@
-import { Countdown, Vector, PlayerState, InputMode, PlayerAnim, ThrowType, IState, EquipmentSlot } from "@common";
+import { Vector } from "@math";
+import { Countdown, PlayerState, InputMode, PlayerAnim, ThrowType, IState, EquipmentSlot } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 
 class PlayerSlide implements IState<PlayerState> {
 
     private playerCharacter: PlayerCharacter;
     private platformIgnoreTime = new Countdown(0.15);
-    private static readonly SlideHeight: number = 20;
+
+    private static readonly slideHeight: number = 20;
+    private static readonly crouchHeight: number = 30;
+
     private crouch: boolean;
-    private unstuckSpeed: number = 420;
+    private unstuckSpeed: number = 300;
 
     constructor(playerCharacter: PlayerCharacter, crouch: boolean) {
         this.playerCharacter = playerCharacter;
@@ -20,7 +24,12 @@ class PlayerSlide implements IState<PlayerState> {
             this.playerCharacter.movement.moveEnabled = false;
             this.playerCharacter.itemManager.forcedThrowType = ThrowType.Drop;
         }
-        this.playerCharacter.body.height = PlayerSlide.SlideHeight;
+
+        if (this.crouch) {
+            this.playerCharacter.body.height = PlayerSlide.crouchHeight;
+        } else {
+            this.playerCharacter.body.height = PlayerSlide.slideHeight;
+        }
         this.playerCharacter.body.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.body.height;
 
         let armOffset = new Vector(16, 42);
@@ -64,9 +73,9 @@ class PlayerSlide implements IState<PlayerState> {
     private setEquipmentPositionsSlide(): void {
         const center = this.playerCharacter.body.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.SlideHeight)],
+            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
             [EquipmentSlot.Body, new Vector(0, 2)],
-            [EquipmentSlot.Boots, new Vector(0, PlayerSlide.SlideHeight)],
+            [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {
             this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, -Math.PI / 2, slot);
@@ -76,9 +85,9 @@ class PlayerSlide implements IState<PlayerState> {
     private setEquipmentPositionsCrouch(): void {
         const center = this.playerCharacter.body.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.SlideHeight)],
+            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
             [EquipmentSlot.Body, new Vector(0, -4)],
-            [EquipmentSlot.Boots, new Vector(0, PlayerSlide.SlideHeight)],
+            [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {
             this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);

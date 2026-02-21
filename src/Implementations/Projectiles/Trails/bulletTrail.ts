@@ -1,10 +1,9 @@
-import { SpriteSheet, images, Vector, Utility, Frame } from "@common";
+import { Vector } from "@math";
+import { SpriteSheet, images, Utility } from "@common";
 import { ITrail } from "@projectile";
 
 class BulletTrail implements ITrail {
     private static spriteSheet: SpriteSheet;
-    private static frames = { default: new Frame() };
-
 
     private startingLocation: Vector;
     private target!: Vector;
@@ -17,7 +16,6 @@ class BulletTrail implements ITrail {
     static {
         const spriteInfo = Utility.File.getImage(images.trail);
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
-        Utility.File.setFrames("trail", this.frames);
     }
     
     constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {
@@ -71,7 +69,7 @@ class BulletTrail implements ITrail {
     }
 
     public draw(): void {
-        BulletTrail.spriteSheet.drawLine(BulletTrail.frames.default, this.startingLocation, this.target, this.size);
+        BulletTrail.spriteSheet.drawLine(this.startingLocation, this.target, this.size);
     }
 }
 

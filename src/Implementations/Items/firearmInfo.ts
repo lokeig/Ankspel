@@ -1,4 +1,5 @@
-import { Vector, Utility, SeededRNG } from "@common";
+import { Vector } from "@math";
+import { Utility, SeededRNG } from "@common";
 import { ProjectileManager } from "@game/Projectile";
 import { Bullet } from "@impl/Projectiles";
 import { OnItemUseEffect, OnItemUseType } from "@item";
@@ -6,7 +7,7 @@ import { OnItemUseEffect, OnItemUseType } from "@item";
 class FirearmHelper {
     public knockback = new Vector();
     public bulletAngleVariation: number = 0;
-    public pipeOffset = new Vector();
+    public muzzleOffset = new Vector();
     public ammo: number = 10;
     public bulletCount: number = 1;
     public bulletSpeed: number = 1000;
@@ -14,28 +15,34 @@ class FirearmHelper {
     public bulletRangeVariation: number = 0;
 
     public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number, local: boolean): OnItemUseEffect[] {
-        const rng = new SeededRNG(seed);
         if (this.ammo < 1) {
             return [];
         }
-        const direcMult = flip ? -1 : 1;
-        this.ammo -= 1;
-        const offset = Utility.Angle.rotateForce(this.pipeOffset, angle);
-        const pos = new Vector(
-            centerPos.x + offset.x * direcMult,
-            centerPos.y + offset.y
-        );
+        this.ammo--;
+
+        const rng = new SeededRNG(seed);
+        const baseAngle = flip ? Math.PI - angle : angle;
+
         for (let i = 0; i < this.bulletCount; i++) {
-            let shotAngle = angle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
-            shotAngle = flip ? Math.PI - shotAngle : shotAngle;
+            const shotAngle = baseAngle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             const range = this.bulletRange + rng.getInRange(-this.bulletRangeVariation, this.bulletRangeVariation);
-            const bullet = new Bullet(pos.clone(), shotAngle, this.bulletSpeed, range);
-            ProjectileManager.addProjectile(bullet, local);
+
+            ProjectileManager.addProjectile(new Bullet(this.getMuzzleOffset(centerPos, angle, flip), shotAngle, this.bulletSpeed, range), local);
         }
-        return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }]; 
+        return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }];
     }
 
-    public getKnockback(angle: number, flip: boolean): Vector {
+    public getMuzzleOffset(center: Vector, angle: number, flip: boolean): Vector {
+        const muzzleOffset = Utility.Angle.rotateForce(this.muzzleOffset, angle);
+        const directionalMultiplier = flip ? -1 : 1;
+
+        return new Vector(
+            center.x + muzzleOffset.x * directionalMultiplier,
+            center.y + muzzleOffset.y
+        );
+    }
+
+    private getKnockback(angle: number, flip: boolean): Vector {
         const result = Utility.Angle.rotateForce(new Vector(this.knockback.x, 0), angle);
         if (flip) {
             result.x *= -1;

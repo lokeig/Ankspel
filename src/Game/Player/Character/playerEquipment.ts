@@ -1,4 +1,5 @@
-import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility } from "@common";
 import { IItem, Ownership } from "@item";
 
 class PlayerEquipment {

@@ -1,4 +1,5 @@
-import { Vector, SpriteAnimator, SpriteSheet, images, Animation, Utility } from "@common";
+import { Vector } from "@math";
+import { SpriteAnimator, SpriteSheet, images, Animation, Utility } from "@common";
 
 class ExplosionParticle {
     private pos: Vector;

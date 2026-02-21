@@ -1,5 +1,5 @@
 import { NetworkVector } from "@server";
-import { Vector } from "../Types/vector";
+import { Vector } from "../../../Math/vector";
 
 class VectorUtility {
 

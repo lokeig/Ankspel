@@ -1,11 +1,11 @@
-import { AxisDirection, Countdown, Grid, ProjectileEffect, Utility, Vector } from "@common";
+import { Vector } from "@math";
+import { AxisDirection, Countdown, Grid, ProjectileEffect, Utility } from "@common";
 import { CollisionObject, GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile } from "@projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { ParticleManager } from "@game/Particles";
-import { BulletReboundVFX, ExplosionVFX } from "@impl/Particles";
-import { stat } from "fs";
+import { BulletReboundVFX } from "@impl/Particles";
 
 class Bullet implements IProjectile {
     private pos: Vector;
@@ -35,7 +35,7 @@ class Bullet implements IProjectile {
         this.angle = Math.atan2(velocity.y, velocity.x);
 
         const trailPos = pos.clone().add(size / 2);
-        this.trail = new BulletTrail(trailPos, velocity.clone(), blockRange * Grid.size, size);
+        this.trail = new BulletTrail(trailPos, velocity.clone(), 200, size);
         this.trail.setTarget(trailPos);
     }
 

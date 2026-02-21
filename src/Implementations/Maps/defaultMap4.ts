@@ -1,6 +1,6 @@
 import { IceTile } from "@impl/Tiles";
 import { GameMap } from "@game/Map/gameMap";
-import { Vector } from "@common";
+import { Vector } from "@math";
 
 const defaultMap4 = new GameMap();
 

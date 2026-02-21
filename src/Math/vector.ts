@@ -55,9 +55,10 @@ class Vector {
         return Math.pow(end.x - this.x, 2) + Math.pow(end.y - this.y, 2);
     }
 
-    public set(x: number, y: number): void {
+    public set(x: number, y: number): Vector {
         this.x = x;
         this.y = y;
+        return this;
     }
 
     public clone(): Vector {

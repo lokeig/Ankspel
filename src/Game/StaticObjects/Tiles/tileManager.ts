@@ -1,4 +1,5 @@
-import { Vector, Grid, Utility, Direction, Side } from "@common";
+import { Vector } from "@math";
+import { Grid, Utility, Direction, Side } from "@common";
 import { CollisionObject, GameObject } from "@core";
 import { ITile } from "./ITile";
 
@@ -54,6 +55,10 @@ class TileManager {
 
         Grid.forNearby(pos, nextPos, width, height, accumulate);
         return result;
+    }
+
+    public static getTiles(): ITile[] {
+        return Array.from(this.tiles.values());
     }
 
     private static tilesMatch(a: ITile, b: ITile): boolean {

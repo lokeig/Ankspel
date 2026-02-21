@@ -1,5 +1,6 @@
 export { ItemManager } from "./itemManager";
 export type { IItem, ItemConstructor } from "./IItem";
+export  { isItem } from "./IItem";
 
 export type { ItemUseHandler } from "./itemUseHandler";
 

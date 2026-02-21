@@ -1,18 +1,27 @@
-import { Grid, Utility, Vector } from "@common";
-import { ItemConstructor, IItem } from "./IItem";
+import { Grid, Utility,  } from "@common";
+import { ItemConstructor, IItem, isItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
 import { Ownership } from "./itemUseType";
+import { Vector } from "@math";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
+<<<<<<< HEAD
     private static idManager = new IDManager<IItem>();
     private static permanent: Array<{ item: IItem; id: number }> = [];
+=======
+
+    private static idManager = new IDManager;
+    private static permanent: IItem[] = [];
+>>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
 
     public static clear(): void {
         this.items = new Map();
+        this.permanent.forEach(item => this.addToMap(item));
         this.idManager.reset();
+<<<<<<< HEAD
 
         for (const { item, id } of this.permanent) {
             this.addToMap(item);
@@ -20,6 +29,8 @@ class ItemManager {
         }
 
         this.idManager.recalculateNextID();
+=======
+>>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
     }
 
 
@@ -102,14 +113,22 @@ class ItemManager {
     }
 
     public static addPermanent(item: IItem, id: number): void {
+<<<<<<< HEAD
         this.permanent.push({ item, id });
         this.addToMap(item);
         this.idManager.setID(item, id);
+=======
+        this.idManager.setPermanentID(item, id);
+        this.permanent.push(item);
+>>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
     }
 
 
     public static getItemFromID(id: number): IItem | undefined {
-        return this.idManager.getObject(id);
+        const obj = this.idManager.getObject(id);
+        if (isItem(obj)) {
+            return obj;
+        }
     }
 
     public static getItemID(item: IItem): number | undefined {
