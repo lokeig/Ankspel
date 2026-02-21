@@ -42,6 +42,9 @@ class MultiPeerServer implements IServer {
         this.socket.send(JSON.stringify(connectMsg));
         this.socket.send(JSON.stringify(listLobbiesMsg));
 
+        this.localMode = false;
+        this.host = false;
+
         console.log("Connected to signaling server");
     }
 

@@ -53,6 +53,7 @@ class ItemManager {
     }
 
     public static spawn(type: string, gridPos: Vector, id: number): void {
+        console.log("Spawning: ", id, type)
         const constructor = this.register.get(type);
         if (!constructor) {
             return;

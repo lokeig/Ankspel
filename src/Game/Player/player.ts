@@ -33,8 +33,8 @@ class Player {
     }
 
     public held(): boolean {
-        const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll);
-        return ragdoll instanceof PlayerRagdoll && ragdoll.getOwnership() === Ownership.Held;
+        const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
+        return ragdoll.getOwnership() === Ownership.Held;
     }
 
     public reset(): void {
