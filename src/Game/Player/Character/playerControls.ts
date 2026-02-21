@@ -35,7 +35,7 @@ class PlayerControls {
         return Number(this.right()) - Number(this.left());
     }
 
-    public ragdoll(inputMode: InputMode = InputMode.Hold): boolean {
+    public ragdoll(inputMode: InputMode = InputMode.Press): boolean {
         return this.getKey(this.controls.ragdoll, inputMode);
     }
 

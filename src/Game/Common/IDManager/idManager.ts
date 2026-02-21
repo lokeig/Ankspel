@@ -45,13 +45,7 @@ class IDManager {
         return id;
     }
 
-<<<<<<< HEAD
-    public recalculateNextID(): 
-
-    public setID(object: T, id: number): void {
-=======
     public setID(object: Object, id: number): void {
->>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
         this.objectToID.set(object, id);
         this.idToObject.set(id, object);
     }

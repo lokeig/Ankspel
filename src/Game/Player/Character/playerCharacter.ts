@@ -8,7 +8,7 @@ import { PlayerMove } from "./playerMove";
 import { PlayerControls } from "./playerControls";
 import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
-import { ProjectileManager } from "@projectile";
+import { IProjectile, ProjectileManager } from "@projectile";
 import { IItem } from "@item";
 import { Connection, GameMessage } from "@server";
 
@@ -154,17 +154,18 @@ class PlayerCharacter {
                 const effect = projectile.onPlayerHit(seed);
                 if (projectile.isLocal()) {
                     Connection.get().sendGameMessage(GameMessage.PlayerHit, { id: this.id, effect, seed, slot });
-                    this.handleEffect(effect, equipment, seed, true);
+                    this.handleEffect(projectile, effect, equipment, seed, true);
                 }
             }
         });
     }
 
-    public handleEffect(effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
+    public handleEffect(projectile: IProjectile, effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
         switch (effect) {
             case ProjectileEffect.Damage: {
                 if (equipment && !equipment.shouldBeDeleted() && equipment.interactions().get(ItemInteraction.HitByProjectile)) {
                     equipment.interactions().get(ItemInteraction.HitByProjectile)!(seed, local);
+                    projectile.setToDelete();
                 } else {
                     this.die();
                 }

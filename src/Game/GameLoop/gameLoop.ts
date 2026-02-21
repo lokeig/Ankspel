@@ -6,12 +6,15 @@ import { Playing } from "./LoopStates/playing";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { LoadingMap } from "./LoopStates/loadingMap";
 import { DuckGame } from "./game";
+import { FrameHandler } from "./frameTimer";
 
 class GameLoop {
     private lastTime = 0;
     private stateMachine: StateMachine<GameLoopState>;
+    private frameHandler: FrameHandler;
 
-    constructor() {
+    constructor(timer: FrameHandler) {
+        this.frameHandler = timer;
         NetworkHandler.init();
         LobbyList.get().show();
 
@@ -28,13 +31,13 @@ class GameLoop {
     private startGame(): void {
         LobbyList.get().hide();
         this.stateMachine.enterState();
-        requestAnimationFrame(this.gameLoop);
+        this.frameHandler.newFrame(this.gameLoop);
     }
 
     private gameLoop = (currentTime: number) => {
         if (this.lastTime === 0) {
             this.lastTime = currentTime;
-            requestAnimationFrame(this.gameLoop);
+            this.frameHandler.newFrame(this.gameLoop);
             return;
         }
         const deltaTime = (currentTime - this.lastTime) / 1000;
@@ -46,7 +49,7 @@ class GameLoop {
         Input.update();
         NetworkHandler.update(deltaTime);
 
-        requestAnimationFrame(this.gameLoop);
+        this.frameHandler.newFrame(this.gameLoop);
     };
 }
 

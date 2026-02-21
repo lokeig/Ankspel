@@ -8,31 +8,15 @@ import { Vector } from "@math";
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
-<<<<<<< HEAD
-    private static idManager = new IDManager<IItem>();
-    private static permanent: Array<{ item: IItem; id: number }> = [];
-=======
 
     private static idManager = new IDManager;
     private static permanent: IItem[] = [];
->>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
 
     public static clear(): void {
         this.items = new Map();
         this.permanent.forEach(item => this.addToMap(item));
         this.idManager.reset();
-<<<<<<< HEAD
-
-        for (const { item, id } of this.permanent) {
-            this.addToMap(item);
-            this.idManager.setID(item, id);
-        }
-
-        this.idManager.recalculateNextID();
-=======
->>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
     }
-
 
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
@@ -113,16 +97,9 @@ class ItemManager {
     }
 
     public static addPermanent(item: IItem, id: number): void {
-<<<<<<< HEAD
-        this.permanent.push({ item, id });
-        this.addToMap(item);
-        this.idManager.setID(item, id);
-=======
         this.idManager.setPermanentID(item, id);
         this.permanent.push(item);
->>>>>>> 8147d057c34d0fa99f039eb9b42fa4805ed6b815
     }
-
 
     public static getItemFromID(id: number): IItem | undefined {
         const obj = this.idManager.getObject(id);

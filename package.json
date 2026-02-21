@@ -17,7 +17,6 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
-    "uuid": "^11.1.0",
     "ws": "^8.18.3"
   }
 }
