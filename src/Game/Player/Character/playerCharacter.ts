@@ -154,18 +154,17 @@ class PlayerCharacter {
                 const effect = projectile.onPlayerHit(seed);
                 if (projectile.isLocal()) {
                     Connection.get().sendGameMessage(GameMessage.PlayerHit, { id: this.id, effect, seed, slot });
-                    this.handleEffect(projectile, effect, equipment, seed, true);
+                    this.handleEffect(effect, equipment, seed, true);
                 }
             }
         });
     }
 
-    public handleEffect(projectile: IProjectile, effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
+    public handleEffect(effect: ProjectileEffect, equipment: IItem | null, seed: number, local: boolean): void {
         switch (effect) {
             case ProjectileEffect.Damage: {
                 if (equipment && !equipment.shouldBeDeleted() && equipment.interactions().get(ItemInteraction.HitByProjectile)) {
                     equipment.interactions().get(ItemInteraction.HitByProjectile)!(seed, local);
-                    projectile.setToDelete();
                 } else {
                     this.die();
                 }
