@@ -1,4 +1,4 @@
-import { Vector } from "../../../Math/vector";
+import { Vector } from "@math";
 
 class Input {
     private static keysDown: Set<string> = new Set();
@@ -12,17 +12,18 @@ class Input {
     static init() {
 
         window.addEventListener('keydown', e => {
-            const onKeyFunction = this.onKeyFunction.get(e.key);
-            if (onKeyFunction) {
-                onKeyFunction.forEach(fn => fn());
+            const target = e.target as HTMLElement;
+            if (target.tagName !== "TEXTAREA") {
+                const onKeyFunction = this.onKeyFunction.get(e.key);
+                if (onKeyFunction) {
+                    onKeyFunction.forEach(fn => fn());
+                }
             }
-
             if (!this.keysDown.has(e.key)) {
                 this.keysPressed.add(e.key);
             }
-            const target = e.target as HTMLElement;
             this.keysDown.add(e.key);
-            if ((e.key === " " || e.key === "ArrowLeft" || e.key === "ArrowUp") && target.tagName !== "INPUT" && target.tagName !== "TEXTAREA") {
+            if (target.tagName !== "TEXTAREA") {
                 e.preventDefault();
             }
         });
@@ -51,7 +52,14 @@ class Input {
         if (!this.onKeyFunction.get(key)) {
             this.onKeyFunction.set(key, new Set());
         }
-        this.onKeyFunction.get!(key)!.add(e);
+        this.onKeyFunction.get(key)!.add(e);
+    }
+
+    static removeOnKey(key: string, e: () => void): void {
+        if (!this.onKeyFunction.get(key)) {
+            return;
+        }
+        this.onKeyFunction.get(key)!.delete(e);
     }
 
     static onKeyOnce(key: string, e: () => void): void {

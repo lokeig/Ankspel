@@ -1,10 +1,13 @@
 import { CMsgType, ForwardMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessage, GameMessageMap } from "@game/Server";
+import { channel } from "diagnostics_channel";
 
 class PeerConnectionManager {
     private peerConnection: RTCPeerConnection;
-    private dataChannel: RTCDataChannel | null = null;
+    private reliableChannel: RTCDataChannel | null = null;
+    private unreliableChannel: RTCDataChannel | null = null;
+
     private pendingCandidates: RTCIceCandidate[] = [];
     private peerId: string;
     private socket: WebSocket;
@@ -36,39 +39,42 @@ class PeerConnectionManager {
         };
 
         this.peerConnection.ondatachannel = (event: RTCDataChannelEvent) => {
-            this.dataChannel = event.channel;
-            this.setupDataChannel();
+            const channel = event.channel;
+            if (channel.label === "reliable") {
+                this.reliableChannel = channel;
+            } else {
+                this.unreliableChannel = channel;
+            }
+            this.setupDataChannel(channel);
         };
     }
 
-    public createDataChannel(name: string = "game") {
-        this.dataChannel = this.peerConnection.createDataChannel(name);
-        this.setupDataChannel();
+    public createDataChannels() {
+        this.reliableChannel = this.peerConnection.createDataChannel("reliable");
+        this.unreliableChannel = this.peerConnection.createDataChannel("unreliable", {
+            ordered: false,
+            maxRetransmits: 0
+        });
+
+        this.setupDataChannel(this.reliableChannel);
+        this.setupDataChannel(this.unreliableChannel);
     }
 
-    private setupDataChannel() {
-        if (!this.dataChannel) {
-            return;
-        }
-
-        this.dataChannel.onopen = () => {
+    private setupDataChannel(channel: RTCDataChannel) {
+        channel.onopen = () => {
             console.log(`DataChannel with ${this.peerId} open`);
         };
 
-        this.dataChannel.onmessage = (e: MessageEvent) => {
-            try {
-                const msg: { type: GameMessage, gameMessage: GameMessage } = JSON.parse(e.data);
-                this.messageCallback(msg.type, msg.gameMessage);
-            } catch (error) {
-                console.error("Failed to parse message:", error);
-            }
+        channel.onmessage = (e: MessageEvent) => {
+            const msg: { type: GameMessage, gameMessage: GameMessage } = JSON.parse(e.data);
+            this.messageCallback(msg.type, msg.gameMessage);
         };
 
-        this.dataChannel.onclose = () => {
+        channel.onclose = () => {
             console.log(`DataChannel with ${this.peerId} closed`);
         };
 
-        this.dataChannel.onerror = (error) => {
+        channel.onerror = (error) => {
             console.error(`DataChannel error with ${this.peerId}:`, error);
         };
     }
@@ -121,15 +127,21 @@ class PeerConnectionManager {
     }
 
     public close() {
-        if (this.dataChannel) {
-            this.dataChannel.close();
+        if (this.reliableChannel) {
+            this.reliableChannel.close();
         }
         this.peerConnection.close();
     }
 
-    public sendMessage<T extends GameMessage>(type: T, gameMessage: GameMessageMap[T]) {
-        if (this.dataChannel?.readyState === "open" && this.peerConnection.connectionState === "connected") {
-            this.dataChannel!.send(JSON.stringify({ type, gameMessage }));
+    public sendReliableMessage<T extends GameMessage>(type: T, gameMessage: GameMessageMap[T]) {
+        if (this.reliableChannel?.readyState === "open" && this.peerConnection.connectionState === "connected") {
+            this.reliableChannel!.send(JSON.stringify({ type, gameMessage }));
+        }
+    }
+
+    public sendUnreliableMessage<T extends GameMessage>(type: T, gameMessage: GameMessageMap[T]) {
+        if (this.unreliableChannel?.readyState === "open" && this.peerConnection.connectionState === "connected") {
+            this.unreliableChannel!.send(JSON.stringify({ type, gameMessage }));
         }
     }
 }

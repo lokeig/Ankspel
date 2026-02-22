@@ -9,7 +9,9 @@ interface IServer {
     getID(): string;
     connectionCount(): number;
     sendGameMessage<T extends GameMessage>(type: T, text: GameMessageMap[T]): void;
+    sendGameMessageUnreliable<T extends GameMessage>(type: T, text: GameMessageMap[T]): void;
     sendClientMessage(text: ClientMessage): void;
+    enableLocalMode(): void;
 }
 
 export type { IServer };
