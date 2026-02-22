@@ -30,8 +30,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.width = PlayerCharacter.standardWidth;
 
         this.head = new DynamicObject(new Vector(), this.width, this.height);
-        this.legs = new DynamicObject(new Vector(), this.width, this.height);
         this.body = new DynamicObject(new Vector(), this.width, this.width);
+        this.legs = new DynamicObject(new Vector(), this.width, this.height);
 
         const bounceFactor = 0.5;
         this.head.bounceFactor = bounceFactor;
@@ -151,6 +151,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.updateStandardBody();
         if (this.getOwnership() === Ownership.Held) {
             this.ownedUpdate(deltaTime);
             return;
@@ -174,7 +175,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
 
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
-            this.head.velocity.x = Utility.Random.getInRange(-3, 3);
+            this.head.velocity.x = Utility.Random.getInRange(-20, 20);
         }
         if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);
@@ -209,7 +210,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         if (this.playerCharacter.isDead() || this.getOwnership() === Ownership.Held) {
             return PlayerState.Ragdoll;
         }
-        this.updateStandardBody();
         const exitKeyPressed = this.playerCharacter.controls.ragdoll() || this.playerCharacter.controls.jump(InputMode.Press);
         if (exitKeyPressed && !this.coyoteTime.isDone()) {
             return PlayerState.Standard;
@@ -219,7 +219,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public stateExited(): void {
         this.currentState = false;
-        this.updateStandardBody();
         const jumpHeight = 25;
         const exitVerticalSpeed = -250;
         this.playerCharacter.body.pos.y -= jumpHeight;

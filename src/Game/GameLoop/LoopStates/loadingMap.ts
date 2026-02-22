@@ -18,10 +18,10 @@ class LoadingMap implements IState<GameLoopState> {
 
     public constructor(game: DuckGame) {
         this.game = game;
-
+        
         MapNetworkHandler.setMapLoad((time: number) => {
+            this.game.reset();
             setTimeout(() => {
-                this.game.reset();
                 this.startPlayingCountdown.reset();
                 this.startPlaying = true;
             }, Math.max(time - Date.now(), 0));
