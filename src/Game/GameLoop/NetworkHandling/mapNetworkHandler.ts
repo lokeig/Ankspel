@@ -35,8 +35,8 @@ class MapNetworkHandler {
 
         Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
         MapLoader.load(map[1], host);
-        if (PlayerManager.getLocal().length == PlayerManager.getPlayers().length) {
-            this.onMapLoad(Date.now() + 1);
+        if (PlayerManager.getLocal().length === PlayerManager.getPlayers().length) {
+            this.onMapLoad(0);
         }
     }
 
@@ -46,7 +46,7 @@ class MapNetworkHandler {
             return;
         }
         this.readyCount = 0;
-        const timeToStart = Date.now() + 500;
+        const timeToStart = Date.now() + 1500;
         Connection.get().sendGameMessage(GameMessage.StartMap, {
             time: timeToStart
         });

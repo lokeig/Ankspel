@@ -6,24 +6,26 @@ class Input {
     private static mouseClickBool: boolean = false;
     private static mouseDownBool: boolean = false;
     private static mousePos: Vector = new Vector();
-    
+
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
 
     static init() {
 
         window.addEventListener('keydown', e => {
-            const target = e.target as HTMLElement;
-            if (target.tagName !== "TEXTAREA") {
-                const onKeyFunction = this.onKeyFunction.get(e.key);
-                if (onKeyFunction) {
-                    onKeyFunction.forEach(fn => fn());
-                }
+            if (document.querySelector('.modal:not(.hidden)')) {
+                return;
+            }
+
+            const onKeyFunction = this.onKeyFunction.get(e.key);
+            if (onKeyFunction) {
+                onKeyFunction.forEach(fn => fn());
             }
             if (!this.keysDown.has(e.key)) {
                 this.keysPressed.add(e.key);
             }
             this.keysDown.add(e.key);
-            if (target.tagName !== "TEXTAREA") {
+
+            if (["ArrowLeft", "ArrowRight", " "].includes(e.key)) {
                 e.preventDefault();
             }
         });

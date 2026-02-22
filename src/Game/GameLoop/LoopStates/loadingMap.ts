@@ -21,10 +21,10 @@ class LoadingMap implements IState<GameLoopState> {
 
         MapNetworkHandler.setMapLoad((time: number) => {
             setTimeout(() => {
+                this.game.reset();
                 this.startPlayingCountdown.reset();
                 this.startPlaying = true;
             }, Math.max(time - Date.now(), 0));
-            this.game.reset();
         })
 
         const readyImageInfo = Utility.File.getImage(images.ready);
