@@ -17,8 +17,6 @@ class MultiPeerServer implements IServer {
         this.socket = socket;
         this.socket.onmessage = (e: MessageEvent) => this.handleMessage(e);
 
-        this.enableLocalMode();
-
         this.socket.onopen = () => {
             this.enableOnlineMode();
         };
@@ -50,7 +48,7 @@ class MultiPeerServer implements IServer {
         console.log("Connected to signaling server");
     }
 
-    private enableLocalMode(): void {
+    public enableLocalMode(): void {
         this.localMode = true;
         this.host = true;
         this.myID = "local";
@@ -58,7 +56,6 @@ class MultiPeerServer implements IServer {
 
         console.log("Running in local mode");
     }
-
 
     public isHost(): boolean {
         return this.host;
@@ -92,7 +89,7 @@ class MultiPeerServer implements IServer {
         const isInitiator = peerId < this.myID!;
         if (isInitiator) {
             console.log(`Initiating connection to ${peerId}`);
-            peer.createDataChannel();
+            peer.createDataChannels();
             peer.createOffer();
         }
     }
@@ -200,16 +197,22 @@ class MultiPeerServer implements IServer {
             }
 
             case ServerMessage.StartGame: {
-                console.log("Starting game");
+                console.log("pmu game");
                 break;
             }
         }
     }
 
-    public sendGameMessage<T extends GameMessage>(type: T, msg: GameMessageMap[T]): void {
+    public sendGameMessage<T extends GameMessage>(type: T, text: GameMessageMap[T]): void {
         // console.log("Sending message: " + GameMessage[type], msg);
         this.peers.forEach((peer: PeerConnectionManager) => {
-            peer.sendMessage(type, msg);
+            peer.sendReliableMessage(type, text);
+        });
+    }
+
+    public sendGameMessageUnreliable<T extends GameMessage>(type: T, text: GameMessageMap[T]): void {
+        this.peers.forEach((peer: PeerConnectionManager) => {
+            peer.sendUnreliableMessage(type, text);
         });
     }
 

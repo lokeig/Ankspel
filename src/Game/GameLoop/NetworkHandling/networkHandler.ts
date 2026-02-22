@@ -10,6 +10,7 @@ import { MapLoader, MapManager } from "@game/Map";
 class NetworkHandler {
     private static readyCount: number = 0;
     private static messageTimer = new Countdown(0.05);
+    private static started: boolean = false;
     private static onStart: () => void;
 
     static init() {
@@ -21,12 +22,16 @@ class NetworkHandler {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
+            if (Connection.get().connectionCount() === 0) {
+                Connection.get().enableLocalMode();
+                this.start();
+            }
         });
 
         const gameEvent = Connection.get().gameEvent;
 
         gameEvent.subscribe(GameMessage.StartPlaying, () => {
-            this.onStart()
+            this.start()
         });
 
         gameEvent.subscribe(GameMessage.ReadyToPlay, () => {
@@ -38,20 +43,27 @@ class NetworkHandler {
                 return;
             }
             Connection.get().sendGameMessage(GameMessage.StartPlaying, {});
-            this.onStart();
+            this.start();
             this.readyCount = 0;
         });
 
-        Input.onKeyOnce("q", this.quickStart.bind(this));
+        Input.onKeyOnce("q", this.quickStart);
     }
 
-    private static quickStart(): void {
+    private static quickStart = (): void => {
         PlayerManager.create();
         PlayerManager.create();
+
+        Connection.get().enableLocalMode();
 
         const map = MapManager.getRandomMap()[1];
         MapLoader.load(map, true);
+        this.start();
+    }
+
+    private static start(): void {
         this.onStart();
+        Input.removeOnKey("q", this.quickStart);
     }
 
     public static setOnStart(e: () => void) {

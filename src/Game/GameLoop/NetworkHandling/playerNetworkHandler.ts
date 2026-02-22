@@ -81,7 +81,7 @@ class PlayerNetworkHandler {
             const id = player.getId();
             if (player.getCurrentState() === PlayerState.Ragdoll) {
                 const ragdollInfo = player.getRagdollInfo();
-                Connection.get().sendGameMessage(GameMessage.PlayerRagdollInfo, {
+                Connection.get().sendGameMessageUnreliable(GameMessage.PlayerRagdollInfo, {
                     id,
                     head: Utility.Vector.convertToNetwork(ragdollInfo.head),
                     body: Utility.Vector.convertToNetwork(ragdollInfo.body),
@@ -89,7 +89,7 @@ class PlayerNetworkHandler {
                     velocity: Utility.Vector.convertNetwork(ragdollInfo.velocity)
                 });
             } else {
-                Connection.get().sendGameMessage(GameMessage.PlayerInfo, {
+                Connection.get().sendGameMessageUnreliable(GameMessage.PlayerInfo, {
                     id,
                     pos: Utility.Vector.convertToNetwork(player.character.body.pos),
                     velocity: Utility.Vector.convertToNetwork(player.character.body.velocity),
