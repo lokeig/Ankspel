@@ -9,7 +9,7 @@ class Input {
 
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
 
-    static init() {
+    public static init(): void {
         window.addEventListener('keydown', e => {
             if (document.querySelector('.modal:not(.hidden)')) {
                 return;
@@ -49,21 +49,21 @@ class Input {
         });
     }
 
-    static onKey(key: string, e: () => void): void {
+    public static onKey(key: string, e: () => void): void {
         if (!this.onKeyFunction.get(key)) {
             this.onKeyFunction.set(key, new Set());
         }
         this.onKeyFunction.get(key)!.add(e);
     }
 
-    static removeOnKey(key: string, e: () => void): void {
+    public static removeOnKey(key: string, e: () => void): void {
         if (!this.onKeyFunction.get(key)) {
             return;
         }
         this.onKeyFunction.get(key)!.delete(e);
     }
 
-    static onKeyOnce(key: string, e: () => void): void {
+    public static onKeyOnce(key: string, e: () => void): void {
         if (!this.onKeyFunction.get(key)) {
             this.onKeyFunction.set(key, new Set());
         }
@@ -75,27 +75,27 @@ class Input {
         this.onKeyFunction.get(key)!.add(wrapper);
     }
 
-    static keyDown(key: string): boolean {
+    public static keyDown(key: string): boolean {
         return this.keysDown.has(key);
     }
 
-    static keyPress(key: string): boolean {
+    public static keyPress(key: string): boolean {
         return this.keysPressed.has(key);
     }
 
-    static mouseDown(): boolean {
+    public static mouseDown(): boolean {
         return this.mouseDownBool;
     }
 
-    static mouseClick(): boolean {
+    public static mouseClick(): boolean {
         return this.mouseClickBool;
     }
 
-    static getMousePos(): Vector {
+    public static getMousePos(): Vector {
         return this.mousePos;
     }
 
-    static update() {
+    public static update(): void {
         this.mouseClickBool = false;
         this.keysPressed.clear();
     }

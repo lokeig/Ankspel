@@ -139,6 +139,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.body.velocity = velocity.clone();
         this.legs.velocity = velocity.clone();
 
+        this.head.velocity.x -= Utility.Random.getInRange(-10, 10);
+
         if (this.playerCharacter.isLocal() && this.playerCharacter.jump.isJumping) {
             const jumpLeft = this.playerCharacter.jump.getJumpRemaining();
             const jumpCharge = this.playerCharacter.jump.getJumpForce() / 5;
@@ -162,25 +164,20 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.head.ignoreFriction = !this.head.grounded;
         this.body.ignoreFriction = !this.body.grounded;
         this.legs.ignoreFriction = !this.legs.grounded;
-        
+
         this.head.update(deltaTime);
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
-        
-        for (let i = 0; i < 500; i++) {
-            this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
-            this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
-            this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
-        }
-        
-        if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
-            this.head.velocity.x = Utility.Random.getInRange(-20, 20);
-        }
+
+        this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
+        this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
+
         if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);
         }
         this.updateStandardBody();
-        
+
         const head = true;
         this.setBodyPartAngle(head);
         this.setBodyPartAngle(!head);
@@ -252,7 +249,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     // For IItem
     public update(deltaTime: number): void {
-        
+
     }
 
     public getBody(): DynamicObject {

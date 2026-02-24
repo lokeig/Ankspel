@@ -35,7 +35,6 @@ class DuckGame {
         ItemManager.update(deltaTime);
         PlayerManager.update(deltaTime);
         ParticleManager.update(deltaTime);
-
         this.camera.update(deltaTime);
     }
 

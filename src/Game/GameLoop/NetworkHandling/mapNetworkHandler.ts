@@ -1,4 +1,3 @@
-import { Input } from "@common";
 import { GameMap, MapLoader, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
@@ -25,8 +24,6 @@ class MapNetworkHandler {
         });
 
         gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapLoad() });
-
-        Input.onKeyOnce("q", this.quickStart.bind(this));
     }
 
     public static hostInitializeMap(map: [number, GameMap]): void {
@@ -49,12 +46,12 @@ class MapNetworkHandler {
         this.onMapLoad();
     }
 
-    private static quickStart(): void {
-        this.onMapLoad();
-    }
-
     public static setMapLoad(callback: () => void): void {
         this.onMapLoad = callback;
+    }
+
+    public static doOnMapLoad(): void {
+        this.onMapLoad();
     }
 }
 

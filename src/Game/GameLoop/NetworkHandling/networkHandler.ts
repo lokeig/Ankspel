@@ -1,7 +1,6 @@
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@game/Server";
 import { Countdown, IDManager, Input } from "@common";
-import { ServerMessage } from "@shared";
 import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
@@ -37,7 +36,7 @@ class NetworkHandler {
             this.checkReadyToStart();
         });
 
-        Input.onKeyOnce("q", this.quickStart);
+        Input.onKey("q", this.quickStart);
     }
 
     private static checkReadyToStart(): void {
@@ -63,6 +62,7 @@ class NetworkHandler {
 
         const map = MapManager.getRandomMap()[1];
         MapLoader.load(map, true);
+        MapNetworkHandler.doOnMapLoad();
         this.start();
     }
 

@@ -41,7 +41,7 @@ class Glock extends Item {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmHelper();
-        this.firearmInfo.ammo = 11119;
+        this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
         this.firearmInfo.knockback = new Vector(450, 120);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
@@ -61,7 +61,9 @@ class Glock extends Item {
     public shoot(seed: number, local: boolean): OnItemUseEffect[] {
         this.animator.reset();
         this.animator.setAnimation(Glock.animations.shoot);
-        this.flare.reset();
+        if (this.firearmInfo.ammo > 0) {
+            this.flare.reset();
+        }
 
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
@@ -77,9 +79,7 @@ class Glock extends Item {
     private drawFlare(): void {
         const pos = this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip());
 
-
         this.flare.draw(pos, this.body.isFlip(), this.getAngle());
-
     }
 
     public shouldBeDeleted(): boolean {

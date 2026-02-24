@@ -3,7 +3,6 @@ import { Emitter, GameMessage, IServer } from "@game/Server";
 import { ClientMessage, CMsgType, ForwardedMessage, ServerMessage, ServerMessageMap } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessageMap } from "@game/Server/gameMessage";
-import { parse } from "path";
 
 class MultiPeerServer implements IServer {
     public gameEvent: Emitter<GameMessageMap> = new Emitter();
