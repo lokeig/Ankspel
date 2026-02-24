@@ -125,13 +125,11 @@ class CanvasRender implements IRender {
         const xOffset = newWidth / 2 - pos.x;
         const yOffset = newHeight / 2 - pos.y;
 
-        this.ctx.scale(Math.floor(zoom), Math.floor(zoom));
-        this.ctx.translate(Math.floor(xOffset), Math.floor(yOffset));
+        this.ctx.scale(zoom, zoom);
+        this.ctx.translate(xOffset, yOffset);
 
         this.cameraPos = pos.clone();
-        this.cameraPos.x = Math.floor(this.cameraPos.x);
-        this.cameraPos.y = Math.floor(this.cameraPos.y);
-        this.cameraZoom = Math.floor(zoom);
+        this.cameraZoom = zoom;
     }
 
     public getCameraPos(): Vector {
