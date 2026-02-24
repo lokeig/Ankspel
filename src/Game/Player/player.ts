@@ -4,6 +4,7 @@ import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
+import { PlayerManager } from "./playerManager";
 
 class Player {
     public character!: PlayerCharacter;
@@ -25,6 +26,7 @@ class Player {
         worldPos.y -= this.character.body.height;
         worldPos.x += (Grid.size - this.character.body.width) / 2;
         this.character.setPos(worldPos);
+        console.log(PlayerManager.getPlayers());
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
         console.log("Created spawn: x: " + gridPos.x + " y: " + gridPos.y);
     }

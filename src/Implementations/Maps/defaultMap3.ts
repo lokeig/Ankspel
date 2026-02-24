@@ -4,18 +4,63 @@ import { Vector } from "@math";
 
 const defaultMap3 = new GameMap();
 
-defaultMap3.fillArea(IceTile, 5, 14, 25, 2);
-defaultMap3.fillArea(IceTile, 23, 5, 6, 8);
-defaultMap3.fillArea(IceTile, 3, 8, 2, 8);
-defaultMap3.fillArea(IceTile, 9, 11, 2, 4);
-defaultMap3.fillArea(IceTile, 9, 5, 2, 4);
-defaultMap3.fillArea(IceTile, 15, 7, 3, 3);
+/**
+ * WIDE BASE FLOOR
+ */
+defaultMap3.fillArea(IceTile, 6, 18, 18, 2);
 
-defaultMap3.setPlayerSpawn(new Vector(8, 14));
-defaultMap3.setPlayerSpawn(new Vector(15, 14));
-defaultMap3.setPlayerSpawn(new Vector(15, 5));
-defaultMap3.setPlayerSpawn(new Vector(16, 14));
+/**
+ * LOWER SIDE PLATFORMS
+ */
+defaultMap3.fillArea(IceTile, 4, 14, 6, 2);
+defaultMap3.fillArea(IceTile, 20, 14, 6, 2);
 
-defaultMap3.setTile(IceTile, new Vector(15, 6));
+/**
+ * CENTRAL CORE PLATFORM
+ */
+defaultMap3.fillArea(IceTile, 12, 12, 6, 2);
+
+/**
+ * SIDE MID PLATFORMS
+ */
+defaultMap3.fillArea(IceTile, 3, 9, 5, 2);
+defaultMap3.fillArea(IceTile, 22, 9, 5, 2);
+
+/**
+ * TOP TOWER PLATFORM
+ */
+defaultMap3.fillArea(IceTile, 13, 6, 4, 2);
+
+/**
+ * SMALL TOP WINGS (grenade risk zone)
+ */
+defaultMap3.fillArea(IceTile, 8, 4, 4, 2);
+defaultMap3.fillArea(IceTile, 18, 4, 4, 2);
+
+/**
+ * PLAYER SPAWNS (spread vertically)
+ */
+defaultMap3.setPlayerSpawn(new Vector(9, 17));
+defaultMap3.setPlayerSpawn(new Vector(21, 17));
+defaultMap3.setPlayerSpawn(new Vector(5, 8));
+defaultMap3.setPlayerSpawn(new Vector(24, 8));
+
+/**
+ * ITEMS
+ */
+
+// Shotgun = central dominance
+defaultMap3.setItem("shotgun", new Vector(15, 11));
+
+// Grenade = high-risk top power
+defaultMap3.setItem("grenade", new Vector(15, 5));
+
+// Side pistols for scrappy fights
+defaultMap3.setItem("glock", new Vector(5, 13));
+defaultMap3.setItem("glock", new Vector(24, 13));
+
+// Bottom survival gear
+defaultMap3.setItem("chestplate", new Vector(10, 17));
+defaultMap3.setItem("helmet", new Vector(20, 17));
 
 export { defaultMap3 };

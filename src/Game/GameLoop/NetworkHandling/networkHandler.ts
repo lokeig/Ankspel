@@ -11,6 +11,7 @@ class NetworkHandler {
     private static readyCount: number = 0;
     private static messageTimer = new Countdown(0.05);
     private static onStart: () => void;
+    private static readyToPlay: boolean = false;
 
     static init() {
         PlayerNetworkHandler.init();
@@ -21,10 +22,8 @@ class NetworkHandler {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
-            if (Connection.get().connectionCount() === 0) {
-                Connection.get().enableLocalMode();
-                this.start();
-            }
+            this.readyToPlay = true;
+            this.checkReadyToStart();
         });
 
         const gameEvent = Connection.get().gameEvent;
@@ -34,19 +33,26 @@ class NetworkHandler {
         });
 
         gameEvent.subscribe(GameMessage.ReadyToPlay, () => {
-            if (!Connection.get().isHost()) {
-                return;
-            }
             this.readyCount++;
-            if (this.readyCount !== Connection.get().connectionCount()) {
-                return;
-            }
-            Connection.get().sendGameMessage(GameMessage.StartPlaying, {});
-            this.start();
-            this.readyCount = 0;
+            this.checkReadyToStart();
         });
 
         Input.onKeyOnce("q", this.quickStart);
+    }
+
+    private static checkReadyToStart(): void {
+        if (!Connection.get().isHost()) {
+            return;
+        }
+        if (this.readyCount !== Connection.get().connectionCount()) {
+            return;
+        }
+        if (!this.readyToPlay) {
+            return;
+        }
+        Connection.get().sendGameMessage(GameMessage.StartPlaying, {});
+        this.start();
+        this.readyCount = 0;
     }
 
     private static quickStart = (): void => {

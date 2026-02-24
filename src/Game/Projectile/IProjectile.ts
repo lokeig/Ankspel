@@ -8,13 +8,14 @@ interface IProjectile {
     onPlayerHit(seed: number): ProjectileEffect, 
 
     wentThrough(block: GameObject): { collision: boolean, pos: Vector };
-    getPos(): Vector;
     setPos(pos: Vector): void;
+    getPos(): Vector;
 
     getTrail(): ITrail;
 
     isLocal(): boolean;
     setLocal(): void;
+
     setToDelete(): void
     shouldBeDeleted(): boolean;
 

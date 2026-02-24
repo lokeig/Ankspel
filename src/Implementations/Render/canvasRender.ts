@@ -15,6 +15,7 @@ class CanvasRender implements IRender {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
+        this.canvas.style.imageRendering = "pixelated";
     }
 
     private loadImage(src: string): HTMLImageElement {
@@ -50,10 +51,14 @@ class CanvasRender implements IRender {
 
         this.ctx.drawImage(
             img,
-            Math.floor(drawInfo.source.x), Math.floor(drawInfo.source.y),
-            Math.floor(drawInfo.source.width), Math.floor(drawInfo.source.height),
-            -drawInfo.world.width / 2, -drawInfo.world.height / 2,
-            drawInfo.world.width, drawInfo.world.height
+            Math.floor(drawInfo.source.x),
+            Math.floor(drawInfo.source.y),
+            Math.floor(drawInfo.source.width),
+            Math.floor(drawInfo.source.height),
+            Math.floor(-drawInfo.world.width / 2),
+            Math.floor(-drawInfo.world.height / 2),
+            Math.floor(drawInfo.world.width), 
+            Math.floor(drawInfo.world.height), 
         );
 
         this.ctx.restore();
@@ -108,7 +113,7 @@ class CanvasRender implements IRender {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.restore();    
+        this.ctx.restore();
     }
 
     public setCamera(pos: Vector, zoom: number): void {
@@ -120,11 +125,13 @@ class CanvasRender implements IRender {
         const xOffset = newWidth / 2 - pos.x;
         const yOffset = newHeight / 2 - pos.y;
 
-        this.ctx.scale(zoom, zoom);
-        this.ctx.translate(xOffset, yOffset);
+        this.ctx.scale(Math.floor(zoom), Math.floor(zoom));
+        this.ctx.translate(Math.floor(xOffset), Math.floor(yOffset));
 
         this.cameraPos = pos.clone();
-        this.cameraZoom = zoom;
+        this.cameraPos.x = Math.floor(this.cameraPos.x);
+        this.cameraPos.y = Math.floor(this.cameraPos.y);
+        this.cameraZoom = Math.floor(zoom);
     }
 
     public getCameraPos(): Vector {

@@ -54,8 +54,10 @@ class PlayerManager {
     }
 
     public static spawn(id: number): Player {
+        console.log("Spawning player with id: ", id);
+        console.log("All players:", this.players);
         const player = new Player(id);
-        this.players.push(player);
+        this.players.push(player);  
         return player;
     }
 

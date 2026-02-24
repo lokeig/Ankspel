@@ -22,8 +22,7 @@ class ItemManager {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.shouldBeDeleted()) {
                 itemSet.delete(item);
-                const id = this.idManager.removeObject(item)!;
-                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id });
+                this.idManager.removeObject(item)!;
             } else {
                 item.update(deltaTime);
             }
@@ -53,7 +52,6 @@ class ItemManager {
     }
 
     public static spawn(type: string, gridPos: Vector, id: number): void {
-        console.log("Spawning: ", id, type)
         const constructor = this.register.get(type);
         if (!constructor) {
             return;

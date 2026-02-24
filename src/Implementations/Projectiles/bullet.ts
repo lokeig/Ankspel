@@ -9,18 +9,15 @@ import { BulletReboundVFX } from "@impl/Particles";
 
 class Bullet implements IProjectile {
     private pos: Vector;
-
     private angle: number;
+    private velocity: Vector;
+    
+    private local: boolean = false;
     private lifespan!: Countdown;
+    private delete: boolean = false;
     public trail!: BulletTrail;
 
-    private delete: boolean = false;
-
-    private local: boolean = false;
-    private velocity: Vector;
-
     private prevPos: Vector;
-
     private minDistance: number = Infinity;
 
     constructor(pos: Vector, angle: number, speed: number, blockRange: number) {

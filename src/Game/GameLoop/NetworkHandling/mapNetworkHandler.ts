@@ -45,8 +45,7 @@ class MapNetworkHandler {
             return;
         }
         this.readyCount = 0;
-        const time = Date.now() + 1500;
-        Connection.get().sendGameMessage(GameMessage.StartMap, { time });
+        Connection.get().sendGameMessage(GameMessage.StartMap, {});
         this.onMapLoad();
     }
 
