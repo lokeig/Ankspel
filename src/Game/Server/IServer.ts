@@ -5,13 +5,17 @@ import { GameMessage, GameMessageMap } from "./gameMessage";
 interface IServer {
     gameEvent: Emitter<GameMessageMap>;
     serverEvent: Emitter<ServerMessageMap>;
-    isHost(): boolean;
-    getID(): string;
+
+    enableLocalMode(): void;
     connectionCount(): number;
+    getID(): string;
+    isHost(): boolean;
+    
     sendGameMessage<T extends GameMessage>(type: T, text: GameMessageMap[T]): void;
     sendGameMessageUnreliable<T extends GameMessage>(type: T, text: GameMessageMap[T]): void;
     sendClientMessage(text: ClientMessage): void;
-    enableLocalMode(): void;
+
+    onGameStart(callback: (gameId: number) => void): void;
 }
 
 export type { IServer };

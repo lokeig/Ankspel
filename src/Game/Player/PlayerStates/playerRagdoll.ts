@@ -151,7 +151,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
-        this.updateStandardBody();
         if (this.getOwnership() === Ownership.Held) {
             this.ownedUpdate(deltaTime);
             return;
@@ -163,23 +162,25 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.head.ignoreFriction = !this.head.grounded;
         this.body.ignoreFriction = !this.body.grounded;
         this.legs.ignoreFriction = !this.legs.grounded;
-
+        
         this.head.update(deltaTime);
         this.body.update(deltaTime);
         this.legs.update(deltaTime);
-
+        
         for (let i = 0; i < 500; i++) {
             this.keepBodiesTogether(deltaTime, this.head, this.body, this.height - 1, false);
             this.keepBodiesTogether(deltaTime, this.legs, this.body, this.height - 1, false);
             this.keepBodiesTogether(deltaTime, this.head, this.legs, this.height * 1.5, true);
         }
-
+        
         if (this.head.pos.x === this.legs.pos.x && this.head.velocity.x === 0 && this.legs.velocity.x === 0) {
             this.head.velocity.x = Utility.Random.getInRange(-20, 20);
         }
         if (!this.playerCharacter.isDead() && this.playerCharacter.isLocal()) {
             this.handleInputs(deltaTime);
         }
+        this.updateStandardBody();
+        
         const head = true;
         this.setBodyPartAngle(head);
         this.setBodyPartAngle(!head);

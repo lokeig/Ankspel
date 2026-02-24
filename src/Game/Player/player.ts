@@ -26,6 +26,7 @@ class Player {
         worldPos.x += (Grid.size - this.character.body.width) / 2;
         this.character.setPos(worldPos);
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
+        console.log("Created spawn: x: " + gridPos.x + " y: " + gridPos.y);
     }
 
     public getId(): number {

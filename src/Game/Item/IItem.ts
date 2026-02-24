@@ -29,7 +29,7 @@ interface IItem {
 type ItemConstructor = new (pos: Vector) => IItem
 
 function isItem(object: any): object is IItem {
-    return 'throw' in object;
+    return object && 'throw' in object;
 }
 
 export { isItem };

@@ -10,7 +10,6 @@ import { MapLoader, MapManager } from "@game/Map";
 class NetworkHandler {
     private static readyCount: number = 0;
     private static messageTimer = new Countdown(0.05);
-    private static started: boolean = false;
     private static onStart: () => void;
 
     static init() {
@@ -18,7 +17,7 @@ class NetworkHandler {
         ItemMessageHandler.init();
         MapNetworkHandler.init();
 
-        Connection.get().serverEvent.subscribe(ServerMessage.StartGame, ({ userID }) => {
+        Connection.get().onGameStart((userID) => {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});

@@ -21,6 +21,6 @@ MapManager.addMap(defaultMap);
 
 
 RegisterItems();
-Connection.set(new MultiPeerServer(new WebSocket("ws://localhost:3000")));
+Connection.set(new MultiPeerServer(new WebSocket("https://ankspel.onrender.com")));
 LobbyList.set(new LobbyListCSS());
 new GameLoop(new RequestAnimationFrameTimer());

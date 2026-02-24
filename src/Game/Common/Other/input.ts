@@ -10,7 +10,6 @@ class Input {
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
 
     static init() {
-
         window.addEventListener('keydown', e => {
             if (document.querySelector('.modal:not(.hidden)')) {
                 return;

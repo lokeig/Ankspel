@@ -113,6 +113,14 @@ class PeerConnectionManager {
         this.pendingCandidates = [];
     }
 
+    public isConnected(): boolean {
+        return (
+            this.peerConnection.connectionState === "connected" &&
+            this.reliableChannel?.readyState === "open" &&
+            this.unreliableChannel?.readyState === "open"
+        );
+    }
+
     public async handleAnswer(answer: RTCSessionDescriptionInit) {
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     }

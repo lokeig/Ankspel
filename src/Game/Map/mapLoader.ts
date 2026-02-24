@@ -17,7 +17,7 @@ class MapLoader {
         }
     }
 
-    public static reset(): void {
+    private static reset(): void {
         PlayerManager.reset();
         TileManager.clear();
         ItemManager.clear();
@@ -25,13 +25,13 @@ class MapLoader {
         ParticleManager.clear();
     }
 
-    public static loadTiles(map: GameMap): void {
+    private static loadTiles(map: GameMap): void {
         map.getTiles().forEach(tile => {
             TileManager.setTile(tile);
         });
     }
 
-    public static loadPlayerSpawns(map: GameMap) {
+    private static loadPlayerSpawns(map: GameMap) {
         const playerSpawns = map.getSpawns();
         const spawnCount = playerSpawns.length;
 
@@ -54,7 +54,7 @@ class MapLoader {
         }
     }
 
-    public static loadItems(map: GameMap) {
+    private static loadItems(map: GameMap) {
         map.getItems().forEach(item => {
             ItemManager.create(item.type, item.gridPos);
         });

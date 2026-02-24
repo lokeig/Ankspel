@@ -5,7 +5,7 @@ import { Connection, GameMessage } from "@server";
 
 class MapNetworkHandler {
     private static readyCount: number = 0;
-    private static onMapLoad: (t: number) => void;
+    private static onMapLoad: (time: number) => void;
 
     public static init() {
         const gameEvent = Connection.get().gameEvent;
@@ -31,10 +31,9 @@ class MapNetworkHandler {
 
     public static hostInitializeMap(map: [number, GameMap]): void {
         this.readyCount = 0;
-        const host = true;
 
+        MapLoader.load(map[1], true);
         Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
-        MapLoader.load(map[1], host);
         if (PlayerManager.getLocal().length === PlayerManager.getPlayers().length) {
             this.onMapLoad(0);
         }
@@ -46,19 +45,17 @@ class MapNetworkHandler {
             return;
         }
         this.readyCount = 0;
-        const timeToStart = Date.now() + 1500;
-        Connection.get().sendGameMessage(GameMessage.StartMap, {
-            time: timeToStart
-        });
-        this.onMapLoad(timeToStart);
+        const time = Date.now() + 1500;
+        Connection.get().sendGameMessage(GameMessage.StartMap, { time });
+        this.onMapLoad(time);
     }
 
     private static quickStart(): void {
         this.onMapLoad(0);
     }
 
-    public static setMapLoad(e: (t: number) => void): void {
-        this.onMapLoad = e;
+    public static setMapLoad(callback: (time: number) => void): void {
+        this.onMapLoad = callback;
     }
 }
 

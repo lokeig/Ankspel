@@ -1,7 +1,7 @@
 import { Countdown, images, IState, SpriteSheet, Utility } from "@common";
 import { GameLoopState } from "../gameLoopState";
 import { DuckGame } from "../game";
-import { GameMap, MapManager } from "@game/Map";
+import { MapManager } from "@game/Map";
 import { Connection } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
 import { PlayerManager } from "@player";
@@ -38,11 +38,10 @@ class LoadingMap implements IState<GameLoopState> {
 
     public stateEntered(): void {
         PlayerManager.getLocal().forEach(player => player.character.controls.setEnabled(false));
-        const host = Connection.get().isHost();
-        if (!host) {
+        if (!Connection.get().isHost()) {
             return;
         }
-        const map: [number, GameMap] = MapManager.getRandomMap();
+        const map = MapManager.getRandomMap();
         MapNetworkHandler.hostInitializeMap(map);
     }
 
