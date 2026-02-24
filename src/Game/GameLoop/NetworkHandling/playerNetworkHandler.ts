@@ -14,8 +14,6 @@ class PlayerNetworkHandler {
         gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, pos }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             player.character.setPos(Utility.Vector.convertNetwork(pos));
-            console.log("Message to spawn: x: " + pos.x + " y: " + pos.y);
-
         });
 
         gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, velocity, state, anim, side }) => {

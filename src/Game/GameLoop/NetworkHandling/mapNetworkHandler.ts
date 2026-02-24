@@ -5,7 +5,7 @@ import { Connection, GameMessage } from "@server";
 
 class MapNetworkHandler {
     private static readyCount: number = 0;
-    private static onMapLoad: (time: number) => void;
+    private static onMapLoad: () => void;
 
     public static init() {
         const gameEvent = Connection.get().gameEvent;
@@ -24,7 +24,7 @@ class MapNetworkHandler {
             Connection.get().sendGameMessage(GameMessage.MapLoaded, {});
         });
 
-        gameEvent.subscribe(GameMessage.StartMap, ({ time }) => { this.onMapLoad(time) });
+        gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapLoad() });
 
         Input.onKeyOnce("q", this.quickStart.bind(this));
     }
@@ -32,10 +32,10 @@ class MapNetworkHandler {
     public static hostInitializeMap(map: [number, GameMap]): void {
         this.readyCount = 0;
 
-        MapLoader.load(map[1], true);
         Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
+        MapLoader.load(map[1], true);
         if (PlayerManager.getLocal().length === PlayerManager.getPlayers().length) {
-            this.onMapLoad(0);
+            this.onMapLoad();
         }
     }
 
@@ -47,14 +47,14 @@ class MapNetworkHandler {
         this.readyCount = 0;
         const time = Date.now() + 1500;
         Connection.get().sendGameMessage(GameMessage.StartMap, { time });
-        this.onMapLoad(time);
+        this.onMapLoad();
     }
 
     private static quickStart(): void {
-        this.onMapLoad(0);
+        this.onMapLoad();
     }
 
-    public static setMapLoad(callback: (time: number) => void): void {
+    public static setMapLoad(callback: () => void): void {
         this.onMapLoad = callback;
     }
 }

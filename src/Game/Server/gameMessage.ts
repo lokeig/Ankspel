@@ -60,7 +60,7 @@ interface GameMessageMap {
     // ─── Map ────────────────────────────────
     [GameMessage.LoadMap]: { id: number };
     [GameMessage.MapLoaded]: {};
-    [GameMessage.StartMap]: { time: number };
+    [GameMessage.StartMap]: {};
 }
 
 const test: GameMessageMap[GameMessage] = {}

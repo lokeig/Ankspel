@@ -85,7 +85,7 @@ class MultiPeerServer implements IServer {
         this.peers.set(peerId, peer);
 
         peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
-            // console.log("Received message " + GameMessage[type] + ":", msg);
+            console.log("Received message " + GameMessage[type] + ":", msg);
             this.gameEvent.publish(type, msg);
         });
         const isInitiator = peerId < this.myID!;
