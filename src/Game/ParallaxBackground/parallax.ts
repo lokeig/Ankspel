@@ -1,7 +1,7 @@
-class Parallax {
-    private current;
+// class Parallax {
+//     private current;
 
-    public draw
-}
+//     public draw
+// }
 
-export { Parallax };
+// export { Parallax };
