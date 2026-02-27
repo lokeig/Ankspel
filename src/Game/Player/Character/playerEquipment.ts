@@ -14,13 +14,22 @@ class PlayerEquipment {
     }
 
     public equip(item: IItem | null, slot: EquipmentSlot): void {
-        this.throw(slot, ThrowType.Drop);
+        const current = this.equipment.get(slot);
+
+        if (current) {
+            current.onUnequip?.();
+            current.setOwnership(Ownership.None);
+        }
         if (!item) {
+            this.equipment.set(slot, undefined);
             return;
         }
         this.equipment.set(slot, item);
-        const ownership: Ownership = (slot === EquipmentSlot.Hand) ? Ownership.Held : Ownership.Equipped;
-        this.getItem(slot).setOwnership(ownership);
+
+        const ownership = (slot === EquipmentSlot.Hand) ? Ownership.Held : Ownership.Equipped;
+
+        item.setOwnership(ownership);
+        item.onEquip?.(slot);
     }
 
     public unequipAll(): void {
@@ -30,7 +39,7 @@ class PlayerEquipment {
     }
 
     public setAnimation(anim: PlayerAnim): void {
-        this.equipment.forEach((item, slot) => {
+        this.equipment.forEach((_, slot) => {
             if (this.hasItem(slot)) {
                 this.getItem(slot).interactions().getOnPlayerAnimation(anim);
             }
@@ -42,6 +51,8 @@ class PlayerEquipment {
             return;
         }
         const item = this.getItem(slot);
+
+        item.onUnequip?.();
         item.throw(throwType);
         item.setOwnership(Ownership.None);
 

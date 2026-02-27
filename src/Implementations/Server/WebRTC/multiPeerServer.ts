@@ -212,7 +212,7 @@ class MultiPeerServer implements IServer {
     }
 
     public sendGameMessage<T extends GameMessage>(type: T, text: GameMessageMap[T]): void {
-        console.log("Sending message: " + GameMessage[type], text);
+        // console.log("Sending message: " + GameMessage[type], text);
         this.peers.forEach((peer: PeerConnectionManager) => {
             peer.sendReliableMessage(type, text);
         });

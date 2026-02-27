@@ -1,12 +1,15 @@
 import { Vector } from "@math";
-import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, images, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
+import { ProjectileManager, ProjectileTarget } from "@projectile";
 
 class Chestplate extends Item {
-    private static readonly slot: EquipmentSlot = EquipmentSlot.Body;
     private static frames = { default: new Frame(), equipped: new Frame() };
     private static spriteSheet: SpriteSheet;
+
+    private target: ProjectileTarget;
+    private destroyed: boolean = false;
 
     static {
         Utility.File.setFrames("chestplate", this.frames);
@@ -15,23 +18,47 @@ class Chestplate extends Item {
     }
 
     constructor(pos: Vector) {
-        const width = 20;
+        const width = 25;
         const height = 20;
         super(pos, width, height);
 
-
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
-            const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: Chestplate.slot };
+            const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Body };
             return [result];
         });
-        this.useInteractions.set(ItemInteraction.HitByProjectile, (seed: number, local: boolean) => {
-            if (this.getOwnership() === Ownership.Equipped) {
-                return this.onHitFunction();
-            } else {
-                return [];
+        this.target = {
+            body: this.body,
+            penetrationResistance: 5,
+            onProjectileHit: this.onProjectileHit.bind(this),
+            enabled: () => !this.shouldBeDeleted()
+        }
+    }
+
+    public onEquip(slot: EquipmentSlot): void {
+        this.body.width = 40;
+        this.body.height = 40;
+        if (slot === EquipmentSlot.Body) {
+            ProjectileManager.addCollidable(this.target);
+        }
+    }
+
+    public onUnequip(): void {
+        this.body.width = 25;
+        this.body.height = 20;
+        ProjectileManager.removeCollidable(this.target);
+    }
+
+    private onProjectileHit(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
+        if (this.getOwnership() !== Ownership.Equipped || !local) {
+            return;
+        }
+        effects.forEach(effect => {
+            if (effect.type === ProjectileEffectType.Damage) {
+                this.destroyed = true;
+                this.setToDelete();
             }
-        });
+        })
     }
 
     public draw(): void {
@@ -41,9 +68,9 @@ class Chestplate extends Item {
         Chestplate.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
     }
 
-    private onHitFunction(): OnItemUseEffect[] {
-        this.setToDelete();
-        return [];
+    public setToDelete(): void {
+        super.setToDelete();
+        ProjectileManager.removeCollidable(this.target);
     }
 }
 

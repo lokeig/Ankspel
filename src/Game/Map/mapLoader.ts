@@ -43,7 +43,6 @@ class MapLoader {
 
         const order = Utility.Random.order(spawnCount);
 
-        console.log("Amount of players:", playerCount);
         let index = 0;
         for (let i = 0; i < spawnCount && i < playerCount; i++) {
             for (let j = 0; j < base; j++) {

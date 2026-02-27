@@ -1,14 +1,15 @@
 import { Vector } from "@math";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, images, ItemInteraction, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, images, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
+import { ProjectileManager, ProjectileTarget } from "@projectile";
 
 class Helmet extends Item {
-    private static readonly slot: EquipmentSlot = EquipmentSlot.Head;
     private static frames = { default: new Frame(), broken: new Frame() };
-
     private static spriteSheet: SpriteSheet;
+
     private damaged: boolean = false;
+    private target: ProjectileTarget;
 
     static {
         const spriteInfo = Utility.File.getImage(images.armor);
@@ -21,19 +22,43 @@ class Helmet extends Item {
         const height = 32;
         super(pos, width, height);
 
-
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
-            const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: Helmet.slot };
+            const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Head };
             return [result];
         });
-        this.useInteractions.set(ItemInteraction.HitByProjectile, (seed: number, local: boolean) => {
-            if (this.getOwnership() === Ownership.Equipped) {
-                return this.onHitFunction();
-            } else {
-                return [];
+
+        this.target = {
+            body: this.body,
+            penetrationResistance: 5,
+            onProjectileHit: this.onProjectileHit.bind(this),
+            enabled: () => !this.shouldBeDeleted()
+        }
+    }
+
+    public onEquip(slot: EquipmentSlot): void {
+        this.body.width = 40;
+        this.body.height = 40;
+        if (slot === EquipmentSlot.Head) {
+            ProjectileManager.addCollidable(this.target);
+        }
+    }
+
+    public onUnequip(): void {
+        this.body.width = 25;
+        this.body.height = 20;
+        ProjectileManager.removeCollidable(this.target);
+    }
+
+    private onProjectileHit(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
+        if (this.getOwnership() !== Ownership.Equipped || !local) {
+            return;
+        }
+        effects.forEach(effect => {
+            if (effect.type === ProjectileEffectType.Damage) {
+                this.setToDelete();
             }
-        });
+        })
     }
 
     public draw(): void {

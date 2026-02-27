@@ -81,10 +81,10 @@ class DynamicObject extends GameObject {
     public getCollidingTile(): GameObject | undefined {
         this.collidingSide = false;
         for (const collidable of this.collidableObjects) {
-            if (!this.collision(collidable.gameObject) || collidable.platform) {
+            if (!this.collision(collidable.body) || collidable.platform) {
                 continue;
             }
-            return collidable.gameObject
+            return collidable.body
         }
     }
 
@@ -92,19 +92,19 @@ class DynamicObject extends GameObject {
         this.grounded = false;
         this.collidingUp = false;
         for (const collidable of this.collidableObjects) {
-            if (!this.collision(collidable.gameObject)) {
+            if (!this.collision(collidable.body)) {
                 continue;
             }
             if (!collidable.platform) {
-                return collidable.gameObject;
+                return collidable.body;
             }
             if (this.ignorePlatforms || this.velocity.y < 0) {
                 continue;
             }
-            if (this.pos.y - (this.velocity.y * deltaTime) + this.height> collidable.gameObject.pos.y) {
+            if (this.pos.y - (this.velocity.y * deltaTime) + this.height> collidable.body.pos.y) {
                 continue;
             }
-            return collidable.gameObject;
+            return collidable.body;
         }
     }
 
@@ -145,7 +145,7 @@ class DynamicObject extends GameObject {
     }
 
     public getNearbyTiles(): GameObject[] {
-        return this.collidableObjects.map(t => t.gameObject);
+        return this.collidableObjects.map(t => t.body);
     }
 
     public setNewCollidableObjects() {
@@ -158,7 +158,7 @@ class DynamicObject extends GameObject {
         }
 
         return this.collidableObjects.every(tile =>
-            !this.collision(tile.gameObject.scale(0, 5)) || tile.platform
+            !this.collision(tile.body.scale(0, 5)) || tile.platform
         );
     }
 }

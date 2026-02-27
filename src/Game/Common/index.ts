@@ -24,7 +24,8 @@ export { PlayerState } from "./Types/playerState";
 export { PlayerAnim } from "./Types/playerAnim";
 export { ItemInteraction } from "./Types/itemInteraction";
 export { EquipmentSlot } from "./Types/equipmentSlot";
-export { ProjectileEffect } from "./Types/projectileEffect";
+export type { ProjectileEffect } from "./Types/projectileEffect";
+export { ProjectileEffectType } from "./Types/projectileEffect";
 
 // Utility
 export { Utility } from "./Utility/utility";

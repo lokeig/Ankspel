@@ -44,7 +44,6 @@ class PlayerItemManager {
                 throwType
             });
             this.sendEquipmentMessage();
-            
         } else {  // Pickup item
             const nextItem = this.getNearbyItem();
             if (nextItem) {
@@ -107,7 +106,7 @@ class PlayerItemManager {
     }
 
 
-    private handleEffects(item: IItem, effects: OnItemUseEffect[]) {
+    public handleEffects(item: IItem, effects: OnItemUseEffect[]) {
         effects.forEach((effect) => {
             switch (effect.type) {
                 case (OnItemUseType.Aim): {
@@ -123,6 +122,7 @@ class PlayerItemManager {
                 }
                 case (OnItemUseType.Equip): {
                     this.equipment.equip(null, EquipmentSlot.Hand);
+                    this.equipment.throw(effect.value, ThrowType.Light);
                     this.equipment.equip(item, effect.value);
                     break;
                 }

@@ -1,4 +1,4 @@
-import { ThrowType } from "@common";
+import { EquipmentSlot, ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { Ownership } from "./itemUseType";
 import { ItemUseInteractions } from "./itemUseInteractions";
@@ -13,6 +13,10 @@ interface IItem {
 
     setOwnership(value: Ownership): void;
     getOwnership(): Ownership;
+
+    onEquip?(slot: EquipmentSlot): void;
+    onUnequip?(): void;
+
     throw(throwType: ThrowType): void;
     enabled(): boolean;
 

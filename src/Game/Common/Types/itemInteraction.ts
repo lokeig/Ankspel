@@ -6,7 +6,6 @@ enum ItemInteraction {
     Activate,
     ActivateHold,
     Quack,
-    HitByProjectile,
 }
 
 

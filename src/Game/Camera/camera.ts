@@ -53,7 +53,7 @@ class Camera {
         let minY = Infinity;
         let maxY = -Infinity;
         for (const player of players) {
-            const pos = player.character.body.getCenter();
+            const pos = player.character.standardBody.getCenter();
             if (pos.x < minX) {
                 minX = pos.x;
             }

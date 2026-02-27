@@ -12,8 +12,8 @@ class PlayerStandard implements IState<PlayerState> {
 
     private setCurrentAnimation() {
         const animator = this.playerCharacter.animator;
-        if (!this.playerCharacter.body.grounded) {
-            if (this.playerCharacter.body.velocity.y < 0) {
+        if (!this.playerCharacter.standardBody.grounded) {
+            if (this.playerCharacter.standardBody.velocity.y < 0) {
                 animator.setAnimation(PlayerAnim.Jump);
             } else {
                 animator.setAnimation(PlayerAnim.Fall);
@@ -21,9 +21,9 @@ class PlayerStandard implements IState<PlayerState> {
             return;
         }
         const left = this.playerCharacter.controls.left(); const right = this.playerCharacter.controls.right();
-        if ((left && this.playerCharacter.body.velocity.x > 20) || right && this.playerCharacter.body.velocity.x < -20) {
+        if ((left && this.playerCharacter.standardBody.velocity.x > 20) || right && this.playerCharacter.standardBody.velocity.x < -20) {
             animator.setAnimation(PlayerAnim.Turn);
-        } else if (Math.abs(this.playerCharacter.body.velocity.x) > 20) {
+        } else if (Math.abs(this.playerCharacter.standardBody.velocity.x) > 20) {
             animator.setAnimation(PlayerAnim.Walk);
         } else {
             animator.setAnimation(PlayerAnim.Idle);
@@ -43,19 +43,19 @@ class PlayerStandard implements IState<PlayerState> {
         this.playerCharacter.rotateArm(deltaTime);
         this.playerCharacter.update(deltaTime);
         this.setCurrentAnimation();
-
+        
         this.setEquipmentLocation();
     }
 
     private setEquipmentLocation() {
-        const center = this.playerCharacter.body.getCenter();
+        const center = this.playerCharacter.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -21)],
             [EquipmentSlot.Body, new Vector(2, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
         ];
         positions.forEach(([slot, offset]) => {
-            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);
+            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.standardBody.direction, 0, slot);
         });
     }
 
@@ -69,11 +69,11 @@ class PlayerStandard implements IState<PlayerState> {
         if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.isDead()) {
             return PlayerState.Ragdoll;
         }
-        if (this.playerCharacter.controls.jump(InputMode.Press) && !this.playerCharacter.body.grounded && !this.playerCharacter.jump.isJumping) {
+        if (this.playerCharacter.controls.jump(InputMode.Press) && !this.playerCharacter.standardBody.grounded && !this.playerCharacter.jump.isJumping) {
             return PlayerState.Flap;
         }
         if (this.playerCharacter.controls.down()) {
-            if (Math.abs(this.playerCharacter.body.velocity.x) < 180 || !this.playerCharacter.body.grounded) {
+            if (Math.abs(this.playerCharacter.standardBody.velocity.x) < 180 || !this.playerCharacter.standardBody.grounded) {
                 return PlayerState.Crouch;
             } else {
                 return PlayerState.Slide

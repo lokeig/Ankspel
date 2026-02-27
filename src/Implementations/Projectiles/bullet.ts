@@ -1,24 +1,26 @@
 import { Vector } from "@math";
-import { AxisDirection, Countdown, Grid, ProjectileEffect, Utility } from "@common";
-import { CollisionObject, GameObject } from "@core";
+import { AxisDirection, Countdown, Grid, ProjectileEffectType, Utility } from "@common";
+import { GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile } from "@projectile";
-import { TileManager } from "@game/StaticObjects/Tiles";
+import { IProjectile, ProjectileTarget } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BulletReboundVFX } from "@impl/Particles";
+import { TileManager } from "@game/StaticObjects/Tiles";
+
+type BulletHit =
+    | { type: "tile"; tile: GameObject; pos: Vector; resistance: number }
+    | { type: "target"; target: ProjectileTarget; pos: Vector; resistance: number };
 
 class Bullet implements IProjectile {
     private pos: Vector;
     private angle: number;
     private velocity: Vector;
-    
+    private prevPos: Vector;
+
     private local: boolean = false;
     private lifespan!: Countdown;
     private delete: boolean = false;
     public trail!: BulletTrail;
-
-    private prevPos: Vector;
-    private minDistance: number = Infinity;
 
     constructor(pos: Vector, angle: number, speed: number, blockRange: number) {
         const lifespan = blockRange * Grid.size / speed;
@@ -40,23 +42,44 @@ class Bullet implements IProjectile {
         return this.trail;
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number, collidable: ProjectileTarget[]): void {
         this.prevPos = this.pos.clone();
         this.pos.add(this.velocity.clone().multiply(deltaTime));
-
         this.lifespan.update(deltaTime);
 
-        const nearbyTiles = TileManager.getNearby(this.prevPos, 0, 0, this.pos);
-        const status = this.getClosestCollidingTile(nearbyTiles);
-        if (status) {
-            const [tile, pos] = status;
-            this.minDistance = pos.distanceToSquared(this.prevPos);
-            this.pos = pos.clone();
-            const axisDirection = this.getAxis(pos, tile);
+        const tiles = this.getTileHits();
+        const targets = this.getTargetHits(collidable);
 
-            ParticleManager.addParticle(new BulletReboundVFX(this.pos.clone(), this.angle, axisDirection));
-            this.setToDelete();
+        const allHits = [...tiles, ...targets];
+        allHits.sort((a, b) => {
+            const aDistance = a.pos.distanceToSquared(this.prevPos);
+            const bDistance = b.pos.distanceToSquared(this.prevPos);
+            return aDistance - bDistance;
+        })
+
+        for (const hit of allHits) {
+            this.resolveHit(hit);
+            if (this.delete) {
+                break;
+            }
         }
+    }
+
+    private resolveHit(hit: BulletHit): void {
+        if (hit.type === "target") {
+            if (!hit.target.enabled()) {
+                return;
+            }
+            const knockback = this.velocity.clone().divide(10);
+            hit.target.onProjectileHit([{ type: ProjectileEffectType.Damage }, { type: ProjectileEffectType.Knockback, amount: knockback }], hit.pos, this.local);
+        } else {
+            ParticleManager.addParticle(new BulletReboundVFX(hit.pos, this.angle, this.getAxis(hit.pos, hit.tile)));
+        }
+        if (hit.resistance < 2) {
+            return;
+        }
+        this.pos = hit.pos.clone();
+        this.setToDelete();
     }
 
     private getAxis(pos: Vector, tile: GameObject): AxisDirection {
@@ -72,43 +95,37 @@ class Bullet implements IProjectile {
         return AxisDirection.Right;
     }
 
-    private getClosestCollidingTile(tiles: CollisionObject[]): [GameObject, Vector] | null {
-        const colliding: [GameObject, Vector][] = [];
+    private getTileHits(): BulletHit[] {
+        const hits: BulletHit[] = [];
+        const tiles = TileManager.getNearby(this.prevPos, 0, 0, this.pos);
+
         tiles.forEach(tile => {
-            if (tile.platform) {
+            const result = this.collision(tile.body);
+            if (!result.collision) {
                 return;
             }
-            const status = this.collision(tile.gameObject);
-            if (status.collision) {
-                colliding.push([tile.gameObject, status.pos]);
-            }
+            hits.push({ type: "tile", tile: tile.body, pos: result.pos, resistance: 999 });
         });
+        return hits;
+    }
 
-        let closest: [GameObject, Vector] | null = null;
-        let minDistance: number = Infinity;
-        colliding.forEach(([tile, pos]) => {
-            const distance = pos.distanceToSquared(this.prevPos);
-            if (distance < minDistance) {
-                closest = [tile, pos];
-                minDistance = distance;
-            }
+    private getTargetHits(targets: ProjectileTarget[]): BulletHit[] {
+        const hits: BulletHit[] = [];
+
+        targets.forEach(target => {
+            const result = this.collision(target.body);
+            if (!result.collision) {
+                return;
+            };
+            hits.push({ type: "target", target, pos: result.pos, resistance: target.penetrationResistance });
         });
-        return closest;
+        return hits;
     }
 
     private collision(block: GameObject): { collision: boolean; pos: Vector } {
         const start = this.prevPos;
         const end = this.pos;
         return block.lineCollision(start, end);
-    }
-
-    public wentThrough(block: GameObject): { collision: boolean; pos: Vector } {
-        const status = this.collision(block);
-        if (status.collision && status.pos.distanceToSquared(this.prevPos) < this.minDistance) {
-            this.pos = status.pos.clone();
-            return { collision: true, pos: status.pos };
-        }
-        return { collision: false, pos: status.pos };
     }
 
     public getPos(): Vector {
@@ -133,10 +150,6 @@ class Bullet implements IProjectile {
 
     public setLocal(): void {
         this.local = true;
-    }
-
-    public onPlayerHit(): ProjectileEffect {
-        return ProjectileEffect.Damage;
     }
 
     public draw(): void {

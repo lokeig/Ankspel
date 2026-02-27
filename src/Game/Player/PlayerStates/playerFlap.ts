@@ -25,7 +25,7 @@ class PlayerFlap implements IState<PlayerState> {
             this.nonLocalUpdate(deltaTime);
             return;
         }
-        this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
+        this.playerCharacter.standardBody.velocity.y = Math.min(this.playerCharacter.standardBody.velocity.y, this.flapSpeed);
         
         const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
         this.playerCharacter.rotateArm(deltaTime, forceRotationUp);
@@ -36,14 +36,14 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     private setEquipmentPosition(): void {
-        const center = this.playerCharacter.body.getCenter();
+        const center = this.playerCharacter.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -21)],
             [EquipmentSlot.Body, new Vector(2, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
         ];
         positions.forEach(([slot, offset]) => {
-            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.body.direction, 0, slot);
+            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.standardBody.direction, 0, slot);
         });
     }
 
@@ -55,7 +55,7 @@ class PlayerFlap implements IState<PlayerState> {
         if (controls.down()) {
             return PlayerState.Crouch;
         }
-        if (controls.jump() && !this.playerCharacter.body.grounded) {
+        if (controls.jump() && !this.playerCharacter.standardBody.grounded) {
             return PlayerState.Flap
         }
         return PlayerState.Standard;
@@ -65,7 +65,7 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     private nonLocalUpdate(deltaTime: number): void {
-        this.playerCharacter.body.velocity.y = Math.min(this.playerCharacter.body.velocity.y, this.flapSpeed);
+        this.playerCharacter.standardBody.velocity.y = Math.min(this.playerCharacter.standardBody.velocity.y, this.flapSpeed);
         const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
         this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
         this.playerCharacter.nonLocalUpdate(deltaTime);

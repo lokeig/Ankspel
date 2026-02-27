@@ -39,17 +39,17 @@ class TileManager {
             }
             const tileObj = tile.body;
 
-            result.push({ gameObject: tileObj, platform: tileObj.isPlatform() });
+            result.push({ body: tileObj, platform: tileObj.isPlatform() });
 
             if (tile.body.getLip(Side.Left)) {
                 const lipLeft = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
                 lipLeft.pos.x -= tileObj.getLipWidth();
-                result.push({ gameObject: lipLeft, platform: true });
+                result.push({ body: lipLeft, platform: true });
             }
             if (tile.body.getLip(Side.Right)) {
                 const lipRight = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
                 lipRight.pos.x += tileObj.width;
-                result.push({ gameObject: lipRight, platform: true });
+                result.push({ body: lipRight, platform: true });
             }
         };
 

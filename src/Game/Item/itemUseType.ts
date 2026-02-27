@@ -15,8 +15,8 @@ enum Ownership {
 }
 
 interface OnItemUseMap {
-    [OnItemUseType.Knockback]: Vector ,
-    [OnItemUseType.Position]: Vector ,
+    [OnItemUseType.Knockback]: Vector,
+    [OnItemUseType.Position]: Vector,
     [OnItemUseType.Aim]: number,
     [OnItemUseType.Equip]: EquipmentSlot
 }
