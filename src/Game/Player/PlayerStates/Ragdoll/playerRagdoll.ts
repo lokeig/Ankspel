@@ -300,9 +300,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             this.legsAngle,
             this.head.isFlip()
         );
-
-        Render.get().drawSquare({x: this.torso.pos.x, y: this.torso.pos.y, width: this.torso.width, height: this.torso.height}, 0, "green");
-
         this.player.animator.drawItems(this.player.equipment);
     }
 

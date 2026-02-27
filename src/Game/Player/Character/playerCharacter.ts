@@ -38,10 +38,9 @@ class PlayerCharacter {
         this.equipment = new PlayerEquipment();
         this.id = id;
 
-        const self = this;
         const collidable: ProjectileTarget = {
-            get body() { return self.activeBody },
-            penetrationResistance: 10,
+            body: () => this.activeBody,
+            penetrationResistance: () => 10,
             onProjectileHit: this.handleEffects.bind(this),
             enabled: () => true
         };
@@ -105,6 +104,7 @@ class PlayerCharacter {
         this.standardBody.update(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.equipment.setAnimation(this.animator.getCurrentAnimation());
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {

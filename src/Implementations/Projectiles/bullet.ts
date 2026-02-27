@@ -2,7 +2,7 @@ import { Vector } from "@math";
 import { AxisDirection, Countdown, Grid, ProjectileEffectType, Utility } from "@common";
 import { GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile, ProjectileTarget } from "@projectile";
+import { IProjectile, ProjectileCollisionResolver, ProjectileTarget } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BulletReboundVFX } from "@impl/Particles";
 import { TileManager } from "@game/StaticObjects/Tiles";
@@ -43,26 +43,20 @@ class Bullet implements IProjectile {
     }
 
     public update(deltaTime: number, collidable: ProjectileTarget[]): void {
-        this.prevPos = this.pos.clone();
-        this.pos.add(this.velocity.clone().multiply(deltaTime));
+        this.move(deltaTime);
         this.lifespan.update(deltaTime);
-
-        const tiles = this.getTileHits();
-        const targets = this.getTargetHits(collidable);
-
-        const allHits = [...tiles, ...targets];
-        allHits.sort((a, b) => {
-            const aDistance = a.pos.distanceToSquared(this.prevPos);
-            const bDistance = b.pos.distanceToSquared(this.prevPos);
-            return aDistance - bDistance;
-        })
-
-        for (const hit of allHits) {
-            this.resolveHit(hit);
+        const collisions = ProjectileCollisionResolver.resolve(this.getSegment(), collidable);
+        for (const target of collisions) {
+            this.resolveHit(target);
             if (this.delete) {
                 break;
             }
         }
+    }
+
+    private move(deltaTime: number): void {
+        this.prevPos = this.pos.clone();
+        this.pos.add(this.velocity.clone().multiply(deltaTime));
     }
 
     private resolveHit(hit: BulletHit): void {
@@ -95,41 +89,8 @@ class Bullet implements IProjectile {
         return AxisDirection.Right;
     }
 
-    private getTileHits(): BulletHit[] {
-        const hits: BulletHit[] = [];
-        const tiles = TileManager.getNearby(this.prevPos, 0, 0, this.pos);
-
-        tiles.forEach(tile => {
-            const result = this.collision(tile.body);
-            if (!result.collision) {
-                return;
-            }
-            hits.push({ type: "tile", tile: tile.body, pos: result.pos, resistance: 999 });
-        });
-        return hits;
-    }
-
-    private getTargetHits(targets: ProjectileTarget[]): BulletHit[] {
-        const hits: BulletHit[] = [];
-
-        targets.forEach(target => {
-            const result = this.collision(target.body);
-            if (!result.collision) {
-                return;
-            };
-            hits.push({ type: "target", target, pos: result.pos, resistance: target.penetrationResistance });
-        });
-        return hits;
-    }
-
-    private collision(block: GameObject): { collision: boolean; pos: Vector } {
-        const start = this.prevPos;
-        const end = this.pos;
-        return block.lineCollision(start, end);
-    }
-
-    public getPos(): Vector {
-        return this.pos;
+    public getSegment(): { start: Vector; end: Vector; } {
+        return { start: this.prevPos, end: this.pos };
     }
 
     public setPos(pos: Vector): void {

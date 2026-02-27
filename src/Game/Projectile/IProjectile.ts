@@ -6,7 +6,7 @@ import { ProjectileEffect } from "@common";
 interface IProjectile {
     update(deltaTime: number, collidable: ProjectileTarget[]): void;
 
-    getPos(): Vector;
+    getSegment(): {start: Vector, end: Vector};
     setPos(pos: Vector): void;
 
     getTrail(): ITrail;
@@ -20,8 +20,8 @@ interface IProjectile {
 }
 
 type ProjectileTarget = {
-    body: GameObject;
-    penetrationResistance: number;
+    body: () => GameObject;
+    penetrationResistance: () => number;
     onProjectileHit: (effects: ProjectileEffect[], pos: Vector, local: boolean) => void;
     enabled: () => boolean;
 }

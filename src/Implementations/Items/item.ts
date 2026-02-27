@@ -29,6 +29,11 @@ abstract class Item implements IItem {
         } else {
             this.body.setNewCollidableObjects();
         }
+        this.itemUpdate(deltaTime);
+    }
+
+    protected itemUpdate(deltaTime: number): void {
+        
     }
 
     private updateItemPhysics(deltaTime: number) {

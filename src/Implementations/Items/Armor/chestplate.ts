@@ -1,18 +1,18 @@
 import { Vector } from "@math";
-import { EquipmentSlot, Frame, images, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
+import { Animation, EquipmentSlot, images, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteAnimator, SpriteSheet, Utility } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 
 class Chestplate extends Item {
-    private static frames = { default: new Frame(), equipped: new Frame() };
+    private static animations = { default: new Animation, equipped: new Animation, running: new Animation };
     private static spriteSheet: SpriteSheet;
 
+    private animator: SpriteAnimator;
     private target: ProjectileTarget;
-    private destroyed: boolean = false;
 
     static {
-        Utility.File.setFrames("chestplate", this.frames);
+        Utility.File.setAnimations("chestplate", this.animations);
         const spriteInfo = Utility.File.getImage(images.armor);
         this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
     }
@@ -22,31 +22,50 @@ class Chestplate extends Item {
         const height = 20;
         super(pos, width, height);
 
+        this.animator = new SpriteAnimator(Chestplate.spriteSheet, Chestplate.animations.default);
+
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Body };
             return [result];
         });
+        this.useInteractions.setOnPlayerAnimation(anim => {
+            if (this.getOwnership() !== Ownership.Equipped) {
+                this.animator.setAnimation(Chestplate.animations.default);
+                return;
+            }
+            if (anim === PlayerAnim.Walk) {
+                this.animator.setAnimation(Chestplate.animations.running);
+            } else {
+                this.animator.setAnimation(Chestplate.animations.equipped);
+            }
+        });
         this.target = {
-            body: this.body,
-            penetrationResistance: 5,
+            body: () => this.body,
+            penetrationResistance: () => 5,
             onProjectileHit: this.onProjectileHit.bind(this),
             enabled: () => !this.shouldBeDeleted()
         }
     }
 
+    protected itemUpdate(deltaTime: number): void {
+        this.animator.update(deltaTime);
+    }
+
     public onEquip(slot: EquipmentSlot): void {
+        if (slot !== EquipmentSlot.Body) {
+                return;
+        }
         this.body.width = 40;
         this.body.height = 40;
-        if (slot === EquipmentSlot.Body) {
-            ProjectileManager.addCollidable(this.target);
-        }
+        ProjectileManager.addCollidable(this.target);
     }
 
     public onUnequip(): void {
         this.body.width = 25;
         this.body.height = 20;
         ProjectileManager.removeCollidable(this.target);
+        this.animator.setAnimation(Chestplate.animations.default);
     }
 
     private onProjectileHit(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
@@ -55,17 +74,15 @@ class Chestplate extends Item {
         }
         effects.forEach(effect => {
             if (effect.type === ProjectileEffectType.Damage) {
-                this.destroyed = true;
                 this.setToDelete();
             }
         })
     }
 
     public draw(): void {
-        const frame = this.getOwnership() === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
         const drawSize = 32;
 
-        Chestplate.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
+        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
     }
 
     public setToDelete(): void {

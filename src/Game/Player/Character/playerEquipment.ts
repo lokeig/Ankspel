@@ -41,7 +41,7 @@ class PlayerEquipment {
     public setAnimation(anim: PlayerAnim): void {
         this.equipment.forEach((_, slot) => {
             if (this.hasItem(slot)) {
-                this.getItem(slot).interactions().getOnPlayerAnimation(anim);
+                this.getItem(slot).interactions().getOnPlayerAnimation()?.(anim);
             }
         })
     }

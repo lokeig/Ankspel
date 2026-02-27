@@ -27,7 +27,7 @@ class ProjectileManager {
             }
 
             projectile.update(deltaTime, targets);
-            projectile.getTrail().setTarget(projectile.getPos());
+            projectile.getTrail().setTarget(projectile.getSegment().end);
         }
     }
 

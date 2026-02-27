@@ -39,7 +39,7 @@ class Camera {
     }
 
     private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number) {
-        const smoothFactor = 5;
+        const smoothFactor = 3;
         this.currentPos.x += (targetPos.x - this.currentPos.x) * deltaTime * smoothFactor;
         this.currentPos.y += (targetPos.y - this.currentPos.y) * deltaTime * smoothFactor;
         this.currentZoom += (targetZoom - this.currentZoom) * deltaTime * smoothFactor;

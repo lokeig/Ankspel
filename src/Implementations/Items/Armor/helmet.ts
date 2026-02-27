@@ -5,7 +5,7 @@ import { EquipmentSlot, Frame, images, ItemInteraction, ProjectileEffect, Projec
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 
 class Helmet extends Item {
-    private static frames = { default: new Frame(), broken: new Frame() };
+    private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
     private static spriteSheet: SpriteSheet;
 
     private damaged: boolean = false;
@@ -29,8 +29,8 @@ class Helmet extends Item {
         });
 
         this.target = {
-            body: this.body,
-            penetrationResistance: 5,
+            body: () => this.body,
+            penetrationResistance: () => 5,
             onProjectileHit: this.onProjectileHit.bind(this),
             enabled: () => !this.shouldBeDeleted()
         }
@@ -62,7 +62,7 @@ class Helmet extends Item {
     }
 
     public draw(): void {
-        const frame = this.damaged ? Helmet.frames.broken : Helmet.frames.default;
+        const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
         const drawSize = 32;
 
         Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
