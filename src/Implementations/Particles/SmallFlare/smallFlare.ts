@@ -1,5 +1,6 @@
 import { Vector } from "@math";
-import { Countdown, Frame, images, SpriteSheet, Utility } from "@common";
+import { Countdown, SpriteSheet, Utility } from "@common";
+import { Images } from "@render";
 
 class SmallFlare {
     private lifeTime = new Countdown(0.1);
@@ -8,8 +9,7 @@ class SmallFlare {
     private static spriteSheet: SpriteSheet;
 
     static {
-        const imageSrc = Utility.File.getImage(images.smallFlare);
-        this.spriteSheet = new SpriteSheet(imageSrc.src, imageSrc.frameWidth, imageSrc.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.smallFlare);
     }
 
     constructor() {

@@ -5,7 +5,7 @@ const images = {
 
     // World
     tileIce: 'tileIce',
-    background: 'rainbow',
+    tileNature: 'tileNature',
 
     // Props
     prop: 'props',
@@ -28,7 +28,7 @@ const images = {
     bulletGlow: 'bulletGlow',
 
     ready: 'ready',
-    get: 'get'
+    get: 'get',
 };
 
 export { images };

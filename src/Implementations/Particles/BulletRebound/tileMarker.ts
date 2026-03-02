@@ -1,5 +1,6 @@
 import { Vector } from "@math";
-import { AxisDirection, Countdown, Frame, images, SpriteSheet, Utility } from "@common";
+import { AxisDirection, Countdown, Frame, SpriteSheet, Utility } from "@common";
+import { Images } from "@render";
 
 class TileMarker {
     private lifeTime = new Countdown(0.15);
@@ -19,8 +20,7 @@ class TileMarker {
 
     static {
         Utility.File.setFrames("bulletRebound", TileMarker.frames);
-        const imageSrc = Utility.File.getImage(images.bulletRebound);
-        this.spriteSheet = new SpriteSheet(imageSrc.src, imageSrc.frameWidth, imageSrc.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.bulletRebound);
     }
 
     constructor(pos: Vector, normal: AxisDirection) {

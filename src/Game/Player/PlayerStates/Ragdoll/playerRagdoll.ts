@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot } from "@common";
+import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim } from "@common";
 import { DynamicObject } from "@core";
 import { IItem, Ownership } from "@item";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
@@ -77,6 +77,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
         if (this.isHeld()) {
             this.updateOwned(deltaTime);
             return;
@@ -86,24 +87,21 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.updatePhysics(deltaTime);
         this.solveConstraints(deltaTime);
         this.handleLocalInput(deltaTime);
-        this.syncBackToPlayerBody();
         this.updateAngles();
         this.syncEquipment();
+
+        this.player.equipment.setAnimation(this.player.animator.getCurrentAnimation());
     }
 
     public stateChange(): PlayerState {
         if (this.player.isDead() || this.isHeld()) {
             return PlayerState.Ragdoll;
         }
-
-        const exit =
-            this.player.controls.ragdoll() ||
-            this.player.controls.jump(InputMode.Press);
+        const exit = this.player.controls.ragdoll() || this.player.controls.jump(InputMode.Press);
 
         if (exit && !this.coyoteTime.isDone()) {
             return PlayerState.Standard;
         }
-
         return PlayerState.Ragdoll;
     }
 
@@ -111,10 +109,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.currentState = false;
 
         this.player.activeBody = this.player.standardBody;
-
+        this.syncBackToPlayerBody();
         this.player.standardBody.pos.y -= PlayerRagdoll.ExitJumpHeight;
-        this.player.standardBody.velocity =
-            new Vector(this.torso.velocity.x, PlayerRagdoll.ExitVerticalSpeed);
+        this.player.standardBody.velocity = new Vector(this.torso.velocity.x, PlayerRagdoll.ExitVerticalSpeed);
     }
 
     private initializePositions(from: PlayerState): void {
@@ -124,8 +121,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             const mult = this.player.standardBody.getDirectionMultiplier();
             const centerX = this.player.standardBody.getCenter().x;
 
-            const offset = (i: number) =>
-                new Vector(centerX + (i * this.width / 3), basePos.y + this.height);
+            const offset = (i: number) => new Vector(centerX + (i * this.width / 3), basePos.y + this.height);
 
             this.head.pos = offset(-1 * mult);
             this.torso.pos = offset(0);
@@ -137,19 +133,29 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
     }
 
+    private nonLocalUpdate(deltaTime: number): void {
+        this.updateTimers(deltaTime);
+        this.updatePhysics(deltaTime);
+        this.solveConstraints(deltaTime);
+        this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
+        this.updateAngles();
+        this.syncEquipment();
+    }
+
     private initializeVelocities(): void {
-        const vel = this.player.standardBody.velocity;
+        const velocity = this.player.standardBody.velocity;
 
-        this.head.velocity = vel.clone();
-        this.torso.velocity = vel.clone();
-        this.legs.velocity = vel.clone();
+        this.head.velocity = velocity.clone();
+        this.torso.velocity = velocity.clone();
+        this.legs.velocity = velocity.clone();
 
-        this.head.velocity.x -= Utility.Random.getInRange(-10, 10);
+        this.head.velocity.x -= Utility.Random.getInRange(-30, 30);
     }
 
     private applyJumpInheritance(): void {
-        if (!this.player.isLocal() || !this.player.jump.isJumping) return;
-
+        if (!this.player.isLocal() || !this.player.jump.isJumping) {
+            return;
+        }
         const jumpLeft = this.player.jump.getJumpRemaining();
         const jumpCharge = this.player.jump.getJumpForce() / 5;
         const impulse = jumpLeft * jumpCharge;
@@ -162,7 +168,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private updateTimers(deltaTime: number): void {
         this.coyoteTime.update(deltaTime);
-        if (this.isGrounded()) this.coyoteTime.reset();
+        if (this.isGrounded()) {
+            this.coyoteTime.reset()
+        };
     }
 
     private updatePhysics(deltaTime: number): void {
@@ -192,6 +200,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             this.legs.pos.x,
             this.legs.pos.y + this.legs.height - PlayerCharacter.standardHeight
         );
+        this.player.activeBody = this.player.standardBody;
 
         this.player.standardBody.grounded = true;
         this.player.setPos(pos);
@@ -233,32 +242,32 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.solveConstraints(deltaTime);
         this.updateAngles();
         this.syncEquipment();
+        this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
     }
 
     private isHeld(): boolean {
         return this.owned === Ownership.Held;
     }
 
-    private keepDistance(deltaTime: number, a: DynamicObject, b: DynamicObject, target: number, allowStretch: boolean): void {
+    private keepDistance(deltaTime: number, a: DynamicObject, b: DynamicObject, targetDistance: number, allowStretch: boolean): void {
         const prevGroundedA = a.grounded;
         const prevGroundedB = b.grounded;
 
-        const aC = a.getCenter();
-        const bC = b.getCenter();
+        const aCenter = a.getCenter();
+        const bCenter = b.getCenter();
 
-        const dx = bC.x - aC.x;
-        const dy = bC.y - aC.y;
+        const diffX = bCenter.x - aCenter.x;
+        const diffY = bCenter.y - aCenter.y;
 
-        const dist = Math.hypot(dx, dy);
-        if (allowStretch && dist > target) {
+        const dist = Math.hypot(diffX, diffY);
+        if (allowStretch && dist > targetDistance) {
             return;
         }
+        const diff = (dist - targetDistance) / dist;
+        const impulse = new Vector(diffX * diff, diffY * diff).divide(2 * deltaTime);
 
-        const diff = (dist - target) / dist;
-        const impulse = new Vector(dx * diff, dy * diff).divide(2 * deltaTime);
-
-        const velA = a.velocity.clone();
-        const velB = b.velocity.clone();
+        const velocityA = a.velocity.clone();
+        const velocityB = b.velocity.clone();
 
         a.velocity = impulse.clone();
         b.velocity = impulse.clone().multiply(-1);
@@ -269,8 +278,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         a.grounded = prevGroundedA;
         b.grounded = prevGroundedB;
 
-        a.velocity = velA.add(impulse);
-        b.velocity = velB.subtract(impulse);
+        a.velocity = velocityA.add(impulse);
+        b.velocity = velocityB.subtract(impulse);
     }
 
     private calculateAngle(segment: DynamicObject, reference: DynamicObject, offset: number): number {
@@ -292,18 +301,21 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public draw(): void {
-        this.player.animator.drawRagdoll(
-            this.getDrawPos(this.head),
-            this.getDrawPos(this.legs),
-            PlayerCharacter.drawSize,
-            this.headAngle,
-            this.legsAngle,
-            this.head.isFlip()
-        );
+        const flip = this.head.isFlip();
+        this.player.animator.setAnimation(PlayerAnim.UpperRagdoll);
+        this.player.animator.drawBody(this.getDrawPos(this.head), PlayerCharacter.drawSize, flip, this.headAngle);
+
+        this.player.animator.setAnimation(PlayerAnim.LowerRagdoll);
+        this.player.animator.drawBody(this.getDrawPos(this.legs), PlayerCharacter.drawSize, flip, this.legsAngle);
+
         this.player.animator.drawItems(this.player.equipment);
     }
 
-    public update(_deltaTime: number): void { }
+    // For IItem
+
+    public update(_deltaTime: number): void {
+
+    }
 
     public getBody(): DynamicObject {
         return this.head;
@@ -313,7 +325,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         return this.headAngle;
     }
 
-    public setAngle(_angle: number): void { }
+    public setAngle(_angle: number): void {
+
+    }
 
     public enabled(): boolean {
         return this.currentState;
@@ -371,7 +385,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         return false;
     }
 
-    public setToDelete(): void { }
+    public setToDelete(): void {
+
+    }
 }
 
 export { PlayerRagdoll };

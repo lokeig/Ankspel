@@ -6,7 +6,7 @@ class PlayerManager {
     private static players: Player[] = [];
     private static localPlayerCount = 0;
 
-    static update(deltaTime: number) {
+    public static update(deltaTime: number, maxY: number) {
         const pending: Player[] = [];
 
         const updatePlayer = (player: Player) => {
@@ -15,7 +15,11 @@ class PlayerManager {
                 if (item && item.shouldBeDeleted()) {
                     player.character.equipment.equip(null, slot);
                 }
-            })
+            });
+            const fallingOffMapDistance = 100;
+            if (!player.character.isDead() && player.character.activeBody.pos.y > maxY + fallingOffMapDistance) {
+                player.character.die();
+            }
         };
         this.getPlayers().forEach(player => {
             if (player.held()) {
@@ -54,8 +58,6 @@ class PlayerManager {
     }
 
     public static spawn(id: number): Player {
-        console.log("Spawning player with id: ", id);
-        console.log("All players:", this.players);
         const player = new Player(id);
         this.players.push(player);  
         return player;

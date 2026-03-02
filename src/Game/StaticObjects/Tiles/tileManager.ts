@@ -11,7 +11,7 @@ class TileManager {
         this.tiles = new Map;
     }
 
-    public static getTile(gridPos: Vector): ITile | undefined {
+    private static getTile(gridPos: Vector): ITile | undefined {
         return this.tiles.get(Grid.key(gridPos));
     }
 

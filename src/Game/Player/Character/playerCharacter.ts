@@ -74,14 +74,13 @@ class PlayerCharacter {
         this.equipment.unequipAll();
         this.animator.reset();
         this.armFront.angle = 0;
-        this.setPos(new Vector);
         this.standardBody.velocity = new Vector();
     }
 
     public setPos(pos: Vector) {
-        this.standardBody.pos = pos;
+        this.activeBody.pos = pos;
         this.setArmPos();
-        this.standardBody.setNewCollidableObjects();
+        this.activeBody.setNewCollidableObjects();
     }
 
     private updateControllers(deltaTime: number): void {
@@ -97,6 +96,7 @@ class PlayerCharacter {
         this.standardBody.update(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.equipment.setAnimation(this.animator.getCurrentAnimation());
     }
 
     public update(deltaTime: number): void {

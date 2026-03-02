@@ -1,12 +1,12 @@
-import { Countdown, images, IState, SpriteSheet, Utility } from "@common";
+import { Countdown, IState, SpriteSheet, Utility } from "@common";
 import { GameLoopState } from "../gameLoopState";
 import { DuckGame } from "../game";
-import { MapManager } from "@game/Map";
 import { Connection } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
 import { PlayerManager } from "@player";
-import { Render, RenderSpace } from "@render";
+import { Images, Render, RenderSpace } from "@render";
 import { Vector } from "@math";
+import { MapManager } from "@game/Map";
 
 class LoadingMap implements IState<GameLoopState> {
     private startPlaying: boolean = false;
@@ -19,18 +19,20 @@ class LoadingMap implements IState<GameLoopState> {
     public constructor(game: DuckGame) {
         this.game = game;
 
-        MapNetworkHandler.setMapLoad(() => {
-            this.game.reset();
+        MapNetworkHandler.setMapLoad((mapId: number) => {
+            this.game.loadMap(mapId);
+        });
+
+        MapNetworkHandler.setMapStart(() => {
             this.startPlayingCountdown.reset();
             this.startPlaying = true;
-        })
+            this.game.initialize();
+        });
 
-        const readyImageInfo = Utility.File.getImage(images.ready);
-        this.ready = new SpriteSheet(readyImageInfo.src, readyImageInfo.frameWidth, readyImageInfo.frameHeight);
+        this.ready = new SpriteSheet(Images.ready);
         this.ready.setRenderSpace(RenderSpace.Screen);
 
-        const getImageInfo = Utility.File.getImage(images.get);
-        this.get = new SpriteSheet(getImageInfo.src, getImageInfo.frameWidth, getImageInfo.frameHeight);
+        this.get = new SpriteSheet(Images.get);
         this.get.setRenderSpace(RenderSpace.Screen);
     }
 
@@ -39,7 +41,7 @@ class LoadingMap implements IState<GameLoopState> {
         if (!Connection.get().isHost()) {
             return;
         }
-        const map = MapManager.getRandomMap();
+        const map = MapManager.getRandomMap()[0];
         MapNetworkHandler.hostInitializeMap(map);
     }
 

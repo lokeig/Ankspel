@@ -1,8 +1,9 @@
 import { Vector } from "@math";
-import { Animation, EquipmentSlot, images, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteAnimator, SpriteSheet, Utility } from "@common";
+import { Animation, EquipmentSlot, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteAnimator, SpriteSheet, Utility } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
+import { Images } from "@render";
 
 class Chestplate extends Item {
     private static animations = { default: new Animation, equipped: new Animation, running: new Animation };
@@ -13,8 +14,7 @@ class Chestplate extends Item {
 
     static {
         Utility.File.setAnimations("chestplate", this.animations);
-        const spriteInfo = Utility.File.getImage(images.armor);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.armor);
     }
 
     constructor(pos: Vector) {

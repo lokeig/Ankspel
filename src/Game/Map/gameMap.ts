@@ -2,12 +2,21 @@ import { Grid, Utility } from "@common";
 import { TileConstructor, ITile } from "@game/StaticObjects/Tiles";
 import { ItemDescription } from "./itemDescription";
 import { Vector } from "@math";
-
+import { BackgroundConfig } from "./backgroundConfig";
 
 class GameMap {
     private tiles: ITile[] = [];
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
+    private background!: BackgroundConfig;
+
+    public setBackground(config: BackgroundConfig): void {
+        this.background = config;
+    }   
+
+    public getBackground(): BackgroundConfig {
+        return this.background;
+    }
 
     public setTile(tile: TileConstructor, gridPos: Vector): void {
         const pos = Grid.getWorldPos(gridPos);

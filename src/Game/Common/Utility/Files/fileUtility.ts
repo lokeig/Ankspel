@@ -4,10 +4,6 @@ import { Animation } from "../../Sprite/Animation/animation";
 import { Frame } from "../../Sprite/Animation/frame";
 
 class FileUtility {
-    public getImage(name: string): ImageDefinition {
-        return imageTable[name];
-    }
-
     public getControls(number: number): Controls {
         let index = Math.min(number, controlArray.length-1);
         return controlArray[index].keyboard;

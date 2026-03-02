@@ -1,8 +1,9 @@
 import { Vector } from "@math";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, images, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
+import { Images } from "@render";
 
 class Helmet extends Item {
     private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
@@ -12,8 +13,7 @@ class Helmet extends Item {
     private target: ProjectileTarget;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.armor);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.armor);
         Utility.File.setFrames("helmet", this.frames);
     }
 
@@ -66,12 +66,6 @@ class Helmet extends Item {
         const drawSize = 32;
 
         Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
-    }
-
-
-    private onHitFunction(): OnItemUseEffect[] {
-        this.setToDelete();
-        return [];
     }
 }
 

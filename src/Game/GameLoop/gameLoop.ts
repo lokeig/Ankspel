@@ -1,5 +1,5 @@
 import { StateMachine, Input } from "@common";
-import { Render } from "@render";
+import { ImageName, Images, Render } from "@render";
 import { LobbyList } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
 import { Playing } from "./LoopStates/playing";
@@ -15,17 +15,30 @@ class GameLoop {
 
     constructor(timer: FrameHandler) {
         this.frameHandler = timer;
-        NetworkHandler.init();
-        LobbyList.get().show();
-
         const initalState = GameLoopState.LoadingMap;
         this.stateMachine = new StateMachine(initalState);
-
+    
         const game = new DuckGame();
         this.stateMachine.addState(GameLoopState.Playing, new Playing(game));
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(game));
+    }
+    
+    public async init() {
+        await this.preloadAllImages();
 
-        NetworkHandler.setOnStart(() => { this.startGame(); });
+        NetworkHandler.init();
+        LobbyList.get().show();
+    
+        NetworkHandler.setOnStart(() => { this.startGame(); });        
+    }
+
+    private async preloadAllImages(): Promise<void> {
+        const keys = Object.keys(Images) as ImageName[];
+
+        for (const key of keys) {
+            const imageInfo = Images[key];
+            await Render.get().loadImage(imageInfo); 
+        }
     }
 
     private startGame(): void {

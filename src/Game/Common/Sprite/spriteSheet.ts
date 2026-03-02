@@ -1,18 +1,14 @@
-import { DrawInfo, Rect, Render, RenderSpace } from "@render";
-import { Vector } from "../../../Math/vector";
+import { DrawInfo, ImageInfo, Rect, Render, RenderSpace } from "@render";
 import { Frame } from "./Animation/frame";
+import { Vector } from "@math";
 
 class SpriteSheet {
-    private imageSrc: string;
-    private frameWidth: number;
-    private frameHeight: number;
+    private image: ImageInfo;
     private noFrame = new Frame();
     private space: RenderSpace = RenderSpace.World;
 
-    constructor(imageSrc: string, frameWidth: number, frameHeight: number) {
-        this.imageSrc = imageSrc;
-        this.frameWidth = frameWidth;
-        this.frameHeight = frameHeight;
+    constructor(image: ImageInfo) {
+        this.image = image;
     }
 
     public setRenderSpace(space: RenderSpace): void {
@@ -21,10 +17,10 @@ class SpriteSheet {
   
     private getSource(row: number, col: number): Rect {
         return {
-            x: col * this.frameWidth,
-            y: row * this.frameHeight,
-            width: this.frameWidth,
-            height: this.frameHeight,
+            x: col * this.image.frameWidth,
+            y: row * this.image.frameHeight,
+            width: this.image.frameWidth,
+            height: this.image.frameHeight,
         };
     }
 
@@ -33,7 +29,7 @@ class SpriteSheet {
         const height = size instanceof Vector ? size.y : size;
 
         const drawInfo: DrawInfo = {
-            imageSrc: this.imageSrc,
+            image: this.image,
             source: this.getSource(frame.row, frame.col),
             world: { x: pos.x, y: pos.y, width, height },
             flip,
@@ -45,7 +41,7 @@ class SpriteSheet {
 
     public drawLine(start: Vector, end: Vector, width: number, frame: Frame = this.noFrame, opacity: number = 1): void {
         const source = this.getSource(frame.row, frame.col);
-        Render.get().drawLine(this.imageSrc, start, end, width, source, opacity, this.space);
+        Render.get().drawLine(this.image, start, end, width, source, opacity, this.space);
     }
 }
 

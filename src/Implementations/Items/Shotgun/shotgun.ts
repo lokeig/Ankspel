@@ -1,9 +1,10 @@
 import { Vector } from "@math";
-import { Lerp, lerpTriangle, SpriteSheet, images, Utility, Frame, ItemInteraction } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
 import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
+import { Images } from "@render";
 
 class Shotgun extends Item {
     private handleOffset: number = 0;
@@ -20,8 +21,7 @@ class Shotgun extends Item {
     private currentState: ShotgunState = ShotgunState.Loaded;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.shotgun);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.shotgun);
         Utility.File.setFrames("shotgun", this.frames);
     }
     
@@ -32,7 +32,6 @@ class Shotgun extends Item {
         
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
-        
         
         this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
@@ -98,7 +97,6 @@ class Shotgun extends Item {
     public shouldBeDeleted(): boolean {
         return super.shouldBeDeleted() || (this.deleteHelper() && this.currentState === ShotgunState.Empty);
     }
-
 }
 
 export { Shotgun };

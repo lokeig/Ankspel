@@ -4,11 +4,13 @@ import { Countdown, IDManager, Input } from "@common";
 import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
-import { MapLoader, MapManager } from "@game/Map";
+import { MapManager } from "@game/Map";
+
+const tickRate = 60;
 
 class NetworkHandler {
     private static readyCount: number = 0;
-    private static messageTimer = new Countdown(0.05);
+    private static messageTimer = new Countdown(1 / tickRate);
     private static onStart: () => void;
     private static readyToPlay: boolean = false;
 
@@ -62,10 +64,9 @@ class NetworkHandler {
 
         Connection.get().enableLocalMode();
 
-        const map = MapManager.getRandomMap()[1];
-        MapLoader.load(map, true);
-        MapNetworkHandler.doOnMapLoad();
         this.start();
+        const mapId = MapManager.getRandomMap()[0];
+        MapNetworkHandler.forceStart(mapId);
     }
 
     private static start(): void {

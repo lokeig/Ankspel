@@ -3,17 +3,17 @@ import { SpriteSheet } from "@common";
 import { BaseTile } from "./baseTile";
 import { Images } from "@render";
 
-class IceTile extends BaseTile {
+class NatureTile extends BaseTile {
     private static sprite: SpriteSheet;
 
     static {
-        this.sprite = new SpriteSheet(Images.tileIce);
+        this.sprite = new SpriteSheet(Images.tileNature);
     }
 
     constructor(pos: Vector, size: number) {
         super(pos, size);
-        this.sprite = IceTile.sprite;
+        this.sprite = NatureTile.sprite;
     }
 }
 
-export { IceTile };
+export { NatureTile };

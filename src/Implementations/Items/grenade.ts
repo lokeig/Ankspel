@@ -1,10 +1,11 @@
 import { Vector } from "@math";
-import { SpriteSheet, images, Countdown, Utility, Frame, ItemInteraction } from "@common";
+import { SpriteSheet, Countdown, Utility, Frame, ItemInteraction } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
+import { Images } from "@render";
 
 class Grenade extends Item {
     private static spriteSheet: SpriteSheet;
@@ -15,8 +16,7 @@ class Grenade extends Item {
     private locallyActivated!: boolean;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.grenade);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.grenade);
         Utility.File.setFrames("grenade", this.frames);
     }
 
@@ -46,7 +46,7 @@ class Grenade extends Item {
             ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
             this.setToDelete();
 
-            const amountOfBullets = 16;
+            const amountOfBullets = 24;
             for (let i = 0; i < amountOfBullets; i++) {
                 const angle = i * 2 * Math.PI / amountOfBullets;
                 const pos = this.body.pos;

@@ -19,8 +19,7 @@ MapManager.addMap(defaultMap);
 // MapManager.addMap(defaultMap3);
 // MapManager.addMap(defaultMap4);
 
-
 RegisterItems();
 Connection.set(new MultiPeerServer(new WebSocket("https://ankspel.onrender.com")));
 LobbyList.set(new LobbyListCSS());
-new GameLoop(new RequestAnimationFrameTimer());
+new GameLoop(new RequestAnimationFrameTimer()).init();

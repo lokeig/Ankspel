@@ -24,6 +24,7 @@ enum GameMessage {
     // ─── Projectiles ────────────────────────
 
     // ─── Map ────────────────────────────────
+    ResetMap,
     LoadMap,
     MapLoaded,
     StartMap,
@@ -58,6 +59,7 @@ interface GameMessageMap {
     // ─── Projectiles ────────────────────────
 
     // ─── Map ────────────────────────────────
+    [GameMessage.ResetMap]: {};
     [GameMessage.LoadMap]: { id: number };
     [GameMessage.MapLoaded]: {};
     [GameMessage.StartMap]: {};

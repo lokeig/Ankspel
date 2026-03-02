@@ -5,7 +5,6 @@ import { BulletTrail } from "./Trails/bulletTrail";
 import { IProjectile, ProjectileCollisionResolver, ProjectileTarget } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BulletReboundVFX } from "@impl/Particles";
-import { TileManager } from "@game/StaticObjects/Tiles";
 
 type BulletHit =
     | { type: "tile"; tile: GameObject; pos: Vector; resistance: number }
@@ -103,10 +102,6 @@ class Bullet implements IProjectile {
 
     public shouldBeDeleted(): boolean {
         return this.delete || this.lifespan.isDone();
-    }
-
-    public isLocal(): boolean {
-        return this.local;
     }
 
     public setLocal(): void {

@@ -1,6 +1,7 @@
-import { Animation, images, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
+import { Animation, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
 import { Vector } from "@math";
+import { Images } from "@render";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;
@@ -28,11 +29,8 @@ class PlayerAnimation {
     static {
         Utility.File.setAnimations("player", this.animations);
 
-        const bodySpriteInfo = Utility.File.getImage(images.playerImage);
-        this.bodySprite = new SpriteSheet(bodySpriteInfo.src, bodySpriteInfo.frameWidth, bodySpriteInfo.frameHeight);
-
-        const armSpriteInfo = Utility.File.getImage(images.playerHands);
-        this.armSprite = new SpriteSheet(armSpriteInfo.src, armSpriteInfo.frameWidth, armSpriteInfo.frameHeight);
+        this.bodySprite = new SpriteSheet(Images.player);
+        this.armSprite = new SpriteSheet(Images.playerHands);
     }
 
     constructor() {
@@ -73,8 +71,7 @@ class PlayerAnimation {
         draw(EquipmentSlot.Hand);
     }
 
-    public drawBody(pos: Vector, drawSize: number, flip: boolean): void {
-        const angle = 0;
+    public drawBody(pos: Vector, drawSize: number, flip: boolean, angle: number = 0): void {
         this.bodyAnimator.draw(pos, drawSize, flip, angle);
     };
 

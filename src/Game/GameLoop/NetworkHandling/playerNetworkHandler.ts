@@ -21,22 +21,13 @@ class PlayerNetworkHandler {
             if (state !== player.getCurrentState()) {
                 player.setState(state);
             }
-            player.character.standardBody.pos = Utility.Vector.convertNetwork(pos);
-            player.character.standardBody.velocity = Utility.Vector.convertNetwork(velocity);
+            player.character.setPos(Utility.Vector.convertNetwork(pos));
+            player.character.activeBody.velocity = Utility.Vector.convertNetwork(velocity);
             if (player.character.standardBody.direction !== side) {
                 player.character.armFront.angle *= -1;
                 player.character.standardBody.direction = side;
             }
             player.character.animator.setAnimation(anim);
-        });
-
-        gameEvent.subscribe(GameMessage.PlayerHit, ({ id, effect, slot, seed }) => {
-            const player = PlayerManager.getPlayerFromID(id)!;
-            let item = null;
-            if (slot && player.character.equipment.hasItem(slot)) {
-                item = player.character.equipment.getItem(slot);
-            }
-            // player!.character.handleEffect(effect, item, seed, false);
         });
 
         gameEvent.subscribe(GameMessage.PlayerEquipment, ({ id, holding, head, body, boots }) => {
@@ -68,8 +59,8 @@ class PlayerNetworkHandler {
 
             Connection.get().sendGameMessageUnreliable(GameMessage.PlayerInfo, {
                 id,
-                pos: Utility.Vector.convertToNetwork(player.character.standardBody.pos),
-                velocity: Utility.Vector.convertToNetwork(player.character.standardBody.velocity),
+                pos: Utility.Vector.convertToNetwork(player.character.activeBody.pos),
+                velocity: Utility.Vector.convertToNetwork(player.character.activeBody.velocity),
                 state: player.getCurrentState(),
                 anim: player.character.animator.getCurrentAnimation(),
                 side: player.character.standardBody.direction,

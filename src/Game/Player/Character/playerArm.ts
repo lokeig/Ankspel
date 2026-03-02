@@ -24,8 +24,6 @@ class PlayerArm {
         }
         result.y += this.posOffset.y + offset.y;
         this.pos = result;
-
-
     }
 
     public setOffset(offset: Vector): void {

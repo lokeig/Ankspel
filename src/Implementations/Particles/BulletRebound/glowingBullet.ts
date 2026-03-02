@@ -1,5 +1,6 @@
 import { Vector } from "@math";
-import { Countdown, Frame, images, SpriteSheet, Utility } from "@common";
+import { Countdown, Frame, SpriteSheet, Utility } from "@common";
+import { Images } from "@render";
 
 class GlowingBullet {
     private static spriteSheet: SpriteSheet;
@@ -17,8 +18,7 @@ class GlowingBullet {
     private rotateSpeed: number = Utility.Random.getInRange(-1, 1);
 
     static {
-        const imageSrc = Utility.File.getImage(images.bulletGlow);
-        this.spriteSheet = new SpriteSheet(imageSrc.src, imageSrc.frameWidth, imageSrc.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.bulletGlow);
         Utility.File.setFrames("bulletGlow", this.frames);
     }
 

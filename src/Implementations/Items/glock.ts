@@ -1,9 +1,10 @@
 import { Vector } from "@math";
-import { SpriteAnimator, Animation, SpriteSheet, images, Utility, ItemInteraction } from "@common";
+import { SpriteAnimator, Animation, SpriteSheet, Utility, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
+import { Images } from "@render";
 
 class Glock extends Item {
     private static animations: Record<string, Animation> = {
@@ -18,8 +19,7 @@ class Glock extends Item {
 
     static {
         Utility.File.setAnimations("glock", this.animations);
-        const spriteInfo = Utility.File.getImage(images.glock);
-        this.sprite = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.sprite = new SpriteSheet(Images.glock);
     }
 
     constructor(pos: Vector) {
