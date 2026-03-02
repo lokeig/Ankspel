@@ -3,6 +3,7 @@ import { Lerp, lerpAngle, ThrowType, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { IItem, Ownership } from "@item";
+import { AudioManager, Sound } from "@game/Audio";
 
 abstract class Item implements IItem {
     protected useInteractions = new ItemUseInteractions;
@@ -24,16 +25,24 @@ abstract class Item implements IItem {
     }
 
     public update(deltaTime: number): void {
+        const prevGrounded = this.body.grounded;
+        const prevVelocity = Math.abs(this.body.velocity.y);
+        
         if (this.ownership === Ownership.None) {
             this.updateItemPhysics(deltaTime);
         } else {
             this.body.setNewCollidableObjects();
         }
         this.itemUpdate(deltaTime);
+        
+        const audioLandThreshold = 100;
+        if (this.body.grounded && !prevGrounded && prevVelocity > audioLandThreshold) {
+            AudioManager.get().play(Sound.land);
+        }
     }
 
     protected itemUpdate(deltaTime: number): void {
-        
+
     }
 
     private updateItemPhysics(deltaTime: number) {
@@ -101,7 +110,7 @@ abstract class Item implements IItem {
             this.body.pos.y + ((this.body.height - drawSize) / 2)
         );
     }
-    
+
     public enabled(): boolean {
         return true;
     }

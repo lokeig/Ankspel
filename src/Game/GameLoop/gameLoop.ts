@@ -7,6 +7,8 @@ import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { LoadingMap } from "./LoopStates/loadingMap";
 import { DuckGame } from "./game";
 import { FrameHandler } from "./frameTimer";
+import { Sound, SoundInfo, SoundName } from "@game/Audio";
+import { AudioManager } from "@game/Audio/audioManager";
 
 class GameLoop {
     private lastTime = 0;
@@ -17,19 +19,20 @@ class GameLoop {
         this.frameHandler = timer;
         const initalState = GameLoopState.LoadingMap;
         this.stateMachine = new StateMachine(initalState);
-    
+
         const game = new DuckGame();
         this.stateMachine.addState(GameLoopState.Playing, new Playing(game));
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(game));
     }
-    
+
     public async init() {
         await this.preloadAllImages();
+        await this.preloadAllAudio();
 
         NetworkHandler.init();
         LobbyList.get().show();
-    
-        NetworkHandler.setOnStart(() => { this.startGame(); });        
+
+        NetworkHandler.setOnStart(() => { this.startGame(); });
     }
 
     private async preloadAllImages(): Promise<void> {
@@ -37,7 +40,16 @@ class GameLoop {
 
         for (const key of keys) {
             const imageInfo = Images[key];
-            await Render.get().loadImage(imageInfo); 
+            await Render.get().loadImage(imageInfo);
+        }
+    }
+
+    private async preloadAllAudio(): Promise<void> {
+        const keys = Object.keys(Sound) as SoundName[];
+
+        for (const key of keys) {
+            const src = SoundInfo[key].src;
+            await AudioManager.get().load(key, src);
         }
     }
 

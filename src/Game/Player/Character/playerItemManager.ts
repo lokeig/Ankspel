@@ -4,6 +4,7 @@ import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
 import { Connection, GameMessage, GameMessageMap } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
+import { AudioManager, Sound } from "@game/Audio";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;
@@ -124,6 +125,7 @@ class PlayerItemManager {
                     this.equipment.equip(null, EquipmentSlot.Hand);
                     this.equipment.throw(effect.value, ThrowType.Light);
                     this.equipment.equip(item, effect.value);
+                    AudioManager.get().play(Sound.equip);
                     break;
                 }
             }

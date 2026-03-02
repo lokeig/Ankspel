@@ -58,7 +58,7 @@ class NetworkHandler {
 
     private static quickStart = (): void => {
         PlayerManager.create();
-        PlayerManager.create();
+        // PlayerManager.create();
         // PlayerManager.create();
         // PlayerManager.create();
 

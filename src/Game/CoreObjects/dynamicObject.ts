@@ -3,6 +3,7 @@ import { TileManager } from "../StaticObjects/Tiles";
 import { CollisionObject } from "./collisionObject";
 import { GameObject } from "./gameObject";
 import { Vector } from "@math";
+import { AudioManager, Sound } from "@game/Audio";
 
 class DynamicObject extends GameObject {
     private collidableObjects: Array<CollisionObject> = [];

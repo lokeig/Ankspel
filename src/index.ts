@@ -10,9 +10,12 @@ import { MapManager } from "@game/Map";
 import { RegisterItems } from "@impl/Items/registerItems";
 import { defaultMap, defaultMap2, defaultMap3, defaultMap4 } from "@impl/Maps";
 import { RequestAnimationFrameTimer } from "@impl/FrameTimer/requestAnimationFrame";
+import { HTMLAudio } from "@impl/Audio/HTMLAudio";
+import { AudioManager } from "@game/Audio/audioManager";
 
 Input.init();
 Render.set(new CanvasRender("gameCanvas"));
+AudioManager.set(new HTMLAudio());
 
 MapManager.addMap(defaultMap);
 // MapManager.addMap(defaultMap2);

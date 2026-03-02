@@ -10,6 +10,7 @@ import { PlayerAnimation } from "./playerAnimation";
 import { PlayerEquipment } from "./playerEquipment";
 import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
+import { AudioManager, Sound } from "@game/Audio";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -100,11 +101,19 @@ class PlayerCharacter {
     }
 
     public update(deltaTime: number): void {
+        const prevGrounded = this.standardBody.grounded;
+        const prevVelocityY = Math.abs(this.standardBody.velocity.y);
+        
         this.updateControllers(deltaTime);
         this.standardBody.update(deltaTime);
         this.setArmPos();
         this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
         this.equipment.setAnimation(this.animator.getCurrentAnimation());
+        
+        const audioThreshold = 200;
+        if (this.standardBody.grounded && !prevGrounded && prevVelocityY > audioThreshold) {
+            AudioManager.get().play(Sound.land);
+        }
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {

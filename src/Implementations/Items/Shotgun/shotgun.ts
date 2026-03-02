@@ -5,11 +5,13 @@ import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
 import { Images } from "@render";
+import { AudioManager } from "@game/Audio/audioManager";
+import { Sound } from "@game/Audio";
 
 class Shotgun extends Item {
     private handleOffset: number = 0;
     private handleLerp = new Lerp(6, lerpTriangle)
-    
+
     private static maxHandleOffset: number = -8;
     private static frames = {
         gun: new Frame(),
@@ -24,15 +26,15 @@ class Shotgun extends Item {
         this.spriteSheet = new SpriteSheet(Images.shotgun);
         Utility.File.setFrames("shotgun", this.frames);
     }
-    
+
     constructor(pos: Vector) {
         const width = 30;
         const height = 15;
         super(pos, width, height);
-        
+
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
-        
+
         this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
@@ -72,12 +74,14 @@ class Shotgun extends Item {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.Reloadable;
+        AudioManager.get().play(Sound.shotgunFire);
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
     private reload(): OnItemUseEffect[] {
         this.handleLerp.startLerp(0, Shotgun.maxHandleOffset);
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
+        AudioManager.get().play(Sound.shotgunLoad);
         return [];
     }
 

@@ -5,6 +5,8 @@ import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
 import { Images } from "@render";
+import { AudioManager } from "@game/Audio/audioManager";
+import { Sound } from "@game/Audio";
 
 class Glock extends Item {
     private static animations: Record<string, Animation> = {
@@ -62,9 +64,9 @@ class Glock extends Item {
         this.animator.reset();
         this.animator.setAnimation(Glock.animations.shoot);
         if (this.firearmInfo.ammo > 0) {
+            AudioManager.get().play(Sound.glock);
             this.flare.reset();
         }
-
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
@@ -78,7 +80,6 @@ class Glock extends Item {
 
     private drawFlare(): void {
         const pos = this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip());
-
         this.flare.draw(pos, this.body.isFlip(), this.getAngle());
     }
 
