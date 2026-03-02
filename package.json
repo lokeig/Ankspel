@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && npm run copy-assets",
-    "copy-assets": "cpy \"Assets/**/*\" dist/assets --parents",
+    "copy-assets": "cpy \"Assets/**/*\" dist/assets --flat",
     "preview": "vite preview",
     "server": "npm run build --prefix Server && npm start --prefix Server"
   },
