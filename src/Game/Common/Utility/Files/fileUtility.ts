@@ -1,4 +1,4 @@
-import { animations, controlArray, ImageDefinition, imageTable, frames, tileLookup } from "./fileTypes";
+import { animations, controlArray, frames, tileLookup } from "./fileTypes";
 import { Controls } from "../../Types/controls";
 import { Animation } from "../../Sprite/Animation/animation";
 import { Frame } from "../../Sprite/Animation/frame";
