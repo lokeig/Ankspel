@@ -4,58 +4,64 @@ import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
 
 class PlayerFlap implements IState<PlayerState> {
-    private playerCharacter: PlayerCharacter;
+    private player: PlayerCharacter;
     private flapSpeed: number = 90;
 
     constructor(playerCharacter: PlayerCharacter) {
-        this.playerCharacter = playerCharacter;
+        this.player = playerCharacter;
     }
 
     private setCurrentAnimation(): void {
-        this.playerCharacter.animator.setAnimation(PlayerAnim.Flap);
+        this.player.animator.setAnimation(PlayerAnim.Flap);
     }
 
     public stateEntered(): void {
         const armOffset = new Vector(10, 28);
-        this.playerCharacter.armFront.setOffset(armOffset);
+        this.player.armFront.setOffset(armOffset);
+
+        this.player.equipment.getAllEquippedItems().forEach((item) => {
+            if (item && item.interactions().getOnPlayerState()) {
+                item.interactions().getOnPlayerState()!(PlayerState.Flap);
+            }
+        });
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.playerCharacter.isLocal()) {
+        if (!this.player.isLocal()) {
             this.nonLocalUpdate(deltaTime);
             return;
         }
-        this.playerCharacter.standardBody.velocity.y = Math.min(this.playerCharacter.standardBody.velocity.y, this.flapSpeed);
-        
-        const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
-        this.playerCharacter.rotateArm(deltaTime, forceRotationUp);
+        this.player.standardBody.velocity.y = Math.min(this.player.standardBody.velocity.y, this.flapSpeed);
 
-        this.playerCharacter.update(deltaTime);
+        const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
+        this.player.rotateArm(deltaTime, forceRotationUp);
+
+        this.player.update(deltaTime);
         this.setCurrentAnimation();
         this.setEquipmentPosition();
     }
 
     private setEquipmentPosition(): void {
-        const center = this.playerCharacter.standardBody.getCenter();
+        const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -21)],
             [EquipmentSlot.Body, new Vector(2, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
         ];
         positions.forEach(([slot, offset]) => {
-            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.standardBody.direction, 0, slot);
+            this.player.equipment.setBody(center, offset, this.player.standardBody.direction, 0, slot);
         });
     }
 
     public stateChange(): PlayerState {
-        const controls = this.playerCharacter.controls;
-        if (controls.ragdoll() || this.playerCharacter.isDead()) {
+        const controls = this.player.controls;
+        if (controls.ragdoll() || this.player.isDead()) {
             return PlayerState.Ragdoll;
         }
         if (controls.down()) {
             return PlayerState.Crouch;
         }
-        if (controls.jump() && !this.playerCharacter.standardBody.grounded) {
+        if (controls.jump() && !this.player.standardBody.grounded) {
             return PlayerState.Flap
         }
         return PlayerState.Standard;
@@ -65,15 +71,15 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     private nonLocalUpdate(deltaTime: number): void {
-        this.playerCharacter.standardBody.velocity.y = Math.min(this.playerCharacter.standardBody.velocity.y, this.flapSpeed);
-        const forceRotationUp = this.playerCharacter.equipment.hasItem(EquipmentSlot.Hand);
-        this.playerCharacter.rotateArm(deltaTime, forceRotationUp)
-        this.playerCharacter.nonLocalUpdate(deltaTime);
+        this.player.standardBody.velocity.y = Math.min(this.player.standardBody.velocity.y, this.flapSpeed);
+        const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
+        this.player.rotateArm(deltaTime, forceRotationUp)
+        this.player.nonLocalUpdate(deltaTime);
         this.setEquipmentPosition();
     }
 
     public draw(): void {
-        this.playerCharacter.draw();
+        this.player.draw();
     }
 }
 

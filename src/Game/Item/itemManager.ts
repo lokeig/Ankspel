@@ -1,4 +1,4 @@
-import { Grid, Utility,  } from "@common";
+import { Grid, Utility, } from "@common";
 import { ItemConstructor, IItem, isItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
@@ -39,12 +39,14 @@ class ItemManager {
         if (!constructor) {
             return null;
         }
-        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        const id = this.idManager.getNextID();
+
+        const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
         newItem.getBody().pos.y -= newItem.getBody().height;
 
         this.addToMap(newItem);
-        const id = this.idManager.add(newItem);
+        this.idManager.add(newItem);
 
         Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
 
@@ -56,7 +58,7 @@ class ItemManager {
         if (!constructor) {
             return;
         }
-        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
         newItem.getBody().pos.y -= newItem.getBody().height;
 

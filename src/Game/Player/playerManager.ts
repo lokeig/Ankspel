@@ -1,6 +1,7 @@
 import { IDManager, Utility } from "@common";
 import { Player } from "./player";
 import { Connection, GameMessage } from "@server";
+import { ImageInfo, ImageName, Images } from "@render";
 
 class PlayerManager {
     private static players: Player[] = [];
@@ -45,20 +46,20 @@ class PlayerManager {
         return this.players;
     }
 
-    public static create(): Player {
+    public static create(color: ImageName): Player {
         const controls = Utility.File.getControls(this.localPlayerCount);
         const id = IDManager.getBaseOffset() + this.localPlayerCount++;
 
-        const player = new Player(id, controls);
+        const player = new Player(id, color, controls);
         this.players.push(player);
 
-        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, color }));
 
         return player;
     }
 
-    public static spawn(id: number): Player {
-        const player = new Player(id);
+    public static spawn(id: number, color: ImageName): Player {
+        const player = new Player(id, color);
         this.players.push(player);  
         return player;
     }

@@ -1,4 +1,4 @@
-import { EquipmentSlot, ThrowType } from "@common";
+import { EquipmentSlot, ProjectileEffect, ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { Ownership } from "./itemUseType";
 import { ItemUseInteractions } from "./itemUseInteractions";
@@ -28,9 +28,11 @@ interface IItem {
 
     getHoldOffset(): Vector;
     getHandOffset(): Vector;
+
+    onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean): void;
 }
 
-type ItemConstructor = new (pos: Vector) => IItem
+type ItemConstructor = new (pos: Vector, id: number) => IItem
 
 function isItem(object: any): object is IItem {
     return object && 'throw' in object;

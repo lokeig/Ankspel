@@ -1,6 +1,6 @@
 import { StateMachine, Input } from "@common";
 import { ImageName, Images, Render } from "@render";
-import { LobbyList } from "@game/Server";
+import { MainMenu } from "@game/Server";
 import { GameLoopState } from "./gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
@@ -30,7 +30,7 @@ class GameLoop {
         await this.preloadAllAudio();
 
         NetworkHandler.init();
-        LobbyList.get().show();
+        MainMenu.get().show();
 
         NetworkHandler.setOnStart(() => { this.startGame(); });
     }
@@ -54,7 +54,7 @@ class GameLoop {
     }
 
     private startGame(): void {
-        LobbyList.get().hide();
+        MainMenu.get().hide();
         this.stateMachine.enterState();
         this.frameHandler.newFrame(this.gameLoop);
     }

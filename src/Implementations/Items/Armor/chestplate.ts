@@ -4,6 +4,8 @@ import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { Images } from "@render";
+import { Connection, GameMessage } from "@server";
+import { AudioManager, Sound } from "@game/Audio";
 
 class Chestplate extends Item {
     private static animations = { default: new Animation, equipped: new Animation, running: new Animation };
@@ -17,10 +19,10 @@ class Chestplate extends Item {
         this.spriteSheet = new SpriteSheet(Images.armor);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 25;
         const height = 20;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
         this.animator = new SpriteAnimator(Chestplate.spriteSheet, Chestplate.animations.default);
 
@@ -54,7 +56,7 @@ class Chestplate extends Item {
 
     public onEquip(slot: EquipmentSlot): void {
         if (slot !== EquipmentSlot.Body) {
-                return;
+            return;
         }
         this.body.width = 40;
         this.body.height = 40;
@@ -68,15 +70,19 @@ class Chestplate extends Item {
         this.animator.setAnimation(Chestplate.animations.default);
     }
 
-    private onProjectileHit(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
-        if (this.getOwnership() !== Ownership.Equipped || !local) {
+    private onProjectileHit(effects: ProjectileEffect[], pos: Vector, local: boolean): void {
+        effects.forEach(effect => this.onProjectileEffect(effect, pos, local));
+    }
+
+    public onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean) {
+        if (!local || this.shouldBeDeleted()) {
             return;
         }
-        effects.forEach(effect => {
-            if (effect.type === ProjectileEffectType.Damage) {
-                this.setToDelete();
-            }
-        })
+        if (effect.type === ProjectileEffectType.Damage) {
+            this.setToDelete();
+            AudioManager.get().play(Sound.ting);
+            Connection.get().sendGameMessage(GameMessage.ItemProjectileEffect, { id: this.id, effect, pos });
+        }
     }
 
     public draw(): void {

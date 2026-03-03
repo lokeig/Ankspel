@@ -34,16 +34,8 @@ class PlayerItemManager {
 
     private handlePickupOrThrow(): void {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
-            const item = this.equipment.getItem(EquipmentSlot.Hand);
             const throwType = this.getThrowType();
             this.equipment.throw(EquipmentSlot.Hand, throwType);
-
-            Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-                itemID: ItemManager.getItemID(item)!,
-                pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
-                direction: item.getBody().direction,
-                throwType
-            });
             this.sendEquipmentMessage();
         } else {  // Pickup item
             const nextItem = this.getNearbyItem();
@@ -127,6 +119,9 @@ class PlayerItemManager {
                     this.equipment.equip(item, effect.value);
                     AudioManager.get().play(Sound.equip);
                     break;
+                }
+                case (OnItemUseType.Unequip): {
+                    this.equipment.throw(effect.value, ThrowType.Drop);
                 }
             }
         })

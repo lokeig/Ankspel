@@ -5,7 +5,7 @@ import { Frame } from "../../Sprite/Animation/frame";
 
 class FileUtility {
     public getControls(number: number): Controls {
-        let index = Math.min(number, controlArray.length-1);
+        let index = Math.min(number, controlArray.length - 1);
         return controlArray[index].keyboard;
     }
 

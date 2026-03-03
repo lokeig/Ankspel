@@ -1,17 +1,21 @@
-import { Connection, ILobbyList } from "@game/Server";
+import { Connection, IMainMenu } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
+import { ImageName } from "@render";
+import { ControlsMenu } from "./controlsMenu";
 
-class LobbyListCSS implements ILobbyList {
+class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
     private lobbyDiv: HTMLElement;
     private selectedLobbyId: string | null = null;
     private hostMenu = new HostMenu();
+    private controlsMenu = new ControlsMenu;
 
     private joinbutton: HTMLButtonElement;
     private hostbutton: HTMLButtonElement;
     private startbutton: HTMLButtonElement;
     private leavebutton: HTMLButtonElement;
+    private controlsButton: HTMLButtonElement; 
 
     private lastLobbies: LobbyMessageData[] = [];
 
@@ -33,6 +37,9 @@ class LobbyListCSS implements ILobbyList {
 
         this.hostbutton = document.getElementById("hostbutton") as HTMLButtonElement;
         this.hostbutton.addEventListener("click", () => this.onHost());
+
+        this.controlsButton = document.getElementById("controlsButton") as HTMLButtonElement;
+        this.controlsButton.addEventListener("click", () => this.onControls());
 
         this.startbutton.disabled = true;
         this.leavebutton.disabled = true;
@@ -76,6 +83,19 @@ class LobbyListCSS implements ILobbyList {
             this.startbutton.disabled = false;
             this.refresh(this.lastLobbies);
         });
+    }
+
+    private onControls(): void {
+        this.controlsMenu.show();
+    }
+
+    public getChosenColor(): ImageName {
+        const select = document.getElementById("playerColorSelect") as HTMLSelectElement;
+        let color: string = "Yellow";
+        if (select) {
+            color = select.value;
+        }
+        return "player" + color as ImageName;
     }
 
     public show(): void {
@@ -182,4 +202,4 @@ class LobbyListCSS implements ILobbyList {
     }
 }
 
-export { LobbyListCSS }
+export { MainMenuCSS }

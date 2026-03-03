@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { Lerp, lerpAngle, ThrowType, Utility } from "@common";
+import { Lerp, lerpAngle, ProjectileEffect, ThrowType, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { IItem, Ownership } from "@item";
@@ -15,13 +15,16 @@ abstract class Item implements IItem {
     private rotateSpeed: number = 0;
     private rotateLerp = new Lerp(15, lerpAngle);
 
+    protected id: number;
+
     protected holdOffset = new Vector;
     protected handOffset = new Vector;
 
     private delete: boolean = false;
 
-    constructor(pos: Vector, width: number, height: number) {
+    constructor(pos: Vector, width: number, height: number, id: number) {
         this.body = new DynamicObject(pos, width, height);
+        this.id = id;
     }
 
     public update(deltaTime: number): void {
@@ -43,6 +46,10 @@ abstract class Item implements IItem {
 
     protected itemUpdate(deltaTime: number): void {
 
+    }
+
+    public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
+        return;
     }
 
     private updateItemPhysics(deltaTime: number) {

@@ -7,8 +7,8 @@ class PlayerNetworkHandler {
     public static init() {
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.NewPlayer, ({ id }) => {
-            PlayerManager.spawn(id);
+        gameEvent.subscribe(GameMessage.NewPlayer, ({ id, color }) => {
+            PlayerManager.spawn(id, color);
         });
 
         gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, pos }) => {

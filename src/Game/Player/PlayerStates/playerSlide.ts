@@ -4,7 +4,7 @@ import { PlayerCharacter } from "../Character/playerCharacter";
 
 class PlayerSlide implements IState<PlayerState> {
 
-    private playerCharacter: PlayerCharacter;
+    private player: PlayerCharacter;
     private platformIgnoreTime = new Countdown(0.15);
 
     private static readonly slideHeight: number = 20;
@@ -14,44 +14,51 @@ class PlayerSlide implements IState<PlayerState> {
     private unstuckSpeed: number = 300;
 
     constructor(playerCharacter: PlayerCharacter, crouch: boolean) {
-        this.playerCharacter = playerCharacter;
+        this.player = playerCharacter;
         this.crouch = crouch;
     }
 
     public stateEntered(): void {
         this.platformIgnoreTime.setToReady();
-        if (this.playerCharacter.isLocal()) {
-            this.playerCharacter.movement.moveEnabled = false;
-            this.playerCharacter.itemManager.forcedThrowType = ThrowType.Drop;
+        if (this.player.isLocal()) {
+            this.player.movement.moveEnabled = false;
+            this.player.itemManager.forcedThrowType = ThrowType.Drop;
         }
 
         if (this.crouch) {
-            this.playerCharacter.standardBody.height = PlayerSlide.crouchHeight;
+            this.player.standardBody.height = PlayerSlide.crouchHeight;
         } else {
-            this.playerCharacter.standardBody.height = PlayerSlide.slideHeight;
+            this.player.standardBody.height = PlayerSlide.slideHeight;
         }
-        this.playerCharacter.standardBody.pos.y += PlayerCharacter.standardHeight - this.playerCharacter.standardBody.height;
+        this.player.standardBody.pos.y += PlayerCharacter.standardHeight - this.player.standardBody.height;
 
         let armOffset = new Vector(16, 42);
         if (this.crouch) {
             armOffset = new Vector(10, 34);
         }
-        this.playerCharacter.armFront.setOffset(armOffset);
+        this.player.armFront.setOffset(armOffset);
+
+        this.player.equipment.getAllEquippedItems().forEach((item) => {
+            if (item && item.interactions().getOnPlayerState()) {
+                const state = this.crouch ? PlayerState.Crouch : PlayerState.Slide;
+                item.interactions().getOnPlayerState()!(state);
+            }
+        });
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.playerCharacter.isLocal()) {
+        if (!this.player.isLocal()) {
             this.nonLocalUpdate(deltaTime);
             return;
         }
         const animation = this.crouch ? PlayerAnim.Crouch : PlayerAnim.Slide;
-        this.playerCharacter.animator.setAnimation(animation);
+        this.player.animator.setAnimation(animation);
 
         this.setFriction();
         this.handlePlatforms(deltaTime);
 
-        this.playerCharacter.rotateArm(deltaTime);
-        this.playerCharacter.update(deltaTime);
+        this.player.rotateArm(deltaTime);
+        this.player.update(deltaTime);
 
         if (this.crouch) {
             this.setEquipmentPositionsCrouch();
@@ -61,8 +68,8 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     private nonLocalUpdate(deltaTime: number): void {
-        this.playerCharacter.rotateArm(deltaTime);
-        this.playerCharacter.nonLocalUpdate(deltaTime);
+        this.player.rotateArm(deltaTime);
+        this.player.nonLocalUpdate(deltaTime);
         if (this.crouch) {
             this.setEquipmentPositionsCrouch();
         } else {
@@ -71,66 +78,66 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     private setEquipmentPositionsSlide(): void {
-        const center = this.playerCharacter.standardBody.getCenter();
+        const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
             [EquipmentSlot.Body, new Vector(0, 2)],
             [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {
-            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.standardBody.direction, -Math.PI / 2, slot);
+            this.player.equipment.setBody(center, offset, this.player.standardBody.direction, -Math.PI / 2, slot);
         });
     }
 
     private setEquipmentPositionsCrouch(): void {
-        const center = this.playerCharacter.standardBody.getCenter();
+        const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
             [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
             [EquipmentSlot.Body, new Vector(0, -4)],
             [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {
-            this.playerCharacter.equipment.setBody(center, offset, this.playerCharacter.standardBody.direction, 0, slot);
+            this.player.equipment.setBody(center, offset, this.player.standardBody.direction, 0, slot);
         });
     }
 
     private setFriction(): void {
-        if (!this.playerCharacter.standardBody.grounded) {
-            this.playerCharacter.standardBody.frictionMultiplier = 0.5;
-        } else if (Math.abs(this.playerCharacter.standardBody.velocity.x) > 120) {
-            this.playerCharacter.standardBody.frictionMultiplier = 1 / 5;
+        if (!this.player.standardBody.grounded) {
+            this.player.standardBody.frictionMultiplier = 0.5;
+        } else if (Math.abs(this.player.standardBody.velocity.x) > 120) {
+            this.player.standardBody.frictionMultiplier = 1 / 5;
         } else {
-            this.playerCharacter.standardBody.frictionMultiplier = 1;
+            this.player.standardBody.frictionMultiplier = 1;
         }
     }
 
     private handlePlatforms(deltaTime: number): void {
-        this.playerCharacter.jump.jumpEnabled = true;
-        if (this.playerCharacter.controls.jump(InputMode.Press)) {
+        this.player.jump.jumpEnabled = true;
+        if (this.player.controls.jump(InputMode.Press)) {
             this.platformIgnoreTime.reset();
-            if (this.playerCharacter.standardBody.onPlatform()) {
-                this.playerCharacter.jump.jumpEnabled = false;
+            if (this.player.standardBody.onPlatform()) {
+                this.player.jump.jumpEnabled = false;
             }
-            if (this.playerCharacter.standardBody.grounded && this.playerCharacter.idleCollision()) {
-                this.playerCharacter.standardBody.velocity.x = this.unstuckSpeed * this.playerCharacter.standardBody.getDirectionMultiplier();
-                this.playerCharacter.jump.jumpEnabled = false;
+            if (this.player.standardBody.grounded && this.player.idleCollision()) {
+                this.player.standardBody.velocity.x = this.unstuckSpeed * this.player.standardBody.getDirectionMultiplier();
+                this.player.jump.jumpEnabled = false;
             }
         }
-        this.playerCharacter.standardBody.ignorePlatforms = !this.platformIgnoreTime.isDone();
+        this.player.standardBody.ignorePlatforms = !this.platformIgnoreTime.isDone();
         this.platformIgnoreTime.update(deltaTime);
     }
 
 
     public stateChange(): PlayerState {
-        if (this.playerCharacter.controls.ragdoll() || this.playerCharacter.isDead()) {
+        if (this.player.controls.ragdoll() || this.player.isDead()) {
             return PlayerState.Ragdoll;
         }
-        if (this.playerCharacter.controls.down() || this.playerCharacter.idleCollision()) {
+        if (this.player.controls.down() || this.player.idleCollision()) {
             if (this.crouch) {
                 const maxCrouchSpeed = 400;
                 const validCrouch =
-                    Math.abs(this.playerCharacter.standardBody.velocity.x) < maxCrouchSpeed
-                    || this.playerCharacter.idleCollision();
+                    Math.abs(this.player.standardBody.velocity.x) < maxCrouchSpeed
+                    || this.player.idleCollision();
                 if (validCrouch) {
                     return PlayerState.Crouch;
                 }
@@ -141,20 +148,20 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     public stateExited(): void {
-        this.playerCharacter.standardBody.pos.y -= PlayerCharacter.standardHeight - this.playerCharacter.standardBody.height;
-        this.playerCharacter.standardBody.height = PlayerCharacter.standardHeight;
+        this.player.standardBody.pos.y -= PlayerCharacter.standardHeight - this.player.standardBody.height;
+        this.player.standardBody.height = PlayerCharacter.standardHeight;
 
         this.platformIgnoreTime.reset();
-        this.playerCharacter.standardBody.ignorePlatforms = false;
-        if (this.playerCharacter.isLocal()) {
-            this.playerCharacter.movement.moveEnabled = true;
-            this.playerCharacter.itemManager.forcedThrowType = null;
+        this.player.standardBody.ignorePlatforms = false;
+        if (this.player.isLocal()) {
+            this.player.movement.moveEnabled = true;
+            this.player.itemManager.forcedThrowType = null;
         }
-        this.playerCharacter.standardBody.frictionMultiplier = 1;
+        this.player.standardBody.frictionMultiplier = 1;
     }
 
     public draw(): void {
-        this.playerCharacter.draw();
+        this.player.draw();
     }
 }
 

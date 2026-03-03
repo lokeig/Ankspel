@@ -24,10 +24,10 @@ class Glock extends Item {
         this.sprite = new SpriteSheet(Images.glock);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 30;
         const height = 15;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
         this.handOffset = new Vector(2, 2);
         this.holdOffset = new Vector(10, -4);
@@ -66,6 +66,8 @@ class Glock extends Item {
         if (this.firearmInfo.ammo > 0) {
             AudioManager.get().play(Sound.glock);
             this.flare.reset();
+        } else {
+            AudioManager.get().play(Sound.click);
         }
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }

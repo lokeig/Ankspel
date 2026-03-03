@@ -1,9 +1,9 @@
 import { Input } from "@common";
-import { Connection, LobbyList } from "@game/Server";
+import { Connection, MainMenu } from "@game/Server";
 import { Render } from "@render";
 import { GameLoop } from "@game/GameLoop";
 
-import { LobbyListCSS } from "@impl/LobbyList/CSS";
+import { MainMenuCSS } from "@impl/LobbyList/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
 import { MapManager } from "@game/Map";
@@ -24,5 +24,5 @@ MapManager.addMap(defaultMap);
 
 RegisterItems();
 Connection.set(new MultiPeerServer(new WebSocket("https://ankspel.onrender.com")));
-LobbyList.set(new LobbyListCSS());
+MainMenu.set(new MainMenuCSS());
 new GameLoop(new RequestAnimationFrameTimer()).init();

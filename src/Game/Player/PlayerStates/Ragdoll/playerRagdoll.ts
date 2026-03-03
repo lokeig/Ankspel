@@ -1,10 +1,9 @@
 import { Vector } from "@math";
-import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim } from "@common";
+import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, ProjectileEffect } from "@common";
 import { DynamicObject } from "@core";
 import { IItem, Ownership } from "@item";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { PlayerCharacter } from "@game/Player/Character/playerCharacter";
-import { Render } from "@render";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -32,7 +31,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public useInteractions = new ItemUseInteractions();
 
-    constructor(player: PlayerCharacter) {
+    constructor(player: PlayerCharacter, _id: number) {
         this.player = player;
 
         this.height = PlayerCharacter.standardHeight / 3;
@@ -74,6 +73,13 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
         this.headAngle = 0;
         this.legsAngle = 0;
+
+        this.player.equipment.getAllEquippedItems().forEach((item) => {
+            if (item && item.interactions().getOnPlayerState()) {
+                const effects = item.interactions().getOnPlayerState()!(PlayerState.Ragdoll);
+                this.player.itemManager.handleEffects(item, effects);
+            }
+        });
     }
 
     public stateUpdate(deltaTime: number): void {
@@ -347,6 +353,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public getOwnership(): Ownership {
         return this.owned;
+    }
+
+    public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
+        return;
     }
 
     public interactions(): ItemUseInteractions {

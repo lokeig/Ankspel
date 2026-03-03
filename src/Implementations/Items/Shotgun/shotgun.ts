@@ -27,10 +27,10 @@ class Shotgun extends Item {
         Utility.File.setFrames("shotgun", this.frames);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 30;
         const height = 15;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
@@ -66,6 +66,7 @@ class Shotgun extends Item {
         } else if (this.currentState === ShotgunState.Reloadable) {
             return this.reload();
         } else {
+            AudioManager.get().play(Sound.click);
             return [];
         }
     }

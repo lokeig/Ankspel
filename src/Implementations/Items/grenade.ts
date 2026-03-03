@@ -24,10 +24,10 @@ class Grenade extends Item {
         Utility.File.setFrames("grenade", this.frames);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 8;
         const height = 19;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
 
         this.holdOffset = new Vector(11, -6)

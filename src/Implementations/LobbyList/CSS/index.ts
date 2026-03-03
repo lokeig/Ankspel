@@ -1,1 +1,1 @@
-export { LobbyListCSS } from "./lobbyListCSS";
+export { MainMenuCSS } from "./mainMenuCSS";

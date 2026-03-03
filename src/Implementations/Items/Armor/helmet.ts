@@ -1,9 +1,12 @@
 import { Vector } from "@math";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, ItemInteraction, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, ItemInteraction, PlayerState, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { Images } from "@render";
+import { Connection, GameMessage } from "@server";
+import { AudioManager, Sound } from "@game/Audio";
+import { PlayerStandard } from "@game/Player/PlayerStates";
 
 class Helmet extends Item {
     private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
@@ -17,16 +20,18 @@ class Helmet extends Item {
         Utility.File.setFrames("helmet", this.frames);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 32;
         const height = 32;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Head };
             return [result];
         });
+
+        this.interactions().setOnPlayerState(this.onPlayerState.bind(this));
 
         this.target = {
             body: () => this.body,
@@ -35,6 +40,14 @@ class Helmet extends Item {
             enabled: () => !this.shouldBeDeleted()
         }
     }
+
+    private onPlayerState(state: PlayerState): OnItemUseEffect[] {
+        if (state === PlayerState.Ragdoll) {
+            return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Head }];
+        }
+        return [];
+    }
+
 
     public onEquip(slot: EquipmentSlot): void {
         this.body.width = 40;
@@ -45,23 +58,28 @@ class Helmet extends Item {
     }
 
     public onUnequip(): void {
-        this.body.width = 25;
-        this.body.height = 20;
+        this.body.width = 32;
+        this.body.height = 32;
         ProjectileManager.removeCollidable(this.target);
     }
 
-    private onProjectileHit(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
-        if (this.getOwnership() !== Ownership.Equipped || !local) {
+    private onProjectileHit(effects: ProjectileEffect[], pos: Vector, local: boolean): void {
+        effects.forEach(effect => this.onProjectileEffect(effect, pos, local));
+    }
+
+    public onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean) {
+        if (!local || this.shouldBeDeleted()) {
             return;
         }
-        effects.forEach(effect => {
-            if (effect.type === ProjectileEffectType.Damage) {
-                this.setToDelete();
-            }
-        })
+        if (effect.type === ProjectileEffectType.Damage) {
+            this.setToDelete();
+            AudioManager.get().play(Sound.ting);
+            Connection.get().sendGameMessage(GameMessage.ItemProjectileEffect, { id: this.id, effect, pos });
+        }
     }
 
     public draw(): void {
+        console.log(this.body.width);
         const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
         const drawSize = 32;
 

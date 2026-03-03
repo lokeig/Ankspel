@@ -11,6 +11,7 @@ import { PlayerEquipment } from "./playerEquipment";
 import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
+import { ImageInfo, ImageName } from "@render";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -32,16 +33,16 @@ class PlayerCharacter {
 
     private id: number;
 
-    constructor(pos: Vector, id: number) {
+    constructor(pos: Vector, id: number, color: ImageName) {
         this.standardBody = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
         this.activeBody = this.standardBody;
-        this.animator = new PlayerAnimation();
+        this.animator = new PlayerAnimation(color);
         this.equipment = new PlayerEquipment();
         this.id = id;
 
         const collidable: ProjectileTarget = {
             body: () => this.activeBody,
-            penetrationResistance: () => 10,
+            penetrationResistance: () => 2,
             onProjectileHit: this.handleEffects.bind(this),
             enabled: () => true
         };
@@ -146,7 +147,7 @@ class PlayerCharacter {
         return this.dead;
     }
 
-    private handleEffects(effects: ProjectileEffect[], pos: Vector, local: boolean): void {
+    private handleEffects(effects: ProjectileEffect[], _pos: Vector, local: boolean): void {
         effects.forEach(effect => {
             switch (effect.type) {
                 case (ProjectileEffectType.Damage): {

@@ -6,22 +6,20 @@ import { Render } from "@render";
 class Camera {
     private currentPos: Vector = new Vector();
     private currentZoom: number = 1;
+    private targetZoom: number = 1;
+    private targetPos: Vector = new Vector();
 
     public update(deltaTime: number, bounds: MaxMinPositions) {
         const players = PlayerManager.getPlayers().filter(player => !player.character.isDead());
         if (players.length == 0) {
-            this.setFrame(this.getCenter(), 1, deltaTime, bounds);
+            this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
             return;
         }
         const positions = this.getPositions(players, bounds);
-        const targetPos = this.calculateTargetPos(positions);
-        const targetZoom = this.calculateTargetZoom(positions, 200);
+        this.targetPos = this.calculateTargetPos(positions);
+        this.targetZoom = this.calculateTargetZoom(positions, 200);
 
-        this.setFrame(targetPos, targetZoom, deltaTime, bounds);
-    }
-
-    private getCenter(): Vector {
-        return new Vector(Render.get().getWidth(), Render.get().getHeight()).divide(2);
+        this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
     }
 
     public initialize(bounds: MaxMinPositions): void {
@@ -70,7 +68,7 @@ class Camera {
         minX = Math.min(bounds.maxX, Math.max(bounds.minX, minX));
         maxX = Math.min(bounds.maxX, Math.max(bounds.minX, maxX));
         minY = Math.min(bounds.maxY, Math.max(bounds.minY - minYPadding, minY));
-        maxY = Math.min(bounds.maxY, Math.max(bounds.minY, maxY));
+        maxY = Math.min(bounds.maxY, Math.max(bounds.minY - minYPadding, maxY));
 
         return { minX, maxX, minY, maxY };
     }

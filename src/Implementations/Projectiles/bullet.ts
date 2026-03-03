@@ -59,17 +59,22 @@ class Bullet implements IProjectile {
     }
 
     private resolveHit(hit: BulletHit): void {
+        let body: GameObject;
         if (hit.type === "target") {
             if (!hit.target.enabled()) {
                 return;
             }
+            body = hit.target.body();
             const knockback = this.velocity.clone().divide(10);
             hit.target.onProjectileHit([{ type: ProjectileEffectType.Damage }, { type: ProjectileEffectType.Knockback, amount: knockback }], hit.pos, this.local);
         } else {
-            ParticleManager.addParticle(new BulletReboundVFX(hit.pos, this.angle, this.getAxis(hit.pos, hit.tile)));
+            body = hit.tile;
         }
         if (hit.resistance < 2) {
             return;
+        }
+        if (hit.resistance > 3) {
+            ParticleManager.addParticle(new BulletReboundVFX(hit.pos, this.angle, this.getAxis(hit.pos, body)));
         }
         this.pos = hit.pos.clone();
         this.setToDelete();

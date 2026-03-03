@@ -8,6 +8,9 @@ const Sound = {
     jump: "jump",
     equip: "equip",
     beep: "beep",
+    ting: "ting",
+    click: "click",
+
 } as const;
 
 const SoundInfo: Record<SoundName, { src: string }> = {
@@ -20,8 +23,10 @@ const SoundInfo: Record<SoundName, { src: string }> = {
     jump: { src: "/assets/Sounds/jump.mp3" },
     equip: { src: "/assets/Sounds/equip.mp3" },
     beep: { src: "/assets/Sounds/beep.mp3" },
+    ting: { src: "/assets/Sounds/ting.mp3" },
+    click: { src: "/assets/Sounds/click.mp3" },
 };
-    
+
 type SoundName = typeof Sound[keyof typeof Sound];
 
 export { Sound, SoundInfo };

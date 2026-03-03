@@ -1,6 +1,7 @@
 import { Vector } from "@math";
 import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility } from "@common";
-import { IItem, Ownership } from "@item";
+import { IItem, ItemManager, Ownership } from "@item";
+import { Connection, GameMessage } from "@server";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
@@ -55,6 +56,13 @@ class PlayerEquipment {
         item.onUnequip?.();
         item.throw(throwType);
         item.setOwnership(Ownership.None);
+
+        Connection.get().sendGameMessage(GameMessage.ThrowItem, {
+            itemID: ItemManager.getItemID(item)!,
+            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
+            direction: item.getBody().direction,
+            throwType
+        });
 
         this.equipment.set(slot, undefined);
     }

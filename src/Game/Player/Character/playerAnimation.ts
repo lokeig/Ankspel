@@ -1,7 +1,7 @@
 import { Animation, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
 import { Vector } from "@math";
-import { Images } from "@render";
+import { ImageInfo, ImageName, Images } from "@render";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;
@@ -22,22 +22,24 @@ class PlayerAnimation {
     };
     private holding: boolean = false;
 
-    private static bodySprite: SpriteSheet;
-    private static armSprite: SpriteSheet;
+    private bodySprite: SpriteSheet;
+    private armSprite: SpriteSheet;
 
 
     static {
         Utility.File.setAnimations("player", this.animations);
-
-        this.bodySprite = new SpriteSheet(Images.player);
-        this.armSprite = new SpriteSheet(Images.playerHands);
     }
 
-    constructor() {
+    constructor(color: ImageName) {
         this.currAnim = PlayerAnim.Idle;
 
-        this.bodyAnimator = new SpriteAnimator(PlayerAnimation.bodySprite, PlayerAnimation.animations[this.currAnim]);
-        this.armAnimator = new SpriteAnimator(PlayerAnimation.armSprite, PlayerAnimation.animations[this.currAnim]);
+        const handsImage = color + "Hands" as ImageName;
+
+        this.bodySprite = new SpriteSheet(Images[color]);
+        this.armSprite = new SpriteSheet(Images[handsImage]);
+
+        this.bodyAnimator = new SpriteAnimator(this.bodySprite, PlayerAnimation.animations[this.currAnim]);
+        this.armAnimator = new SpriteAnimator(this.armSprite, PlayerAnimation.animations[this.currAnim]);
     }
 
     public setAnimation(animation: PlayerAnim) {

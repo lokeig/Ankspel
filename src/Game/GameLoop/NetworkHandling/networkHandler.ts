@@ -5,6 +5,7 @@ import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
 import { MapManager } from "@game/Map";
+import { MainMenu } from "@game/Server/Lobby/mainMenu";
 
 const tickRate = 60;
 
@@ -13,7 +14,7 @@ class NetworkHandler {
     private static messageTimer = new Countdown(1 / tickRate);
     private static onStart: () => void;
     private static readyToPlay: boolean = false;
-
+    
     static init() {
         PlayerNetworkHandler.init();
         ItemMessageHandler.init();
@@ -21,7 +22,7 @@ class NetworkHandler {
 
         Connection.get().onGameStart((userID) => {
             IDManager.setBaseOffset(userID * (2 << 16));
-            PlayerManager.create();
+            PlayerManager.create(MainMenu.get().getChosenColor());
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
             this.readyToPlay = true;
             this.checkReadyToStart();
@@ -57,10 +58,9 @@ class NetworkHandler {
     }
 
     private static quickStart = (): void => {
-        PlayerManager.create();
-        // PlayerManager.create();
-        // PlayerManager.create();
-        // PlayerManager.create();
+        PlayerManager.create(MainMenu.get().getChosenColor());
+        // PlayerManager.create(colors[1]);
+        // PlayerManager.create(colors[2]);
 
         Connection.get().enableLocalMode();
 
