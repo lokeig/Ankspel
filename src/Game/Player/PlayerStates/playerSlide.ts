@@ -80,8 +80,8 @@ class PlayerSlide implements IState<PlayerState> {
     private setEquipmentPositionsSlide(): void {
         const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
-            [EquipmentSlot.Body, new Vector(0, 2)],
+            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight + 4)],
+            [EquipmentSlot.Body, new Vector(0, 4)],
             [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {
@@ -92,8 +92,8 @@ class PlayerSlide implements IState<PlayerState> {
     private setEquipmentPositionsCrouch(): void {
         const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight)],
-            [EquipmentSlot.Body, new Vector(0, -4)],
+            [EquipmentSlot.Head, new Vector(0, -PlayerSlide.slideHeight + 3)],
+            [EquipmentSlot.Body, new Vector(0, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerSlide.slideHeight)],
         ];
         positions.forEach(([slot, offset]) => {

@@ -272,6 +272,8 @@ button:disabled {
 .input-row label {
     text-align: left;
     width: 120px;
+    margin: 0;
+    padding: 0;
     font-weight: 600;
 }
 

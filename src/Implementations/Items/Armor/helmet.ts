@@ -6,7 +6,6 @@ import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { Images } from "@render";
 import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
-import { PlayerStandard } from "@game/Player/PlayerStates";
 
 class Helmet extends Item {
     private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
@@ -48,7 +47,6 @@ class Helmet extends Item {
         return [];
     }
 
-
     public onEquip(slot: EquipmentSlot): void {
         this.body.width = 40;
         this.body.height = 40;
@@ -79,7 +77,6 @@ class Helmet extends Item {
     }
 
     public draw(): void {
-        console.log(this.body.width);
         const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
         const drawSize = 32;
 

@@ -44,7 +44,7 @@ class PlayerFlap implements IState<PlayerState> {
     private setEquipmentPosition(): void {
         const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -21)],
+            [EquipmentSlot.Head, new Vector(-1, -19)],
             [EquipmentSlot.Body, new Vector(2, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
         ];

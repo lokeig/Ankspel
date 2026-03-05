@@ -1,7 +1,7 @@
-import { IDManager, Utility } from "@common";
+import { IDManager } from "@common";
 import { Player } from "./player";
-import { Connection, GameMessage } from "@server";
-import { ImageInfo, ImageName, Images } from "@render";
+import { Connection, GameMessage, MainMenu } from "@server";
+import { ImageName } from "@render";
 
 class PlayerManager {
     private static players: Player[] = [];
@@ -47,7 +47,7 @@ class PlayerManager {
     }
 
     public static create(color: ImageName): Player {
-        const controls = Utility.File.getControls(this.localPlayerCount);
+        const controls = MainMenu.get().getControls(this.localPlayerCount);
         const id = IDManager.getBaseOffset() + this.localPlayerCount++;
 
         const player = new Player(id, color, controls);

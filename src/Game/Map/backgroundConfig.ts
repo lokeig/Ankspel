@@ -2,7 +2,7 @@ import { Vector } from "@math";
 import { ImageInfo } from "@render";
 
 type BackgroundConfigLayer = {
-        src: ImageInfo,
+    src: ImageInfo,
     speed?: number,
     offset?: Vector,
     zIndex?: number;

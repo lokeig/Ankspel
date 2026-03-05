@@ -7,39 +7,12 @@ class ControlsMenu {
     private saveButton: HTMLButtonElement;
     private activeInput: HTMLInputElement | null = null;
     private keyHandler: ((e: KeyboardEvent) => void) | null = null;
-    private currentControls: Controls = Utility.File.getControls(0);
+
+    private currentControls: Controls = this.loadControls();
+
     private backupControls: Controls = { ...this.currentControls };
     private controlInputs: Record<keyof Controls, HTMLInputElement>;
 
-    private startKeyCapture(input: HTMLInputElement, control: keyof Controls) {
-        if (this.keyHandler && this.activeInput) {
-            window.removeEventListener("keydown", this.keyHandler);
-            if (this.activeInput.value === "Click a key") {
-                const prevKey = Object.entries(this.currentControls).find(([k, _]) => k === control)?.[1];
-                this.activeInput.value = prevKey ?? "";
-            }
-        }
-        this.activeInput = input;
-
-        this.keyHandler = (e: KeyboardEvent) => {
-            e.preventDefault();
-            input.value = this.displayKey(e.key);
-            this.currentControls[control] = e.key;
-
-            window.removeEventListener("keydown", this.keyHandler!);
-            this.activeInput = null;
-            this.keyHandler = null;
-        };
-
-        window.addEventListener("keydown", this.keyHandler);
-    }
-
-    private displayKey(key: string): string {
-        if (key === " ") {
-            return "Space";
-        }
-        return key;
-    }
 
     constructor() {
         this.controlsMenu = document.getElementById('controlsMenu')!;
@@ -62,9 +35,9 @@ class ControlsMenu {
 
         this.cancelButton.addEventListener("click", () => {
             this.currentControls = { ...this.backupControls };
-            this.populateInputs();
             this.hide();
-        }); this.saveButton.addEventListener('click', () => this.saveControls());
+        });
+        this.saveButton.addEventListener('click', () => this.saveControls());
 
         for (const key in this.controlInputs) {
             const k = key as keyof Controls;
@@ -74,6 +47,35 @@ class ControlsMenu {
         }
     }
 
+    private startKeyCapture(input: HTMLInputElement, control: keyof Controls) {
+        if (this.keyHandler && this.activeInput) {
+            window.removeEventListener("keydown", this.keyHandler);
+        }
+        this.activeInput = input;
+
+        this.keyHandler = (e: KeyboardEvent) => {
+            e.preventDefault();
+            input.value = this.displayKey(e.key);
+            this.currentControls[control] = e.key;
+
+            window.removeEventListener("keydown", this.keyHandler!);
+            this.activeInput = null;
+            this.keyHandler = null;
+        };
+
+        window.addEventListener("keydown", this.keyHandler);
+    }
+
+    private displayKey(key: string): string {
+        if (key === " ") {
+            return "Space";
+        }
+        if (key.length === 1) {
+            return key.toLowerCase();
+        }
+        return key;
+    }
+
     private populateInputs(): void {
         for (const key in this.controlInputs) {
             const k = key as keyof Controls;
@@ -81,14 +83,35 @@ class ControlsMenu {
         }
     }
 
+    private loadControls(): Controls {
+        const saved = localStorage.getItem('gameControls');
+        if (saved) {
+            return JSON.parse(saved);
+        } else {
+            return {
+                jump: " ",
+                left: "a",
+                right: "d",
+                down: "s",
+                up: "w",
+                shoot: "ArrowLeft",
+                pickup: "ArrowUp",
+                ragdoll: "e",
+                strafe: "Shift",
+                menu: "Escape",
+            };
+        }
+    }
+
     private saveControls(): void {
         for (const key in this.controlInputs) {
-            let k = key as keyof Controls;
+            let k = key.toLowerCase() as keyof Controls;
             const value = this.controlInputs[k].value === "Space" ? " " : this.controlInputs[k].value;
             if (value) {
                 this.currentControls[k] = value;
             }
         }
+        localStorage.setItem('gameControls', JSON.stringify(this.currentControls));
         this.hide();
     }
 
@@ -100,6 +123,10 @@ class ControlsMenu {
 
     public hide(): void {
         this.controlsMenu.classList.add('hidden');
+    }
+
+    public getControls(player: number): Controls {
+        return this.currentControls;
     }
 }
 

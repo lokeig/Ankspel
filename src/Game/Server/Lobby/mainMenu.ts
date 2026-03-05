@@ -1,6 +1,5 @@
 import { IMainMenu } from "./IMainMenu";
 
-
 class MainMenu {
     private static current: IMainMenu;
 

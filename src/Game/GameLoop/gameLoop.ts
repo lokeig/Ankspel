@@ -29,8 +29,8 @@ class GameLoop {
         await this.preloadAllImages();
         await this.preloadAllAudio();
 
-        NetworkHandler.init();
         MainMenu.get().show();
+        NetworkHandler.init();
 
         NetworkHandler.setOnStart(() => { this.startGame(); });
     }

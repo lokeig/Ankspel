@@ -3,6 +3,7 @@ import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
 import { ImageName } from "@render";
 import { ControlsMenu } from "./controlsMenu";
+import { Controls } from "@common";
 
 class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
@@ -15,7 +16,7 @@ class MainMenuCSS implements IMainMenu {
     private hostbutton: HTMLButtonElement;
     private startbutton: HTMLButtonElement;
     private leavebutton: HTMLButtonElement;
-    private controlsButton: HTMLButtonElement; 
+    private controlsButton: HTMLButtonElement;
 
     private lastLobbies: LobbyMessageData[] = [];
 
@@ -24,6 +25,19 @@ class MainMenuCSS implements IMainMenu {
 
     constructor() {
         this.mainDiv = document.getElementById("gameServerList")!;
+        this.mainDiv = document.getElementById("gameServerList")!;
+        const select = document.getElementById("playerColorSelect") as HTMLSelectElement;
+
+        if (select) {
+            const savedColor = localStorage.getItem("playerColor");
+            if (savedColor) {
+                select.value = savedColor;
+            }
+            select.addEventListener("change", () => {
+                localStorage.setItem("playerColor", select.value);
+            });
+        }
+
         this.lobbyDiv = document.getElementById("lobbylist")!;
 
         this.startbutton = document.getElementById("startbutton") as HTMLButtonElement;
@@ -90,12 +104,12 @@ class MainMenuCSS implements IMainMenu {
     }
 
     public getChosenColor(): ImageName {
-        const select = document.getElementById("playerColorSelect") as HTMLSelectElement;
-        let color: string = "Yellow";
-        if (select) {
-            color = select.value;
-        }
-        return "player" + color as ImageName;
+        const select = document.getElementById("playerColorSelect")! as HTMLSelectElement;
+        return "player" + select.value as ImageName;
+    }
+
+    public getControls(player: number): Controls {
+        return this.controlsMenu.getControls(player);
     }
 
     public show(): void {

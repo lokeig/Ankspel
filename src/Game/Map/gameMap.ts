@@ -3,12 +3,14 @@ import { TileConstructor, ITile } from "@game/StaticObjects/Tiles";
 import { ItemDescription } from "./itemDescription";
 import { Vector } from "@math";
 import { BackgroundConfig } from "./backgroundConfig";
+import { SpawnerInfo } from "./spawnerInfo";
 
 class GameMap {
     private tiles: ITile[] = [];
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
     private background!: BackgroundConfig;
+    private itemSpawners: SpawnerInfo[] = [];
 
     public setBackground(config: BackgroundConfig): void {
         this.background = config;
@@ -40,6 +42,13 @@ class GameMap {
         this.items.push({ type, gridPos });
     }
 
+    public setItemSpawner(pos: SpawnerInfo): void {
+        this.itemSpawners.push(pos);
+    }
+
+    public getItemSpawners(): SpawnerInfo[] {
+        return this.itemSpawners;
+    }
 
     public getItems(): ItemDescription[] {
         return this.items;

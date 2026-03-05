@@ -14,24 +14,25 @@ class Input {
             if (document.querySelector('.modal:not(.hidden)')) {
                 return;
             }
-
-            const onKeyFunction = this.onKeyFunction.get(e.key);
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            const onKeyFunction = this.onKeyFunction.get(key);
             if (onKeyFunction) {
                 onKeyFunction.forEach(fn => fn());
             }
-            if (!this.keysDown.has(e.key)) {
-                this.keysPressed.add(e.key);
+            if (!this.keysDown.has(key)) {
+                this.keysPressed.add(key);
             }
-            this.keysDown.add(e.key);
+            this.keysDown.add(key);
 
-            if (["ArrowLeft", "ArrowRight", " "].includes(e.key)) {
+            if (["ArrowLeft", "ArrowRight", " ", "Shift", "CapsLock"].includes(key)) {
                 e.preventDefault();
             }
         });
 
         window.addEventListener('keyup', e => {
-            this.keysDown.delete(e.key);
-            this.keysPressed.delete(e.key);
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            this.keysDown.delete(key);
+            this.keysPressed.delete(key);
         });
 
         window.addEventListener("mousedown", (e) => {

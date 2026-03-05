@@ -84,7 +84,6 @@ class MapLoader {
                 minY = pos.y;
             }
         });
-
         return { minX, maxX, minY, maxY };
     }
 }

@@ -1,16 +1,10 @@
-import { controlConfigJSON, animationConfigJSON, frameConfigJSON, tileLookupConfigJSON } from "@config";
+import { animationConfigJSON, frameConfigJSON, tileLookupConfigJSON } from "@config";
 import { Controls } from "../../Types/controls";
 import { Frame } from "../../Sprite/Animation/frame";
 
-const controlArray: ControllerConfig[] = controlConfigJSON;
 const animations: Record<string, Record<string, AnimationConfig>> = animationConfigJSON;
 const frames: Record<string, Record<string, Frame>> = frameConfigJSON;
 const tileLookup: TileLookupConfig = tileLookupConfigJSON;
-
-type ControllerConfig = {
-    keyboard: Controls;
-    controller?: Controls;
-}
 
 type TileLookupConfig = {
     tileLookup: Record<string, number[]>;
@@ -40,5 +34,5 @@ type AnimationConfig = {
 };
 
 export type { ImageDefinition, Controls, AnimationConfig };
-export { controlArray, animations, frames, tileLookup };
+export { animations, frames, tileLookup };
 

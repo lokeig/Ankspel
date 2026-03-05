@@ -1,14 +1,8 @@
-import { animations, controlArray, frames, tileLookup } from "./fileTypes";
-import { Controls } from "../../Types/controls";
+import { animations, frames, tileLookup } from "./fileTypes";
 import { Animation } from "../../Sprite/Animation/animation";
 import { Frame } from "../../Sprite/Animation/frame";
 
 class FileUtility {
-    public getControls(number: number): Controls {
-        let index = Math.min(number, controlArray.length - 1);
-        return controlArray[index].keyboard;
-    }
-
     public getTileLookup(): { tiles: Record<number, Frame>, lipLeft: Frame, lipRight: Frame } {
         const config = tileLookup;
         const result: { tiles: Record<number, Frame>, lipLeft: Frame, lipRight: Frame } = { tiles: {}, lipLeft: new Frame(), lipRight: new Frame() };
@@ -77,8 +71,6 @@ class FileUtility {
             }
         }
     }
-
-
 }
 
 export { FileUtility };
