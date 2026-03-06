@@ -1,5 +1,5 @@
 import { Utility } from "@common";
-import { ItemManager, OnItemUseType, Ownership } from "@item";
+import { ItemManager, OnItemUseType } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
@@ -14,6 +14,7 @@ class ItemMessageHandler {
         gameEvent.subscribe(GameMessage.DeleteItem, ({ id }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
+                console.log("Can't delete item: ", id, ", doesn't exist.");
                 return;
             }
             item.setToDelete();
@@ -22,6 +23,7 @@ class ItemMessageHandler {
         gameEvent.subscribe(GameMessage.ActivateItem, ({ id, pos: position, angle, direction, action, seed }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
+                console.log("Can't activate item: ", id, ", doesn't exist.")
                 return;
             }
             item.setAngle(angle);
@@ -38,9 +40,10 @@ class ItemMessageHandler {
             })
         });
 
-        gameEvent.subscribe(GameMessage.ThrowItem, ({ itemID, pos, direction, throwType }) => {
-            const item = ItemManager.getItemFromID(itemID);
+        gameEvent.subscribe(GameMessage.ThrowItem, ({ id, pos, direction, throwType }) => {
+            const item = ItemManager.getItemFromID(id);
             if (!item) {
+                console.log("Can't throw item: ", id, ", doesn't exist.");
                 return;
             }
             PlayerManager.getPlayers().forEach(player => {

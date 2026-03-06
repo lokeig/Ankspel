@@ -49,7 +49,7 @@ interface GameMessageMap {
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
 
     // ─── Items ──────────────────────────────
-    [GameMessage.ThrowItem]: { itemID: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
+    [GameMessage.ThrowItem]: { id: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
     [GameMessage.SpawnItem]: { id: number, pos: NetworkVector, type: string };
     [GameMessage.DeleteItem]: { id: number };
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };

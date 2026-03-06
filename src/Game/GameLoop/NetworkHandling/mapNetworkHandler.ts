@@ -34,6 +34,7 @@ class MapNetworkHandler {
 
         Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
         MapLoader.load(map[1], true);
+
         if (PlayerManager.getLocal().length === PlayerManager.getPlayers().length) {
             this.onMapLoad();
         }

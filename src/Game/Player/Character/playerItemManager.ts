@@ -38,7 +38,7 @@ class PlayerItemManager {
             this.equipment.throw(EquipmentSlot.Hand, throwType);
 
             Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-                itemID: ItemManager.getItemID(item)!,
+                id: ItemManager.getItemID(item)!,
                 pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
                 direction: item.getBody().direction,
                 throwType
