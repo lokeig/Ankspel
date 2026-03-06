@@ -4,16 +4,17 @@ import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
+import { ImageInfo, ImageName } from "@render";
 
 class Player {
     public character!: PlayerCharacter;
     private stateMachine: StateMachine<PlayerState>;
     private id: number;
 
-    constructor(id: number, controls?: Controls) {
+    constructor(id: number, color: ImageName, controls?: Controls) {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
         this.id = id;
-        this.character = new PlayerCharacter(new Vector(), id);
+        this.character = new PlayerCharacter(new Vector(), id, color);
         if (controls) {
             this.character.setControls(controls);
         }
@@ -22,17 +23,16 @@ class Player {
 
     public setSpawn(gridPos: Vector): void {
         const worldPos = Grid.getWorldPos(gridPos);
-        worldPos.y -= this.character.body.height;
-        worldPos.x += (Grid.size - this.character.body.width) / 2;
+        worldPos.y -= this.character.standardBody.height;
+        worldPos.x += (Grid.size - this.character.standardBody.width) / 2;
         this.character.setPos(worldPos);
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
-        console.log("Created spawn: x: " + gridPos.x + " y: " + gridPos.y);
     }
 
     public getId(): number {
         return this.id;
     }
-
+    
     public held(): boolean {
         const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
         return ragdoll.getOwnership() === Ownership.Held;
@@ -51,22 +51,12 @@ class Player {
         this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
 
-        const ragdoll = new PlayerRagdoll(this.character);
+        const ragdoll = new PlayerRagdoll(this.character, this.id);
 
         ItemManager.addPermanent(ragdoll, this.id);
         
         this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.enterState();
-    }
-
-    public setRagdoll(head: Vector, body: Vector, legs: Vector, velocity: Vector) {
-        const ragdoll: PlayerRagdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
-        ragdoll.setBody(head, body, legs, velocity);
-    }
-
-    public getRagdollInfo(): { head: Vector, body: Vector, legs: Vector, velocity: Vector } {
-        const ragdoll: PlayerRagdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
-        return ragdoll.getBodies();
     }
 
     public getStateInstance(state: PlayerState): IState<PlayerState> {

@@ -1,14 +1,17 @@
 import { Vector } from "@math";
-import { Lerp, lerpTriangle, SpriteSheet, images, Utility, Frame, ItemInteraction } from "@common";
+import { Lerp, lerpTriangle, SpriteSheet, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
 import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
+import { Images } from "@render";
+import { AudioManager } from "@game/Audio/audioManager";
+import { Sound } from "@game/Audio";
 
 class Shotgun extends Item {
     private handleOffset: number = 0;
     private handleLerp = new Lerp(6, lerpTriangle)
-    
+
     private static maxHandleOffset: number = -8;
     private static frames = {
         gun: new Frame(),
@@ -20,20 +23,18 @@ class Shotgun extends Item {
     private currentState: ShotgunState = ShotgunState.Loaded;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.shotgun);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.shotgun);
         Utility.File.setFrames("shotgun", this.frames);
     }
-    
-    constructor(pos: Vector) {
+
+    constructor(pos: Vector, id: number) {
         const width = 30;
         const height = 15;
-        super(pos, width, height);
-        
+        super(pos, width, height, id);
+
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
-        
-        
+
         this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
@@ -43,8 +44,8 @@ class Shotgun extends Item {
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 2;
-        this.firearmInfo.bulletCount = 14;
-        this.firearmInfo.bulletAngleVariation = Math.PI / 20;
+        this.firearmInfo.bulletCount = 6;
+        this.firearmInfo.bulletAngleVariation = Math.PI / 38;
         this.firearmInfo.muzzleOffset = new Vector(28, -10);
         this.firearmInfo.knockback = new Vector(720, 240);
         this.firearmInfo.bulletRange = 8;
@@ -65,6 +66,7 @@ class Shotgun extends Item {
         } else if (this.currentState === ShotgunState.Reloadable) {
             return this.reload();
         } else {
+            AudioManager.get().play(Sound.click);
             return [];
         }
     }
@@ -73,12 +75,14 @@ class Shotgun extends Item {
         this.handleLerp.cancel();
         this.handleOffset = 0;
         this.currentState = ShotgunState.Reloadable;
+        AudioManager.get().play(Sound.shotgunFire);
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
     private reload(): OnItemUseEffect[] {
         this.handleLerp.startLerp(0, Shotgun.maxHandleOffset);
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
+        AudioManager.get().play(Sound.shotgunLoad);
         return [];
     }
 
@@ -98,7 +102,6 @@ class Shotgun extends Item {
     public shouldBeDeleted(): boolean {
         return super.shouldBeDeleted() || (this.deleteHelper() && this.currentState === ShotgunState.Empty);
     }
-
 }
 
 export { Shotgun };

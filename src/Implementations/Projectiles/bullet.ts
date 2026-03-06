@@ -1,27 +1,25 @@
 import { Vector } from "@math";
-import { AxisDirection, Countdown, Grid, ProjectileEffect, Utility } from "@common";
-import { CollisionObject, GameObject } from "@core";
+import { AxisDirection, Countdown, Grid, ProjectileEffectType, Utility } from "@common";
+import { GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile } from "@projectile";
-import { TileManager } from "@game/StaticObjects/Tiles";
+import { IProjectile, ProjectileCollisionResolver, ProjectileTarget } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BulletReboundVFX } from "@impl/Particles";
 
+type BulletHit =
+    | { type: "tile"; tile: GameObject; pos: Vector; resistance: number }
+    | { type: "target"; target: ProjectileTarget; pos: Vector; resistance: number };
+
 class Bullet implements IProjectile {
     private pos: Vector;
-
     private angle: number;
-    private lifespan!: Countdown;
-    public trail!: BulletTrail;
-
-    private delete: boolean = false;
-
-    private local: boolean = false;
     private velocity: Vector;
-
     private prevPos: Vector;
 
-    private minDistance: number = Infinity;
+    private local: boolean = false;
+    private lifespan!: Countdown;
+    private delete: boolean = false;
+    public trail!: BulletTrail;
 
     constructor(pos: Vector, angle: number, speed: number, blockRange: number) {
         const lifespan = blockRange * Grid.size / speed;
@@ -43,23 +41,43 @@ class Bullet implements IProjectile {
         return this.trail;
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number, collidable: ProjectileTarget[]): void {
+        this.move(deltaTime);
+        this.lifespan.update(deltaTime);
+        const collisions = ProjectileCollisionResolver.resolve(this.getSegment(), collidable);
+        for (const target of collisions) {
+            this.resolveHit(target);
+            if (this.delete) {
+                break;
+            }
+        }
+    }
+
+    private move(deltaTime: number): void {
         this.prevPos = this.pos.clone();
         this.pos.add(this.velocity.clone().multiply(deltaTime));
+    }
 
-        this.lifespan.update(deltaTime);
-
-        const nearbyTiles = TileManager.getNearby(this.prevPos, 0, 0, this.pos);
-        const status = this.getClosestCollidingTile(nearbyTiles);
-        if (status) {
-            const [tile, pos] = status;
-            this.minDistance = pos.distanceToSquared(this.prevPos);
-            this.pos = pos.clone();
-            const axisDirection = this.getAxis(pos, tile);
-
-            ParticleManager.addParticle(new BulletReboundVFX(this.pos.clone(), this.angle, axisDirection));
-            this.setToDelete();
+    private resolveHit(hit: BulletHit): void {
+        let body: GameObject;
+        if (hit.type === "target") {
+            if (!hit.target.enabled()) {
+                return;
+            }
+            body = hit.target.body();
+            const knockback = this.velocity.clone().divide(10);
+            hit.target.onProjectileHit([{ type: ProjectileEffectType.Damage }, { type: ProjectileEffectType.Knockback, amount: knockback }], hit.pos, this.local);
+        } else {
+            body = hit.tile;
         }
+        if (hit.resistance < 2) {
+            return;
+        }
+        if (hit.resistance > 3) {
+            ParticleManager.addParticle(new BulletReboundVFX(hit.pos, this.angle, this.getAxis(hit.pos, body)));
+        }
+        this.pos = hit.pos.clone();
+        this.setToDelete();
     }
 
     private getAxis(pos: Vector, tile: GameObject): AxisDirection {
@@ -75,47 +93,8 @@ class Bullet implements IProjectile {
         return AxisDirection.Right;
     }
 
-    private getClosestCollidingTile(tiles: CollisionObject[]): [GameObject, Vector] | null {
-        const colliding: [GameObject, Vector][] = [];
-        tiles.forEach(tile => {
-            if (tile.platform) {
-                return;
-            }
-            const status = this.collision(tile.gameObject);
-            if (status.collision) {
-                colliding.push([tile.gameObject, status.pos]);
-            }
-        });
-
-        let closest: [GameObject, Vector] | null = null;
-        let minDistance: number = Infinity;
-        colliding.forEach(([tile, pos]) => {
-            const distance = pos.distanceToSquared(this.prevPos);
-            if (distance < minDistance) {
-                closest = [tile, pos];
-                minDistance = distance;
-            }
-        });
-        return closest;
-    }
-
-    private collision(block: GameObject): { collision: boolean; pos: Vector } {
-        const start = this.prevPos;
-        const end = this.pos;
-        return block.lineCollision(start, end);
-    }
-
-    public wentThrough(block: GameObject): { collision: boolean; pos: Vector } {
-        const status = this.collision(block);
-        if (status.collision && status.pos.distanceToSquared(this.prevPos) < this.minDistance) {
-            this.pos = status.pos.clone();
-            return { collision: true, pos: status.pos };
-        }
-        return { collision: false, pos: status.pos };
-    }
-
-    public getPos(): Vector {
-        return this.pos;
+    public getSegment(): { start: Vector; end: Vector; } {
+        return { start: this.prevPos, end: this.pos };
     }
 
     public setPos(pos: Vector): void {
@@ -130,16 +109,8 @@ class Bullet implements IProjectile {
         return this.delete || this.lifespan.isDone();
     }
 
-    public isLocal(): boolean {
-        return this.local;
-    }
-
     public setLocal(): void {
         this.local = true;
-    }
-
-    public onPlayerHit(): ProjectileEffect {
-        return ProjectileEffect.Damage;
     }
 
     public draw(): void {

@@ -1,17 +1,20 @@
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@game/Server";
 import { Countdown, IDManager, Input } from "@common";
-import { ServerMessage } from "@shared";
 import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
-import { MapLoader, MapManager } from "@game/Map";
+import { MapManager } from "@game/Map";
+import { MainMenu } from "@game/Server/Lobby/mainMenu";
+
+const tickRate = 60;
 
 class NetworkHandler {
     private static readyCount: number = 0;
-    private static messageTimer = new Countdown(0.05);
+    private static messageTimer = new Countdown(1 / tickRate);
     private static onStart: () => void;
-
+    private static readyToPlay: boolean = false;
+    
     static init() {
         PlayerNetworkHandler.init();
         ItemMessageHandler.init();
@@ -19,12 +22,10 @@ class NetworkHandler {
 
         Connection.get().onGameStart((userID) => {
             IDManager.setBaseOffset(userID * (2 << 16));
-            PlayerManager.create();
+            PlayerManager.create(MainMenu.get().getChosenColor());
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
-            if (Connection.get().connectionCount() === 0) {
-                Connection.get().enableLocalMode();
-                this.start();
-            }
+            this.readyToPlay = true;
+            this.checkReadyToStart();
         });
 
         const gameEvent = Connection.get().gameEvent;
@@ -34,30 +35,38 @@ class NetworkHandler {
         });
 
         gameEvent.subscribe(GameMessage.ReadyToPlay, () => {
-            if (!Connection.get().isHost()) {
-                return;
-            }
             this.readyCount++;
-            if (this.readyCount !== Connection.get().connectionCount()) {
-                return;
-            }
-            Connection.get().sendGameMessage(GameMessage.StartPlaying, {});
-            this.start();
-            this.readyCount = 0;
+            this.checkReadyToStart();
         });
 
-        Input.onKeyOnce("q", this.quickStart);
+        Input.onKey("q", this.quickStart);
+    }
+
+    private static checkReadyToStart(): void {
+        if (!Connection.get().isHost()) {
+            return;
+        }
+        if (this.readyCount !== Connection.get().connectionCount()) {
+            return;
+        }
+        if (!this.readyToPlay) {
+            return;
+        }
+        Connection.get().sendGameMessage(GameMessage.StartPlaying, {});
+        this.start();
+        this.readyCount = 0;
     }
 
     private static quickStart = (): void => {
-        PlayerManager.create();
-        PlayerManager.create();
+        PlayerManager.create(MainMenu.get().getChosenColor());
+        PlayerManager.create(MainMenu.get().getChosenColor());
+        // PlayerManager.create(colors[2]);
 
         Connection.get().enableLocalMode();
 
-        const map = MapManager.getRandomMap()[1];
-        MapLoader.load(map, true);
         this.start();
+        const mapId = MapManager.getRandomMap()[0];
+        MapNetworkHandler.forceStart(mapId);
     }
 
     private static start(): void {

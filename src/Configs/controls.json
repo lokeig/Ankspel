@@ -10,7 +10,7 @@
       "pickup": "ArrowUp",
       "ragdoll": "e",
       "strafe": "l",
-      "menu": "esc"
+      "menu": "Escape"
     },
     "controls": {}
   }

@@ -1,4 +1,4 @@
-import { Grid, Utility,  } from "@common";
+import { Grid, Utility, } from "@common";
 import { ItemConstructor, IItem, isItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
@@ -22,8 +22,7 @@ class ItemManager {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.shouldBeDeleted()) {
                 itemSet.delete(item);
-                const id = this.idManager.removeObject(item)!;
-                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id });
+                this.idManager.removeObject(item)!;
             } else {
                 item.update(deltaTime);
             }
@@ -40,12 +39,14 @@ class ItemManager {
         if (!constructor) {
             return null;
         }
-        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        const id = this.idManager.getNextID();
+
+        const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
         newItem.getBody().pos.y -= newItem.getBody().height;
 
         this.addToMap(newItem);
-        const id = this.idManager.add(newItem);
+        this.idManager.add(newItem);
 
         Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
 
@@ -53,12 +54,11 @@ class ItemManager {
     }
 
     public static spawn(type: string, gridPos: Vector, id: number): void {
-        console.log("Spawning: ", id, type)
         const constructor = this.register.get(type);
         if (!constructor) {
             return;
         }
-        const newItem = new constructor(Grid.getWorldPos(gridPos));
+        const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
         newItem.getBody().pos.y -= newItem.getBody().height;
 

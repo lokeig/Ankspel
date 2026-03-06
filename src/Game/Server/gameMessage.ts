@@ -1,4 +1,6 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, EquipmentSlot } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, EquipmentSlot, ProjectileEffectType } from "@common";
+import { Vector } from "@math";
+import { ImageName } from "@render";
 
 enum GameMessage {
     // ─── Connection ─────────────────────────
@@ -10,7 +12,7 @@ enum GameMessage {
     PlayerRagdollInfo,
     NewPlayer,
     PlayerSpawn,
-    PlayerHit,
+    PlayerProjectileEffect,
     PlayerDead,
     PlayerEquipment,
 
@@ -20,10 +22,12 @@ enum GameMessage {
     ActivateItem,
     DeactivateItem,
     ThrowItem,
+    ItemProjectileEffect,
 
     // ─── Projectiles ────────────────────────
 
     // ─── Map ────────────────────────────────
+    ResetMap,
     LoadMap,
     MapLoaded,
     StartMap,
@@ -42,9 +46,9 @@ interface GameMessageMap {
     // ─── Player ─────────────────────────────
     [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
-    [GameMessage.NewPlayer]: { id: number };
+    [GameMessage.NewPlayer]: { id: number, color: ImageName };
     [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };
-    [GameMessage.PlayerHit]: { id: number, effect: ProjectileEffect, seed: number, slot: EquipmentSlot | null };
+    [GameMessage.PlayerProjectileEffect]: { id: number, type: ProjectileEffectType, effect: ProjectileEffect };
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
 
@@ -52,12 +56,14 @@ interface GameMessageMap {
     [GameMessage.ThrowItem]: { id: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
     [GameMessage.SpawnItem]: { id: number, pos: NetworkVector, type: string };
     [GameMessage.DeleteItem]: { id: number };
+    [GameMessage.ItemProjectileEffect]: { id: number, effect: ProjectileEffect, pos: Vector };
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
 
     // ─── Projectiles ────────────────────────
 
     // ─── Map ────────────────────────────────
+    [GameMessage.ResetMap]: {};
     [GameMessage.LoadMap]: { id: number };
     [GameMessage.MapLoaded]: {};
     [GameMessage.StartMap]: {};

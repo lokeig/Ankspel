@@ -1,37 +1,45 @@
 
 import { Vector } from "@math";
-import { DrawInfo, Rect, IRender } from "@render";
+import { DrawInfo, Rect, IRender, ImageInfo } from "@render";
 import { RenderSpace } from "src/Render/IRender";
 
 class CanvasRender implements IRender {
     private cameraPos = new Vector;
     private cameraZoom: number = 1;
 
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    images: Map<string, HTMLImageElement> = new Map();
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private images: Map<string, HTMLImageElement> = new Map();
 
     constructor(canvasID: string) {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
         this.ctx = this.canvas.getContext('2d')!;
         this.ctx.imageSmoothingEnabled = false;
+        this.canvas.style.imageRendering = "pixelated";
     }
 
-    private loadImage(src: string): HTMLImageElement {
-        if (!this.images.has(src)) {
-            const img = new Image();
-            img.src = src;
-            this.images.set(src, img);
+    public async loadImage(img: ImageInfo): Promise<void> {
+        if (this.images.has(img.src)) {
+            return;
         }
-        return this.images.get(src)!;
+        const HTMLImage = new Image();
+        HTMLImage.src = img.src;
+
+        await new Promise<void>((resolve, reject) => {
+            HTMLImage.onload = () => resolve();
+            HTMLImage.onerror = () => reject("Failed to load image: " + HTMLImage.src)
+        })
+
+        this.images.set(img.src, HTMLImage);
     }
 
     public draw(drawInfo: DrawInfo, space?: RenderSpace): void {
-        const img = this.loadImage(drawInfo.imageSrc);
-        if (!img.complete) {
-            img.onload = () => this.draw(drawInfo, space);
+        const img = this.images.get(drawInfo.image.src);
+        if (!img) {
+            console.error("Image " + drawInfo.image.src + " not loaded before use");
             return;
         }
+
         this.ctx.save();
         if (space === RenderSpace.Screen) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -50,19 +58,23 @@ class CanvasRender implements IRender {
 
         this.ctx.drawImage(
             img,
-            Math.floor(drawInfo.source.x), Math.floor(drawInfo.source.y),
-            Math.floor(drawInfo.source.width), Math.floor(drawInfo.source.height),
-            -drawInfo.world.width / 2, -drawInfo.world.height / 2,
-            drawInfo.world.width, drawInfo.world.height
+            Math.floor(drawInfo.source.x),
+            Math.floor(drawInfo.source.y),
+            Math.floor(drawInfo.source.width),
+            Math.floor(drawInfo.source.height),
+            Math.floor(-drawInfo.world.width / 2),
+            Math.floor(-drawInfo.world.height / 2),
+            Math.floor(drawInfo.world.width),
+            Math.floor(drawInfo.world.height),
         );
 
         this.ctx.restore();
     }
 
-    public drawLine(imageSrc: string, start: Vector, end: Vector, width: number, sourceRect: Rect, opacity: number, space?: RenderSpace): void {
-        const img = this.loadImage(imageSrc);
-        if (!img.complete) {
-            img.onload = () => this.drawLine(imageSrc, start, end, width, sourceRect, opacity, space);
+    public drawLine(image: ImageInfo, start: Vector, end: Vector, width: number, sourceRect: Rect, opacity: number, space?: RenderSpace): void {
+        const img = this.images.get(image.src);
+        if (!img) {
+            console.error("Image not loaded before use!");
             return;
         }
 
@@ -108,7 +120,7 @@ class CanvasRender implements IRender {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.restore();    
+        this.ctx.restore();
     }
 
     public setCamera(pos: Vector, zoom: number): void {

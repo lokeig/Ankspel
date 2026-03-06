@@ -35,6 +35,14 @@ class GameObject {
         this.pos.y = pos.y - this.height / 2;
     }
 
+    public vectorCollision(pos: Vector): boolean {
+        return (
+            this.pos.x < pos.x &&
+            this.pos.x + this.width > pos.x &&
+            this.pos.y < pos.y &&
+            this.pos.y + this.height > pos.y
+        );
+    }
 
     public collision(block: GameObject): boolean {
         return (

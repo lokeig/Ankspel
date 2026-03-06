@@ -1,29 +1,33 @@
 import { Vector } from "@math";
-import { SpriteSheet, images, Countdown, Utility, Frame, ItemInteraction } from "@common";
+import { SpriteSheet, Countdown, Utility, Frame, ItemInteraction } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
+import { Images } from "@render";
+import { AudioManager, Sound } from "@game/Audio";
 
 class Grenade extends Item {
     private static spriteSheet: SpriteSheet;
     private static frames = { pinned: new Frame(), default: new Frame() };
+
+    private firstBeep: boolean = false;
+    private secondBeep: boolean = false;
 
     private explosionDelay = new Countdown(2);
     private activated: boolean = false;
     private locallyActivated!: boolean;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.grenade);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.grenade);
         Utility.File.setFrames("grenade", this.frames);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 8;
         const height = 19;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
 
         this.holdOffset = new Vector(11, -6)
@@ -35,28 +39,46 @@ class Grenade extends Item {
             return [];
         });
     }
-
+    
     public update(deltaTime: number): void {
         if (this.activated) {
-            this.explosionDelay.update(deltaTime);
+            this.explodingUpdate(deltaTime);
         }
         super.update(deltaTime);
 
         if (this.explosionDelay.isDone()) {
-            ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
-            this.setToDelete();
-
-            const amountOfBullets = 16;
-            for (let i = 0; i < amountOfBullets; i++) {
-                const angle = i * 2 * Math.PI / amountOfBullets;
-                const pos = this.body.pos;
-                const bullet = new Bullet(pos, angle, 3400, 7);
-                ProjectileManager.addProjectile(bullet, this.locallyActivated);
-            }
+            this.explode();
         }
     }
 
+    private explodingUpdate(deltaTime: number): void {
+        this.explosionDelay.update(deltaTime);
+        if (!this.firstBeep && this.explosionDelay.getPercentageReady() > 1 / 3) {
+            this.firstBeep = true;
+            AudioManager.get().play(Sound.beep);
+        }
+        if (!this.secondBeep && this.explosionDelay.getPercentageReady() > 2 / 3) {
+            this.secondBeep = true;
+            AudioManager.get().play(Sound.beep);
+        }
+    }
+
+    private explode(): void {
+        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
+        this.setToDelete();
+
+        const amountOfBullets = 24;
+        for (let i = 0; i < amountOfBullets; i++) {
+            const angle = i * 2 * Math.PI / amountOfBullets;
+            const pos = this.body.pos;
+            const bullet = new Bullet(pos, angle, 3400, 7);
+            ProjectileManager.addProjectile(bullet, this.locallyActivated);
+        }
+        AudioManager.get().play(Sound.explode);
+    }
+
     private activate(): void {
+        AudioManager.get().play(Sound.pullPin);
         this.activated = true;
     }
 

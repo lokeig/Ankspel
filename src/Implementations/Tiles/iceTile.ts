@@ -1,13 +1,13 @@
 import { Vector } from "@math";
-import { images, SpriteSheet, Utility } from "@common";
+import { SpriteSheet } from "@common";
 import { BaseTile } from "./baseTile";
+import { Images } from "@render";
 
 class IceTile extends BaseTile {
     private static sprite: SpriteSheet;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.tileIce);
-        this.sprite = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.sprite = new SpriteSheet(Images.tileIce);
     }
 
     constructor(pos: Vector, size: number) {

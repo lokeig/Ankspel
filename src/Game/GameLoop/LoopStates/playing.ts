@@ -37,6 +37,7 @@ class Playing implements IState<GameLoopState> {
         }
         return GameLoopState.Playing;
     }
+    
 
     public stateExited(): void {
 

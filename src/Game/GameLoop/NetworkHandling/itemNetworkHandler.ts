@@ -40,6 +40,14 @@ class ItemMessageHandler {
             })
         });
 
+        gameEvent.subscribe(GameMessage.ItemProjectileEffect, ({ id, pos, effect }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                return;
+            }
+            item.onProjectileEffect(effect, pos, true);
+        })
+
         gameEvent.subscribe(GameMessage.ThrowItem, ({ id, pos, direction, throwType }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {

@@ -115,6 +115,53 @@
       "fps": 24
     }
   },
+  "chestplate": {
+    "default": {
+      "frames": [
+        {
+          "row": 0,
+          "col": 0
+        }
+      ]
+    },
+    "equipped": {
+      "frames": [
+        {
+          "row": 0,
+          "col": 1
+        }
+      ]
+    },
+    "running": {
+      "repeat": true,
+      "frames": [
+        {
+          "row": 0,
+          "col": 1
+        },
+        {
+          "row": 0,
+          "col": 2
+        },
+        {
+          "row": 0,
+          "col": 3
+        },
+        {
+          "row": 0,
+          "col": 4
+        },
+        {
+          "row": 0,
+          "col": 5
+        },
+        {
+          "row": 0,
+          "col": 6
+        }
+      ]
+    }
+  },
   "explosive": {
     "animation": {
       "grid": {
@@ -124,7 +171,6 @@
         "colCount": 4,
         "exclude": 1
       },
-
       "fps": 24
     }
   }

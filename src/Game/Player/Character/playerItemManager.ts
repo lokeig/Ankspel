@@ -4,6 +4,7 @@ import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
 import { Connection, GameMessage, GameMessageMap } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
+import { AudioManager, Sound } from "@game/Audio";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;
@@ -33,18 +34,9 @@ class PlayerItemManager {
 
     private handlePickupOrThrow(): void {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
-            const item = this.equipment.getItem(EquipmentSlot.Hand);
             const throwType = this.getThrowType();
             this.equipment.throw(EquipmentSlot.Hand, throwType);
-
-            Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-                id: ItemManager.getItemID(item)!,
-                pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
-                direction: item.getBody().direction,
-                throwType
-            });
             this.sendEquipmentMessage();
-            
         } else {  // Pickup item
             const nextItem = this.getNearbyItem();
             if (nextItem) {
@@ -107,7 +99,7 @@ class PlayerItemManager {
     }
 
 
-    private handleEffects(item: IItem, effects: OnItemUseEffect[]) {
+    public handleEffects(item: IItem, effects: OnItemUseEffect[]) {
         effects.forEach((effect) => {
             switch (effect.type) {
                 case (OnItemUseType.Aim): {
@@ -123,8 +115,13 @@ class PlayerItemManager {
                 }
                 case (OnItemUseType.Equip): {
                     this.equipment.equip(null, EquipmentSlot.Hand);
+                    this.equipment.throw(effect.value, ThrowType.Light);
                     this.equipment.equip(item, effect.value);
+                    AudioManager.get().play(Sound.equip);
                     break;
+                }
+                case (OnItemUseType.Unequip): {
+                    this.equipment.throw(effect.value, ThrowType.Drop);
                 }
             }
         })

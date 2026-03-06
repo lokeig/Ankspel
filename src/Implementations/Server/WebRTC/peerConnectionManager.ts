@@ -1,7 +1,6 @@
 import { CMsgType, ForwardMessage } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessage, GameMessageMap } from "@game/Server";
-import { channel } from "diagnostics_channel";
 
 class PeerConnectionManager {
     private peerConnection: RTCPeerConnection;
@@ -19,7 +18,16 @@ class PeerConnectionManager {
         this.peerConnection = new RTCPeerConnection({
             iceServers: [
                 { urls: "stun:stun.l.google.com:19302" },
-                { urls: "stun:stun1.l.google.com:19302" }
+                { urls: "stun:stun1.l.google.com:19302" },
+                {
+                    urls: [
+                        "turn:openrelay.metered.ca:80",
+                        "turn:openrelay.metered.ca:443",
+                        "turn:openrelay.metered.ca:443?transport=tcp"
+                    ],
+                    username: "openrelayproject",
+                    credential: "openrelayproject"
+                }
             ]
         });
 

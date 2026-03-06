@@ -1,9 +1,12 @@
 import { Vector } from "@math";
-import { SpriteAnimator, Animation, SpriteSheet, images, Utility, ItemInteraction } from "@common";
+import { SpriteAnimator, Animation, SpriteSheet, Utility, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
+import { Images } from "@render";
+import { AudioManager } from "@game/Audio/audioManager";
+import { Sound } from "@game/Audio";
 
 class Glock extends Item {
     private static animations: Record<string, Animation> = {
@@ -18,14 +21,13 @@ class Glock extends Item {
 
     static {
         Utility.File.setAnimations("glock", this.animations);
-        const spriteInfo = Utility.File.getImage(images.glock);
-        this.sprite = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.sprite = new SpriteSheet(Images.glock);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, id: number) {
         const width = 30;
         const height = 15;
-        super(pos, width, height);
+        super(pos, width, height, id);
 
         this.handOffset = new Vector(2, 2);
         this.holdOffset = new Vector(10, -4);
@@ -41,12 +43,12 @@ class Glock extends Item {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmHelper();
-        this.firearmInfo.ammo = 11119;
+        this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
         this.firearmInfo.knockback = new Vector(450, 120);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
         this.firearmInfo.bulletRange = 16;
-        this.firearmInfo.bulletSpeed = 3400;
+        this.firearmInfo.bulletSpeed = 4000;
     }
 
     public update(deltaTime: number): void {
@@ -61,8 +63,12 @@ class Glock extends Item {
     public shoot(seed: number, local: boolean): OnItemUseEffect[] {
         this.animator.reset();
         this.animator.setAnimation(Glock.animations.shoot);
-        this.flare.reset();
-
+        if (this.firearmInfo.ammo > 0) {
+            AudioManager.get().play(Sound.glock);
+            this.flare.reset();
+        } else {
+            AudioManager.get().play(Sound.click);
+        }
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
     }
 
@@ -76,10 +82,7 @@ class Glock extends Item {
 
     private drawFlare(): void {
         const pos = this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip());
-
-
         this.flare.draw(pos, this.body.isFlip(), this.getAngle());
-
     }
 
     public shouldBeDeleted(): boolean {

@@ -1,14 +1,20 @@
-import { Input } from "@common";
 import { GameMap, MapLoader, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
 class MapNetworkHandler {
     private static readyCount: number = 0;
-    private static onMapLoad: () => void;
+
+    private static onMapLoad: (mapId: number) => void;
+    private static onMapStart: () => void;
 
     public static init() {
         const gameEvent = Connection.get().gameEvent;
+
+        gameEvent.subscribe(GameMessage.LoadMap, ({ id }) => {
+            this.onMapLoad(id);
+            Connection.get().sendGameMessage(GameMessage.MapLoaded, {});
+        });
 
         gameEvent.subscribe(GameMessage.MapLoaded, () => {
             if (!Connection.get().isHost()) {
@@ -18,45 +24,47 @@ class MapNetworkHandler {
             this.checkReadyToStart();
         });
 
-        gameEvent.subscribe(GameMessage.LoadMap, ({ id }) => {
-            const map = MapManager.getMap(id);
-            MapLoader.load(map, false);
-            Connection.get().sendGameMessage(GameMessage.MapLoaded, {});
-        });
 
-        gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapLoad() });
-
-        Input.onKeyOnce("q", this.quickStart.bind(this));
+        gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapStart() });
     }
 
-    public static hostInitializeMap(map: [number, GameMap]): void {
+    public static hostInitializeMap(mapId: number): void {
         this.readyCount = 0;
 
-        Connection.get().sendGameMessage(GameMessage.LoadMap, { id: map[0] });
-        MapLoader.load(map[1], true);
+        Connection.get().sendGameMessage(GameMessage.LoadMap, { id: mapId });
+        this.onMapLoad(mapId);
 
-        if (PlayerManager.getLocal().length === PlayerManager.getPlayers().length) {
-            this.onMapLoad();
-        }
+        this.checkReadyToStart();
     }
 
     private static checkReadyToStart(): void {
+        if (PlayerManager.getPlayers().length === PlayerManager.getLocal().length) {
+            this.onMapStart();
+        }
         const totalPlayers = PlayerManager.getPlayers().length;
+
         if (this.readyCount !== totalPlayers - 1) {
             return;
         }
+
         this.readyCount = 0;
-        const time = Date.now() + 1500;
-        Connection.get().sendGameMessage(GameMessage.StartMap, { time });
-        this.onMapLoad();
+
+        Connection.get().sendGameMessage(GameMessage.StartMap, {});
+
+        this.onMapStart();
     }
 
-    private static quickStart(): void {
-        this.onMapLoad();
-    }
-
-    public static setMapLoad(callback: () => void): void {
+    public static setMapLoad(callback: (mapId: number) => void): void {
         this.onMapLoad = callback;
+    }
+
+    public static setMapStart(callback: () => void): void {
+        this.onMapStart = callback;
+    }
+
+    public static forceStart(id: number): void {
+        this.onMapLoad(id);
+        this.onMapStart();
     }
 }
 

@@ -1,5 +1,6 @@
 import { Vector } from "@math";
-import { SpriteAnimator, SpriteSheet, images, Animation, Utility } from "@common";
+import { SpriteAnimator, SpriteSheet, Animation, Utility } from "@common";
+import { Images } from "@render";
 
 class ExplosionParticle {
     private pos: Vector;
@@ -13,8 +14,7 @@ class ExplosionParticle {
     private static sprite: SpriteSheet;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.explosion);
-        this.sprite = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.sprite = new SpriteSheet(Images.explosion);
         Utility.File.setAnimations("explosive", this.animations);
     }
 

@@ -1,7 +1,7 @@
 import { GameObject } from "./gameObject";
 
 type CollisionObject = {
-    gameObject: GameObject;
+    body: GameObject;
     platform: boolean;
 };
 

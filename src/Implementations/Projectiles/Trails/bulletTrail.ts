@@ -1,6 +1,7 @@
 import { Vector } from "@math";
-import { SpriteSheet, images, Utility } from "@common";
+import { SpriteSheet, Utility } from "@common";
 import { ITrail } from "@projectile";
+import { Images } from "@render";
 
 class BulletTrail implements ITrail {
     private static spriteSheet: SpriteSheet;
@@ -14,8 +15,7 @@ class BulletTrail implements ITrail {
     private setToRemove: boolean = false;
 
     static {
-        const spriteInfo = Utility.File.getImage(images.trail);
-        this.spriteSheet = new SpriteSheet(spriteInfo.src, spriteInfo.frameWidth, spriteInfo.frameHeight);
+        this.spriteSheet = new SpriteSheet(Images.trail);
     }
     
     constructor(startingLocation: Vector, speed: Vector, length: number, size: number) {

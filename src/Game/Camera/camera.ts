@@ -1,34 +1,31 @@
+import { MaxMinPositions } from "@common";
 import { Vector } from "@math";
 import { Player, PlayerManager } from "@player";
 import { Render } from "@render";
 
-type Positions = { minX: number, maxX: number, minY: number, maxY: number };
-
 class Camera {
     private currentPos: Vector = new Vector();
     private currentZoom: number = 1;
+    private targetZoom: number = 1;
+    private targetPos: Vector = new Vector();
 
-    public update(deltaTime: number) {
+    public update(deltaTime: number, bounds: MaxMinPositions) {
         const players = PlayerManager.getPlayers().filter(player => !player.character.isDead());
         if (players.length == 0) {
-            this.setFrame(this.getCenter(), 1, deltaTime);
+            this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
             return;
         }
-        
-        const positions = this.getPositions(players);
-        const targetPos = this.calculateTargetPos(positions);
-        const targetZoom = this.calculateTargetZoom(positions, 200);
-        this.setFrame(targetPos, targetZoom, deltaTime);
+        const positions = this.getPositions(players, bounds);
+        this.targetPos = this.calculateTargetPos(positions);
+        this.targetZoom = this.calculateTargetZoom(positions, 200);
+
+        this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
     }
 
-    private getCenter(): Vector {
-        return new Vector(Render.get().getWidth(), Render.get().getHeight()).divide(2);
-    }
-
-    public initialize(): void {
+    public initialize(bounds: MaxMinPositions): void {
         const players = PlayerManager.getPlayers();
 
-        const positions = this.getPositions(players);
+        const positions = this.getPositions(players, bounds);
         const targetPos = this.calculateTargetPos(positions);
         const targetZoom = this.calculateTargetZoom(positions, 200);
 
@@ -38,8 +35,8 @@ class Camera {
         Render.get().setCamera(this.currentPos, this.currentZoom);
     }
 
-    private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number) {
-        const smoothFactor = 5;
+    private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number, bounds: MaxMinPositions) {
+        const smoothFactor = 3;
         this.currentPos.x += (targetPos.x - this.currentPos.x) * deltaTime * smoothFactor;
         this.currentPos.y += (targetPos.y - this.currentPos.y) * deltaTime * smoothFactor;
         this.currentZoom += (targetZoom - this.currentZoom) * deltaTime * smoothFactor;
@@ -47,13 +44,13 @@ class Camera {
         Render.get().setCamera(this.currentPos, this.currentZoom);
     }
 
-    private getPositions(players: Player[]): Positions {        
+    private getPositions(players: Player[], bounds: MaxMinPositions): MaxMinPositions {
         let minX = Infinity;
         let maxX = -Infinity;
         let minY = Infinity;
         let maxY = -Infinity;
         for (const player of players) {
-            const pos = player.character.body.getCenter();
+            const pos = player.character.standardBody.getCenter();
             if (pos.x < minX) {
                 minX = pos.x;
             }
@@ -67,15 +64,21 @@ class Camera {
                 maxY = pos.y;
             }
         }
+        const minYPadding = 1000;
+        minX = Math.min(bounds.maxX, Math.max(bounds.minX, minX));
+        maxX = Math.min(bounds.maxX, Math.max(bounds.minX, maxX));
+        minY = Math.min(bounds.maxY, Math.max(bounds.minY - minYPadding, minY));
+        maxY = Math.min(bounds.maxY, Math.max(bounds.minY - minYPadding, maxY));
+
         return { minX, maxX, minY, maxY };
     }
 
-    private calculateTargetPos(positions: Positions): Vector {
+    private calculateTargetPos(positions: MaxMinPositions): Vector {
         const { minX, maxX, minY, maxY } = positions;
         return new Vector(minX + maxX, minY + maxY).divide(2);
     }
 
-    private calculateTargetZoom(positions: Positions, padding: number): number {
+    private calculateTargetZoom(positions: MaxMinPositions, padding: number): number {
         const { minX, maxX, minY, maxY } = positions;
 
         const width = (maxX - minX) + padding;

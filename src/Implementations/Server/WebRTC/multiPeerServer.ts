@@ -3,7 +3,6 @@ import { Emitter, GameMessage, IServer } from "@game/Server";
 import { ClientMessage, CMsgType, ForwardedMessage, ServerMessage, ServerMessageMap } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessageMap } from "@game/Server/gameMessage";
-import { parse } from "path";
 
 class MultiPeerServer implements IServer {
     public gameEvent: Emitter<GameMessageMap> = new Emitter();
@@ -85,7 +84,9 @@ class MultiPeerServer implements IServer {
         this.peers.set(peerId, peer);
 
         peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
-            console.log("Received message " + GameMessage[type] + ":", msg);
+            if (type !== GameMessage.PlayerInfo) {
+                console.log("Received message " + GameMessage[type] + ":", msg);
+            }
             this.gameEvent.publish(type, msg);
         });
         const isInitiator = peerId < this.myID!;
@@ -203,12 +204,6 @@ class MultiPeerServer implements IServer {
 
             case ServerMessage.StartGame: {
                 const data = parsed.msg as ServerMessageMap[typeof type];
-                const allConnected = Array.from(this.peers.values()).every(peer => peer.isConnected());
-
-                if (!allConnected) {
-                    console.log("Waiting for all peers to connect");
-                    return;
-                }
                 console.log("Starting game");
                 this.onStart(data.userID);
                 break;
@@ -217,7 +212,7 @@ class MultiPeerServer implements IServer {
     }
 
     public sendGameMessage<T extends GameMessage>(type: T, text: GameMessageMap[T]): void {
-        // console.log("Sending message: " + GameMessage[type], msg);
+        // console.log("Sending message: " + GameMessage[type], text);
         this.peers.forEach((peer: PeerConnectionManager) => {
             peer.sendReliableMessage(type, text);
         });
@@ -230,7 +225,6 @@ class MultiPeerServer implements IServer {
     }
 
     public sendClientMessage(message: ClientMessage): void {
-        // console.log("Sending to server: ", message);
         this.socket.send(JSON.stringify(message));
     }
 

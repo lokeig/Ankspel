@@ -27,16 +27,10 @@
     "broken": {
       "row": 1,
       "col": 1
-    }
-  },
-  "chestplate": {
-    "default": {
-      "row": 0,
-      "col": 0
     },
     "equipped": {
-      "row": 0,
-      "col": 1
+      "row": 1,
+      "col": 2
     }
   },
   "bulletRebound": {

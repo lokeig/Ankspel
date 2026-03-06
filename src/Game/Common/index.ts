@@ -24,14 +24,15 @@ export { PlayerState } from "./Types/playerState";
 export { PlayerAnim } from "./Types/playerAnim";
 export { ItemInteraction } from "./Types/itemInteraction";
 export { EquipmentSlot } from "./Types/equipmentSlot";
-export { ProjectileEffect } from "./Types/projectileEffect";
+export type { ProjectileEffect } from "./Types/projectileEffect";
+export { ProjectileEffectType } from "./Types/projectileEffect";
+export type { MaxMinPositions } from "./Types/maxMinPositions";
 
 // Utility
 export { Utility } from "./Utility/utility";
 export { SeededRNG } from "./Utility/Random/seededRNG";
 
 // Other
-export { images } from "./Utility/Files/images";
 export { Input } from "./Other/input";
 export { InputMode } from "./Other/inputMode";
 export { Grid } from "./Other/grid";

@@ -32,6 +32,7 @@
       "@player": ["src/Game/Player"],
       "@item": ["src/Game/Item"],
       "@projectile": ["src/Game/Projectile"],
+      "@sound": ["src/game/Sound"],
       
       "@game/*": ["src/Game/*"],
       "@impl/*": ["src/Implementations/*"],

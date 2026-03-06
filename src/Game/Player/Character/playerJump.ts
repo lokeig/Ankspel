@@ -1,6 +1,7 @@
 import { Countdown, InputMode } from "@common";
 import { DynamicObject } from "@core";
 import { PlayerControls } from "./playerControls";
+import { AudioManager, Sound } from "@game/Audio";
 
 class PlayerJump {
     public isJumping: boolean = false;
@@ -24,7 +25,7 @@ class PlayerJump {
             this.coyoteTime.reset();
         }
         this.jump(deltaTime);
-    }
+        }
 
     private jump(deltaTime: number): void {
         if (this.controls.jump(InputMode.Press) && this.jumpReady() && this.jumpEnabled) {
@@ -32,6 +33,8 @@ class PlayerJump {
             this.playerCharacter.velocity.y = -this.minJump;
             this.maxJumpTime.reset();
             this.coyoteTime.setToReady();
+
+            AudioManager.get().play(Sound.jump);
         }
         if (this.controls.jump() && this.isJumping && this.jumpEnabled) {
             this.playerCharacter.velocity.y -= this.jumpForce * deltaTime;

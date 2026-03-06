@@ -4,23 +4,29 @@ import { ITrail } from "./ITrail";
 import { ProjectileEffect } from "@common";
 
 interface IProjectile {
-    update(deltaTime: number): void;
-    onPlayerHit(seed: number): ProjectileEffect, 
+    update(deltaTime: number, collidable: ProjectileTarget[]): void;
 
-    wentThrough(block: GameObject): { collision: boolean, pos: Vector };
-    getPos(): Vector;
+    getSegment(): {start: Vector, end: Vector};
     setPos(pos: Vector): void;
 
     getTrail(): ITrail;
 
-    isLocal(): boolean;
     setLocal(): void;
+
     setToDelete(): void
     shouldBeDeleted(): boolean;
 
     draw(): void;
 }
 
+type ProjectileTarget = {
+    body: () => GameObject;
+    penetrationResistance: () => number;
+    onProjectileHit: (effects: ProjectileEffect[], pos: Vector, local: boolean) => void;
+    enabled: () => boolean;
+}
+
+type CollisionCallback = (effect: ProjectileEffect[]) => void;
 type ProjectileConstructor = new (pos: Vector, angle: number, seed?: number) => IProjectile;
 
-export type { IProjectile, ProjectileConstructor };
+export type { IProjectile, ProjectileConstructor, CollisionCallback, ProjectileTarget };

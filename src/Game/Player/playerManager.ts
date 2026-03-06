@@ -1,12 +1,13 @@
-import { IDManager, Utility } from "@common";
+import { IDManager } from "@common";
 import { Player } from "./player";
-import { Connection, GameMessage } from "@server";
+import { Connection, GameMessage, MainMenu } from "@server";
+import { ImageName } from "@render";
 
 class PlayerManager {
     private static players: Player[] = [];
     private static localPlayerCount = 0;
 
-    static update(deltaTime: number) {
+    public static update(deltaTime: number, maxY: number) {
         const pending: Player[] = [];
 
         const updatePlayer = (player: Player) => {
@@ -15,7 +16,11 @@ class PlayerManager {
                 if (item && item.shouldBeDeleted()) {
                     player.character.equipment.equip(null, slot);
                 }
-            })
+            });
+            const fallingOffMapDistance = 100;
+            if (!player.character.isDead() && player.character.activeBody.pos.y > maxY + fallingOffMapDistance) {
+                player.character.die();
+            }
         };
         this.getPlayers().forEach(player => {
             if (player.held()) {
@@ -41,21 +46,21 @@ class PlayerManager {
         return this.players;
     }
 
-    public static create(): Player {
-        const controls = Utility.File.getControls(this.localPlayerCount);
+    public static create(color: ImageName): Player {
+        const controls = MainMenu.get().getControls(this.localPlayerCount);
         const id = IDManager.getBaseOffset() + this.localPlayerCount++;
 
-        const player = new Player(id, controls);
+        const player = new Player(id, color, controls);
         this.players.push(player);
 
-        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id }));
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, color }));
 
         return player;
     }
 
-    public static spawn(id: number): Player {
-        const player = new Player(id);
-        this.players.push(player);
+    public static spawn(id: number, color: ImageName): Player {
+        const player = new Player(id, color);
+        this.players.push(player);  
         return player;
     }
 
