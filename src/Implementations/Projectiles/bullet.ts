@@ -2,13 +2,9 @@ import { Vector } from "@math";
 import { AxisDirection, Countdown, Grid, ProjectileEffectType, Utility } from "@common";
 import { GameObject } from "@core";
 import { BulletTrail } from "./Trails/bulletTrail";
-import { IProjectile, ProjectileCollisionResolver, ProjectileTarget } from "@projectile";
+import { BulletHit, IProjectile, ProjectileCollisionResolver, ProjectileTarget } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BulletReboundVFX } from "@impl/Particles";
-
-type BulletHit =
-    | { type: "tile"; tile: GameObject; pos: Vector; resistance: number }
-    | { type: "target"; target: ProjectileTarget; pos: Vector; resistance: number };
 
 class Bullet implements IProjectile {
     private pos: Vector;

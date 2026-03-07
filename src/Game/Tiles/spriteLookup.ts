@@ -1,8 +1,10 @@
 import { Frame, Side } from "@common";
+
 class SpriteLookup {
     private table: Record<number, Frame>;
     private lipLeft: Frame;
     private lipRight: Frame;
+    private static emptyFrame = new Frame();
 
     constructor(table: Record<number, Frame>, lipLeft: Frame, lipRight: Frame) {
         this.table = table;
@@ -12,7 +14,7 @@ class SpriteLookup {
 
     public tile(id: number): Frame {
         const result = this.table[id];
-        return result ? result : new Frame();
+        return result ? result : SpriteLookup.emptyFrame;
     }
 
     public getLip(side: Side): Frame {

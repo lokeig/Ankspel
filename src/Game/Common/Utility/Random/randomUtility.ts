@@ -12,12 +12,16 @@ class RandomUtility {
         return Math.floor(Math.random() * 0xffffffff);
     }
 
-    public getInRange(min: number, max: number) {
+    public getInRange(min: number, max: number): number {
         return min + (max - min) * Math.random();
     }
 
     public trueOrFalse(): boolean {
         return Math.random() < 0.5;
+    }
+
+    public getInteger(min: number, max: number): number {
+        return Math.floor(this.getInRange(min, max + 1));
     }
 }
 

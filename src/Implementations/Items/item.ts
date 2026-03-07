@@ -122,6 +122,10 @@ abstract class Item implements IItem {
         return true;
     }
 
+    public getId(): number {
+        return this.id;
+    }
+
     public throw(throwType: ThrowType): void {
         this.body.grounded = false;
         const direcMult = this.body.getDirectionMultiplier();

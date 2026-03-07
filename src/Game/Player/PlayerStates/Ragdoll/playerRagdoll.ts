@@ -59,7 +59,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     public stateEntered(from: PlayerState): void {
         this.currentState = true;
 
-        this.player.activeBody = this.torso;
+        this.player.activeBody = this.legs;
 
         this.player.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
         this.coyoteTime.setToReady();
@@ -87,6 +87,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         if (this.isHeld()) {
             this.updateOwned(deltaTime);
             return;
+        }
+
+        if (!this.player.isLocal()) {
+            console.log(Ownership[this.getOwnership()])
         }
         if (this.isOnSpawner()) {
             this.updateOnSpawner(deltaTime);
@@ -250,6 +254,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     private updateOnSpawner(deltaTime: number): void {
+        console.log("local: ", this.player.isLocal(), " on spawner")
         this.head.update(deltaTime);
         this.torso.update(deltaTime);
 
@@ -406,6 +411,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
                 break;
             }
         }
+    }
+
+    public getId(): number {
+        return 0;
     }
 
     public shouldBeDeleted(): boolean {

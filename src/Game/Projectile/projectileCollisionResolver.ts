@@ -1,7 +1,7 @@
 import { GameObject } from "@core";
 import { ProjectileTarget } from "./IProjectile";
 import { Vector } from "@math";
-import { TileManager } from "@game/StaticObjects/Tiles";
+import { TileManager } from "@game/Tiles";
 
 type BulletHit =
     | { type: "tile"; tile: GameObject; pos: Vector; resistance: number }
@@ -28,6 +28,9 @@ class ProjectileCollisionResolver {
         const tiles = TileManager.getNearby(segment.start, 0, 0, segment.end);
 
         tiles.forEach(tile => {
+            if (tile.platform && segment.start.y > tile.body.pos.y) {
+                return;
+            }
             const result = this.collision(segment, tile.body);
             if (!result.collision) {
                 return;
@@ -56,3 +59,4 @@ class ProjectileCollisionResolver {
 }
 
 export { ProjectileCollisionResolver };
+export type { BulletHit };

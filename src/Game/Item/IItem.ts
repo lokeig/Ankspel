@@ -7,29 +7,32 @@ import { Vector } from "@math";
 
 interface IItem {
     update(deltaTime: number): void;
-    draw(): void;
     getBody(): DynamicObject;
     interactions(): ItemUseInteractions;
-
+    
     setOwnership(value: Ownership): void;
     getOwnership(): Ownership;
-
+    
     onEquip?(slot: EquipmentSlot): void;
     onUnequip?(): void;
-
+    
     throw(throwType: ThrowType): void;
     enabled(): boolean;
-
+    
     shouldBeDeleted(): boolean;
     setToDelete(): void;
 
     getAngle(): number;
     setAngle(to: number): void;
-
+    
     getHoldOffset(): Vector;
     getHandOffset(): Vector;
-
+    
     onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean): void;
+    
+    getId(): number;
+    
+    draw(): void;
 }
 
 type ItemConstructor = new (pos: Vector, id: number) => IItem

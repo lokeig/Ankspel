@@ -1,27 +1,27 @@
-import { Vector } from "@math";
-import { SpriteSheet, Side } from "@common";
+import { Direction, Side, SpriteSheet } from "@common";
 import { StaticObject } from "@core";
-import { ITile } from "@game/Tiles";
-import { SpriteLookup } from "../../Game/Tiles/spriteLookup";
+import { ITile, SpriteLookup } from "@game/Tiles";
 import { baseTileLookup, lipLeft, lipRight } from "./baseTileLookup";
+import { Vector } from "@math";
+import { Images } from "@render";
 
-abstract class BaseTile implements ITile {
+class Platform implements ITile {
     public body: StaticObject;
-    private spriteIndex: number = 0; 
+    private spriteIndex: number = 0;
 
     private static lookup: SpriteLookup;
-    protected sprite!: SpriteSheet;
+    private static sprite = new SpriteSheet(Images.woodPlatform);
 
     static {
         this.lookup = new SpriteLookup(baseTileLookup, lipLeft, lipRight);
     }
 
     constructor(pos: Vector, size: number) {
-        const platform = false;
+        const platform = true;
         this.body = new StaticObject(pos, size, platform);
     }
 
-    private setSpriteIndex(): void {
+    public setSpriteIndex(): void {
         this.spriteIndex = 0;
 
         const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.body.neighbourStatus();
@@ -53,39 +53,38 @@ abstract class BaseTile implements ITile {
         }
     }
 
-    private setLip(): void {
+    public enabled(): boolean {
         const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.body.neighbourStatus();
 
-        let hasLipLeft = false;
-        let hasLipRight = false;
-        if (!top) {
-            if (!left) {
-                hasLipLeft = true;
-            }
-            if (!right) {
-                hasLipRight = true;
-            }
-        }
         if (top && bot) {
-            if (botRight && right && !topRight && !left) {
-                hasLipLeft = true;
+            if (!left && !right) {
+                return false;
             }
-            if (botLeft && left && !topLeft && !right) {
-                hasLipRight = true;
+            if (left && topLeft) {
+                if (topRight) {
+                    return false;
+                }
+                if (!right) {
+                    return false;
+                }
+                
+            }
+            if (right && topRight) {
+                if (topLeft) {
+                    return false;
+                }   
+                if (!left) {
+                    return false;
+                }       
             }
         }
 
-        this.body.setLip(Side.Left, hasLipLeft);
-        this.body.setLip(Side.Right, hasLipRight);
+
+        return true;
     }
 
     public update(): void {
         this.setSpriteIndex();
-        this.setLip();
-    }
-
-    public enabled(): boolean {
-        return true;
     }
 
     public draw(): void {
@@ -93,15 +92,15 @@ abstract class BaseTile implements ITile {
         const flip = false;
         const angle = 0;
 
-        this.sprite.draw(this.body.pos, drawSize, flip, angle, BaseTile.lookup.tile(this.spriteIndex));
+        Platform.sprite.draw(this.body.pos, drawSize, flip, angle, Platform.lookup.tile(this.spriteIndex));
 
         if (this.body.getLip(Side.Left)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Left));
+            Platform.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, Platform.lookup.getLip(Side.Left));
         }
         if (this.body.getLip(Side.Right)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Right));
+            Platform.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, Platform.lookup.getLip(Side.Right));
         }
     }
 }
 
-export { BaseTile };
+export { Platform };

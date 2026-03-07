@@ -4,6 +4,7 @@ import { StaticObject } from "@core";
 interface ITile {
     body: StaticObject;
     update(): void;
+    enabled(): boolean;
     draw(): void;
 }
 

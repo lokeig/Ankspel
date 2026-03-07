@@ -5,7 +5,7 @@ import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@
 import { Connection, GameMessage, GameMessageMap } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
-import { SpawnManager } from "@game/Spawner";
+import { SpawnerManager } from "@game/Spawner";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;
@@ -129,7 +129,7 @@ class PlayerItemManager {
     }
 
     private getNearbyItem(): IItem | null {
-        const inSpawners = SpawnManager.getSpawnerItems();
+        const inSpawners = SpawnerManager.getSpawnerItems();
         const onGround = ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height);
         const nearby = [...inSpawners, ...onGround];
 

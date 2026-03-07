@@ -1,4 +1,5 @@
 import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType } from "@common";
+import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
 import { ImageName } from "@render";
 
@@ -24,7 +25,9 @@ enum GameMessage {
     ThrowItem,
     ItemProjectileEffect,
 
-    // ─── Projectiles ────────────────────────
+    // ─── Spawner ────────────────────────
+    AddSpawner,
+    SpawnerSpawn,
 
     // ─── Map ────────────────────────────────
     ResetMap,
@@ -60,7 +63,9 @@ interface GameMessageMap {
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
 
-    // ─── Projectiles ────────────────────────
+    // ─── Spawner ────────────────────────
+    [GameMessage.AddSpawner]: { config: SpawnerDescription, id: number };
+    [GameMessage.SpawnerSpawn]: { id: number, item: string, itemId: number };
 
     // ─── Map ────────────────────────────────
     [GameMessage.ResetMap]: {};

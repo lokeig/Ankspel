@@ -1,5 +1,7 @@
 import { Utility } from "@common";
+import { SpawnerManager } from "@game/Spawner";
 import { ItemManager, OnItemUseType } from "@item";
+import { Vector } from "@math";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
@@ -37,7 +39,25 @@ class ItemMessageHandler {
                         break;
                     }
                 }
-            })
+            });
+        });
+
+        gameEvent.subscribe(GameMessage.AddSpawner, ({ config, id }) => {
+            SpawnerManager.spawn(config, id);
+        });
+
+        gameEvent.subscribe(GameMessage.SpawnerSpawn, ({ id, item, itemId }) => {
+            const spawner = SpawnerManager.getSpawnerFromId(id);
+            if (!spawner) {
+                console.log("Can't find spawner ", id);
+                return;
+            }
+            const newItem = ItemManager.spawn(item, new Vector(), itemId);
+            if (!newItem) {
+                console.log("Can't find item ", item);
+                return;
+            }
+            spawner.setContaining(newItem);
         });
 
         gameEvent.subscribe(GameMessage.ItemProjectileEffect, ({ id, pos, effect }) => {

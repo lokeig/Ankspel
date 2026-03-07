@@ -1,20 +1,21 @@
-import { Countdown, Grid, Lerp, lerpAngle, lerpEase, lerpStandard, SeededRNG, SpriteSheet, Utility } from "@common";
+import { Countdown, Grid, Lerp, lerpAngle, lerpEase, SpriteSheet, Utility } from "@common";
 import { GameObject } from "@core";
 import { SpawnerDescription } from "@game/Map/spawnerDescription";
 import { IItem, ItemManager, Ownership } from "@item";
 import { Vector } from "@math";
-import { Images, Render, RenderSpace } from "@render";
+import { Images } from "@render";
+import { Connection, GameMessage } from "@server";
 
 class Spawner {
     private itemPool: string[];
     private spawnCountdown: Countdown;
     private contains: IItem | null = null;
-    private rng: SeededRNG;
     private body: GameObject;
 
     private static yBobbingSpeed: number = 4;
     private static yBobbingMax: number = 3;
     private yBobbingLocation: number = 0;
+    private id: number;
 
     private xPositionLerp = new Lerp(5, lerpEase);
     private yPositionLerp = new Lerp(5, lerpEase);
@@ -25,9 +26,13 @@ class Spawner {
     private static frameSprite = new SpriteSheet(Images.itemSpawner);
     private static frameDrawSize = new Vector(28, 12);
 
-    constructor(config: SpawnerDescription, seed: number) {
+    constructor(config: SpawnerDescription, id: number) {
+        this.id = id;
+
         this.itemPool = config.possibleItems;
+
         this.spawnCountdown = new Countdown(config.timeBetweenSpawn);
+
         if (config.startSpawned) {
             this.spawnCountdown.setToReady();
         }
@@ -38,8 +43,6 @@ class Spawner {
         pos.subtract(size / 2);
 
         this.body = new GameObject(pos, size, size);
-
-        this.rng = new SeededRNG(seed);
     }
 
     public update(deltaTime: number): void {
@@ -60,16 +63,17 @@ class Spawner {
             if (this.rotationLerp.isActive()) {
                 this.contains.setAngle(this.rotationLerp.update(deltaTime));
             }
+            return;
+        }
+        this.suckInNewItem();
 
+        if (!Connection.get().isHost()) {
             return;
         }
         this.spawnCountdown.update(deltaTime);
-
         if (this.spawnCountdown.isDone()) {
             this.spawnNewItem();
-        } else {
-            this.suckInNewItem();
-        }
+        } 
     }
 
     private bobItemUpAndDown(deltaTime: number): void {
@@ -96,18 +100,26 @@ class Spawner {
     }
 
     private spawnNewItem(): void {
-        const toSpawn = this.itemPool[this.rng.getRandomInteger(0, this.itemPool.length - 1)];
-        const item = ItemManager.create(toSpawn, this.body.pos);
+        const toSpawn = this.itemPool[Utility.Random.getInteger(0, this.itemPool.length - 1)];
+
+        const noMessage = true;
+        const item = ItemManager.create(toSpawn, this.body.pos, noMessage);
 
         if (!item) {
             console.error("Error updating spawner ", toSpawn, ", doesn't exist");
             return;
         }
+
+        Connection.get().sendGameMessage(GameMessage.SpawnerSpawn, { id: this.id, item: toSpawn, itemId: item.getId() });
+
         this.spawnCountdown.reset();
-        this.setContaining(item, false);
+        this.setContaining(item);
     }
 
     private suckInNewItem(): void {
+        if (this.contains) {
+            return;
+        }
         const nearby = ItemManager.getNearby(this.body.pos, this.body.width, this.body.height);
         const maxSpeed = 100;
         for (const item of nearby) {
@@ -119,7 +131,10 @@ class Spawner {
         }
     }
 
-    private setContaining(item: IItem, lerp: boolean): void {
+    public setContaining(item: IItem, lerp: boolean = false): void {
+        if (this.contains) {
+            this.contains.setOwnership(Ownership.None);
+        }
         this.contains = item;
 
         const itemBody = item.getBody();
@@ -131,18 +146,22 @@ class Spawner {
         if (lerp) {
             this.xPositionLerp.startLerp(itemBody.pos.x, center.x);
             this.yPositionLerp.startLerp(itemBody.pos.y, center.y);
-            
+
             const normalized = Utility.Angle.normalizeAngle(item.getAngle());
-    
+
             const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
             this.rotationLerp.startLerp(normalized, target);
-    
+
         } else {
             itemBody.pos = center;
             item.setAngle(0);
         }
-        
+
         item.setOwnership(Ownership.InSpawner);
+    }
+
+    public getId(): number {
+        return this.id;
     }
 
     public draw(): void {

@@ -1,2 +1,2 @@
 export { Spawner } from "./spawner";
-export { SpawnManager } from "./spawnManager";
+export { SpawnerManager } from "./spawnerManager";

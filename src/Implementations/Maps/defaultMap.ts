@@ -12,21 +12,19 @@ defaultMap.fillArea("iceTile", 9, 5, 2, 4);
 defaultMap.fillArea("iceTile", 15, 7, 3, 3);
 defaultMap.setTile("iceTile", new Vector(15, 6));
 
+defaultMap.fillArea("woodPlatform", 3, 5, 4, 1);
+defaultMap.fillArea("woodPlatform", 5, 5, 1, 8);
+defaultMap.fillArea("woodPlatform", 5, 7, 4, 6);
+
 defaultMap.setPlayerSpawn(new Vector(8, 14));
 defaultMap.setPlayerSpawn(new Vector(15, 14));
 defaultMap.setPlayerSpawn(new Vector(15, 6));
 defaultMap.setPlayerSpawn(new Vector(16, 14));
 
-defaultMap.setItem("chestplate", new Vector(14, 14));
-defaultMap.setItem("helmet", new Vector(13, 14));
-
-defaultMap.setItem("shotgun", new Vector(10, 5));
-defaultMap.setItem("shotgun", new Vector(20, 14));
-defaultMap.setItem("glock", new Vector(21, 14));
-defaultMap.setItem("grenade", new Vector(19, 14));
-
 defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], startSpawned: false, timeBetweenSpawn: 10 });
 defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"], startSpawned: true, timeBetweenSpawn: 5 });
+defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: false, timeBetweenSpawn: 7 });
+defaultMap.setItemSpawner({ pos: new Vector(9, 4), possibleItems: ["helmet", "chestplate"], startSpawned: false, timeBetweenSpawn: 2 });
 
 defaultMap.setBackground(forestBackground);
 

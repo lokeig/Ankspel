@@ -1,4 +1,4 @@
-import { TileManager } from "@game/StaticObjects/Tiles";
+import { TileManager } from "@game/Tiles";
 import { GameMap } from "../Map/gameMap";
 import { PlayerManager } from "@player";
 import { MaxMinPositions, Utility } from "@common";
@@ -6,7 +6,7 @@ import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { BackgroundConfig } from "../Map/backgroundConfig";
-import { SpawnManager } from "@game/Spawner";
+import { SpawnerManager } from "@game/Spawner";
 
 class MapLoader {
     public static load(map: GameMap, host: boolean): BackgroundConfig {
@@ -28,7 +28,7 @@ class MapLoader {
         ItemManager.clear();
         ProjectileManager.clear();
         ParticleManager.clear();
-        SpawnManager.reset();
+        SpawnerManager.reset();
     }
 
     private static loadTiles(map: GameMap): void {
@@ -38,7 +38,7 @@ class MapLoader {
     }
 
     private static loadSpawners(map: GameMap): void {
-        map.getItemSpawners().forEach(spawner => SpawnManager.addSpawner(spawner));
+        map.getItemSpawners().forEach(spawner => SpawnerManager.create(spawner));
     }
 
     private static loadPlayerSpawns(map: GameMap) {

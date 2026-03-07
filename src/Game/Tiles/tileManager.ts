@@ -39,7 +39,7 @@ class TileManager {
 
         const accumulate = (gridPos: Vector) => {
             const tile = this.getTile(gridPos);
-            if (!tile) {
+            if (!tile || !tile.enabled()) {
                 return;
             }
             const tileObj = tile.body;

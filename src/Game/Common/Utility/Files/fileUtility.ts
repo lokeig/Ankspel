@@ -1,21 +1,8 @@
-import { animations, frames, tileLookup } from "./fileTypes";
+import { animations, frames } from "./fileTypes";
 import { Animation } from "../../Sprite/Animation/animation";
 import { Frame } from "../../Sprite/Animation/frame";
 
 class FileUtility {
-    public getTileLookup(): { tiles: Record<number, Frame>, lipLeft: Frame, lipRight: Frame } {
-        const config = tileLookup;
-        const result: { tiles: Record<number, Frame>, lipLeft: Frame, lipRight: Frame } = { tiles: {}, lipLeft: new Frame(), lipRight: new Frame() };
-        for (const key in config.tileLookup) {
-            result.tiles[Number(key)] = new Frame(config.tileLookup[key][0], config.tileLookup[key][1]);
-        }
-        result.lipLeft.row = config.lipLeft[0];
-        result.lipLeft.col = config.lipLeft[1];
-        result.lipRight.row = config.lipRight[0];
-        result.lipRight.col = config.lipRight[1];
-        return result;
-    }
-
     public setFrames(type: string, target: Record<string, Frame>): void {
         const config = frames[type];
         if (!config) {

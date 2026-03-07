@@ -7,11 +7,11 @@ import { MainMenuCSS } from "@impl/LobbyList/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
 import { MapManager } from "@game/Map";
-import { registerDefaultNames } from "@impl/registerItems";
 import { defaultMap, defaultMap2, defaultMap3, defaultMap4 } from "@impl/Maps";
 import { RequestAnimationFrameTimer } from "@impl/FrameTimer/requestAnimationFrame";
 import { HTMLAudio } from "@impl/Audio/HTMLAudio";
 import { AudioManager } from "@game/Audio/audioManager";
+import { registerDefaultNames } from "@impl/register";
 
 Input.init();
 Render.set(new CanvasRender("gameCanvas"));

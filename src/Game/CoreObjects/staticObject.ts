@@ -3,7 +3,6 @@ import { GameObject } from "./gameObject";
 import { Vector } from "@math";
 
 class StaticObject extends GameObject {
-
     private neighbours: Set<Direction> = new Set();
     private lipLeft: boolean = false;
     private lipRight: boolean = false;
@@ -27,6 +26,22 @@ class StaticObject extends GameObject {
             return this.lipLeft;
         } else {
             return this.lipRight;
+        }
+    }
+
+    public neighbourStatus(): {
+        top: boolean, right: boolean, bot: boolean, left: boolean,
+        topRight: boolean, topLeft: boolean, botRight: boolean, botLeft: boolean
+    } {
+        return {
+            top: this.isNeighbour(Direction.Up),
+            right: this.isNeighbour(Direction.Right),
+            left: this.isNeighbour(Direction.Left),
+            bot: this.isNeighbour(Direction.Down),
+            topRight: this.isNeighbour(Direction.UpRight),
+            topLeft: this.isNeighbour(Direction.UpLeft),
+            botRight: this.isNeighbour(Direction.DownRight),
+            botLeft: this.isNeighbour(Direction.DownLeft)
         }
     }
 

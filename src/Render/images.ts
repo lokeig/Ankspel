@@ -23,6 +23,7 @@ const Images = {
     // Tiles
     tileIce: { src: '/assets/Images/Tiles/tileIce.png', frameWidth: 16, frameHeight: 16 },
     tileNature: { src: '/assets/Images/Tiles/natureTileset.png', frameWidth: 16, frameHeight: 16 },
+    woodPlatform: { src: '/assets/Images/Tiles/woodPlatform.png', frameWidth: 16, frameHeight: 16 },
 
     // Items
     prop: { src: '/assets/Images/Items/props.png', frameWidth: 16, frameHeight: 16 },

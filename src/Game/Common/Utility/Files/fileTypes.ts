@@ -1,10 +1,8 @@
-import { animationConfigJSON, frameConfigJSON, tileLookupConfigJSON } from "@config";
-import { Controls } from "../../Types/controls";
+import { animationConfigJSON, frameConfigJSON } from "@config";
 import { Frame } from "../../Sprite/Animation/frame";
 
 const animations: Record<string, Record<string, AnimationConfig>> = animationConfigJSON;
 const frames: Record<string, Record<string, Frame>> = frameConfigJSON;
-const tileLookup: TileLookupConfig = tileLookupConfigJSON;
 
 type TileLookupConfig = {
     tileLookup: Record<string, number[]>;
@@ -33,6 +31,6 @@ type AnimationConfig = {
     };
 };
 
-export type { ImageDefinition, Controls, AnimationConfig };
-export { animations, frames, tileLookup };
+export type { ImageDefinition, AnimationConfig };
+export { animations, frames };
 

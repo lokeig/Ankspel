@@ -34,7 +34,7 @@ class ItemManager {
         this.register.set(type, constructor);
     }
 
-    public static create(type: string, gridPos: Vector): IItem | null {
+    public static create(type: string, gridPos: Vector, noMessage: boolean = false): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
@@ -48,15 +48,17 @@ class ItemManager {
         this.addToMap(newItem);
         this.idManager.add(newItem);
 
-        Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
-
+        if (!noMessage) {
+            Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
+        }
+        
         return newItem;
     }
 
-    public static spawn(type: string, gridPos: Vector, id: number): void {
+    public static spawn(type: string, gridPos: Vector, id: number): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
-            return;
+            return null;
         }
         const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
@@ -64,6 +66,7 @@ class ItemManager {
 
         this.addToMap(newItem);
         this.idManager.setID(newItem, id);
+        return newItem;
     }
 
     public static getItems(pos: Vector): Set<IItem> | undefined {
