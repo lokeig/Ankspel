@@ -1,4 +1,4 @@
-import { Countdown, IState, SpriteSheet, Utility } from "@common";
+import { Countdown, IState, SpriteSheet } from "@common";
 import { GameLoopState } from "../gameLoopState";
 import { DuckGame } from "../game";
 import { Connection } from "@server";

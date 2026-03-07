@@ -18,6 +18,10 @@ class SeededRNG {
         return min + (max - min) * this.next();
     }
 
+    public getRandomInteger(min: number, max: number): number {
+        return Math.floor(this.getInRange(min, max + 1));
+    }
+
     public order(n: number): number[] {
         const arr = Array.from({ length: n }, (_, i) => i);
         for (let i = arr.length - 1; i > 0; i--) {

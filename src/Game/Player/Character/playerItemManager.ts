@@ -5,6 +5,7 @@ import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@
 import { Connection, GameMessage, GameMessageMap } from "@server";
 import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
+import { SpawnManager } from "@game/Spawner";
 
 class PlayerItemManager {
     private playerBody: DynamicObject;
@@ -128,8 +129,12 @@ class PlayerItemManager {
     }
 
     private getNearbyItem(): IItem | null {
+        const inSpawners = SpawnManager.getSpawnerItems();
+        const onGround = ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height);
+        const nearby = [...inSpawners, ...onGround];
+
         let fallbackItem: IItem | null = null;
-        for (const item of ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height)) {
+        for (const item of nearby) {
             if (!this.playerBody.collision(item.getBody().scale(30, 30))) {
                 continue;
             }

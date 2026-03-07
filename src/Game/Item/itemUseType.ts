@@ -12,6 +12,7 @@ enum OnItemUseType {
 enum Ownership {
     Held,
     Equipped,
+    InSpawner,
     None
 }
 

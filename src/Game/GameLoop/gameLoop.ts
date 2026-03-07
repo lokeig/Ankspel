@@ -26,10 +26,10 @@ class GameLoop {
     }
 
     public async init() {
+        MainMenu.get().show();
         await this.preloadAllImages();
         await this.preloadAllAudio();
 
-        MainMenu.get().show();
         NetworkHandler.init();
 
         NetworkHandler.setOnStart(() => { this.startGame(); });

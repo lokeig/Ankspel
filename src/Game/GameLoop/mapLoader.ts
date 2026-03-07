@@ -1,11 +1,12 @@
 import { TileManager } from "@game/StaticObjects/Tiles";
-import { GameMap } from "./gameMap";
+import { GameMap } from "../Map/gameMap";
 import { PlayerManager } from "@player";
 import { MaxMinPositions, Utility } from "@common";
 import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
-import { BackgroundConfig } from "./backgroundConfig";
+import { BackgroundConfig } from "../Map/backgroundConfig";
+import { SpawnManager } from "@game/Spawner";
 
 class MapLoader {
     public static load(map: GameMap, host: boolean): BackgroundConfig {
@@ -15,6 +16,7 @@ class MapLoader {
         if (host) {
             this.loadPlayerSpawns(map);
             this.loadItems(map);
+            this.loadSpawners(map);
         }
 
         return map.getBackground();
@@ -26,12 +28,17 @@ class MapLoader {
         ItemManager.clear();
         ProjectileManager.clear();
         ParticleManager.clear();
+        SpawnManager.reset();
     }
 
     private static loadTiles(map: GameMap): void {
         map.getTiles().forEach(tile => {
-            TileManager.setTile(tile);
+            TileManager.setTile(tile.type, tile.pos);
         });
+    }
+
+    private static loadSpawners(map: GameMap): void {
+        map.getItemSpawners().forEach(spawner => SpawnManager.addSpawner(spawner));
     }
 
     private static loadPlayerSpawns(map: GameMap) {

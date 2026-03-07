@@ -1,4 +1,3 @@
-import { GameMap, MapLoader, MapManager } from "@game/Map";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 

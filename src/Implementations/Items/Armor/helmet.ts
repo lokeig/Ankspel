@@ -14,15 +14,19 @@ class Helmet extends Item {
     private damaged: boolean = false;
     private target: ProjectileTarget;
 
+    private static standardWidth: number = 30;
+    private static standardHeight: number = 26;
+    
+    private static equippedWidth: number = 40;
+    private static equippedHeight: number = 40;
+
     static {
         this.spriteSheet = new SpriteSheet(Images.armor);
         Utility.File.setFrames("helmet", this.frames);
     }
 
     constructor(pos: Vector, id: number) {
-        const width = 32;
-        const height = 32;
-        super(pos, width, height, id);
+        super(pos, Helmet.standardWidth, Helmet.standardHeight, id);
 
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
@@ -48,16 +52,16 @@ class Helmet extends Item {
     }
 
     public onEquip(slot: EquipmentSlot): void {
-        this.body.width = 40;
-        this.body.height = 40;
         if (slot === EquipmentSlot.Head) {
+            this.body.width = Helmet.equippedWidth;
+            this.body.height = Helmet.equippedHeight;
             ProjectileManager.addCollidable(this.target);
         }
     }
 
     public onUnequip(): void {
-        this.body.width = 32;
-        this.body.height = 32;
+        this.body.width = Helmet.standardWidth;
+        this.body.height = Helmet.standardHeight;
         ProjectileManager.removeCollidable(this.target);
     }
 
@@ -79,7 +83,6 @@ class Helmet extends Item {
     public draw(): void {
         const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
         const drawSize = 32;
-
         Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
     }
 }

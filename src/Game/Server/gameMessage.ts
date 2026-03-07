@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, EquipmentSlot, ProjectileEffectType } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType } from "@common";
 import { Vector } from "@math";
 import { ImageName } from "@render";
 

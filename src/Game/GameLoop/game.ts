@@ -1,13 +1,15 @@
 import { ParticleManager } from "@game/Particles";
 import { ItemManager } from "@game/Item";
-import { Player, PlayerManager } from "@game/Player";
+import { PlayerManager } from "@game/Player";
 import { ProjectileManager } from "@game/Projectile";
 import { TileManager } from "@game/StaticObjects/Tiles";
 import { Camera } from "@game/Camera";
 import { Parallax } from "@game/ParallaxBackground/parallax";
-import { MapLoader, MapManager } from "@game/Map";
+import { MapManager } from "@game/Map";
 import { Connection } from "@server";
 import { MaxMinPositions } from "@common";
+import { MapLoader } from "./mapLoader";
+import { SpawnManager } from "@game/Spawner";
 
 class DuckGame {
     private camera = new Camera();
@@ -46,6 +48,7 @@ class DuckGame {
         ItemManager.update(deltaTime);
         PlayerManager.update(deltaTime, this.mapBounds.maxY);
         ParticleManager.update(deltaTime);
+        SpawnManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
     }
 
@@ -54,6 +57,7 @@ class DuckGame {
 
         ProjectileManager.draw();
         ItemManager.draw();
+        SpawnManager.draw();
         PlayerManager.draw();
         ParticleManager.draw();
         TileManager.draw();

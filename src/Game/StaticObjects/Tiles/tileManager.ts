@@ -1,11 +1,11 @@
 import { Vector } from "@math";
 import { Grid, Utility, Direction, Side } from "@common";
 import { CollisionObject, GameObject } from "@core";
-import { ITile } from "./ITile";
+import { ITile, TileConstructor } from "./ITile";
 
 class TileManager {
-
     private static tiles = new Map<string, ITile>();
+    private static register = new Map<string, TileConstructor>();
 
     public static clear(): void {
         this.tiles = new Map;
@@ -15,8 +15,13 @@ class TileManager {
         return this.tiles.get(Grid.key(gridPos));
     }
 
-    public static setTile(tile: ITile) {
-        const gridPos = Grid.getGridPos(tile.body.pos);
+    public static setTile(name: string, gridPos: Vector): void {
+        const tileConstructor = this.register.get(name);
+        if (!tileConstructor) {
+            console.error("Tried to add non registered tile: ", name);
+            return;
+        }
+        const tile = new tileConstructor(Grid.getWorldPos(gridPos), Grid.size);
         this.tiles.set(Grid.key(gridPos), tile);
 
         this.setNeighbours(tile);
@@ -91,7 +96,11 @@ class TileManager {
         }
     }
 
-    static draw() {
+    public static registerTile(name: string, tile: TileConstructor): void {
+        this.register.set(name, tile);
+    }
+
+    public static draw(): void {
         for (const tile of this.tiles.values()) {
             tile.draw();
         }

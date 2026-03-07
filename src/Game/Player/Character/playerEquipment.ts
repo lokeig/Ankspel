@@ -58,7 +58,7 @@ class PlayerEquipment {
         item.setOwnership(Ownership.None);
 
         Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-            itemID: ItemManager.getItemID(item)!,
+            id: ItemManager.getItemID(item)!,
             pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
             direction: item.getBody().direction,
             throwType

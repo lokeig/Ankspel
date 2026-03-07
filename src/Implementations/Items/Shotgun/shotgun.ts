@@ -45,7 +45,7 @@ class Shotgun extends Item {
         this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 2;
         this.firearmInfo.bulletCount = 6;
-        this.firearmInfo.bulletAngleVariation = Math.PI / 38;
+        this.firearmInfo.bulletAngleVariation = Math.PI / 30;
         this.firearmInfo.muzzleOffset = new Vector(28, -10);
         this.firearmInfo.knockback = new Vector(720, 240);
         this.firearmInfo.bulletRange = 8;

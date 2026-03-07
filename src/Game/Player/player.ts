@@ -25,7 +25,9 @@ class Player {
         const worldPos = Grid.getWorldPos(gridPos);
         worldPos.y -= this.character.standardBody.height;
         worldPos.x += (Grid.size - this.character.standardBody.width) / 2;
+
         this.character.setPos(worldPos);
+        
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
     }
 
@@ -35,7 +37,7 @@ class Player {
     
     public held(): boolean {
         const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
-        return ragdoll.getOwnership() === Ownership.Held;
+        return ragdoll.getOwnership() !== Ownership.None;
     }
 
     public reset(): void {

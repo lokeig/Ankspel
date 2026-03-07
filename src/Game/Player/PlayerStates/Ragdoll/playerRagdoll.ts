@@ -88,6 +88,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             this.updateOwned(deltaTime);
             return;
         }
+        if (this.isOnSpawner()) {
+            this.updateOnSpawner(deltaTime);
+            return;
+        }
 
         this.updateTimers(deltaTime);
         this.updatePhysics(deltaTime);
@@ -118,6 +122,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.syncBackToPlayerBody();
         this.player.standardBody.pos.y -= PlayerRagdoll.ExitJumpHeight;
         this.player.standardBody.velocity = new Vector(this.torso.velocity.x, PlayerRagdoll.ExitVerticalSpeed);
+
+        this.owned = Ownership.None;
     }
 
     private initializePositions(from: PlayerState): void {
@@ -137,15 +143,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             this.torso.pos = basePos.clone().add(new Vector(0, this.height));
             this.legs.pos = basePos.clone().add(new Vector(0, this.height * 2));
         }
-    }
-
-    private nonLocalUpdate(deltaTime: number): void {
-        this.updateTimers(deltaTime);
-        this.updatePhysics(deltaTime);
-        this.solveConstraints(deltaTime);
-        this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
-        this.updateAngles();
-        this.syncEquipment();
     }
 
     private initializeVelocities(): void {
@@ -237,14 +234,26 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private updateOwned(deltaTime: number): void {
         if (this.legs.direction !== this.head.direction) {
-            this.torso.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse * this.head.getDirectionMultiplier());
+            this.torso.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse / 2 * this.head.getDirectionMultiplier());
+            this.head.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse / 2 * this.head.getDirectionMultiplier());
         }
 
-        this.legs.direction = this.head.direction;
+        this.head.direction = this.legs.direction;
 
+        this.head.update(deltaTime);
         this.torso.update(deltaTime);
-        this.legs.update(deltaTime);
 
+        this.solveConstraints(deltaTime);
+        this.updateAngles();
+        this.syncEquipment();
+        this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
+    }
+
+    private updateOnSpawner(deltaTime: number): void {
+        this.head.update(deltaTime);
+        this.torso.update(deltaTime);
+
+        this.updateTimers(deltaTime);
         this.solveConstraints(deltaTime);
         this.updateAngles();
         this.syncEquipment();
@@ -253,6 +262,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private isHeld(): boolean {
         return this.owned === Ownership.Held;
+    }
+
+    private isOnSpawner(): boolean {
+        return this.owned === Ownership.InSpawner;
     }
 
     private keepDistance(deltaTime: number, a: DynamicObject, b: DynamicObject, targetDistance: number, allowStretch: boolean): void {
@@ -318,17 +331,20 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     // For IItem
+    
+    private static holdOffset = new Vector(0, -3);
+    private static handOffset = new Vector();
 
     public update(_deltaTime: number): void {
 
     }
 
     public getBody(): DynamicObject {
-        return this.head;
+        return this.legs;
     }
 
     public getAngle(): number {
-        return this.headAngle;
+        return this.legsAngle;
     }
 
     public setAngle(_angle: number): void {
@@ -340,11 +356,11 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public getHandOffset(): Vector {
-        return new Vector();
+        return PlayerRagdoll.handOffset;
     }
 
     public getHoldOffset(): Vector {
-        return new Vector();
+        return PlayerRagdoll.holdOffset;
     }
 
     public setOwnership(value: Ownership): void {
@@ -362,6 +378,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     public interactions(): ItemUseInteractions {
         return this.useInteractions;
     }
+
     public throw(throwType: ThrowType): void {
         const direcMult = this.head.getDirectionMultiplier();
         this.head.velocity.set(0, 0);
@@ -377,7 +394,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
                 break;
             }
             case (ThrowType.HardDiagonal): {
-                this.torso.velocity.set(2000 * direcMult, -600);
+                this.torso.velocity.set(2000 * direcMult, -1600);
                 break;
             }
             case (ThrowType.Drop): {

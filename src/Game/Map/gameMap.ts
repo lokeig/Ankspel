@@ -1,16 +1,16 @@
-import { Grid, Utility } from "@common";
-import { TileConstructor, ITile } from "@game/StaticObjects/Tiles";
+import { Utility } from "@common";
 import { ItemDescription } from "./itemDescription";
 import { Vector } from "@math";
 import { BackgroundConfig } from "./backgroundConfig";
-import { SpawnerInfo } from "./spawnerInfo";
+import { SpawnerDescription } from "./spawnerDescription";
+import { TileDescription } from "./tileDescription";
 
 class GameMap {
-    private tiles: ITile[] = [];
+    private tiles: TileDescription[] = [];
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
     private background!: BackgroundConfig;
-    private itemSpawners: SpawnerInfo[] = [];
+    private itemSpawners: SpawnerDescription[] = [];
 
     public setBackground(config: BackgroundConfig): void {
         this.background = config;
@@ -20,20 +20,18 @@ class GameMap {
         return this.background;
     }
 
-    public setTile(tile: TileConstructor, gridPos: Vector): void {
-        const pos = Grid.getWorldPos(gridPos);
-        const newTile = new tile(pos, Grid.size);
-        this.tiles.push(newTile);
+    public setTile(type: string, gridPos: Vector): void {
+        this.tiles.push({ type, pos: gridPos });
     }
 
-    public getTiles(): ITile[] {
+    public getTiles(): TileDescription[] {
         return this.tiles;
     }
 
-    public fillArea(tile: TileConstructor, x: number, y: number, width: number, height: number): void {
+    public fillArea(type: string, x: number, y: number, width: number, height: number): void {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                this.setTile(tile, new Vector(x + i, y + j));
+                this.setTile(type, new Vector(x + i, y + j));
             }
         }
     }
@@ -42,11 +40,11 @@ class GameMap {
         this.items.push({ type, gridPos });
     }
 
-    public setItemSpawner(pos: SpawnerInfo): void {
-        this.itemSpawners.push(pos);
+    public setItemSpawner(description: SpawnerDescription): void {
+        this.itemSpawners.push(description);
     }
 
-    public getItemSpawners(): SpawnerInfo[] {
+    public getItemSpawners(): SpawnerDescription[] {
         return this.itemSpawners;
     }
 

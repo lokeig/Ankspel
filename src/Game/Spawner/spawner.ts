@@ -1,0 +1,205 @@
+import { Countdown, Grid, Lerp, lerpAngle, lerpEase, lerpStandard, SeededRNG, SpriteSheet, Utility } from "@common";
+import { GameObject } from "@core";
+import { SpawnerDescription } from "@game/Map/spawnerDescription";
+import { IItem, ItemManager, Ownership } from "@item";
+import { Vector } from "@math";
+import { Images, Render, RenderSpace } from "@render";
+
+class Spawner {
+    private itemPool: string[];
+    private spawnCountdown: Countdown;
+    private contains: IItem | null = null;
+    private rng: SeededRNG;
+    private body: GameObject;
+
+    private static yBobbingSpeed: number = 4;
+    private static yBobbingMax: number = 3;
+    private yBobbingLocation: number = 0;
+
+    private xPositionLerp = new Lerp(5, lerpEase);
+    private yPositionLerp = new Lerp(5, lerpEase);
+    private rotationLerp = new Lerp(10, lerpAngle);
+
+    private ballLocation: number = 0;
+    private static ballSprite = new SpriteSheet(Images.spawnerBall);
+    private static frameSprite = new SpriteSheet(Images.itemSpawner);
+    private static frameDrawSize = new Vector(28, 12);
+
+    constructor(config: SpawnerDescription, seed: number) {
+        this.itemPool = config.possibleItems;
+        this.spawnCountdown = new Countdown(config.timeBetweenSpawn);
+        if (config.startSpawned) {
+            this.spawnCountdown.setToReady();
+        }
+        const size = 25;
+
+        const pos = Grid.getWorldPos(config.pos);
+        pos.add(Grid.size / 2);
+        pos.subtract(size / 2);
+
+        this.body = new GameObject(pos, size, size);
+
+        this.rng = new SeededRNG(seed);
+    }
+
+    public update(deltaTime: number): void {
+        this.ballLocation += deltaTime;
+
+        if (this.contains) {
+            if (this.contains.getOwnership() !== Ownership.InSpawner) {
+                this.dropContaining();
+                return;
+            }
+            if (this.xPositionLerp.isActive()) {
+                const pos = this.contains.getBody().pos;
+                pos.x = this.xPositionLerp.update(deltaTime);
+                pos.y = this.yPositionLerp.update(deltaTime);
+            } else {
+                this.bobItemUpAndDown(deltaTime);
+            }
+            if (this.rotationLerp.isActive()) {
+                this.contains.setAngle(this.rotationLerp.update(deltaTime));
+            }
+
+            return;
+        }
+        this.spawnCountdown.update(deltaTime);
+
+        if (this.spawnCountdown.isDone()) {
+            this.spawnNewItem();
+        } else {
+            this.suckInNewItem();
+        }
+    }
+
+    private bobItemUpAndDown(deltaTime: number): void {
+        const itemBody = this.contains!.getBody();
+
+        const center = this.body.getCenter();
+        center.x -= itemBody.width / 2;
+        center.y -= itemBody.height / 2;
+
+        this.yBobbingLocation += deltaTime;
+
+        const offset = Spawner.yBobbingMax * Math.sin(this.yBobbingLocation * Spawner.yBobbingSpeed);
+
+        itemBody.pos.y = center.y + offset;
+        itemBody.pos.x = center.x;
+    }
+
+    public getContaining(): IItem | null {
+        return this.contains;
+    }
+
+    private dropContaining(): void {
+        this.contains = null;
+    }
+
+    private spawnNewItem(): void {
+        const toSpawn = this.itemPool[this.rng.getRandomInteger(0, this.itemPool.length - 1)];
+        const item = ItemManager.create(toSpawn, this.body.pos);
+
+        if (!item) {
+            console.error("Error updating spawner ", toSpawn, ", doesn't exist");
+            return;
+        }
+        this.spawnCountdown.reset();
+        this.setContaining(item, false);
+    }
+
+    private suckInNewItem(): void {
+        const nearby = ItemManager.getNearby(this.body.pos, this.body.width, this.body.height);
+        const maxSpeed = 100;
+        for (const item of nearby) {
+            const lowEnoughSpeed = Math.abs(item.getBody().velocity.x) < maxSpeed && Math.abs(item.getBody().velocity.y) < maxSpeed;
+            if (item.getBody().collision(this.body) && lowEnoughSpeed) {
+                this.setContaining(item, true);
+                break;
+            }
+        }
+    }
+
+    private setContaining(item: IItem, lerp: boolean): void {
+        this.contains = item;
+
+        const itemBody = item.getBody();
+        const center = this.body.getCenter();
+
+        center.x -= itemBody.width / 2;
+        center.y -= itemBody.height / 2;
+
+        if (lerp) {
+            this.xPositionLerp.startLerp(itemBody.pos.x, center.x);
+            this.yPositionLerp.startLerp(itemBody.pos.y, center.y);
+            
+            const normalized = Utility.Angle.normalizeAngle(item.getAngle());
+    
+            const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
+            this.rotationLerp.startLerp(normalized, target);
+    
+        } else {
+            itemBody.pos = center;
+            item.setAngle(0);
+        }
+        
+        item.setOwnership(Ownership.InSpawner);
+    }
+
+    public draw(): void {
+        const ballDrawSize = 8;
+
+        const maxOffsetX = 20;
+        const maxOffsetY = 5;
+        const maxScaleOffset = 0.25;
+
+        const speed = 5;
+        const phase = this.ballLocation * speed;
+
+        const center = this.body.getCenter();
+
+        const sin = Math.sin(phase);
+        const cos = Math.cos(phase);
+
+        const ballScale = 1 + cos * maxScaleOffset;
+
+        const offsetX = sin * maxOffsetX;
+        const offsetY = cos * maxOffsetY;
+
+        const ball1Size = ballDrawSize * ballScale;
+        const ball2Size = ballDrawSize * (2 - ballScale);
+
+        const ball1Pos = center.clone().subtract(ball1Size / 2);
+        ball1Pos.x += offsetX;
+        ball1Pos.y += offsetY;
+
+        const ball2Pos = center.clone().subtract(ball2Size / 2);
+        ball2Pos.x -= offsetX;
+        ball2Pos.y -= offsetY;
+
+        const frontBall = cos > 0 ? 1 : 2;
+
+        const framePos = center;
+        const frameYOffset = 6;
+
+        framePos.x -= Spawner.frameDrawSize.x / 2;
+        framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
+
+        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0);
+
+        if (frontBall === 1) {
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0);
+            if (this.contains) {
+                this.contains.draw();
+            }
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0);
+        } else {
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0);
+            if (this.contains) {
+                this.contains.draw();
+            }
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0);
+        }
+    }
+}
+
+export { Spawner };

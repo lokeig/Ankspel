@@ -39,6 +39,8 @@ const Images = {
     smallFlare: { src: '/assets/Images/VFX/smallFlare.png', frameWidth: 11, frameHeight: 10 },
     bulletRebound: { src: '/assets/Images/VFX/bulletRebound.png', frameWidth: 16, frameHeight: 16 },
     bulletGlow: { src: '/assets/Images/VFX/bulletGlow.png', frameWidth: 1, frameHeight: 5 },
+    spawnerBall: { src: '/assets/Images/VFX/spawnerBall.png', frameWidth: 4, frameHeight: 4 },
+    itemSpawner: { src: '/assets/Images/VFX/itemSpawner.png', frameWidth: 14, frameHeight: 6 },
 
     // Background
     forestBackground: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },

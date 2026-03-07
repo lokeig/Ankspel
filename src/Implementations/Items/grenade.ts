@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { SpriteSheet, Countdown, Utility, Frame, ItemInteraction } from "@common";
+import { SpriteSheet, Countdown, Utility, Frame, ItemInteraction, SeededRNG } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
@@ -19,6 +19,8 @@ class Grenade extends Item {
     private activated: boolean = false;
     private locallyActivated!: boolean;
 
+    private rng!: SeededRNG;
+
     static {
         this.spriteSheet = new SpriteSheet(Images.grenade);
         Utility.File.setFrames("grenade", this.frames);
@@ -34,12 +36,12 @@ class Grenade extends Item {
         this.body.bounceFactor = 0.3;
 
         this.useInteractions.set(ItemInteraction.Activate, (seed: number, local: boolean) => {
-            this.activate();
+            this.activate(seed);
             this.locallyActivated = local;
             return [];
         });
     }
-    
+
     public update(deltaTime: number): void {
         if (this.activated) {
             this.explodingUpdate(deltaTime);
@@ -69,15 +71,20 @@ class Grenade extends Item {
 
         const amountOfBullets = 24;
         for (let i = 0; i < amountOfBullets; i++) {
-            const angle = i * 2 * Math.PI / amountOfBullets;
+            const angleRandomness = Math.PI / 12;
+            let angle = i * 2 * Math.PI / amountOfBullets;
+            angle -= this.rng.getInRange(-angleRandomness, angleRandomness);
+
             const pos = this.body.pos;
             const bullet = new Bullet(pos, angle, 3400, 7);
+
             ProjectileManager.addProjectile(bullet, this.locallyActivated);
         }
         AudioManager.get().play(Sound.explode);
     }
 
-    private activate(): void {
+    private activate(seed: number): void {
+        this.rng = new SeededRNG(seed);
         AudioManager.get().play(Sound.pullPin);
         this.activated = true;
     }

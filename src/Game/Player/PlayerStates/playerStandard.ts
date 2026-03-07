@@ -56,7 +56,7 @@ class PlayerStandard implements IState<PlayerState> {
     private setEquipmentLocation() {
         const center = this.player.standardBody.getCenter();
         const positions: [EquipmentSlot, Vector][] = [
-            [EquipmentSlot.Head, new Vector(0, -19)],
+            [EquipmentSlot.Head, new Vector(0, -17)],
             [EquipmentSlot.Body, new Vector(2, 1)],
             [EquipmentSlot.Boots, new Vector(0, PlayerCharacter.standardHeight / 2)],
         ];

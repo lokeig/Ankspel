@@ -3,6 +3,8 @@ export { Lerp } from "./Lerp/lerp";
 export { lerpAngle } from "./Lerp/Functions/lerpAngle";
 export { lerpTriangle } from "./Lerp/Functions/lerpTriangle";
 export { lerpStandard } from "./Lerp/Functions/lerpStandard";
+export { lerpEase } from "./Lerp/Functions/lerpEase";
+
 
 // Sprite
 export { SpriteSheet } from "./Sprite/spriteSheet";
