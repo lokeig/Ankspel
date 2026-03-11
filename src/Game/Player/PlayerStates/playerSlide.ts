@@ -153,6 +153,9 @@ class PlayerSlide implements IState<PlayerState> {
 
         this.platformIgnoreTime.reset();
         this.player.standardBody.ignorePlatforms = false;
+
+        this.player.jump.jumpEnabled = true;
+
         if (this.player.isLocal()) {
             this.player.movement.moveEnabled = true;
             this.player.itemManager.forcedThrowType = null;

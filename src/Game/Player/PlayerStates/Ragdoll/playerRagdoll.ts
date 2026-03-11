@@ -254,7 +254,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     private updateOnSpawner(deltaTime: number): void {
-        console.log("local: ", this.player.isLocal(), " on spawner")
         this.head.update(deltaTime);
         this.torso.update(deltaTime);
 

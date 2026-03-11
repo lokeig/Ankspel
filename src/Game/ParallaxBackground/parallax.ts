@@ -1,49 +1,69 @@
-import { SpriteSheet } from "@common";
-import { BackgroundConfig } from "@game/Map/backgroundConfig";
 import { Vector } from "@math";
-import { Render, RenderSpace } from "@render";
+import { Render } from "@render";
+import { ParallaxLayer } from "./parallaxLayer";
+import { MaxMinPositions } from "@common";
 
 class Parallax {
-    private sheets: SpriteSheet[];
-    private static imageWidth = 320;
-    private static imageHeight = 240;
-    private drawPos: Vector = new Vector();
-    private static ZoomInFactor: number = 1.3;
+    private static register: Map<string, Parallax> = new Map();
 
-    constructor(config: BackgroundConfig) {
-        this.sheets = new Array(config.layers.length);
-        for (let i = 0; i < config.layers.length; i++) {
-            const layer = config.layers[i];
-            this.sheets[i] = new SpriteSheet(layer.src);
-            this.sheets[i].setRenderSpace(RenderSpace.Screen); 3
+    private layers: ParallaxLayer[];
+
+    constructor(...layers: ParallaxLayer[]) {
+        this.layers = layers;
+    }
+
+    public update(deltaTime: number): void {
+        this.layers.forEach(layer => layer.update(deltaTime));
+    }
+
+    public draw(positions: MaxMinPositions, pos: Vector): void {
+        const render = Render.get();
+
+        const width = render.getWidth();
+        const height = render.getHeight();
+        const zoom = render.getCameraZoom();
+
+        const length = new Vector(positions.maxX - positions.minX, positions.maxY - positions.minY);
+
+        const percentageX = (pos.x - positions.minX) / length.x;
+        const percentageY = (pos.y - positions.minY) / length.y;
+
+        for (const layer of this.layers) {
+
+            const scaleX = width / layer.getWidth();
+            const scaleY = height / layer.getHeight();
+            const maxScale = Math.max(scaleX, scaleY);
+
+            const scale = Math.max(zoom * layer.getZoomFactor(), maxScale);
+
+            // const parallax = layer.getParallaxFactor();
+
+            console.log(percentageX); 
+
+            const offset = new Vector(
+                positions.minX + (positions.maxX * percentageX),
+                positions.minY + (positions.maxY * percentageY)
+            );
+
+            const layerWidth = layer.getWidth() * scale;
+            const layerHeight = layer.getHeight() * scale;
+
+            const drawPos = new Vector(
+                (width - layerWidth) / 2,
+                (height - layerHeight) / 2
+            ).subtract(offset);
+
+            layer.draw(drawPos, scale);
         }
     }
 
-    public update(_deltaTime: number): void {
-
+    public static registerBackground(name: string, background: Parallax): void {
+        this.register.set(name, background);
     }
 
-    public draw(): void {
-        const scaleX =  Render.get().getWidth() / Parallax.imageWidth;
-        const scaleY =  Render.get().getHeight() / Parallax.imageHeight;
-
-        const maxScale = Math.max(scaleX, scaleY);
-        const currentScale = Render.get().getCameraZoom() * Parallax.ZoomInFactor;
-        const scale = Math.max(currentScale, maxScale);
-
-        const drawDimensions = new Vector(Parallax.imageWidth, Parallax.imageHeight).multiply(scale);
-        
-
-        this.drawPos.set(
-            (Render.get().getWidth() - Parallax.imageWidth * scale) / 2,
-            (Render.get().getHeight() - Parallax.imageHeight *scale) / 2
-        );
-
-        this.sheets.forEach(sheet => {
-            sheet.draw(this.drawPos, drawDimensions, false, 0);
-        })
+    public static getBackground(name: string): Parallax | undefined {
+        return this.register.get(name);
     }
-
 }
 
 export { Parallax };

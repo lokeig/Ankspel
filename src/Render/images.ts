@@ -44,7 +44,9 @@ const Images = {
     itemSpawner: { src: '/assets/Images/VFX/itemSpawner.png', frameWidth: 14, frameHeight: 6 },
 
     // Background
-    forestBackground: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },
+    forest: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },
+    cloud1: { src: '/assets/Images/ParallaxBackgrounds/cloud1.png', frameWidth: 43, frameHeight: 12 },
+    cloud2: { src: '/assets/Images/ParallaxBackgrounds/cloud2.png', frameWidth: 21, frameHeight: 10 },
 
     // UI
     ready: { src: '/assets/Images/UI/ready.png', frameWidth: 41, frameHeight: 9 },

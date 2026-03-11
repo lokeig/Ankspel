@@ -60,7 +60,8 @@ class NetworkHandler {
     private static quickStart = (): void => {
         PlayerManager.create(MainMenu.get().getChosenColor());
         PlayerManager.create(MainMenu.get().getChosenColor());
-        // PlayerManager.create(colors[2]);
+        PlayerManager.create(MainMenu.get().getChosenColor());
+        PlayerManager.create(MainMenu.get().getChosenColor());
 
         Connection.get().enableLocalMode();
 

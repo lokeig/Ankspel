@@ -1,7 +1,6 @@
 import { Utility } from "@common";
 import { ItemDescription } from "./itemDescription";
 import { Vector } from "@math";
-import { BackgroundConfig } from "./backgroundConfig";
 import { SpawnerDescription } from "./spawnerDescription";
 import { TileDescription } from "./tileDescription";
 
@@ -9,14 +8,14 @@ class GameMap {
     private tiles: TileDescription[] = [];
     private playerSpawns: Vector[] = [];
     private items: ItemDescription[] = [];
-    private background!: BackgroundConfig;
+    private background!: string;
     private itemSpawners: SpawnerDescription[] = [];
 
-    public setBackground(config: BackgroundConfig): void {
-        this.background = config;
+    public setBackground(background: string): void {
+        this.background = background;
     }   
 
-    public getBackground(): BackgroundConfig {
+    public getBackground(): string {
         return this.background;
     }
 

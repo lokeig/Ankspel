@@ -25,7 +25,7 @@ class PlayerJump {
             this.coyoteTime.reset();
         }
         this.jump(deltaTime);
-        }
+    }
 
     private jump(deltaTime: number): void {
         if (this.controls.jump(InputMode.Press) && this.jumpReady() && this.jumpEnabled) {
@@ -49,7 +49,7 @@ class PlayerJump {
     public getJumpRemaining(): number {
         return 1 - this.maxJumpTime.getPercentageReady();
     }
-    
+
     public getJumpForce(): number {
         return this.jumpForce;
     }

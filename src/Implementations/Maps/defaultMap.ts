@@ -1,16 +1,18 @@
 import { GameMap } from "@game/Map/gameMap";
 import { Vector } from "@math";
-import { forestBackground } from "@impl/Parallax/forestBackground";
 
 const defaultMap = new GameMap();
 
 defaultMap.fillArea("natureTile", 5, 14, 25, 2);
 defaultMap.fillArea("natureTile", 23, 5, 6, 8);
-defaultMap.fillArea("natureTile", 3, 8, 2, 8);
+defaultMap.fillArea("natureTile", 3, 6, 2, 6);
 defaultMap.fillArea("natureTile", 9, 11, 2, 4);
 defaultMap.fillArea("iceTile", 9, 5, 2, 4);
 defaultMap.fillArea("iceTile", 15, 7, 3, 3);
 defaultMap.setTile("iceTile", new Vector(15, 6));
+
+defaultMap.fillArea("natureTile", -47, 15, 50, 2);
+
 
 defaultMap.fillArea("woodPlatform", 3, 5, 4, 1);
 defaultMap.fillArea("woodPlatform", 5, 5, 1, 8);
@@ -26,6 +28,6 @@ defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"],
 defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: false, timeBetweenSpawn: 7 });
 defaultMap.setItemSpawner({ pos: new Vector(9, 4), possibleItems: ["helmet", "chestplate"], startSpawned: false, timeBetweenSpawn: 2 });
 
-defaultMap.setBackground(forestBackground);
+defaultMap.setBackground("forest");
 
 export { defaultMap };

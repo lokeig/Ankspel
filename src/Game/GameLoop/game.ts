@@ -39,7 +39,12 @@ class DuckGame {
 
     public loadMap(id: number): void {
         const background = MapLoader.load(MapManager.getMap(id), Connection.get().isHost());
-        this.background = new Parallax(background);
+        const parallax = Parallax.getBackground(background);
+        if (!parallax) {
+            console.error(parallax, " does not exist");
+            return;
+        }
+        this.background = parallax;
         this.mapBounds = MapLoader.getMapMinMax();
     }
 
@@ -50,10 +55,11 @@ class DuckGame {
         ParticleManager.update(deltaTime);
         SpawnerManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
+        this.background.update(deltaTime);
     }
 
     public draw(): void {
-        this.background.draw();
+        this.background.draw(this.mapBounds, this.camera.getCurrentPos());
 
         ProjectileManager.draw();
         ItemManager.draw();

@@ -73,6 +73,10 @@ class Camera {
         return { minX, maxX, minY, maxY };
     }
 
+    public getCurrentPos(): Vector {
+        return this.currentPos.clone();
+    }
+
     private calculateTargetPos(positions: MaxMinPositions): Vector {
         const { minX, maxX, minY, maxY } = positions;
         return new Vector(minX + maxX, minY + maxY).divide(2);

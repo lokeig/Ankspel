@@ -126,20 +126,21 @@ class ControlsMenu {
     }
 
     public getControls(player: number): Controls {
-        if (player !== 0) {
-            return {
-                jump: "undefined",
-                left: "undefined",
-                right: "undefined",
-                down: "undefined",
-                up: "undefined",
-                shoot: "undefined",
-                pickup: "undefined",
-                ragdoll: "undefined",
-                strafe: "undefined",
-                menu: "undefined",
-            }
-        }
+        // if (player !== 0) {
+        //     return {
+        //         jump: "undefined",
+        //         left: "undefined",
+        //         right: "undefined",
+        //         down: "undefined",
+        //         up: "undefined",
+        //         shoot: "undefined",
+        //         pickup: "undefined",
+        //         ragdoll: "undefined",
+        //         strafe: "undefined",
+        //         menu: "undefined",
+                
+        //     }
+        // }
         return this.currentControls;
     }
 }

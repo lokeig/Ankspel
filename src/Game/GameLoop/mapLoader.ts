@@ -1,15 +1,14 @@
 import { TileManager } from "@game/Tiles";
 import { GameMap } from "../Map/gameMap";
 import { PlayerManager } from "@player";
-import { MaxMinPositions, Utility } from "@common";
+import { Grid, MaxMinPositions, Utility } from "@common";
 import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
-import { BackgroundConfig } from "../Map/backgroundConfig";
 import { SpawnerManager } from "@game/Spawner";
 
 class MapLoader {
-    public static load(map: GameMap, host: boolean): BackgroundConfig {
+    public static load(map: GameMap, host: boolean): string {
         this.reset();
         this.loadTiles(map);
 
@@ -91,6 +90,9 @@ class MapLoader {
                 minY = pos.y;
             }
         });
+        maxX += Grid.size;
+        maxY += Grid.size;
+        
         return { minX, maxX, minY, maxY };
     }
 }
