@@ -32,10 +32,12 @@ class PlayerManager {
         pending.forEach(updatePlayer);
     }
 
+    public static reload(): void {
+        this.getPlayers().forEach(player => player.reload());
+    }
+
     public static reset(): void {
-        this.getPlayers().forEach(player => {
-            player.reset();
-        });
+        this.getPlayers().forEach(player => player.reset());
     }
 
     public static getLocal(): Player[] {
@@ -60,7 +62,7 @@ class PlayerManager {
 
     public static spawn(id: number, color: ImageName): Player {
         const player = new Player(id, color);
-        this.players.push(player);  
+        this.players.push(player);
         return player;
     }
 

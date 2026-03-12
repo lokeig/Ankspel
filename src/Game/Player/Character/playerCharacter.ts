@@ -11,7 +11,7 @@ import { PlayerEquipment } from "./playerEquipment";
 import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
-import { ImageInfo, ImageName } from "@render";
+import { ImageName } from "@render";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -129,7 +129,10 @@ class PlayerCharacter {
         }
     }
 
-    public die(local: boolean = true) {
+    public die(local: boolean = true): void {
+        if (this.dead) {
+            return;
+        }
         this.dead = true;
         this.equipment.getAllEquippedItems().forEach((_, slot) => {
             this.equipment.throw(slot, ThrowType.Upwards);
@@ -137,6 +140,7 @@ class PlayerCharacter {
         if (local) {
             Connection.get().sendGameMessage(GameMessage.PlayerDead, { id: this.id });
         }
+        AudioManager.get().play(Sound.death);
     }
 
     public revive(): void {

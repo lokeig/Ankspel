@@ -1,3 +1,4 @@
+import { Side } from "@common";
 import { GameMap } from "@game/Map/gameMap";
 import { Vector } from "@math";
 
@@ -18,10 +19,10 @@ defaultMap.fillArea("woodPlatform", 3, 5, 4, 1);
 defaultMap.fillArea("woodPlatform", 5, 5, 1, 8);
 defaultMap.fillArea("woodPlatform", 5, 7, 4, 6);
 
-defaultMap.setPlayerSpawn(new Vector(8, 14));
-defaultMap.setPlayerSpawn(new Vector(15, 14));
-defaultMap.setPlayerSpawn(new Vector(15, 6));
-defaultMap.setPlayerSpawn(new Vector(16, 14));
+defaultMap.setPlayerSpawn({ pos: new Vector(8, 14), direction: Side.Left });
+defaultMap.setPlayerSpawn({ pos: new Vector(15, 14), direction: Side.Left });
+defaultMap.setPlayerSpawn({ pos: new Vector(15, 6), direction: Side.Left });
+defaultMap.setPlayerSpawn({ pos: new Vector(16, 14), direction: Side.Left });
 
 defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], startSpawned: false, timeBetweenSpawn: 10 });
 defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"], startSpawned: true, timeBetweenSpawn: 5 });

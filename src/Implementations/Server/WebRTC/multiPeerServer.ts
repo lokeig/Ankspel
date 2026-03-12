@@ -12,6 +12,7 @@ class MultiPeerServer implements IServer {
     private socket: WebSocket;
     private host: boolean = false;
     private localMode: boolean = false;
+    private ignoring: Set<GameMessage> = new Set();
     private onStart: (gameId: number) => void = () => { };
 
     constructor(socket: WebSocket) {
@@ -66,6 +67,13 @@ class MultiPeerServer implements IServer {
         return this.myID;
     }
 
+    public ignoreMessage(...messages: GameMessage[]): void {
+        if (messages.length === 0) {
+            this.ignoring = new Set();
+        }
+        messages.forEach(message => { this.ignoring.add(message); })
+    }
+
     private cleanupAllPeers(): void {
         console.log("Cleaning up all peer connections");
         this.peers.forEach((peer: PeerConnectionManager, peerId: string) => {
@@ -86,6 +94,10 @@ class MultiPeerServer implements IServer {
         peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
             if (type !== GameMessage.PlayerInfo) {
                 console.log("Received message " + GameMessage[type] + ":", msg);
+            }
+            if (this.ignoring.has(type)) {
+                console.log("Just ignored: ", GameMessage[type])
+                return;
             }
             this.gameEvent.publish(type, msg);
         });

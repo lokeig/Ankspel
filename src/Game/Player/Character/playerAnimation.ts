@@ -1,7 +1,7 @@
 import { Animation, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
 import { Vector } from "@math";
-import { ImageInfo, ImageName, Images } from "@render";
+import { ImageName, Images } from "@render";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;

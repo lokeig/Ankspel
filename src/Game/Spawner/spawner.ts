@@ -49,6 +49,10 @@ class Spawner {
         this.ballLocation += deltaTime;
 
         if (this.contains) {
+            if (this.contains.shouldBeDeleted()) {
+                this.contains = null;
+                return;
+            }
             if (this.contains.getOwnership() !== Ownership.InSpawner) {
                 this.dropContaining();
                 return;

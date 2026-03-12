@@ -51,6 +51,7 @@ const Images = {
     // UI
     ready: { src: '/assets/Images/UI/ready.png', frameWidth: 41, frameHeight: 9 },
     get: { src: '/assets/Images/UI/get.png', frameWidth: 25, frameHeight: 9 },
+    plusOne: { src: '/assets/Images/UI/plusOne.png', frameWidth: 19, frameHeight: 15 },
 } as const;
 
 type ImageName = keyof typeof Images;

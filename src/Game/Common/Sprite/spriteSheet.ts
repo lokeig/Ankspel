@@ -4,7 +4,7 @@ import { Vector } from "@math";
 
 class SpriteSheet {
     private image: ImageInfo;
-    private noFrame = new Frame();
+    private static noFrame = new Frame();
     private space: RenderSpace = RenderSpace.World;
 
     constructor(image: ImageInfo) {
@@ -24,7 +24,7 @@ class SpriteSheet {
         };
     }
 
-    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, frame: Frame = this.noFrame, opacity: number = 1): void {
+    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {
         const width = size instanceof Vector ? size.x : size;
         const height = size instanceof Vector ? size.y : size;
 
@@ -39,7 +39,7 @@ class SpriteSheet {
         Render.get().draw(drawInfo, this.space);
     }
 
-    public drawLine(start: Vector, end: Vector, width: number, frame: Frame = this.noFrame, opacity: number = 1): void {
+    public drawLine(start: Vector, end: Vector, width: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {
         const source = this.getSource(frame.row, frame.col);
         Render.get().drawLine(this.image, start, end, width, source, opacity, this.space);
     }

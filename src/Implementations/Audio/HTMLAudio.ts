@@ -14,7 +14,7 @@ class HTMLAudio implements IAudio {
                 this.sounds.set(name, audio);
                 resolve();
             }
-            audio.onerror = (e) => reject("Failed to load audio: " + src);
+            audio.onerror = () => reject("Failed to load audio: " + src);
         });
     }
 

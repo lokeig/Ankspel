@@ -1,7 +1,7 @@
 import { SpriteSheet } from "@common";
 import { ParallaxLayer } from "@game/ParallaxBackground/parallaxLayer";
 import { Vector } from "@math";
-import { Images, Render, RenderSpace } from "@render";
+import { Images, RenderSpace } from "@render";
 
 class ForestBaseLayer implements ParallaxLayer {
     private static sheet = new SpriteSheet(Images.forest);
@@ -24,29 +24,19 @@ class ForestBaseLayer implements ParallaxLayer {
     }
 
     public getZoomFactor(): number {
-        return 4;
-    }
-
-    public getParallaxFactor(): number {
         return 1;
     }
 
-    public draw(pos: Vector, zoom: number): void {
-        // const render = Render.get();
-        // const screenWidth = render.getWidth();
-        // const screenHeight = render.getHeight();
+    public getParallaxFactor(): number {
+        return 0;
+    }
 
-        // const scaledSize = ForestBaseLayer.size.clone().multiply(zoom);
+    public shouldClampToScreen(): boolean {
+        return true;
+    }
 
-        // const maxOffsetX = Math.max(0, scaledSize.x - screenWidth);
-        // const maxOffsetY = Math.max(0, scaledSize.y - screenHeight);
-
-        // const clampedPos = new Vector(
-        //     Math.min(0, Math.max(pos.x, -maxOffsetX)),
-        //     Math.min(0, Math.max(pos.y, -maxOffsetY))
-        // );
-
-        ForestBaseLayer.sheet.draw(pos, ForestBaseLayer.size.clone().multiply(zoom), false, 0);
+    public draw(pos: Vector, size: Vector): void {
+        ForestBaseLayer.sheet.draw(pos, size, false, 0);
     }
 }
 

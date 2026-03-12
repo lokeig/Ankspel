@@ -1,12 +1,15 @@
 import { Countdown, IState } from "@common";
 import { GameLoopState } from "../gameLoopState";
 import { DuckGame } from "../game";
-import { PlayerManager } from "@player";
+import { Player, PlayerManager } from "@player";
 
 class Playing implements IState<GameLoopState> {
-    private newMapCountdown = new Countdown(3);
+    private newMapCountdown = new Countdown(5);
     private startNewMap: boolean = false;
     private game: DuckGame;
+
+    private lastPlayer: Player | null = null;
+    private scoreGiven = false;
 
     public constructor(game: DuckGame) {
         this.game = game;
@@ -18,20 +21,38 @@ class Playing implements IState<GameLoopState> {
 
     public stateUpdate(deltaTime: number) {
         this.game.update(deltaTime);
+
+        const remaining = PlayerManager.getPlayers().filter(player => !player.character.isDead());
+        if (remaining.length === 0) {
+            this.lastPlayer = null;
+        } 
+
+        if (remaining.length === 1) {
+            this.lastPlayer = remaining[0];
+        }
+
+        if (remaining.length === 0 || remaining.length === 1) {
+            if (!this.startNewMap) {
+                this.startNewMap = true;
+                this.newMapCountdown.reset();
+            }
+        }
+        
         if (this.startNewMap) {
             this.newMapCountdown.update(deltaTime);
-            return;
-        }
-        if (PlayerManager.getPlayers().filter(player => !player.character.isDead()).length <= 1) {
-            if (PlayerManager.getPlayers().length === 1) {
-                return;
+            if (this.newMapCountdown.getPercentageReady() > 0.5 && !this.scoreGiven) {
+                this.scoreGiven = true;
+                this.lastPlayer?.givePoint();
             }
-            this.startNewMap = true;
-            this.newMapCountdown.reset();
+            return;
         }
     }
 
     public stateChange(): GameLoopState {
+        const maxRounds = 10;
+        if (this.startNewMap && this.newMapCountdown.isDone() && this.game.getRoundsPlayed() > maxRounds) {
+            return GameLoopState.ScoreScreen;
+        }
         if (this.startNewMap && this.newMapCountdown.isDone()) {
             return GameLoopState.LoadingMap;
         }
@@ -40,7 +61,8 @@ class Playing implements IState<GameLoopState> {
     
 
     public stateExited(): void {
-
+        this.lastPlayer = null;
+        this.scoreGiven = false;
     }
 
     public draw() {

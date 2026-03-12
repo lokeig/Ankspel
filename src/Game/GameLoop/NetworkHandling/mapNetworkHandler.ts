@@ -60,11 +60,6 @@ class MapNetworkHandler {
     public static setMapStart(callback: () => void): void {
         this.onMapStart = callback;
     }
-
-    public static forceStart(id: number): void {
-        this.onMapLoad(id);
-        this.onMapStart();
-    }
 }
 
 export { MapNetworkHandler };

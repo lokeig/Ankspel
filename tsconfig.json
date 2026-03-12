@@ -15,10 +15,10 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedSideEffectImports": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
 
     "baseUrl": ".",
     "paths": {

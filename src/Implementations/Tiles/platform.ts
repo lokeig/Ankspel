@@ -1,4 +1,4 @@
-import { Direction, Side, SpriteSheet } from "@common";
+import { Side, SpriteSheet } from "@common";
 import { StaticObject } from "@core";
 import { ITile, SpriteLookup } from "@game/Tiles";
 import { baseTileLookup, lipLeft, lipRight } from "./baseTileLookup";
@@ -54,7 +54,7 @@ class Platform implements ITile {
     }
 
     public enabled(): boolean {
-        const { top, right, bot, left, topLeft, topRight, botLeft, botRight } = this.body.neighbourStatus();
+        const { top, right, bot, left, topLeft, topRight } = this.body.neighbourStatus();
 
         if (top && bot) {
             if (!left && !right) {

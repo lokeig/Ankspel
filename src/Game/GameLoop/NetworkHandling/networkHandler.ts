@@ -60,14 +60,12 @@ class NetworkHandler {
     private static quickStart = (): void => {
         PlayerManager.create(MainMenu.get().getChosenColor());
         PlayerManager.create(MainMenu.get().getChosenColor());
-        PlayerManager.create(MainMenu.get().getChosenColor());
-        PlayerManager.create(MainMenu.get().getChosenColor());
+        // PlayerManager.create(MainMenu.get().getChosenColor());
+        // PlayerManager.create(MainMenu.get().getChosenColor());
 
         Connection.get().enableLocalMode();
 
         this.start();
-        const mapId = MapManager.getRandomMap()[0];
-        MapNetworkHandler.forceStart(mapId);
     }
 
     private static start(): void {

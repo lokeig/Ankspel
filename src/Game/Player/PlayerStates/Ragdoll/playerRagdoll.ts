@@ -89,9 +89,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             return;
         }
 
-        if (!this.player.isLocal()) {
-            console.log(Ownership[this.getOwnership()])
-        }
         if (this.isOnSpawner()) {
             this.updateOnSpawner(deltaTime);
             return;

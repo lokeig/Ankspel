@@ -15,6 +15,7 @@ class DuckGame {
     private camera = new Camera();
     private background!: Parallax;
     private mapBounds!: MaxMinPositions;
+    private roundsPlayed: number = 0;
 
     public update(deltaTime: number): void {
         const fixedStep = 0.1;
@@ -46,6 +47,11 @@ class DuckGame {
         }
         this.background = parallax;
         this.mapBounds = MapLoader.getMapMinMax();
+        this.roundsPlayed++;
+    }
+
+    public getRoundsPlayed(): number {
+        return this.roundsPlayed;
     }
 
     private gameUpdate(deltaTime: number): void {

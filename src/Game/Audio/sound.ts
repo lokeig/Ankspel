@@ -10,6 +10,8 @@ const Sound = {
     beep: "beep",
     ting: "ting",
     click: "click",
+    score: "score",
+    death: "death",
 
 } as const;
 
@@ -25,6 +27,8 @@ const SoundInfo: Record<SoundName, { src: string }> = {
     beep: { src: "/assets/Sounds/beep.mp3" },
     ting: { src: "/assets/Sounds/ting.mp3" },
     click: { src: "/assets/Sounds/click.mp3" },
+    score: { src: "/assets/Sounds/score.mp3"},
+    death: { src: "/assets/Sounds/death.mp3"},
 };
 
 type SoundName = typeof Sound[keyof typeof Sound];

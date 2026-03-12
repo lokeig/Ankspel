@@ -1,12 +1,12 @@
-import { Utility } from "@common";
 import { ItemDescription } from "./itemDescription";
 import { Vector } from "@math";
 import { SpawnerDescription } from "./spawnerDescription";
 import { TileDescription } from "./tileDescription";
+import { PlayerSpawnDescription } from "./PlayerSpawnDescription";
 
 class GameMap {
     private tiles: TileDescription[] = [];
-    private playerSpawns: Vector[] = [];
+    private playerSpawns: PlayerSpawnDescription[] = [];
     private items: ItemDescription[] = [];
     private background!: string;
     private itemSpawners: SpawnerDescription[] = [];
@@ -51,33 +51,12 @@ class GameMap {
         return this.items;
     }
 
-    public setPlayerSpawn(gridPos: Vector): void {
-        this.playerSpawns.push(gridPos);
+    public setPlayerSpawn(spawn: PlayerSpawnDescription): void {
+        this.playerSpawns.push(spawn);
     }
 
-    public getSpawns(): Vector[] {
+    public getSpawns(): PlayerSpawnDescription[] {
         return this.playerSpawns;
-    }
-
-    public getRandomSpawnLocations(amount: number): Vector[] {
-        const spawnCount = this.playerSpawns.length;
-
-        const base = Math.floor(amount / spawnCount);
-        const extra = amount % spawnCount;
-
-        const order = Utility.Random.order(spawnCount);
-        const result: Vector[] = new Array(amount);
-
-        let index = 0;
-        for (let i = 0; i < spawnCount && i < amount; i++) {
-            for (let j = 0; j < base; j++) {
-                result[index++] = this.playerSpawns[order[i]];
-            }
-        }
-        for (let i = 0; i < extra; i++) {
-            result[index++] = this.playerSpawns[order[i]];
-        }
-        return result;
     }
 }
 

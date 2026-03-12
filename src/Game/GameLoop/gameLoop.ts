@@ -1,14 +1,16 @@
 import { StateMachine, Input } from "@common";
 import { ImageName, Images, Render } from "@render";
 import { MainMenu } from "@game/Server";
-import { GameLoopState } from "./gameLoopState";
-import { Playing } from "./LoopStates/playing";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
-import { LoadingMap } from "./LoopStates/loadingMap";
 import { DuckGame } from "./game";
 import { FrameHandler } from "./frameTimer";
 import { Sound, SoundInfo, SoundName } from "@game/Audio";
 import { AudioManager } from "@game/Audio/audioManager";
+
+import { GameLoopState } from "./gameLoopState";
+import { Playing } from "./LoopStates/playing";
+import { ScoreScreen } from "./LoopStates/scoreScreen";
+import { LoadingMap } from "./LoopStates/loadingMap";
 
 class GameLoop {
     private lastTime = 0;
@@ -23,6 +25,8 @@ class GameLoop {
         const game = new DuckGame();
         this.stateMachine.addState(GameLoopState.Playing, new Playing(game));
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(game));
+        this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(game));
+
     }
 
     public async init() {

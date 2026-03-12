@@ -1,5 +1,5 @@
 export type { IServer } from "./IServer";
-export { Connection } from "./servers";
+export { Connection } from "./connection";
 export { Emitter } from "./emitter";
 
 export type { IMainMenu } from "./Lobby/IMainMenu";

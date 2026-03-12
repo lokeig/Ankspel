@@ -15,6 +15,8 @@ interface IServer {
     sendGameMessageUnreliable<T extends GameMessage>(type: T, text: GameMessageMap[T]): void;
     sendClientMessage(text: ClientMessage): void;
 
+    ignoreMessage(...messages: GameMessage[]): void;
+
     onGameStart(callback: (gameId: number) => void): void;
 }
 

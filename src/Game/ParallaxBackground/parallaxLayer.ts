@@ -7,8 +7,9 @@ interface ParallaxLayer {
     getHeight(): number;
     getZoomFactor(): number;
     getParallaxFactor(): number;
+    shouldClampToScreen(): boolean,
 
-    draw(pos: Vector, zoom: number): void;
+    draw(pos: Vector, size: Vector): void;
 }
 
 export type { ParallaxLayer };

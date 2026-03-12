@@ -8,6 +8,8 @@ class Parallax {
 
     private layers: ParallaxLayer[];
 
+    private static baseSize = new Vector(320, 240);
+
     constructor(...layers: ParallaxLayer[]) {
         this.layers = layers;
     }
@@ -17,44 +19,34 @@ class Parallax {
     }
 
     public draw(positions: MaxMinPositions, pos: Vector): void {
-        const render = Render.get();
 
-        const width = render.getWidth();
-        const height = render.getHeight();
-        const zoom = render.getCameraZoom();
+        const center = new Vector((positions.minX + positions.maxX) / 2, (positions.minY + positions.maxY) / 2);
+        const offset = pos.subtract(center).multiply(0.5);
 
-        const length = new Vector(positions.maxX - positions.minX, positions.maxY - positions.minY);
+        this.layers.forEach(layer => {
 
-        const percentageX = (pos.x - positions.minX) / length.x;
-        const percentageY = (pos.y - positions.minY) / length.y;
+            const render = Render.get();
 
-        for (const layer of this.layers) {
-
-            const scaleX = width / layer.getWidth();
-            const scaleY = height / layer.getHeight();
-            const maxScale = Math.max(scaleX, scaleY);
-
-            const scale = Math.max(zoom * layer.getZoomFactor(), maxScale);
-
-            // const parallax = layer.getParallaxFactor();
-
-            console.log(percentageX); 
-
-            const offset = new Vector(
-                positions.minX + (positions.maxX * percentageX),
-                positions.minY + (positions.maxY * percentageY)
+            const maxScale = Math.max(
+                render.getWidth() / Parallax.baseSize.x,
+                render.getHeight() / Parallax.baseSize.y
             );
+            const currentScale = Render.get().getCameraZoom() * 1.25;
 
-            const layerWidth = layer.getWidth() * scale;
-            const layerHeight = layer.getHeight() * scale;
+            let scale = Math.max(currentScale, maxScale);
+            scale *= layer.getZoomFactor();
 
             const drawPos = new Vector(
-                (width - layerWidth) / 2,
-                (height - layerHeight) / 2
-            ).subtract(offset);
+                (render.getWidth() - (layer.getWidth() * scale)) / 2,
+                (render.getHeight() - (layer.getHeight() * scale)) / 2
+            );
+            drawPos.subtract(offset.clone().multiply(layer.getParallaxFactor()));
 
-            layer.draw(drawPos, scale);
-        }
+            const scaledWidth = layer.getWidth() * scale;
+            const scaledHeight = layer.getHeight() * scale;
+
+            layer.draw(drawPos, new Vector(scaledWidth, scaledHeight));
+        });
     }
 
     public static registerBackground(name: string, background: Parallax): void {

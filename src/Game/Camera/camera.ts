@@ -12,14 +12,14 @@ class Camera {
     public update(deltaTime: number, bounds: MaxMinPositions) {
         const players = PlayerManager.getPlayers().filter(player => !player.character.isDead());
         if (players.length == 0) {
-            this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
+            this.setFrame(this.targetPos, this.targetZoom, deltaTime);
             return;
         }
         const positions = this.getPositions(players, bounds);
         this.targetPos = this.calculateTargetPos(positions);
         this.targetZoom = this.calculateTargetZoom(positions, 200);
 
-        this.setFrame(this.targetPos, this.targetZoom, deltaTime, bounds);
+        this.setFrame(this.targetPos, this.targetZoom, deltaTime);
     }
 
     public initialize(bounds: MaxMinPositions): void {
@@ -35,7 +35,7 @@ class Camera {
         Render.get().setCamera(this.currentPos, this.currentZoom);
     }
 
-    private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number, bounds: MaxMinPositions) {
+    private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number) {
         const smoothFactor = 3;
         this.currentPos.x += (targetPos.x - this.currentPos.x) * deltaTime * smoothFactor;
         this.currentPos.y += (targetPos.y - this.currentPos.y) * deltaTime * smoothFactor;

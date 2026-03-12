@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { SpriteSheet, Utility } from "@common";
+import { SpriteSheet } from "@common";
 import { ITrail } from "@projectile";
 import { Images } from "@render";
 

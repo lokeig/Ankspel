@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { Countdown, SpriteSheet, Utility } from "@common";
+import { Countdown, SpriteSheet } from "@common";
 import { Images } from "@render";
 
 class SmallFlare {

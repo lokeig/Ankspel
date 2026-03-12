@@ -44,7 +44,7 @@ abstract class Item implements IItem {
         }
     }
 
-    protected itemUpdate(deltaTime: number): void {
+    protected itemUpdate(_deltaTime: number): void {
 
     }
 

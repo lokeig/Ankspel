@@ -4,12 +4,6 @@ import { Frame } from "../../Sprite/Animation/frame";
 const animations: Record<string, Record<string, AnimationConfig>> = animationConfigJSON;
 const frames: Record<string, Record<string, Frame>> = frameConfigJSON;
 
-type TileLookupConfig = {
-    tileLookup: Record<string, number[]>;
-    lipLeft: number[];
-    lipRight: number[];
-};
-
 type ImageDefinition = {
     src: string;
     frameWidth: number;

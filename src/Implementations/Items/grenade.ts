@@ -71,7 +71,7 @@ class Grenade extends Item {
 
         const amountOfBullets = 24;
         for (let i = 0; i < amountOfBullets; i++) {
-            const angleRandomness = Math.PI / 12;
+            const angleRandomness = Math.PI / 24;
             let angle = i * 2 * Math.PI / amountOfBullets;
             angle -= this.rng.getInRange(-angleRandomness, angleRandomness);
 
@@ -84,6 +84,9 @@ class Grenade extends Item {
     }
 
     private activate(seed: number): void {
+        if (this.activated) {
+            return;
+        }
         this.rng = new SeededRNG(seed);
         AudioManager.get().play(Sound.pullPin);
         this.activated = true;

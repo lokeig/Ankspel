@@ -22,7 +22,7 @@ class MapLoader {
     }
 
     private static reset(): void {
-        PlayerManager.reset();
+        PlayerManager.reload();
         TileManager.clear();
         ItemManager.clear();
         ProjectileManager.clear();
@@ -55,7 +55,8 @@ class MapLoader {
         let index = 0;
         for (let i = 0; i < spawnCount && i < playerCount; i++) {
             for (let j = 0; j < base; j++) {
-                players[index++].setSpawn(playerSpawns[order[i]]);
+                const player = players[index++];
+                player.setSpawn(playerSpawns[order[i]]);
             }
         }
         for (let i = 0; i < extra; i++) {

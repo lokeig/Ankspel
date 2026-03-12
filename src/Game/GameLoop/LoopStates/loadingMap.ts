@@ -1,7 +1,7 @@
 import { Countdown, IState, SpriteSheet } from "@common";
 import { GameLoopState } from "../gameLoopState";
 import { DuckGame } from "../game";
-import { Connection } from "@server";
+import { Connection, GameMessage } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
 import { PlayerManager } from "@player";
 import { Images, Render, RenderSpace } from "@render";
@@ -29,14 +29,16 @@ class LoadingMap implements IState<GameLoopState> {
             this.game.initialize();
         });
 
+        
         this.ready = new SpriteSheet(Images.ready);
         this.ready.setRenderSpace(RenderSpace.Screen);
-
+        
         this.get = new SpriteSheet(Images.get);
         this.get.setRenderSpace(RenderSpace.Screen);
     }
-
+    
     public stateEntered(): void {
+        Connection.get().ignoreMessage(GameMessage.PlayerDead, GameMessage.PlayerInfo);
         PlayerManager.getLocal().forEach(player => player.character.controls.setEnabled(false));
         if (!Connection.get().isHost()) {
             return;
@@ -61,6 +63,7 @@ class LoadingMap implements IState<GameLoopState> {
 
     public stateExited(): void {
         PlayerManager.getLocal().forEach(player => player.character.controls.setEnabled(true));
+        Connection.get().ignoreMessage();
 
         this.startPlaying = false;
     }

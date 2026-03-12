@@ -66,10 +66,10 @@ class Bullet implements IProjectile {
         } else {
             body = hit.tile;
         }
-        if (hit.resistance < 2) {
+        if (hit.resistance < 4) {
             return;
         }
-        if (hit.resistance > 3) {
+        if (hit.resistance > 4) {
             ParticleManager.addParticle(new BulletReboundVFX(hit.pos, this.angle, this.getAxis(hit.pos, body)));
         }
         this.pos = hit.pos.clone();

@@ -74,7 +74,5 @@ interface GameMessageMap {
     [GameMessage.StartMap]: {};
 }
 
-const test: GameMessageMap[GameMessage] = {}
-
 export { GameMessage };
 export type { GameMessageMap, NetworkVector };

@@ -1,4 +1,4 @@
-import { EquipmentSlot, PlayerState, Utility } from "@common";
+import { EquipmentSlot, Utility } from "@common";
 import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
