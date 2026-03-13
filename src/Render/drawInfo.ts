@@ -1,3 +1,4 @@
+import { Vector } from "@math";
 import { ImageInfo } from "./images";
 import { Rect } from "./rect";
 
@@ -10,4 +11,13 @@ type DrawInfo = {
     opacity: number;
 };
 
-export type { DrawInfo };
+
+type DrawTextInfo = {   
+    text: string;
+    pos: Vector;
+    font: string;
+    color: string;
+    opacity: number;
+};
+
+export type { DrawInfo, DrawTextInfo };

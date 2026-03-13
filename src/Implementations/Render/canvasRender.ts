@@ -1,6 +1,7 @@
 
 import { Vector } from "@math";
 import { DrawInfo, Rect, IRender, ImageInfo } from "@render";
+import { DrawTextInfo } from "src/Render/drawInfo";
 import { RenderSpace } from "src/Render/IRender";
 
 class CanvasRender implements IRender {
@@ -112,6 +113,21 @@ class CanvasRender implements IRender {
         this.ctx.rotate(angle);
 
         this.ctx.fillRect(-rect.width / 2, -rect.height / 2, rect.width, rect.height);
+
+        this.ctx.restore();
+    }
+
+    public drawText(info: DrawTextInfo, space?: RenderSpace): void {
+        this.ctx.save();
+        if (space === RenderSpace.Screen) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+        this.ctx.globalAlpha = info.opacity;
+
+        this.ctx.font = info.font;
+        this.ctx.fillStyle = info.color;
+
+        this.ctx.fillText(info.text, Math.floor(info.pos.x), Math.floor(info.pos.y));
 
         this.ctx.restore();
     }
