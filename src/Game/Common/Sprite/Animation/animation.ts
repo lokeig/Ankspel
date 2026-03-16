@@ -14,20 +14,20 @@ class Animation {
             for (let currentFrame = startFrame; currentFrame <= endFrame; currentFrame++) {
                 const col = currentFrame % framesWide;
                 const row = Math.floor(currentFrame / framesWide);
-                this.frames.push({ col, row });
+                this.frames.push(new Frame(col, row));
             }
         } else {
             for (let currentFrame = startFrame; currentFrame >= endFrame; currentFrame--) {
                 const col = currentFrame % framesWide;
                 const row = Math.floor(currentFrame / framesWide);
-                this.frames.push({ col, row });
-            } 
+                this.frames.push(new Frame(col, row));
+            }
         }
     }
 
     public addRow(row: number, length: number) {
         for (let i = 0; i < length; i++) {
-            this.frames.push({ row, col: i });
+            this.frames.push(new Frame(row, i));
         }
     }
 
