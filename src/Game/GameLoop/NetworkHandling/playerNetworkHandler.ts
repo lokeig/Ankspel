@@ -49,7 +49,7 @@ class PlayerNetworkHandler {
 
         gameEvent.subscribe(GameMessage.PlayerDead, ({ id }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
-            player.character.die(false);
+            player.character.die();
         });
     }
 

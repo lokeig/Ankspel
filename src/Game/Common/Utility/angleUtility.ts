@@ -9,8 +9,12 @@ class AngleUtility {
         return new Vector(force.x * cos - force.y * sin, force.x * sin + force.y * cos);
     }
 
-    public normalizeAngle(angle: number) {
+    public normalize(angle: number): number {
         return ((angle + Math.PI) % (Math.PI * 2)) - Math.PI
+    }
+
+    public getDegrees(angle: number): number {
+        return 180 * angle / Math.PI;
     }
 }
 

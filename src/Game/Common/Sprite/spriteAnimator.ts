@@ -40,9 +40,9 @@ class SpriteAnimator {
         return this.animation;
     }
 
-    public draw(pos: Vector, size: number, flip: boolean, angle: number): void {
+    public draw(pos: Vector, size: number, flip: boolean, angle: number, zIndex: number): void {
         const frame = this.animation.getFrame(this.currentFrame);
-        this.spriteSheet.draw(pos, size, flip, angle, frame);
+        this.spriteSheet.draw(pos, size, flip, angle, zIndex, frame);
     }
 
     public setAnimation(animation: Animation): void {
@@ -52,6 +52,15 @@ class SpriteAnimator {
             this.currentFrame = 0;
             this.timer = 0;
         }
+    }
+
+    public syncTimer(animator: SpriteAnimator): void {
+        this.currentFrame = animator.currentFrame;
+        this.timer = animator.timer;
+    }
+
+    public getCurrentFrame(): number {
+        return this.currentFrame;
     }
 
     public reset(): void {

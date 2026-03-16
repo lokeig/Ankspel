@@ -6,6 +6,7 @@ class PlayerArm {
     public angle: number = 0;
     private posOffset = new Vector();
     private rotateSpeed: number = 25;
+    private rotateOffset = new Vector(4, 4);
 
     public getCenter(): Vector {
         return new Vector(
@@ -15,6 +16,9 @@ class PlayerArm {
     }
 
     public setPosition(playerPos: Vector, playerDrawSize: number, offset: Vector, flip: boolean): void {
+        offset = offset.clone();
+        offset.add(this.getRotationOffset());
+
         const result = playerPos.clone();
 
         if (flip) {
@@ -26,12 +30,17 @@ class PlayerArm {
         this.pos = result;
     }
 
+    public getRotationOffset(): Vector {
+        const normalized = (2 * this.angle / Math.PI);
+        return this.rotateOffset.clone().multiply(normalized);
+    }
+
     public setOffset(offset: Vector): void {
         this.posOffset = offset.clone();
     }
 
-    public getOffset(): Vector {
-        return this.posOffset;
+    public getTruePos(): void {
+
     }
 
     public getDrawSize(): number {

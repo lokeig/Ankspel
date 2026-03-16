@@ -27,6 +27,5 @@ type ProjectileTarget = {
 }
 
 type CollisionCallback = (effect: ProjectileEffect[]) => void;
-type ProjectileConstructor = new (pos: Vector, angle: number, seed?: number) => IProjectile;
 
-export type { IProjectile, ProjectileConstructor, CollisionCallback, ProjectileTarget };
+export type { IProjectile, CollisionCallback, ProjectileTarget };

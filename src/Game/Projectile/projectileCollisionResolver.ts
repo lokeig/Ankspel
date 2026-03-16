@@ -9,15 +9,14 @@ type BulletHit =
 
 class ProjectileCollisionResolver {
 
-    public static resolve(segment: { start: Vector, end: Vector }, targets: ProjectileTarget[]): BulletHit[] {
+    public static getCollisions(segment: { start: Vector, end: Vector }, targets: ProjectileTarget[]): BulletHit[] {
         const tileHits = this.getTileHits(segment);
         const targetHits = this.getTargetHits(segment, targets);
 
         const allHits = [...tileHits, ...targetHits];
 
         allHits.sort((a, b) =>
-            a.pos.distanceToSquared(segment.start) -
-            b.pos.distanceToSquared(segment.start)
+            a.pos.distanceToSquared(segment.start) - b.pos.distanceToSquared(segment.start)
         );
 
         return allHits;

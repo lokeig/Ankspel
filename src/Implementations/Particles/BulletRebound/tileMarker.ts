@@ -1,6 +1,6 @@
 import { Vector } from "@math";
 import { AxisDirection, Countdown, Frame, SpriteSheet, Utility } from "@common";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 
 class TileMarker {
     private lifeTime = new Countdown(0.15);
@@ -19,7 +19,11 @@ class TileMarker {
     }
 
     static {
-        Utility.File.setFrames("bulletRebound", TileMarker.frames);
+        this.frames.f1.set(0, 0);
+        this.frames.f2.set(0, 1);
+        this.frames.f2.set(0, 2);
+        this.frames.f3.set(0, 3);
+        
         this.spriteSheet = new SpriteSheet(Images.bulletRebound);
     }
 
@@ -54,7 +58,7 @@ class TileMarker {
     public draw(): void {
         const flip = false;
         const opacity = 1 - this.lifeTime.getPercentageReady();
-        TileMarker.spriteSheet.draw(this.pos, TileMarker.drawSize, flip, this.angle, this.instanceFrame, opacity);
+        TileMarker.spriteSheet.draw(this.pos, TileMarker.drawSize, flip, this.angle, zIndex.Particles, this.instanceFrame, opacity);
     }
 
     public update(deltaTime: number) {

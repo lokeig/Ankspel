@@ -4,7 +4,7 @@ import { OnItemUseEffect } from "@game/Item";
 import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
 
@@ -20,8 +20,10 @@ class Glock extends Item {
     private flare: SmallFlare;
 
     static {
-        Utility.File.setAnimations("glock", this.animations);
         this.sprite = new SpriteSheet(Images.glock);
+        this.animations.default.addFrame(0, 0);
+        this.animations.shoot.addSegment(0, 3, 4);
+        this.animations.shoot.fps = 24;
     }
 
     constructor(pos: Vector, id: number) {
@@ -74,7 +76,7 @@ class Glock extends Item {
 
     public draw(): void {
         const drawSize = 40;
-        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
+        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex());
         if (this.flare.shouldBeShown()) {
             this.drawFlare();
         }

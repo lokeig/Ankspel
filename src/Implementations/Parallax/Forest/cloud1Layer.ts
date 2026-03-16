@@ -1,7 +1,7 @@
 import { SpriteSheet } from "@common";
 import { ParallaxLayer } from "@game/ParallaxBackground/parallaxLayer";
 import { Vector } from "@math";
-import { Images, RenderSpace } from "@render";
+import { Images, RenderSpace, zIndex } from "@render";
 
 class Cloud1Layer implements ParallaxLayer {
     private static sheet = new SpriteSheet(Images.cloud1);
@@ -46,7 +46,7 @@ class Cloud1Layer implements ParallaxLayer {
             this.pos.y * scale
         );
 
-        Cloud1Layer.sheet.draw(pos.add(scaledOffset), size, false, 0);
+        Cloud1Layer.sheet.draw(pos.add(scaledOffset), size, false, 0, zIndex.Background + 1);
     }
 }
 

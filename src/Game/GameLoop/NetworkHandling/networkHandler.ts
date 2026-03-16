@@ -6,6 +6,7 @@ import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
 import { MapManager } from "@game/Map";
 import { MainMenu } from "@game/Server/Lobby/mainMenu";
+import { Images } from "@render";
 
 const tickRate = 60;
 
@@ -59,7 +60,7 @@ class NetworkHandler {
 
     private static quickStart = (): void => {
         PlayerManager.create(MainMenu.get().getChosenColor());
-        PlayerManager.create(MainMenu.get().getChosenColor());
+        PlayerManager.create("playerBlack");
         // PlayerManager.create(MainMenu.get().getChosenColor());
         // PlayerManager.create(MainMenu.get().getChosenColor());
 

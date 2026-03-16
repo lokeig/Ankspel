@@ -3,7 +3,7 @@ import { StaticObject } from "@core";
 import { ITile, SpriteLookup } from "@game/Tiles";
 import { baseTileLookup, lipLeft, lipRight } from "./baseTileLookup";
 import { Vector } from "@math";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 
 class Platform implements ITile {
     public body: StaticObject;
@@ -67,15 +67,15 @@ class Platform implements ITile {
                 if (!right) {
                     return false;
                 }
-                
+
             }
             if (right && topRight) {
                 if (topLeft) {
                     return false;
-                }   
+                }
                 if (!left) {
                     return false;
-                }       
+                }
             }
         }
 
@@ -92,14 +92,7 @@ class Platform implements ITile {
         const flip = false;
         const angle = 0;
 
-        Platform.sprite.draw(this.body.pos, drawSize, flip, angle, Platform.lookup.tile(this.spriteIndex));
-
-        if (this.body.getLip(Side.Left)) {
-            Platform.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, Platform.lookup.getLip(Side.Left));
-        }
-        if (this.body.getLip(Side.Right)) {
-            Platform.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, Platform.lookup.getLip(Side.Right));
-        }
+        Platform.sprite.draw(this.body.pos, drawSize, flip, angle, zIndex.Tiles, Platform.lookup.tile(this.spriteIndex));
     }
 }
 

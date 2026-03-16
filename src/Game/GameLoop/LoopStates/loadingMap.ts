@@ -4,7 +4,7 @@ import { DuckGame } from "../game";
 import { Connection, GameMessage } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
 import { PlayerManager } from "@player";
-import { Images, Render, RenderSpace } from "@render";
+import { Images, Render, RenderSpace, zIndex } from "@render";
 import { Vector } from "@math";
 import { MapManager } from "@game/Map";
 
@@ -69,21 +69,20 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
     public draw() {
-        this.game.draw();
-
         if (this.startPlaying && this.startPlayingCountdown.getPercentageReady() > 0.5) {
             const center = new Vector(Render.get().getWidth(), Render.get().getHeight()).divide(2);
             const scale = 12;
             if (this.startPlayingCountdown.getPercentageReady() > 0.75) {
                 const size = new Vector(41, 9).multiply(scale);
                 center.x -= size.x / 2;
-                this.ready.draw(center, size, false, 0);
+                this.ready.draw(center, size, false, 0, zIndex.UI);
             } else {
                 const size = new Vector(25, 9).multiply(scale);
                 center.x -= size.x / 2;
-                this.get.draw(center, size, false, 0);
+                this.get.draw(center, size, false, 0, zIndex.UI);
             }
         }
+        this.game.draw();
     }
 }
 

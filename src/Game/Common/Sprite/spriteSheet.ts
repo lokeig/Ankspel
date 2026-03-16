@@ -1,4 +1,4 @@
-import { DrawInfo, ImageInfo, Rect, Render, RenderSpace } from "@render";
+import { DrawInfo, DrawLineInfo, ImageInfo, Rect, Render, RenderSpace } from "@render";
 import { Frame } from "./Animation/frame";
 import { Vector } from "@math";
 
@@ -7,6 +7,8 @@ class SpriteSheet {
     private static noFrame = new Frame();
     private space: RenderSpace = RenderSpace.World;
 
+    public zIndex: number = 0;
+
     constructor(image: ImageInfo) {
         this.image = image;
     }
@@ -14,7 +16,7 @@ class SpriteSheet {
     public setRenderSpace(space: RenderSpace): void {
         this.space = space;
     }
-  
+
     private getSource(row: number, col: number): Rect {
         return {
             x: col * this.image.frameWidth,
@@ -24,7 +26,7 @@ class SpriteSheet {
         };
     }
 
-    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {
+    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, zIndex: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {
         const width = size instanceof Vector ? size.x : size;
         const height = size instanceof Vector ? size.y : size;
 
@@ -34,14 +36,24 @@ class SpriteSheet {
             world: { x: pos.x, y: pos.y, width, height },
             flip,
             angle,
-            opacity
+            opacity,
+            zIndex
         };
-        Render.get().draw(drawInfo, this.space);
+        Render.get().drawImage(drawInfo, this.space);
     }
 
     public drawLine(start: Vector, end: Vector, width: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {
         const source = this.getSource(frame.row, frame.col);
-        Render.get().drawLine(this.image, start, end, width, source, opacity, this.space);
+        const drawInfo: DrawLineInfo = {
+            image: this.image,
+            start,
+            end,
+            width,
+            sourceRect: source,
+            opacity,
+            zIndex: this.zIndex,
+        };
+        Render.get().drawLine(drawInfo);
     }
 }
 

@@ -4,7 +4,7 @@ import { OnItemUseEffect } from "./itemUseType";
 
 class ItemUseInteractions {
     private interactions: Map<ItemInteraction, ItemUseHandler> = new Map();
-    private onPlayerAnim: ((anim: PlayerAnim) => void) | undefined;
+    private onPlayerAnim: ((anim: PlayerAnim, holding: boolean) => void) | undefined;
     private onPlayerState: ((state: PlayerState) => OnItemUseEffect[]) | undefined;
 
     public get(interaction: ItemInteraction): ItemUseHandler | undefined {
@@ -15,11 +15,11 @@ class ItemUseInteractions {
         this.interactions.set(interaction, onUse);
     }
 
-    public setOnPlayerAnimation(onAnim: (anim: PlayerAnim) => void): void {
+    public setOnPlayerAnimation(onAnim: (anim: PlayerAnim, holding: boolean) => void): void {
         this.onPlayerAnim = onAnim;
     }
 
-    public getOnPlayerAnimation(): ((anim: PlayerAnim) => void) | undefined {
+    public getOnPlayerAnimation(): ((anim: PlayerAnim, holding: boolean) => void) | undefined {
         return this.onPlayerAnim;
     }
 

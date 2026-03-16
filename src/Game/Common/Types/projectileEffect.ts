@@ -5,7 +5,8 @@ enum ProjectileEffectType {
     Knockback,
     Explosion,
     Poison,
-    Net
+    Net,
+    NewProjectile
 }
 
 type ProjectileEffect =

@@ -1,4 +1,4 @@
-export type { DrawInfo } from "./drawInfo";
+export type { DrawInfo, DrawLineInfo, DrawTextInfo } from "./drawInfo";
 export type { Rect } from "./rect";
 
 export { Render } from "./render";
@@ -8,3 +8,5 @@ export type { IRender } from "./IRender";
 
 export { Images } from "./images";
 export type { ImageInfo, ImageName } from "./images";
+
+export { BaseLayer as zIndex } from "./zIndex";

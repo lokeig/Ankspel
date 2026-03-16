@@ -39,13 +39,6 @@ class PlayerEquipment {
         })
     }
 
-    public setAnimation(anim: PlayerAnim): void {
-        this.equipment.forEach((_, slot) => {
-            if (this.hasItem(slot)) {
-                this.getItem(slot).interactions().getOnPlayerAnimation()?.(anim);
-            }
-        })
-    }
 
     public throw(slot: EquipmentSlot, throwType: ThrowType) {
         if (!this.hasItem(slot)) {
@@ -85,20 +78,25 @@ class PlayerEquipment {
         return this.equipment;
     }
 
-    public itemNoRotationCollision(center: Vector): boolean {
+    public itemNoRotationCollision(center: Vector, offset: Vector): boolean {
         if (!this.hasItem(EquipmentSlot.Hand)) {
             return false;
         }
         const item = this.getItem(EquipmentSlot.Hand);
-        const tempItemPos = item.getBody().pos.clone();
+        const itemBody = item.getBody();
+        let holdOffset = item.getHoldOffset();
 
-        item.getBody().setCenterToPos(center);
-        item.getBody().pos.x += item.getHoldOffset().x * item.getBody().getDirectionMultiplier();
-        item.getBody().pos.y += item.getHoldOffset().y;
+        holdOffset = holdOffset.clone().subtract(offset);
 
-        const collision = item.getBody().getCollidingTile();
+        const tempItemPos = itemBody.pos.clone();
 
-        item.getBody().pos = tempItemPos;
+        itemBody.setCenterToPos(center);
+        itemBody.pos.x += holdOffset.x * itemBody.getDirectionMultiplier();
+        itemBody.pos.y += holdOffset.y;
+
+        const collision = itemBody.getCollidingTile();
+
+        itemBody.pos = tempItemPos;
 
         return collision !== undefined;
     }

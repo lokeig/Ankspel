@@ -4,7 +4,7 @@ import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
-import { ImageName, Images } from "@render";
+import { ImageName, Images, zIndex } from "@render";
 import { PlayerSpawnDescription } from "@game/Map/PlayerSpawnDescription";
 import { AudioManager, Sound } from "@game/Audio";
 
@@ -113,7 +113,7 @@ class Player {
             drawPos.y -= 70;
 
             drawPos.subtract((drawSize).clone().divide(2));
-            Player.plusOneSheet.draw(drawPos, drawSize, false, 0);
+            Player.plusOneSheet.draw(drawPos, drawSize, false, 0, zIndex.UI);
         }
     }
 }

@@ -1,0 +1,3 @@
+interface IInteractiveObject {
+    onCollision(): void;
+}

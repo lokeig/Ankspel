@@ -4,6 +4,7 @@ import { DynamicObject } from "@core";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { IItem, Ownership } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
+import { zIndex } from "@render";
 
 abstract class Item implements IItem {
     protected useInteractions = new ItemUseInteractions;
@@ -30,14 +31,14 @@ abstract class Item implements IItem {
     public update(deltaTime: number): void {
         const prevGrounded = this.body.grounded;
         const prevVelocity = Math.abs(this.body.velocity.y);
-        
+
         if (this.ownership === Ownership.None) {
             this.updateItemPhysics(deltaTime);
         } else {
             this.body.setNewCollidableObjects();
         }
         this.itemUpdate(deltaTime);
-        
+
         const audioLandThreshold = 100;
         if (this.body.grounded && !prevGrounded && prevVelocity > audioLandThreshold) {
             AudioManager.get().play(Sound.land);
@@ -64,7 +65,7 @@ abstract class Item implements IItem {
 
     private updateAngle(deltaTime: number): void {
         const angle = this.worldAngle + this.localAngle;
-        const normalized = Utility.Angle.normalizeAngle(angle);
+        const normalized = Utility.Angle.normalize(angle);
         if (this.body.grounded && normalized !== 0 && normalized !== -Math.PI) {
             this.rotateSpeed = 0;
             if (!this.rotateLerp.isActive()) {
@@ -170,6 +171,23 @@ abstract class Item implements IItem {
     public setToDelete(): void {
         this.delete = true;
     };
+
+    protected getZIndex(): number {
+        switch (this.getOwnership()) {
+            case (Ownership.Equipped): {
+                return zIndex.Player;
+            };
+            case (Ownership.Held): {
+                return zIndex.Player;
+            }
+            case (Ownership.InSpawner): {
+                return zIndex.Items;
+            }
+            case (Ownership.None): {
+                return zIndex.Items;
+            }
+        }
+    }
 
     public abstract draw(): void;
 }

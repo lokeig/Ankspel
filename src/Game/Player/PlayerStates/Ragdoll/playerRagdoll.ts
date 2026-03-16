@@ -4,6 +4,7 @@ import { DynamicObject } from "@core";
 import { IItem, Ownership } from "@item";
 import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
 import { PlayerCharacter } from "@game/Player/Character/playerCharacter";
+import { zIndex } from "@render";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -80,6 +81,13 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
                 this.player.itemManager.handleEffects(item, effects);
             }
         });
+
+        this.player.removeCollidable(this.player.standardBody);
+
+        this.player.addCollidableBody(this.head);
+        this.player.addCollidableBody(this.torso);
+        this.player.addCollidableBody(this.legs);
+
     }
 
     public stateUpdate(deltaTime: number): void {
@@ -100,8 +108,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.handleLocalInput(deltaTime);
         this.updateAngles();
         this.syncEquipment();
-
-        this.player.equipment.setAnimation(this.player.animator.getCurrentAnimation());
     }
 
     public stateChange(): PlayerState {
@@ -120,11 +126,19 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.currentState = false;
 
         this.player.activeBody = this.player.standardBody;
+
         this.syncBackToPlayerBody();
         this.player.standardBody.pos.y -= PlayerRagdoll.ExitJumpHeight;
         this.player.standardBody.velocity = new Vector(this.torso.velocity.x, PlayerRagdoll.ExitVerticalSpeed);
 
         this.owned = Ownership.None;
+
+        this.player.addCollidableBody(this.player.standardBody);
+
+        this.player.removeCollidable(this.head);
+        this.player.removeCollidable(this.torso);
+        this.player.removeCollidable(this.legs);
+
     }
 
     private initializePositions(from: PlayerState): void {
@@ -234,6 +248,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     private updateOwned(deltaTime: number): void {
+        this.head.ignorePlatforms = true;
+
         if (this.legs.direction !== this.head.direction) {
             this.torso.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse / 2 * this.head.getDirectionMultiplier());
             this.head.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse / 2 * this.head.getDirectionMultiplier());
@@ -248,6 +264,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.updateAngles();
         this.syncEquipment();
         this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
+
+        this.head.ignorePlatforms = false;
     }
 
     private updateOnSpawner(deltaTime: number): void {
@@ -323,16 +341,17 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     public draw(): void {
         const flip = this.head.isFlip();
         this.player.animator.setAnimation(PlayerAnim.UpperRagdoll);
+
         this.player.animator.drawBody(this.getDrawPos(this.head), PlayerCharacter.drawSize, flip, this.headAngle);
 
         this.player.animator.setAnimation(PlayerAnim.LowerRagdoll);
         this.player.animator.drawBody(this.getDrawPos(this.legs), PlayerCharacter.drawSize, flip, this.legsAngle);
 
-        this.player.animator.drawItems(this.player.equipment);
+        this.player.animator.drawEquipment(this.player.equipment);
     }
 
     // For IItem
-    
+
     private static holdOffset = new Vector(0, -3);
     private static handOffset = new Vector();
 

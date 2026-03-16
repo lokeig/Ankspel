@@ -24,10 +24,12 @@ defaultMap.setPlayerSpawn({ pos: new Vector(15, 14), direction: Side.Left });
 defaultMap.setPlayerSpawn({ pos: new Vector(15, 6), direction: Side.Left });
 defaultMap.setPlayerSpawn({ pos: new Vector(16, 14), direction: Side.Left });
 
-defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], startSpawned: false, timeBetweenSpawn: 10 });
+defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], startSpawned: true, timeBetweenSpawn: 10 });
 defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"], startSpawned: true, timeBetweenSpawn: 5 });
-defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: false, timeBetweenSpawn: 7 });
+defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: true, timeBetweenSpawn: 7 });
 defaultMap.setItemSpawner({ pos: new Vector(9, 4), possibleItems: ["helmet", "chestplate"], startSpawned: false, timeBetweenSpawn: 2 });
+defaultMap.setItemSpawner({ pos: new Vector(13, 13), possibleItems: ["helmet"], startSpawned: false, timeBetweenSpawn: 2 });
+defaultMap.setItemSpawner({ pos: new Vector(14, 13), possibleItems: ["chestplate"], startSpawned: true, timeBetweenSpawn: 2 });
 
 defaultMap.setBackground("forest");
 

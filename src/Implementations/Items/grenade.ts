@@ -5,7 +5,7 @@ import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 import { AudioManager, Sound } from "@game/Audio";
 
 class Grenade extends Item {
@@ -23,7 +23,9 @@ class Grenade extends Item {
 
     static {
         this.spriteSheet = new SpriteSheet(Images.grenade);
-        Utility.File.setFrames("grenade", this.frames);
+
+        this.frames.pinned.set(0, 1);
+        this.frames.default.set(0, 0);
     }
 
     constructor(pos: Vector, id: number) {
@@ -95,7 +97,7 @@ class Grenade extends Item {
     public draw(): void {
         const drawSize = 32;
         const frame = this.activated ? Grenade.frames.pinned : Grenade.frames.default;
-        Grenade.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame)
+        Grenade.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame)
     }
 }
 

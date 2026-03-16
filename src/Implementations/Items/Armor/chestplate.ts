@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { Animation, EquipmentSlot, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteAnimator, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
@@ -8,15 +8,21 @@ import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
 
 class Chestplate extends Item {
-    private static animations = { default: new Animation, equipped: new Animation, running: new Animation };
-    private static spriteSheet: SpriteSheet;
+    private static frames = {
+        default: new Frame(),
+        equipped: new Frame(),
+        overArm: new Frame()
+    };
+    private static spirte: SpriteSheet;
+    private drawOverShoulder: boolean = false;
 
-    private animator: SpriteAnimator;
     private target: ProjectileTarget;
 
     static {
-        Utility.File.setAnimations("chestplate", this.animations);
-        this.spriteSheet = new SpriteSheet(Images.armor);
+        this.spirte = new SpriteSheet(Images.armor);
+        this.frames.default.set(0, 0);
+        this.frames.equipped.set(0, 1);
+        this.frames.overArm.set(0, 2);
     }
 
     constructor(pos: Vector, id: number) {
@@ -24,34 +30,35 @@ class Chestplate extends Item {
         const height = 20;
         super(pos, width, height, id);
 
-        this.animator = new SpriteAnimator(Chestplate.spriteSheet, Chestplate.animations.default);
-
         this.useInteractions.set(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Body };
             return [result];
         });
-        this.useInteractions.setOnPlayerAnimation(anim => {
-            if (this.getOwnership() !== Ownership.Equipped) {
-                this.animator.setAnimation(Chestplate.animations.default);
-                return;
-            }
-            if (anim === PlayerAnim.Walk) {
-                this.animator.setAnimation(Chestplate.animations.running);
-            } else {
-                this.animator.setAnimation(Chestplate.animations.equipped);
-            }
-        });
+
         this.target = {
             body: () => this.body,
             penetrationResistance: () => 5,
             onProjectileHit: this.onProjectileHit.bind(this),
             enabled: () => !this.shouldBeDeleted()
-        }
-    }
+        };
 
-    protected itemUpdate(deltaTime: number): void {
-        this.animator.update(deltaTime);
+        this.useInteractions.setOnPlayerAnimation((anim, holding) => {
+            this.drawOverShoulder = false;
+            if (holding) {
+                return;
+            }
+            switch (anim) {
+                case PlayerAnim.Walk: break;
+                case PlayerAnim.Idle: break;
+                case PlayerAnim.Turn: break;
+                case PlayerAnim.Jump: break;
+                case PlayerAnim.Fall: break;
+
+                default: return;
+            }
+            this.drawOverShoulder = true;
+        });
     }
 
     public onEquip(slot: EquipmentSlot): void {
@@ -60,6 +67,7 @@ class Chestplate extends Item {
         }
         this.body.width = 40;
         this.body.height = 40;
+
         ProjectileManager.addCollidable(this.target);
     }
 
@@ -67,7 +75,6 @@ class Chestplate extends Item {
         this.body.width = 25;
         this.body.height = 20;
         ProjectileManager.removeCollidable(this.target);
-        this.animator.setAnimation(Chestplate.animations.default);
     }
 
     private onProjectileHit(effects: ProjectileEffect[], pos: Vector, local: boolean): void {
@@ -87,8 +94,16 @@ class Chestplate extends Item {
 
     public draw(): void {
         const drawSize = 32;
+        const frame = this.getOwnership() === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
+        Chestplate.spirte.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
+    }
 
-        this.animator.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle());
+    public drawTopLayer(): void {
+        if (!this.drawOverShoulder) {
+            return;
+        }
+        const drawSize = 32;
+        Chestplate.spirte.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), Chestplate.frames.overArm);
     }
 
     public setToDelete(): void {

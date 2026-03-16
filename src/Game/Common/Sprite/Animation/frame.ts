@@ -6,6 +6,11 @@ class Frame {
         this.row = row;
         this.col = col;
     }
+
+    public set(row: number, col: number): void {
+        this.row = row;
+        this.col = col;
+    }
 }
 
 export { Frame };

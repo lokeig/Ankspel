@@ -40,7 +40,7 @@ class Bullet implements IProjectile {
     public update(deltaTime: number, collidable: ProjectileTarget[]): void {
         this.move(deltaTime);
         this.lifespan.update(deltaTime);
-        const collisions = ProjectileCollisionResolver.resolve(this.getSegment(), collidable);
+        const collisions = ProjectileCollisionResolver.getCollisions(this.getSegment(), collidable);
         for (const target of collisions) {
             this.resolveHit(target);
             if (this.delete) {

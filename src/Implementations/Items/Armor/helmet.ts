@@ -3,7 +3,7 @@ import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
 import { EquipmentSlot, Frame, ItemInteraction, PlayerState, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
-import { Images } from "@render";
+import { Images, Render, zIndex } from "@render";
 import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
 
@@ -16,13 +16,16 @@ class Helmet extends Item {
 
     private static standardWidth: number = 30;
     private static standardHeight: number = 26;
-    
-    private static equippedWidth: number = 40;
-    private static equippedHeight: number = 40;
+
+    private static equippedWidth: number = 24;
+    private static equippedHeight: number = 24;
 
     static {
         this.spriteSheet = new SpriteSheet(Images.armor);
-        Utility.File.setFrames("helmet", this.frames);
+
+        this.frames.default.set(1, 0);
+        this.frames.broken.set(1, 1);
+        this.frames.equipped.set(1, 2);
     }
 
     constructor(pos: Vector, id: number) {
@@ -81,9 +84,11 @@ class Helmet extends Item {
     }
 
     public draw(): void {
-        const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
         const drawSize = 32;
-        Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), frame);
+
+        const frame = this.damaged ? Helmet.frames.broken : this.getOwnership() === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
+
+        Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
     }
 }
 

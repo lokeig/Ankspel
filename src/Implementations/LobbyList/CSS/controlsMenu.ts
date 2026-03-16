@@ -135,7 +135,7 @@ class ControlsMenu {
                 up: "undefined",
                 shoot: "undefined",
                 pickup: "undefined",
-                ragdoll: "undefined",
+                ragdoll: "1",
                 strafe: "undefined",
                 menu: "undefined",
                 

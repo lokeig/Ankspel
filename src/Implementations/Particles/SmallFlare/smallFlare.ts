@@ -1,6 +1,6 @@
 import { Vector } from "@math";
 import { Countdown, SpriteSheet } from "@common";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 
 class SmallFlare {
     private lifeTime = new Countdown(0.1);
@@ -26,7 +26,7 @@ class SmallFlare {
 
     public draw(pos: Vector, flip: boolean, angle: number): void {
         const center = pos.subtract(SmallFlare.drawSize / 2);
-        SmallFlare.spriteSheet.draw(center, SmallFlare.drawSize, flip, angle);
+        SmallFlare.spriteSheet.draw(center, SmallFlare.drawSize, flip, angle, zIndex.Particles);
     }
 
     public shouldBeShown(): boolean {

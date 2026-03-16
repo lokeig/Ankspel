@@ -10,6 +10,7 @@ import { Connection } from "@server";
 import { MaxMinPositions } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
+import { Render } from "@render";
 
 class DuckGame {
     private camera = new Camera();
@@ -73,6 +74,8 @@ class DuckGame {
         PlayerManager.draw();
         ParticleManager.draw();
         TileManager.draw();
+
+        Render.get().render();
     }
 }
 

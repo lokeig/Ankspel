@@ -33,6 +33,7 @@ interface IItem {
     getId(): number;
     
     draw(): void;
+    drawTopLayer?(): void;
 }
 
 type ItemConstructor = new (pos: Vector, id: number) => IItem

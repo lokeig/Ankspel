@@ -4,7 +4,7 @@ import { ShotgunState } from "./shotgunState";
 import { FirearmHelper } from "../firearmInfo";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
 
@@ -24,7 +24,9 @@ class Shotgun extends Item {
 
     static {
         this.spriteSheet = new SpriteSheet(Images.shotgun);
-        Utility.File.setFrames("shotgun", this.frames);
+
+        this.frames.gun.set(0, 0);
+        this.frames.handle.set(1, 0);
     }
 
     constructor(pos: Vector, id: number) {
@@ -89,14 +91,14 @@ class Shotgun extends Item {
     public draw(): void {
         const drawSize = 64;
         const drawPos = this.getDrawPos(drawSize);
-        Shotgun.spriteSheet.draw(drawPos, drawSize, this.body.isFlip(), this.getAngle(), Shotgun.frames.gun);
+        Shotgun.spriteSheet.draw(drawPos, drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), Shotgun.frames.gun);
 
         const handleOffsetRotated = Utility.Angle.rotateForce(new Vector(this.handleOffset, 0), this.getAngle());
         const handleDrawPos = new Vector(
             drawPos.x + handleOffsetRotated.x * this.body.getDirectionMultiplier(),
             drawPos.y + handleOffsetRotated.y
         )
-        Shotgun.spriteSheet.draw(handleDrawPos, drawSize, this.body.isFlip(), this.getAngle(), Shotgun.frames.handle);
+        Shotgun.spriteSheet.draw(handleDrawPos, drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), Shotgun.frames.handle);
     }
 
     public shouldBeDeleted(): boolean {

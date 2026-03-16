@@ -1,7 +1,7 @@
-import { Animation, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot } from "@common";
+import { Animation, SpriteAnimator, SpriteSheet, Utility, PlayerAnim, EquipmentSlot, Frame } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
 import { Vector } from "@math";
-import { ImageName, Images } from "@render";
+import { ImageName, Images, zIndex } from "@render";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;
@@ -27,7 +27,22 @@ class PlayerAnimation {
 
 
     static {
-        Utility.File.setAnimations("player", this.animations);
+        this.animations.walk.addRow(1, 6);
+        this.animations.walk.repeat = true;
+
+        this.animations.flap.addRow(3, 4);
+        this.animations.flap.repeat = true;
+        this.animations.flap.fps = 24;
+
+        this.animations.idle.addFrame(0, 0);
+        this.animations.crouch.addFrame(2, 0);
+        this.animations.jump.addFrame(4, 0);
+        this.animations.fall.addFrame(5, 0);
+        this.animations.slide.addFrame(6, 0);
+        this.animations.turn.addFrame(7, 0);
+        this.animations.upperRagdoll.addFrame(8, 0);
+        this.animations.lowerRagdoll.addFrame(9, 0);
+        this.animations.itemHolding.addFrame(8, 0)
     }
 
     constructor(color: ImageName) {
@@ -49,6 +64,7 @@ class PlayerAnimation {
             this.armAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.ItemHolding]);
         } else {
             this.armAnimator.setAnimation(PlayerAnimation.animations[this.currAnim]);
+            this.armAnimator.syncTimer(this.bodyAnimator);
         }
     }
 
@@ -61,32 +77,104 @@ class PlayerAnimation {
         return this.currAnim;
     }
 
-    public drawItems(equipment: PlayerEquipment): void {
-        const draw = (slot: EquipmentSlot): void => {
-            if (equipment.hasItem(slot)) {
-                equipment.getItem(slot).draw();
-            }
+    private drawItem(equipment: PlayerEquipment, slot: EquipmentSlot, offset: Vector = new Vector()) {
+        if (equipment.hasItem(slot)) {
+            const item = equipment.getItem(slot);
+
+            offset.x *= item.getBody().getDirectionMultiplier();
+            const pos = item.getBody().pos;
+            pos.add(offset);
+
+
+            item.draw();
+            pos
         }
-        draw(EquipmentSlot.Head);
-        draw(EquipmentSlot.Body);
-        draw(EquipmentSlot.Boots);
-        draw(EquipmentSlot.Hand);
+    }
+
+    private drawItemTopLayer(equipment: PlayerEquipment, slot: EquipmentSlot, offset: Vector = new Vector()) {
+        if (equipment.hasItem(slot)) {
+            const item = equipment.getItem(slot);
+            if (!item.drawTopLayer) {
+                return;
+            }
+            offset.x *= item.getBody().getDirectionMultiplier();
+            const pos = item.getBody().pos;
+            pos.add(offset);
+
+            item.drawTopLayer();
+            pos
+        }
+    }
+
+    public drawEquipment(equipment: PlayerEquipment): void {
+        this.drawItem(equipment, EquipmentSlot.Head, this.getHeadOffset());
+        this.drawItem(equipment, EquipmentSlot.Body, this.getChestOffset());
+        this.drawItem(equipment, EquipmentSlot.Boots);
+    }
+
+    public drawHolding(equipment: PlayerEquipment): void {
+        this.drawItem(equipment, EquipmentSlot.Hand);
+    }
+
+    public drawTopLayers(equipment: PlayerEquipment): void {
+        this.drawItemTopLayer(equipment, EquipmentSlot.Head, this.getHeadOffset());
+        this.drawItemTopLayer(equipment, EquipmentSlot.Body, this.getChestOffset());
+        this.drawItemTopLayer(equipment, EquipmentSlot.Boots);
+        this.drawItemTopLayer(equipment, EquipmentSlot.Hand);
     }
 
     public drawBody(pos: Vector, drawSize: number, flip: boolean, angle: number = 0): void {
-        this.bodyAnimator.draw(pos, drawSize, flip, angle);
+        this.bodyAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
     };
 
     public drawArm(pos: Vector, drawSize: number, angle: number, flip: boolean): void {
-        this.armAnimator.draw(pos, drawSize, flip, angle);
+        this.armAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
     }
 
-    public drawRagdoll(headPos: Vector, legsPos: Vector, drawSize: number, headAngle: number, legsAngle: number, flip: boolean) {
-        this.bodyAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.UpperRagdoll]);
-        this.bodyAnimator.draw(headPos, drawSize, flip, headAngle);
+    private getHeadOffset(): Vector {
+        let result = new Vector();
+        switch (this.getCurrentAnimation()) {
+            case (PlayerAnim.Jump): result.set(0, -3); break;
+            case (PlayerAnim.Fall): result.set(-2, 2); break;
+            case (PlayerAnim.Turn): result.set(-2, -2); break;
+            case (PlayerAnim.Walk): this.setWalkAnimationHelmet(result); break;
+        }
 
-        this.bodyAnimator.setAnimation(PlayerAnimation.animations[PlayerAnim.LowerRagdoll]);
-        this.bodyAnimator.draw(legsPos, drawSize, flip, legsAngle);
+        return result;
+    }
+
+    private setWalkAnimationHelmet(vector: Vector): void {
+        switch (this.bodyAnimator.getCurrentFrame()) {
+            case (0): vector.set(0, -4); break;
+            case (1): vector.set(0, -2); break;
+            case (2): vector.set(0, -0); break;
+            case (3): vector.set(0, -4); break;
+            case (4): vector.set(0, -2); break;
+            case (5): vector.set(2, 0); break;
+        }
+    }
+
+    private getChestOffset(): Vector {
+        let result = new Vector();
+        switch (this.getCurrentAnimation()) {
+            case (PlayerAnim.Jump): result.set(0, -3); break;
+            case (PlayerAnim.Fall): result.set(-2, 0); break;
+            case (PlayerAnim.Turn): result.set(-2, -2); break;
+            case (PlayerAnim.Walk): this.setWalkAnimationChest(result); break;
+        }
+
+        return result;
+    }
+
+    private setWalkAnimationChest(vector: Vector): void {
+        switch (this.bodyAnimator.getCurrentFrame()) {
+            case (0): vector.set(2, -4); break;
+            case (1): vector.set(0, -2); break;
+            case (2): vector.set(0, -0); break;
+            case (3): vector.set(0, -4); break;
+            case (4): vector.set(2, -2); break;
+            case (5): vector.set(4, 0); break;
+        }
     }
 
     public update(deltaTime: number, holding: boolean): void {

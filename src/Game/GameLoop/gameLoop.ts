@@ -1,5 +1,5 @@
 import { StateMachine, Input } from "@common";
-import { ImageName, Images, Render } from "@render";
+import { DrawTextInfo, ImageName, Images, Render, RenderSpace, zIndex } from "@render";
 import { MainMenu } from "@game/Server";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { DuckGame } from "./game";
@@ -11,6 +11,8 @@ import { GameLoopState } from "./gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
+import { Vector } from "@math";
+import { Fonts } from "src/Render/fonts";
 
 class GameLoop {
     private lastTime = 0;
@@ -74,6 +76,15 @@ class GameLoop {
         Render.get().clear();
 
         this.stateMachine.update(deltaTime);
+        const textInfo: DrawTextInfo = {
+            text: "Yo im duck gaming!",
+            pos: new Vector(),
+            color: "white",
+            opacity: 1,
+            zindex: zIndex.UI,
+            font: Fonts.chat.src,
+        }
+        Render.get().drawText(textInfo, RenderSpace.Screen);
         this.stateMachine.draw();
         Input.update();
         NetworkHandler.update(deltaTime);

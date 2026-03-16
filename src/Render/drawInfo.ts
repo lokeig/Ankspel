@@ -2,22 +2,33 @@ import { Vector } from "@math";
 import { ImageInfo } from "./images";
 import { Rect } from "./rect";
 
-type DrawInfo = {   
+type DrawInfo = {
     image: ImageInfo;
     source: Rect;
     world: Rect;
     flip: boolean;
     angle: number;
     opacity: number;
+    zIndex: number;
 };
 
-
-type DrawTextInfo = {   
+type DrawTextInfo = {
     text: string;
     pos: Vector;
     font: string;
     color: string;
     opacity: number;
+    zindex: number;
 };
 
-export type { DrawInfo, DrawTextInfo };
+type DrawLineInfo = {
+    image: ImageInfo;
+    start: Vector;
+    end: Vector;
+    width: number;
+    sourceRect: Rect;
+    opacity: number;
+    zIndex: number;
+}
+
+export type { DrawInfo, DrawTextInfo, DrawLineInfo };

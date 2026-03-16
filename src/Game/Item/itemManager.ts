@@ -51,7 +51,7 @@ class ItemManager {
         if (!noMessage) {
             Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
         }
-        
+
         return newItem;
     }
 

@@ -1,10 +1,9 @@
 import { Vector } from "@math";
-import { Countdown, Frame, SpriteSheet, Utility } from "@common";
+import { Countdown, SpriteSheet, Utility } from "@common";
 import { Images } from "@render";
 
 class GlowingBullet {
     private static spriteSheet: SpriteSheet;
-    private static frames = { default: new Frame() };
     
     private lifeTime = new Countdown(0.2);
     private pos: Vector;
@@ -19,7 +18,6 @@ class GlowingBullet {
 
     static {
         this.spriteSheet = new SpriteSheet(Images.bulletGlow);
-        Utility.File.setFrames("bulletGlow", this.frames);
     }
 
     constructor(pos: Vector, angle: number) {

@@ -1,7 +1,7 @@
 
 import { Vector } from "@math";
 import { DrawInfo, Rect, IRender, ImageInfo } from "@render";
-import { DrawTextInfo } from "src/Render/drawInfo";
+import { DrawLineInfo, DrawTextInfo } from "src/Render/drawInfo";
 import { RenderSpace } from "src/Render/IRender";
 
 class CanvasRender implements IRender {
@@ -11,6 +11,8 @@ class CanvasRender implements IRender {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private images: Map<string, HTMLImageElement> = new Map();
+
+    private renderQueue: { z: number, fn: () => void }[] = [];
 
     constructor(canvasID: string) {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
@@ -34,7 +36,24 @@ class CanvasRender implements IRender {
         this.images.set(img.src, HTMLImage);
     }
 
-    public draw(drawInfo: DrawInfo, space?: RenderSpace): void {
+    public drawImage(drawInfo: DrawInfo, space?: RenderSpace): void {
+        this.renderQueue.push({ z: drawInfo.zIndex, fn: () => this.executeDrawImage(drawInfo, space) });
+    }
+
+    public drawLine(lineInfo: DrawLineInfo, space?: RenderSpace): void {
+        this.renderQueue.push({ z: lineInfo.zIndex, fn: () => this.executeDrawLine(lineInfo, space) });
+    }
+
+    public drawText(textInfo: DrawTextInfo, space?: RenderSpace): void {
+        this.renderQueue.push({ z: 0, fn: () => this.executeDrawText(textInfo, space) });
+    }
+
+    public drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
+        this.renderQueue.push({ z: 0, fn: () => this.drawSquare(rect, angle, color, space) });
+    }
+
+
+    private executeDrawImage(drawInfo: DrawInfo, space?: RenderSpace): void {
         const img = this.images.get(drawInfo.image.src);
         if (!img) {
             console.error("Image " + drawInfo.image.src + " not loaded before use");
@@ -72,15 +91,21 @@ class CanvasRender implements IRender {
         this.ctx.restore();
     }
 
-    public drawLine(image: ImageInfo, start: Vector, end: Vector, width: number, sourceRect: Rect, opacity: number, space?: RenderSpace): void {
-        const img = this.images.get(image.src);
+    public render(): void {
+        this.renderQueue.sort((a, b) => a.z - b.z);
+        this.renderQueue.forEach(({ fn }) => fn());
+        this.renderQueue.length = 0;
+    }
+
+    public executeDrawLine(info: DrawLineInfo, space?: RenderSpace): void {
+        const img = this.images.get(info.image.src);
         if (!img) {
             console.error("Image not loaded before use!");
             return;
         }
 
-        const dx = Math.floor(end.x - start.x);
-        const dy = Math.floor(end.y - start.y);
+        const dx = Math.floor(info.end.x - info.start.x);
+        const dy = Math.floor(info.end.y - info.start.y);
         const length = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
 
@@ -88,22 +113,22 @@ class CanvasRender implements IRender {
         if (space === RenderSpace.Screen) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
-        this.ctx.globalAlpha = opacity;
-        this.ctx.translate(start.x, start.y);
+        this.ctx.globalAlpha = info.opacity;
+        this.ctx.translate(info.start.x, info.start.y);
         this.ctx.rotate(angle);
 
         this.ctx.drawImage(
             img,
-            sourceRect.x, sourceRect.y,
-            sourceRect.width, sourceRect.height,
-            0, -width / 2,
-            length, width
+            info.sourceRect.x, info.sourceRect.y,
+            info.sourceRect.width, info.sourceRect.height,
+            0, -info.width / 2,
+            length, info.width
         );
 
         this.ctx.restore();
     }
 
-    public drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
+    public executeDrawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
         this.ctx.save();
         if (space === RenderSpace.Screen) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -117,7 +142,7 @@ class CanvasRender implements IRender {
         this.ctx.restore();
     }
 
-    public drawText(info: DrawTextInfo, space?: RenderSpace): void {
+    public executeDrawText(info: DrawTextInfo, space?: RenderSpace): void {
         this.ctx.save();
         if (space === RenderSpace.Screen) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);

@@ -5,8 +5,8 @@ class Animation {
     public fps: number = 8;
     public repeat: boolean = false;
 
-    public addFrame(frame: Frame) {
-        this.frames.push(frame);
+    public addFrame(row: number, col: number) {
+        this.frames.push(new Frame(row, col));
     }
 
     public addSegment(startFrame: number, endFrame: number, framesWide: number) {

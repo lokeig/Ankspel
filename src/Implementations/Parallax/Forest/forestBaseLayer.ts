@@ -1,7 +1,7 @@
 import { SpriteSheet } from "@common";
 import { ParallaxLayer } from "@game/ParallaxBackground/parallaxLayer";
 import { Vector } from "@math";
-import { Images, RenderSpace } from "@render";
+import { Images, RenderSpace, zIndex } from "@render";
 
 class ForestBaseLayer implements ParallaxLayer {
     private static sheet = new SpriteSheet(Images.forest);
@@ -36,7 +36,7 @@ class ForestBaseLayer implements ParallaxLayer {
     }
 
     public draw(pos: Vector, size: Vector): void {
-        ForestBaseLayer.sheet.draw(pos, size, false, 0);
+        ForestBaseLayer.sheet.draw(pos, size, false, 0, zIndex.Background);
     }
 }
 

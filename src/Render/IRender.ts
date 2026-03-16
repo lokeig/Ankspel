@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { DrawInfo, DrawTextInfo } from "./drawInfo";
+import { DrawInfo, DrawLineInfo, DrawTextInfo } from "./drawInfo";
 import { Rect } from "./rect";
 import { ImageInfo } from "./images";
 
@@ -16,10 +16,12 @@ interface IRender {
     getCameraZoom(): number;
 
     loadImage(name: ImageInfo): Promise<void>;
-    draw(drawInfo: DrawInfo, space?: RenderSpace): void;
+    drawImage(drawInfo: DrawInfo, space?: RenderSpace): void;
     drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void;
-    drawLine(imageSrc: ImageInfo, start: Vector, end: Vector, width: number, sourceRect: Rect, opacity: number, space?: RenderSpace): void;
+    drawLine(lineInfo: DrawLineInfo, space?: RenderSpace): void;
     drawText(info: DrawTextInfo, space?: RenderSpace): void;
+
+    render(): void;
 
     getWidth(): number;
     getHeight(): number;

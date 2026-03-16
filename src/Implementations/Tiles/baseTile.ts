@@ -4,10 +4,11 @@ import { StaticObject } from "@core";
 import { ITile } from "@game/Tiles";
 import { SpriteLookup } from "../../Game/Tiles/spriteLookup";
 import { baseTileLookup, lipLeft, lipRight } from "./baseTileLookup";
+import { zIndex } from "@render";
 
 abstract class BaseTile implements ITile {
     public body: StaticObject;
-    private spriteIndex: number = 0; 
+    private spriteIndex: number = 0;
 
     private static lookup: SpriteLookup;
     protected sprite!: SpriteSheet;
@@ -93,13 +94,13 @@ abstract class BaseTile implements ITile {
         const flip = false;
         const angle = 0;
 
-        this.sprite.draw(this.body.pos, drawSize, flip, angle, BaseTile.lookup.tile(this.spriteIndex));
+        this.sprite.draw(this.body.pos, drawSize, flip, angle, zIndex.Tiles, BaseTile.lookup.tile(this.spriteIndex));
 
         if (this.body.getLip(Side.Left)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Left));
+            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, zIndex.Tiles + 1, BaseTile.lookup.getLip(Side.Left));
         }
         if (this.body.getLip(Side.Right)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, BaseTile.lookup.getLip(Side.Right));
+            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, zIndex.Tiles + 1, BaseTile.lookup.getLip(Side.Right));
         }
     }
 }

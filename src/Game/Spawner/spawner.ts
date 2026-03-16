@@ -3,7 +3,7 @@ import { GameObject } from "@core";
 import { SpawnerDescription } from "@game/Map/spawnerDescription";
 import { IItem, ItemManager, Ownership } from "@item";
 import { Vector } from "@math";
-import { Images } from "@render";
+import { Images, zIndex } from "@render";
 import { Connection, GameMessage } from "@server";
 
 class Spawner {
@@ -151,7 +151,7 @@ class Spawner {
             this.xPositionLerp.startLerp(itemBody.pos.x, center.x);
             this.yPositionLerp.startLerp(itemBody.pos.y, center.y);
 
-            const normalized = Utility.Angle.normalizeAngle(item.getAngle());
+            const normalized = Utility.Angle.normalize(item.getAngle());
 
             const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
             this.rotationLerp.startLerp(normalized, target);
@@ -207,20 +207,16 @@ class Spawner {
         framePos.x -= Spawner.frameDrawSize.x / 2;
         framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
 
-        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0);
-
+        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Items);
+        if (this.contains) {
+            this.contains.draw();
+        }
         if (frontBall === 1) {
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0);
-            if (this.contains) {
-                this.contains.draw();
-            }
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items + 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items - 10);
         } else {
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0);
-            if (this.contains) {
-                this.contains.draw();
-            }
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items - 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items + 10);
         }
     }
 }
