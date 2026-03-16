@@ -1,6 +1,6 @@
 
 import { Vector } from "@math";
-import { DrawInfo, Rect, IRender, ImageInfo } from "@render";
+import { DrawInfo, Rect, IRender, ImageInfo, FontInfo, FontName } from "@render";
 import { DrawLineInfo, DrawTextInfo } from "src/Render/drawInfo";
 import { RenderSpace } from "src/Render/IRender";
 
@@ -11,7 +11,6 @@ class CanvasRender implements IRender {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private images: Map<string, HTMLImageElement> = new Map();
-
     private renderQueue: { z: number, fn: () => void }[] = [];
 
     constructor(canvasID: string) {
@@ -31,9 +30,18 @@ class CanvasRender implements IRender {
         await new Promise<void>((resolve, reject) => {
             HTMLImage.onload = () => resolve();
             HTMLImage.onerror = () => reject("Failed to load image: " + HTMLImage.src)
-        })
+        });
 
         this.images.set(img.src, HTMLImage);
+    }
+
+    public async loadFont(name: FontName, font: FontInfo): Promise<void> {
+        const fontFace = new FontFace(name, "url(" + font.src + ")");
+
+        await fontFace.load();
+
+        document.fonts.add(fontFace);
+        await document.fonts.ready;
     }
 
     public drawImage(drawInfo: DrawInfo, space?: RenderSpace): void {
@@ -45,13 +53,19 @@ class CanvasRender implements IRender {
     }
 
     public drawText(textInfo: DrawTextInfo, space?: RenderSpace): void {
-        this.renderQueue.push({ z: 0, fn: () => this.executeDrawText(textInfo, space) });
+        this.renderQueue.push({ z: textInfo.zIndex, fn: () => this.executeDrawText(textInfo, space) });
     }
 
     public drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
         this.renderQueue.push({ z: 0, fn: () => this.drawSquare(rect, angle, color, space) });
     }
 
+
+    public render(): void {
+        this.renderQueue.sort((a, b) => a.z - b.z);
+        this.renderQueue.forEach(({ fn }) => fn());
+        this.renderQueue.length = 0;
+    }
 
     private executeDrawImage(drawInfo: DrawInfo, space?: RenderSpace): void {
         const img = this.images.get(drawInfo.image.src);
@@ -89,12 +103,6 @@ class CanvasRender implements IRender {
         );
 
         this.ctx.restore();
-    }
-
-    public render(): void {
-        this.renderQueue.sort((a, b) => a.z - b.z);
-        this.renderQueue.forEach(({ fn }) => fn());
-        this.renderQueue.length = 0;
     }
 
     public executeDrawLine(info: DrawLineInfo, space?: RenderSpace): void {
@@ -149,7 +157,7 @@ class CanvasRender implements IRender {
         }
         this.ctx.globalAlpha = info.opacity;
 
-        this.ctx.font = info.font;
+        this.ctx.font = info.size + "px " + info.font;
         this.ctx.fillStyle = info.color;
 
         this.ctx.fillText(info.text, Math.floor(info.pos.x), Math.floor(info.pos.y));

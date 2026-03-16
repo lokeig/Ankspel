@@ -12,7 +12,7 @@ import { Playing } from "./LoopStates/playing";
 import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
 import { Vector } from "@math";
-import { Fonts } from "src/Render/fonts";
+import { FontName, Fonts } from "src/Render/fonts";
 
 class GameLoop {
     private lastTime = 0;
@@ -35,7 +35,7 @@ class GameLoop {
         MainMenu.get().show();
         await this.preloadAllImages();
         await this.preloadAllAudio();
-
+        await this.preloadAllFonts();
         NetworkHandler.init();
 
         NetworkHandler.setOnStart(() => { this.startGame(); });
@@ -47,6 +47,15 @@ class GameLoop {
         for (const key of keys) {
             const imageInfo = Images[key];
             await Render.get().loadImage(imageInfo);
+        }
+    }
+
+    private async preloadAllFonts(): Promise<void> {
+        const keys = Object.keys(Fonts) as FontName[];
+
+        for (const key of keys) {
+            const fontInfo = Fonts[key];
+            await Render.get().loadFont(key, fontInfo);
         }
     }
 
@@ -76,15 +85,7 @@ class GameLoop {
         Render.get().clear();
 
         this.stateMachine.update(deltaTime);
-        const textInfo: DrawTextInfo = {
-            text: "Yo im duck gaming!",
-            pos: new Vector(),
-            color: "white",
-            opacity: 1,
-            zindex: zIndex.UI,
-            font: Fonts.chat.src,
-        }
-        Render.get().drawText(textInfo, RenderSpace.Screen);
+
         this.stateMachine.draw();
         Input.update();
         NetworkHandler.update(deltaTime);

@@ -2,6 +2,7 @@ import { Vector } from "@math";
 import { DrawInfo, DrawLineInfo, DrawTextInfo } from "./drawInfo";
 import { Rect } from "./rect";
 import { ImageInfo } from "./images";
+import { FontInfo, FontName } from "./fonts";
 
 enum RenderSpace {
     World,
@@ -16,6 +17,8 @@ interface IRender {
     getCameraZoom(): number;
 
     loadImage(name: ImageInfo): Promise<void>;
+    loadFont(name: FontName, font: FontInfo): Promise<void>;
+
     drawImage(drawInfo: DrawInfo, space?: RenderSpace): void;
     drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void;
     drawLine(lineInfo: DrawLineInfo, space?: RenderSpace): void;

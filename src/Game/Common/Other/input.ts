@@ -8,12 +8,14 @@ class Input {
     private static mousePos: Vector = new Vector();
 
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
+    private static onAnyKeyFunction: Set<((key: string) => void)> = new Set();
 
     public static init(): void {
         window.addEventListener('keydown', e => {
             if (document.querySelector('.modal:not(.hidden)')) {
                 return;
             }
+            this.onAnyKeyFunction.forEach(fn => fn(e.key));
             const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
             const onKeyFunction = this.onKeyFunction.get(key);
             if (onKeyFunction) {
@@ -55,6 +57,10 @@ class Input {
             this.onKeyFunction.set(key, new Set());
         }
         this.onKeyFunction.get(key)!.add(e);
+    }
+
+    public static onAnyKey(fn: (key: string) => void): void {
+        this.onAnyKeyFunction.add(fn);
     }
 
     public static removeOnKey(key: string, e: () => void): void {

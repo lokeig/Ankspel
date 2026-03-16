@@ -1,11 +1,11 @@
-import { Vector } from "@math";
 import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
-import { Item } from "../item";
-import { ProjectileManager, ProjectileTarget } from "@projectile";
-import { Images } from "@render";
+import { Vector } from "@math";
 import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
+import { ProjectileManager, ProjectileTarget } from "@projectile";
+import { Item } from "../item";
+import { Images } from "@render";
 
 class Chestplate extends Item {
     private static frames = {
@@ -52,8 +52,6 @@ class Chestplate extends Item {
                 case PlayerAnim.Walk: break;
                 case PlayerAnim.Idle: break;
                 case PlayerAnim.Turn: break;
-                case PlayerAnim.Jump: break;
-                case PlayerAnim.Fall: break;
 
                 default: return;
             }

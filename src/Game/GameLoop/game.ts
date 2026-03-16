@@ -11,12 +11,14 @@ import { MaxMinPositions } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
 import { Render } from "@render";
+import { Chat } from "./chat";
 
 class DuckGame {
     private camera = new Camera();
     private background!: Parallax;
     private mapBounds!: MaxMinPositions;
     private roundsPlayed: number = 0;
+    public chat = new Chat();
 
     public update(deltaTime: number): void {
         const fixedStep = 0.1;
@@ -62,18 +64,21 @@ class DuckGame {
         ParticleManager.update(deltaTime);
         SpawnerManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
+        this.chat.update(deltaTime);
         this.background.update(deltaTime);
     }
 
     public draw(): void {
         this.background.draw(this.mapBounds, this.camera.getCurrentPos());
-
+        
         ProjectileManager.draw();
         ItemManager.draw();
         SpawnerManager.draw();
         PlayerManager.draw();
         ParticleManager.draw();
         TileManager.draw();
+
+        this.chat.draw();
 
         Render.get().render();
     }

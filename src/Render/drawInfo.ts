@@ -1,6 +1,7 @@
 import { Vector } from "@math";
 import { ImageInfo } from "./images";
 import { Rect } from "./rect";
+import { FontInfo, FontName } from "./fonts";
 
 type DrawInfo = {
     image: ImageInfo;
@@ -15,10 +16,11 @@ type DrawInfo = {
 type DrawTextInfo = {
     text: string;
     pos: Vector;
-    font: string;
+    font: FontName;
+    size: number;
     color: string;
     opacity: number;
-    zindex: number;
+    zIndex: number;
 };
 
 type DrawLineInfo = {
