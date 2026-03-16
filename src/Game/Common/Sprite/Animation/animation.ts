@@ -31,8 +31,8 @@ class Animation {
         }
     }
 
-    public getFrame(number: number) {
-        return this.frames[number];
+    public getFrame(number: number): Frame {
+        return this.frames[number] as Frame;
     }
 
     public getFrameAmount(): number {
