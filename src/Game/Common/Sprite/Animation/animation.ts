@@ -1,7 +1,7 @@
 import { Frame } from "./frame";
 
 class Animation {
-    private frames: Array<{ col: number, row: number }> = [];
+    private frames: Array<Frame> = [];
     public fps: number = 8;
     public repeat: boolean = false;
 
@@ -14,25 +14,25 @@ class Animation {
             for (let currentFrame = startFrame; currentFrame <= endFrame; currentFrame++) {
                 const col = currentFrame % framesWide;
                 const row = Math.floor(currentFrame / framesWide);
-                this.frames.push({ col, row });
+                this.frames.push(new Frame(row, col));
             }
         } else {
             for (let currentFrame = startFrame; currentFrame >= endFrame; currentFrame--) {
                 const col = currentFrame % framesWide;
                 const row = Math.floor(currentFrame / framesWide);
-                this.frames.push({ col, row });
+                this.frames.push(new Frame(row, col));
             }
         }
     }
 
     public addRow(row: number, length: number) {
         for (let i = 0; i < length; i++) {
-            this.frames.push({ row, col: i });
+            this.frames.push(new Frame(row, i));
         }
     }
 
     public getFrame(number: number): Frame {
-        return this.frames[number] as Frame;
+        return this.frames[number];
     }
 
     public getFrameAmount(): number {

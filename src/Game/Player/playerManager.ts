@@ -19,7 +19,7 @@ class PlayerManager {
             });
             const fallingOffMapDistance = 100;
             if (!player.character.isDead() && player.character.activeBody.pos.y > maxY + fallingOffMapDistance) {
-                player.character.die();
+                player.character.die(true);
             }
         };
         this.getPlayers().forEach(player => {

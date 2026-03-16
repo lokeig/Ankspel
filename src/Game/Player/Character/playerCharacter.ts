@@ -146,7 +146,7 @@ class PlayerCharacter {
         }
     }
 
-    public die(): void {
+    public die(local: boolean): void {
         if (this.dead) {
             return;
         }
@@ -154,7 +154,7 @@ class PlayerCharacter {
         this.equipment.getAllEquippedItems().forEach((_, slot) => {
             this.equipment.throw(slot, ThrowType.Upwards);
         });
-        if (this.isLocal()) {
+        if (local) {
             Connection.get().sendGameMessage(GameMessage.PlayerDead, { id: this.id });
         }
         AudioManager.get().play(Sound.death);
@@ -173,7 +173,7 @@ class PlayerCharacter {
             switch (effect.type) {
                 case (ProjectileEffectType.Damage): {
                     if (local) {
-                        this.die();
+                        this.die(true);
                     }
                     break;
                 }
