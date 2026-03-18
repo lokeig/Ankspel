@@ -2,18 +2,22 @@ import { Controls, Input, InputMode } from "@common";
 
 class PlayerControls {
     private controls: Controls;
-    private enabled: boolean = false;
+    private locks: Set<string> = new Set();
 
     constructor(controls: Controls) {
         this.controls = controls;
     }
 
-    public setEnabled(state: boolean) {
-        this.enabled = state;
+    public addLock(reason: string): void {
+        this.locks.add(reason);
+    }
+
+    public removeLock(reason: string): void {
+        this.locks.delete(reason);
     }
 
     private getKey(key: string, inputMode: InputMode): boolean {
-        if (!this.enabled) {
+        if (this.locks.size !== 0) {
             return false;
         }
 
@@ -21,7 +25,6 @@ class PlayerControls {
             ? Input.keyPress(key)
             : Input.keyDown(key);
     }
-
 
     public left(inputMode: InputMode = InputMode.Hold): boolean {
         return this.getKey(this.controls.left, inputMode);

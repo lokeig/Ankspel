@@ -60,6 +60,11 @@ class DuckGame {
     private gameUpdate(deltaTime: number): void {
         ProjectileManager.update(deltaTime);
         ItemManager.update(deltaTime);
+        if (this.chat.isChatOpen()) {
+            PlayerManager.getLocal().forEach(player => player.character.controls.addLock("chatOpen"));
+        } else {
+            PlayerManager.getLocal().forEach(player => player.character.controls.removeLock("chatOpen"));
+        }
         PlayerManager.update(deltaTime, this.mapBounds.maxY);
         ParticleManager.update(deltaTime);
         SpawnerManager.update(deltaTime);
@@ -70,7 +75,7 @@ class DuckGame {
 
     public draw(): void {
         this.background.draw(this.mapBounds, this.camera.getCurrentPos());
-        
+
         ProjectileManager.draw();
         ItemManager.draw();
         SpawnerManager.draw();

@@ -1,5 +1,5 @@
 import { StateMachine, Input } from "@common";
-import { DrawTextInfo, ImageName, Images, Render, RenderSpace, zIndex } from "@render";
+import { ImageName, Images, Render } from "@render";
 import { MainMenu } from "@game/Server";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { DuckGame } from "./game";
@@ -11,23 +11,23 @@ import { GameLoopState } from "./gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
-import { Vector } from "@math";
 import { FontName, Fonts } from "src/Render/fonts";
 
 class GameLoop {
     private lastTime = 0;
     private stateMachine: StateMachine<GameLoopState>;
     private frameHandler: FrameHandler;
+    private game: DuckGame;
 
     constructor(timer: FrameHandler) {
         this.frameHandler = timer;
         const initalState = GameLoopState.LoadingMap;
         this.stateMachine = new StateMachine(initalState);
 
-        const game = new DuckGame();
-        this.stateMachine.addState(GameLoopState.Playing, new Playing(game));
-        this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(game));
-        this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(game));
+        this.game = new DuckGame();
+        this.stateMachine.addState(GameLoopState.Playing, new Playing(this.game));
+        this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(this.game));
+        this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(this.game));
 
     }
 
@@ -36,7 +36,7 @@ class GameLoop {
         await this.preloadAllImages();
         await this.preloadAllAudio();
         await this.preloadAllFonts();
-        NetworkHandler.init();
+        NetworkHandler.init(this.game);
 
         NetworkHandler.setOnStart(() => { this.startGame(); });
     }

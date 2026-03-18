@@ -20,9 +20,11 @@ interface IRender {
     loadFont(name: FontName, font: FontInfo): Promise<void>;
 
     drawImage(drawInfo: DrawInfo, space?: RenderSpace): void;
-    drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void;
+    drawSquare(rect: Rect, zIndex: number, angle: number, color: string, space?: RenderSpace): void;
     drawLine(lineInfo: DrawLineInfo, space?: RenderSpace): void;
+
     drawText(info: DrawTextInfo, space?: RenderSpace): void;
+    measureText(text: string, font: FontName, size: number): { width: number, height: number };
 
     render(): void;
 

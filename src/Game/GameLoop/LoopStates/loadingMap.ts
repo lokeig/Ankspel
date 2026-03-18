@@ -29,17 +29,17 @@ class LoadingMap implements IState<GameLoopState> {
             this.game.initialize();
         });
 
-        
+
         this.ready = new SpriteSheet(Images.ready);
         this.ready.setRenderSpace(RenderSpace.Screen);
-        
+
         this.get = new SpriteSheet(Images.get);
         this.get.setRenderSpace(RenderSpace.Screen);
     }
-    
+
     public stateEntered(): void {
         Connection.get().ignoreMessage(GameMessage.PlayerDead, GameMessage.PlayerInfo);
-        PlayerManager.getLocal().forEach(player => player.character.controls.setEnabled(false));
+        PlayerManager.getLocal().forEach(player => player.character.controls.addLock("loadingMap"));
         if (!Connection.get().isHost()) {
             return;
         }
@@ -62,7 +62,7 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
     public stateExited(): void {
-        PlayerManager.getLocal().forEach(player => player.character.controls.setEnabled(true));
+        PlayerManager.getLocal().forEach(player => player.character.controls.removeLock("loadingMap"));
         Connection.get().ignoreMessage();
 
         this.startPlaying = false;

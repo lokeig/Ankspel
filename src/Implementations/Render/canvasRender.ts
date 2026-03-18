@@ -56,10 +56,22 @@ class CanvasRender implements IRender {
         this.renderQueue.push({ z: textInfo.zIndex, fn: () => this.executeDrawText(textInfo, space) });
     }
 
-    public drawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
-        this.renderQueue.push({ z: 0, fn: () => this.drawSquare(rect, angle, color, space) });
+    public drawSquare(rect: Rect, zIndex: number, angle: number, color: string, space?: RenderSpace): void {
+        this.renderQueue.push({ z: zIndex, fn: () => this.executeDrawSquare(rect, angle, color, space) });
     }
 
+    public measureText(text: string, font: FontName, size: number): { width: number, height: number } {
+        this.ctx.save();
+
+        this.ctx.font = size + "px " + font;
+
+        const metrics = this.ctx.measureText(text);
+        const width = metrics.width;
+        const height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        this.ctx.restore();
+
+        return { width, height };
+    }
 
     public render(): void {
         this.renderQueue.sort((a, b) => a.z - b.z);

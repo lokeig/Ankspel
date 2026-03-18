@@ -1,6 +1,7 @@
 import { Input } from "@common";
 import { Vector } from "@math";
 import { DrawTextInfo, Render, RenderSpace, zIndex } from "@render";
+import { Connection, GameMessage } from "@server";
 
 type ChatMessage = {
     author: string
@@ -14,6 +15,7 @@ class Chat {
     private currentInput = "";
 
     private maxLength: number = 64;
+    private size: number = 12;
 
     private static maxTimeAlive = 8;
 
@@ -41,6 +43,7 @@ class Chat {
             const currentMsg = this.currentInput.trim();
             if (currentMsg !== "") {
                 this.write({ author: "me", text: currentMsg, timeAlive: 0 });
+                Connection.get().sendGameMessage(GameMessage.ChatMessage, { sender: 0, text: currentMsg });
             }
             this.currentInput = "";
         }
@@ -66,15 +69,14 @@ class Chat {
 
     public draw(): void {
         const render = Render.get();
-        const size = 12;
         const pos = new Vector(20, render.getHeight());
-        pos.y -= size;
+        pos.y -= this.size;
 
         const textInfo: DrawTextInfo = {
             text: this.currentInput,
             pos,
             font: "chat",
-            size,
+            size: this.size,
             color: "white",
             opacity: 1,
             zIndex: zIndex.UI
@@ -88,7 +90,7 @@ class Chat {
 
             msgInfo.text = msg.text;
             msgInfo.pos = msgInfo.pos.clone()
-            msgInfo.pos.y -= size * (this.messages.length - i) * 2;
+            msgInfo.pos.y -= this.size * (this.messages.length - i) * 2;
             msgInfo.opacity = 1 - (msg.timeAlive / Chat.maxTimeAlive);
 
             render.drawText(msgInfo, RenderSpace.Screen);

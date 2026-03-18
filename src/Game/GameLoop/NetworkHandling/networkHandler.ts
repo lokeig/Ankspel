@@ -7,6 +7,7 @@ import { MapNetworkHandler } from "./mapNetworkHandler";
 import { MapManager } from "@game/Map";
 import { MainMenu } from "@game/Server/Lobby/mainMenu";
 import { Images } from "@render";
+import { DuckGame } from "../game";
 
 const tickRate = 60;
 
@@ -15,8 +16,8 @@ class NetworkHandler {
     private static messageTimer = new Countdown(1 / tickRate);
     private static onStart: () => void;
     private static readyToPlay: boolean = false;
-    
-    static init() {
+
+    static init(game: DuckGame) {
         PlayerNetworkHandler.init();
         ItemMessageHandler.init();
         MapNetworkHandler.init();
@@ -39,6 +40,11 @@ class NetworkHandler {
             this.readyCount++;
             this.checkReadyToStart();
         });
+
+        gameEvent.subscribe(GameMessage.ChatMessage, ({ sender, text }) => {
+            const author = sender + "";
+            game.chat.write({ author, text, timeAlive: 0 });
+        })
 
         Input.onKey("q", this.quickStart);
     }

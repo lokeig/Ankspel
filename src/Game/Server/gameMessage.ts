@@ -34,6 +34,9 @@ enum GameMessage {
     LoadMap,
     MapLoaded,
     StartMap,
+
+    // ─── Other ────────────────────────────────
+    ChatMessage
 }
 
 type NetworkVector = {
@@ -72,6 +75,9 @@ interface GameMessageMap {
     [GameMessage.LoadMap]: { id: number };
     [GameMessage.MapLoaded]: {};
     [GameMessage.StartMap]: {};
+
+    // ─── Other ────────────────────────────────
+    [GameMessage.ChatMessage]: { sender: number, text: string };
 }
 
 export { GameMessage };
