@@ -207,7 +207,7 @@ class Spawner {
         framePos.x -= Spawner.frameDrawSize.x / 2;
         framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
 
-        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Items);
+        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Tiles - 1);
         if (this.contains) {
             this.contains.draw();
         }

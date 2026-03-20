@@ -1,10 +1,11 @@
-import { Input } from "@common";
+import { IDManager, Input } from "@common";
 import { Vector } from "@math";
+import { PlayerManager } from "@player";
 import { DrawTextInfo, Render, RenderSpace, zIndex } from "@render";
 import { Connection, GameMessage } from "@server";
 
 type ChatMessage = {
-    author: string
+    sender: number
     text: string
     timeAlive: number
 }
@@ -15,9 +16,9 @@ class Chat {
     private currentInput = "";
 
     private maxLength: number = 64;
-    private size: number = 12;
+    private size: number = 36;
 
-    private static maxTimeAlive = 8;
+    private static maxTimeAlive = 7;
 
     constructor() {
         Input.onAnyKey((key => {
@@ -25,25 +26,27 @@ class Chat {
                 this.toggle();
                 return;
             }
+
+            if (!this.isChatOpen()) {
+                return;
+            }
+
             if (key === "Backspace") {
                 this.currentInput = this.currentInput.substring(0, this.currentInput.length - 1);
             }
-            if (this.isChatOpen() && this.currentInput.length < this.maxLength && (this.isLetter(key) || key === " ")) {
-                this.currentInput += key.toUpperCase();
+            if (key.length === 1 && this.currentInput.length < this.maxLength) {
+                this.currentInput += key;
             }
         }))
-    }
-
-    private isLetter(str: string): boolean {
-        return str.length === 1 && str.toLowerCase() != str.toUpperCase();
     }
 
     private toggle(): void {
         if (this.isOpen) {
             const currentMsg = this.currentInput.trim();
             if (currentMsg !== "") {
-                this.write({ author: "me", text: currentMsg, timeAlive: 0 });
-                Connection.get().sendGameMessage(GameMessage.ChatMessage, { sender: 0, text: currentMsg });
+                const sender = IDManager.getBaseOffset();
+                this.write({ sender, text: currentMsg, timeAlive: 0 });
+                Connection.get().sendGameMessage(GameMessage.ChatMessage, { sender, text: currentMsg });
             }
             this.currentInput = "";
         }
@@ -67,33 +70,51 @@ class Chat {
         this.messages.push(message);
     }
 
+    private drawText(playerId: number, pos: Vector, message: string, opacity: number): void {
+        const render = Render.get();
+
+        const player = PlayerManager.getPlayerFromID(playerId)!;
+        const messageInfo: DrawTextInfo = {
+            text: message,
+            pos: pos.clone(),
+            font: "chat",
+            size: this.size,
+            color: "white",
+            opacity,
+            zIndex: zIndex.UI
+        };
+        const nameInfo = { ...messageInfo };
+        nameInfo.text = player.getName() + ": ";
+        nameInfo.color = player.getColor();
+        nameInfo.pos = pos.clone();
+
+        const nameLength = render.measureText(nameInfo.text, nameInfo.font, nameInfo.size).width;
+        messageInfo.pos.x += nameLength;
+
+        render.drawText(nameInfo, RenderSpace.Screen);
+        render.drawText(messageInfo, RenderSpace.Screen);
+
+        pos.y -= this.size;
+    }
+
     public draw(): void {
         const render = Render.get();
         const pos = new Vector(20, render.getHeight());
         pos.y -= this.size;
-
-        const textInfo: DrawTextInfo = {
-            text: this.currentInput,
-            pos,
-            font: "chat",
-            size: this.size,
-            color: "white",
-            opacity: 1,
-            zIndex: zIndex.UI
+        if (this.isChatOpen()) {
+            this.drawText(IDManager.getBaseOffset(), pos, this.currentInput, 1);
         }
-        if (this.isOpen) {
-            render.drawText(textInfo, RenderSpace.Screen);
-        }
-        for (let i = 0; i < this.messages.length; i++) {
-            const msg = this.messages[i];
-            const msgInfo = { ...textInfo };
 
-            msgInfo.text = msg.text;
-            msgInfo.pos = msgInfo.pos.clone()
-            msgInfo.pos.y -= this.size * (this.messages.length - i) * 2;
-            msgInfo.opacity = 1 - (msg.timeAlive / Chat.maxTimeAlive);
-
-            render.drawText(msgInfo, RenderSpace.Screen);
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            const message = this.messages[i];
+            let opacity = message.timeAlive / Chat.maxTimeAlive;
+            const threshold = 0.8;
+            if (opacity > threshold) {
+                opacity = (1 - (message.timeAlive) / (Chat.maxTimeAlive)) / (1 - threshold);
+            } else {
+                opacity = 1;
+            }
+            this.drawText(message.sender, pos, message.text, opacity);
         }
     }
 }

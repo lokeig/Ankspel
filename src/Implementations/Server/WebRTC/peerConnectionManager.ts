@@ -11,6 +11,7 @@ class PeerConnectionManager {
     private peerId: string;
     private socket: WebSocket;
     private messageCallback: (type: GameMessage, msg: GameMessage) => void = () => { };
+    private closeCallback: () => void = () => { };
 
     constructor(peerId: string, socket: WebSocket) {
         this.peerId = peerId;
@@ -80,6 +81,7 @@ class PeerConnectionManager {
 
         channel.onclose = () => {
             console.log(`DataChannel with ${this.peerId} closed`);
+            this.closeCallback();
         };
 
         channel.onerror = (error) => {
@@ -89,6 +91,10 @@ class PeerConnectionManager {
 
     public setOnMessage(callback: (type: GameMessage, msg: GameMessage) => void) {
         this.messageCallback = callback;
+    }
+
+    public setOnClose(callback: () => void): void {
+        this.closeCallback = callback;
     }
 
     public async createOffer() {

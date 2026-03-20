@@ -1,6 +1,6 @@
 import { Controls, EquipmentSlot, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
 import { Vector } from "@math";
-import { CollisionObject, DynamicObject } from "@core";
+import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
 import { PlayerItemManager } from "./playerItemManager";
 import { PlayerJump } from "./playerJump";
@@ -11,7 +11,6 @@ import { PlayerEquipment } from "./playerEquipment";
 import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
-import { ImageName, Render, zIndex } from "@render";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -34,7 +33,7 @@ class PlayerCharacter {
     private id: number;
     private collidableBodies: Map<DynamicObject, ProjectileTarget> = new Map();
 
-    constructor(pos: Vector, id: number, color: ImageName) {
+    constructor(pos: Vector, id: number, color: string) {
         this.standardBody = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
         this.activeBody = this.standardBody;
         this.animator = new PlayerAnimation(color);
@@ -90,8 +89,14 @@ class PlayerCharacter {
         this.equipment.unequipAll();
         this.animator.reset();
         this.armFront.angle = 0;
-        this.standardBody.velocity = new Vector();
+        this.standardBody.velocity.set(0, 0);
     }
+
+    public delete(): void {
+        this.collidableBodies.forEach(target => ProjectileManager.removeCollidable(target));
+        this.equipment.getAllEquippedItems().forEach((_, slot) => this.equipment.equip(null, slot));
+    }
+
 
     public setPos(pos: Vector) {
         this.activeBody.pos = pos;
@@ -210,7 +215,7 @@ class PlayerCharacter {
 
         this.animator.drawEquipment(this.equipment);
         this.animator.drawHolding(this.equipment);
-        
+
         this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.standardBody.isFlip());
         this.animator.drawTopLayers(this.equipment);
 

@@ -3,14 +3,25 @@ import { Frame } from "./Animation/frame";
 import { Vector } from "@math";
 
 class SpriteSheet {
-    private image: ImageInfo;
     private static noFrame = new Frame();
+
+    private image: ImageInfo;
+    private blendingMode: string | null = null;
+    private color: string | null = null;
     private space: RenderSpace = RenderSpace.World;
 
     public zIndex: number = 0;
 
     constructor(image: ImageInfo) {
         this.image = image;
+    }
+
+    public setColor(color: string | null) {
+        this.color = color;
+    }
+
+    public setBlendingMode(mode: string | null): void {
+        this.blendingMode = mode;
     }
 
     public setRenderSpace(space: RenderSpace): void {
@@ -33,13 +44,21 @@ class SpriteSheet {
         const drawInfo: DrawInfo = {
             image: this.image,
             source: this.getSource(frame.row, frame.col),
-            world: { x: pos.x, y: pos.y, width, height },
+            world: { x: Math.floor(pos.x), y: Math.floor(pos.y), width, height },
             flip,
             angle,
             opacity,
-            zIndex
+            zIndex,
         };
-        Render.get().drawImage(drawInfo, this.space);
+        if (this.blendingMode) {
+            drawInfo.blendingMode = this.blendingMode;
+        }
+
+        if (this.color) {
+            Render.get().drawColor(drawInfo, this.color, this.space);
+        } else {
+            Render.get().drawImage(drawInfo, this.space);
+        }
     }
 
     public drawLine(start: Vector, end: Vector, width: number, frame: Frame = SpriteSheet.noFrame, opacity: number = 1): void {

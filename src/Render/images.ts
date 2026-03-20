@@ -1,25 +1,14 @@
 const Images = {
     // Player
-    playerBlack: { src: '/assets/Images/Player/playerBlack.png', frameWidth: 32, frameHeight: 32 },
-    playerBlue: { src: '/assets/Images/Player/playerBlue.png', frameWidth: 32, frameHeight: 32 },
-    playerBrown: { src: '/assets/Images/Player/playerBrown.png', frameWidth: 32, frameHeight: 32 },
-    playerGreen: { src: '/assets/Images/Player/playerGreen.png', frameWidth: 32, frameHeight: 32 },
-    playerPink: { src: '/assets/Images/Player/playerPink.png', frameWidth: 32, frameHeight: 32 },
-    playerRed: { src: '/assets/Images/Player/playerRed.png', frameWidth: 32, frameHeight: 32 },
-    playerWhite: { src: '/assets/Images/Player/playerWhite.png', frameWidth: 32, frameHeight: 32 },
-    playerYellow: { src: '/assets/Images/Player/playerYellow.png', frameWidth: 32, frameHeight: 32 },
-    playerGrey: { src: '/assets/Images/Player/playerGrey.png', frameWidth: 32, frameHeight: 32 },
+    playerBase: { src: '/assets/Images/Player/playerBase.png', frameWidth: 32, frameHeight: 32 },
+    playerBaseMultiply: { src: '/assets/Images/Player/playerBaseMultiply.png', frameWidth: 32, frameHeight: 32 },
+    playerOverlay: { src: '/assets/Images/Player/playerOverlay.png', frameWidth: 32, frameHeight: 32 },
+    playerMask: { src: '/assets/Images/Player/playerMask.png', frameWidth: 32, frameHeight: 32 },
 
-    playerBlackHands: { src: '/assets/Images/Player/playerHandsBlack.png', frameWidth: 16, frameHeight: 16 },
-    playerBlueHands: { src: '/assets/Images/Player/playerHandsBlue.png', frameWidth: 16, frameHeight: 16 },
-    playerBrownHands: { src: '/assets/Images/Player/playerHandsBrown.png', frameWidth: 16, frameHeight: 16 },
-    playerGreenHands: { src: '/assets/Images/Player/playerHandsGreen.png', frameWidth: 16, frameHeight: 16 },
-    playerPinkHands: { src: '/assets/Images/Player/playerHandsPink.png', frameWidth: 16, frameHeight: 16 },
-    playerRedHands: { src: '/assets/Images/Player/playerHandsRed.png', frameWidth: 16, frameHeight: 16 },
-    playerWhiteHands: { src: '/assets/Images/Player/playerHandsWhite.png', frameWidth: 16, frameHeight: 16 },
-    playerYellowHands: { src: '/assets/Images/Player/playerHandsYellow.png', frameWidth: 16, frameHeight: 16 },
-    playerGreyHands: { src: '/assets/Images/Player/playerHandsGrey.png', frameWidth: 16, frameHeight: 16 },
-
+    playerHandsBase: { src: '/assets/Images/Player/playerHandsBase.png', frameWidth: 16, frameHeight: 16 },
+    playerHandsBaseMultiply: { src: '/assets/Images/Player/playerHandsMultiply.png', frameWidth: 16, frameHeight: 16 },
+    playerHandsOverlay: { src: '/assets/Images/Player/playerHandsOverlay.png', frameWidth: 16, frameHeight: 16 },
+    playerHandsMask: { src: '/assets/Images/Player/playerHandsMask.png', frameWidth: 16, frameHeight: 16 },
     // Tiles
     tileIce: { src: '/assets/Images/Tiles/tileIce.png', frameWidth: 16, frameHeight: 16 },
     tileNature: { src: '/assets/Images/Tiles/natureTileset.png', frameWidth: 16, frameHeight: 16 },

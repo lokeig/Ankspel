@@ -12,6 +12,7 @@ enum GameMessage {
     PlayerInfo,
     PlayerRagdollInfo,
     NewPlayer,
+    PlayerLeave,
     PlayerSpawn,
     PlayerProjectileEffect,
     PlayerDead,
@@ -52,7 +53,8 @@ interface GameMessageMap {
     // ─── Player ─────────────────────────────
     [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
-    [GameMessage.NewPlayer]: { id: number, color: ImageName };
+    [GameMessage.NewPlayer]: { id: number, color: string, name: string };
+    [GameMessage.PlayerLeave]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };
     [GameMessage.PlayerProjectileEffect]: { id: number, type: ProjectileEffectType, effect: ProjectileEffect };
     [GameMessage.PlayerDead]: { id: number };

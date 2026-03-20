@@ -1,7 +1,6 @@
 import { Connection, IMainMenu } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
-import { ImageName } from "@render";
 import { ControlsMenu } from "./controlsMenu";
 import { Controls } from "@common";
 
@@ -16,7 +15,7 @@ class MainMenuCSS implements IMainMenu {
     private hostbutton: HTMLButtonElement;
     private startbutton: HTMLButtonElement;
     private leavebutton: HTMLButtonElement;
-    private controlsButton: HTMLButtonElement;
+    private settingsButton: HTMLButtonElement;
 
     private lastLobbies: LobbyMessageData[] = [];
 
@@ -52,8 +51,8 @@ class MainMenuCSS implements IMainMenu {
         this.hostbutton = document.getElementById("hostbutton") as HTMLButtonElement;
         this.hostbutton.addEventListener("click", () => this.onHost());
 
-        this.controlsButton = document.getElementById("controlsButton") as HTMLButtonElement;
-        this.controlsButton.addEventListener("click", () => this.onControls());
+        this.settingsButton = document.getElementById("settingsButton") as HTMLButtonElement;
+        this.settingsButton.addEventListener("click", () => this.onControls());
 
         this.startbutton.disabled = true;
         this.leavebutton.disabled = true;
@@ -103,9 +102,8 @@ class MainMenuCSS implements IMainMenu {
         this.controlsMenu.show();
     }
 
-    public getChosenColor(): ImageName {
-        const select = document.getElementById("playerColorSelect")! as HTMLSelectElement;
-        return "player" + select.value as ImageName;
+    public getChosenColor(player: number): string {
+        return this.controlsMenu.getColor(player);
     }
 
     public getControls(player: number): Controls {
@@ -118,6 +116,10 @@ class MainMenuCSS implements IMainMenu {
 
     public hide(): void {
         this.mainDiv.style.display = "none";
+    }
+
+    public getName(player: number): string {
+        return this.controlsMenu.getName(player);
     }
 
     public refresh(lobbies: LobbyMessageData[]): void {

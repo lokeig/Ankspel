@@ -7,7 +7,7 @@ import { Camera } from "@game/Camera";
 import { Parallax } from "@game/ParallaxBackground/parallax";
 import { MapManager } from "@game/Map";
 import { Connection } from "@server";
-import { MaxMinPositions } from "@common";
+import { IDManager, MaxMinPositions } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
 import { Render } from "@render";

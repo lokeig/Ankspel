@@ -53,8 +53,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             body.bounceFactor = bounce;
             body.friction = friction;
         });
-
-        this.torso.ignorePlatforms = true;
     }
 
     public stateEntered(from: PlayerState): void {
@@ -177,6 +175,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         const jumpLeft = this.player.jump.getJumpRemaining();
         const jumpCharge = this.player.jump.getJumpForce() / 5;
         const impulse = jumpLeft * jumpCharge;
+
 
         this.head.velocity.y -= impulse;
         this.torso.velocity.y -= impulse;

@@ -2,13 +2,15 @@ import { EquipmentSlot, Utility } from "@common";
 import { ItemManager } from "@item";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
+import { DuckGame } from "../game";
 
 class PlayerNetworkHandler {
-    public static init() {
+    public static init(game: DuckGame) {
+
         const gameEvent = Connection.get().gameEvent;
 
-        gameEvent.subscribe(GameMessage.NewPlayer, ({ id, color }) => {
-            PlayerManager.spawn(id, color);
+        gameEvent.subscribe(GameMessage.NewPlayer, ({ id, color, name }) => {
+            PlayerManager.spawn(id, color, name);
         });
 
         gameEvent.subscribe(GameMessage.PlayerSpawn, ({ id, pos }) => {
@@ -45,6 +47,15 @@ class PlayerNetworkHandler {
                     player.character.equipment.equip(null, slot);
                 }
             });
+        });
+
+        gameEvent.subscribe(GameMessage.PlayerLeave, ({ id }) => {
+            const player = PlayerManager.removePlayer(id);
+            if (!player) {
+                return;
+            }
+            player.character.delete();
+            game.chat.write({sender: id, text: (" left the lobby").toUpperCase(), timeAlive: 0 });
         })
 
         gameEvent.subscribe(GameMessage.PlayerDead, ({ id }) => {

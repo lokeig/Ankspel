@@ -4,9 +4,6 @@ import { Countdown, IDManager, Input } from "@common";
 import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
-import { MapManager } from "@game/Map";
-import { MainMenu } from "@game/Server/Lobby/mainMenu";
-import { Images } from "@render";
 import { DuckGame } from "../game";
 
 const tickRate = 60;
@@ -18,13 +15,13 @@ class NetworkHandler {
     private static readyToPlay: boolean = false;
 
     static init(game: DuckGame) {
-        PlayerNetworkHandler.init();
+        PlayerNetworkHandler.init(game);
         ItemMessageHandler.init();
         MapNetworkHandler.init();
 
         Connection.get().onGameStart((userID) => {
             IDManager.setBaseOffset(userID * (2 << 16));
-            PlayerManager.create(MainMenu.get().getChosenColor());
+            PlayerManager.create();
             Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
             this.readyToPlay = true;
             this.checkReadyToStart();
@@ -42,8 +39,7 @@ class NetworkHandler {
         });
 
         gameEvent.subscribe(GameMessage.ChatMessage, ({ sender, text }) => {
-            const author = sender + "";
-            game.chat.write({ author, text, timeAlive: 0 });
+            game.chat.write({ sender, text, timeAlive: 0 });
         })
 
         Input.onKey("q", this.quickStart);
@@ -65,10 +61,10 @@ class NetworkHandler {
     }
 
     private static quickStart = (): void => {
-        PlayerManager.create(MainMenu.get().getChosenColor());
-        PlayerManager.create("playerBlack");
-        // PlayerManager.create(MainMenu.get().getChosenColor());
-        // PlayerManager.create(MainMenu.get().getChosenColor());
+        PlayerManager.create();
+        PlayerManager.create();
+        PlayerManager.create();
+        PlayerManager.create();
 
         Connection.get().enableLocalMode();
 

@@ -161,6 +161,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2px 60px;
+    margin-bottom: 50px;
 }
 
 .serverlist-footer {
@@ -241,6 +242,21 @@ button:hover {
     margin-top: 1rem;
     width: 100%;
     gap: 0;
+}
+
+#settingsMenu .modal-content button {
+    width: 100%;
+}
+
+#closeButton {
+    margin-top: 40px;
+}
+
+#colorInput {
+    padding: 0;
+    height: 35px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .modal-buttons button {

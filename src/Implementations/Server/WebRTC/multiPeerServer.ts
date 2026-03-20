@@ -3,10 +3,12 @@ import { Emitter, GameMessage, IServer } from "@game/Server";
 import { ClientMessage, CMsgType, ForwardedMessage, ServerMessage, ServerMessageMap } from "@shared";
 import { WebRTCMessage, WebRTCSignalType } from "./types";
 import { GameMessageMap } from "@game/Server/gameMessage";
+import { performServerHandshake } from "http2";
 
 class MultiPeerServer implements IServer {
     public gameEvent: Emitter<GameMessageMap> = new Emitter();
     public serverEvent: Emitter<ServerMessageMap> = new Emitter();
+
     private peers: Map<string, PeerConnectionManager> = new Map();
     private myID!: string;
     private socket: WebSocket;
@@ -14,6 +16,8 @@ class MultiPeerServer implements IServer {
     private localMode: boolean = false;
     private ignoring: Set<GameMessage> = new Set();
     private onStart: (gameId: number) => void = () => { };
+
+    private ids: Map<PeerConnectionManager, number[]> = new Map();
 
     constructor(socket: WebSocket) {
         this.socket = socket;
@@ -91,16 +95,9 @@ class MultiPeerServer implements IServer {
         const peer = new PeerConnectionManager(peerId, this.socket);
         this.peers.set(peerId, peer);
 
-        peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => {
-            if (type !== GameMessage.PlayerInfo) {
-                console.log("Received message " + GameMessage[type] + ":", msg);
-            }
-            if (this.ignoring.has(type)) {
-                console.log("Just ignored: ", GameMessage[type])
-                return;
-            }
-            this.gameEvent.publish(type, msg);
-        });
+        peer.setOnMessage((type: GameMessage, msg: GameMessageMap[GameMessage]) => this.onMessage(type, msg, peer));
+        peer.setOnClose(() => this.onClose(peer));
+
         const isInitiator = peerId < this.myID!;
         if (isInitiator) {
             console.log(`Initiating connection to ${peerId}`);
@@ -113,6 +110,30 @@ class MultiPeerServer implements IServer {
         const peer = this.peers.get(peerID);
         peer?.close();
         this.peers.delete(peerID);
+    }
+
+    private onMessage(type: GameMessage, msg: GameMessageMap[GameMessage], peer: PeerConnectionManager) {
+        if (type !== GameMessage.PlayerInfo) {
+            console.log("Received message " + GameMessage[type] + ":", msg);
+        }
+        if (this.ignoring.has(type)) {
+            return;
+        }
+        if (type === GameMessage.NewPlayer) {
+            const ids = this.ids.get(peer);
+            const data = msg as GameMessageMap[GameMessage.NewPlayer];
+            if (!ids) {
+                this.ids.set(peer, [data.id]);
+            } else {
+                ids.push(data.id);
+            }
+        }
+        this.gameEvent.publish(type, msg);
+    }
+
+    private onClose(peer: PeerConnectionManager): void {
+        const ids = this.ids.get(peer)!;
+        ids.forEach(id => { this.gameEvent.publish(GameMessage.PlayerLeave, { id }) });
     }
 
     private handleForwardedMessage(data: ForwardedMessage<WebRTCMessage>): void {

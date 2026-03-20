@@ -1,6 +1,6 @@
 
 import { Vector } from "@math";
-import { DrawInfo, Rect, IRender, ImageInfo, FontInfo, FontName } from "@render";
+import { DrawInfo, Rect, IRender, ImageInfo, FontInfo, FontName, Render } from "@render";
 import { DrawLineInfo, DrawTextInfo } from "src/Render/drawInfo";
 import { RenderSpace } from "src/Render/IRender";
 
@@ -13,11 +13,21 @@ class CanvasRender implements IRender {
     private images: Map<string, HTMLImageElement> = new Map();
     private renderQueue: { z: number, fn: () => void }[] = [];
 
+    private colorBuffer: HTMLCanvasElement;
+    private colorCtx: CanvasRenderingContext2D;
+
     constructor(canvasID: string) {
         this.canvas = document.getElementById(canvasID) as HTMLCanvasElement;
+        this.colorBuffer = document.createElement("canvas");
+
         this.ctx = this.canvas.getContext('2d')!;
+        this.colorCtx = this.colorBuffer.getContext("2d")!;
+
         this.ctx.imageSmoothingEnabled = false;
+        this.colorCtx.imageSmoothingEnabled = false;
+
         this.canvas.style.imageRendering = "pixelated";
+        this.colorBuffer.style.imageRendering = "pixelated";
     }
 
     public async loadImage(img: ImageInfo): Promise<void> {
@@ -60,6 +70,10 @@ class CanvasRender implements IRender {
         this.renderQueue.push({ z: zIndex, fn: () => this.executeDrawSquare(rect, angle, color, space) });
     }
 
+    public drawColor(drawInfo: DrawInfo, color: string, space?: RenderSpace): void {
+        this.renderQueue.push({ z: drawInfo.zIndex, fn: () => this.executeDrawColor(drawInfo, color, space) });
+    }
+
     public measureText(text: string, font: FontName, size: number): { width: number, height: number } {
         this.ctx.save();
 
@@ -91,7 +105,6 @@ class CanvasRender implements IRender {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
         this.ctx.globalAlpha = drawInfo.opacity;
-
         if (drawInfo.flip) {
             const translateAmount = Math.floor(drawInfo.world.x + drawInfo.world.width / 2)
             this.ctx.translate(translateAmount, Math.floor(drawInfo.world.y));
@@ -101,6 +114,10 @@ class CanvasRender implements IRender {
 
         this.ctx.translate(Math.floor(drawInfo.world.x + drawInfo.world.width / 2), Math.floor(drawInfo.world.y + drawInfo.world.height / 2));
         this.ctx.rotate(drawInfo.angle);
+
+        if (drawInfo.blendingMode) {
+            this.ctx.globalCompositeOperation = drawInfo.blendingMode as GlobalCompositeOperation;
+        }
 
         this.ctx.drawImage(
             img,
@@ -117,7 +134,67 @@ class CanvasRender implements IRender {
         this.ctx.restore();
     }
 
-    public executeDrawLine(info: DrawLineInfo, space?: RenderSpace): void {
+    private executeDrawColor(drawInfo: DrawInfo, color: string, space?: RenderSpace) {
+        const img = this.images.get(drawInfo.image.src);
+        if (!img) {
+            console.error("Image " + drawInfo.image.src + " not loaded before use");
+            return;
+        }
+
+        const w = Math.floor(drawInfo.world.width);
+        const h = Math.floor(drawInfo.world.height);
+
+        this.colorBuffer.width = w;
+        this.colorBuffer.height = h;
+
+        if (space === RenderSpace.Screen) {
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+        this.colorCtx.imageSmoothingEnabled = false;
+
+        this.colorCtx.drawImage(
+            img,
+            Math.floor(drawInfo.source.x),
+            Math.floor(drawInfo.source.y),
+            Math.floor(drawInfo.source.width),
+            Math.floor(drawInfo.source.height),
+            0,
+            0,
+            w,
+            h
+        );
+
+        this.colorCtx.globalCompositeOperation = "source-in";
+
+        this.colorCtx.fillStyle = color;
+        this.colorCtx.fillRect(0, 0, w, h);
+
+        this.ctx.save();
+        this.ctx.translate(Math.floor(drawInfo.world.x + w / 2), Math.floor(drawInfo.world.y + h / 2));
+
+        if (drawInfo.flip) {
+            this.ctx.scale(-1, 1);
+        }
+
+        this.ctx.rotate(drawInfo.angle);
+
+        if (drawInfo.blendingMode) {
+            this.ctx.globalCompositeOperation = drawInfo.blendingMode as GlobalCompositeOperation;
+        }
+
+        this.ctx.drawImage(
+            this.colorBuffer,
+            Math.floor(-drawInfo.world.width / 2),
+            Math.floor(-drawInfo.world.height / 2),
+            Math.floor(drawInfo.world.width),
+            Math.floor(drawInfo.world.height)
+        );
+
+        this.ctx.restore();
+    }
+
+    private executeDrawLine(info: DrawLineInfo, space?: RenderSpace): void {
         const img = this.images.get(info.image.src);
         if (!img) {
             console.error("Image not loaded before use!");
@@ -172,6 +249,8 @@ class CanvasRender implements IRender {
         this.ctx.font = info.size + "px " + info.font;
         this.ctx.fillStyle = info.color;
 
+        this.ctx.shadowBlur = 7;
+        this.ctx.shadowColor = "black";
         this.ctx.fillText(info.text, Math.floor(info.pos.x), Math.floor(info.pos.y));
 
         this.ctx.restore();

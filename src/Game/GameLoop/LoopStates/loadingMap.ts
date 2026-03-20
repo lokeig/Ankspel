@@ -4,7 +4,7 @@ import { DuckGame } from "../game";
 import { Connection, GameMessage } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
 import { PlayerManager } from "@player";
-import { Images, Render, RenderSpace, zIndex } from "@render";
+import { DrawTextInfo, Images, Render, RenderSpace, zIndex } from "@render";
 import { Vector } from "@math";
 import { MapManager } from "@game/Map";
 
@@ -82,6 +82,25 @@ class LoadingMap implements IState<GameLoopState> {
                 this.get.draw(center, size, false, 0, zIndex.UI);
             }
         }
+        PlayerManager.getPlayers().forEach(player => {
+            const size = 16;
+            const drawPos = player.character.activeBody.pos.clone();
+            
+            drawPos.x += player.character.activeBody.width / 2;
+            const textInfo: DrawTextInfo = {
+                text: player.getName(),
+                pos: drawPos,
+                font: "chat",
+                size,
+                color: "white",
+                opacity: 1,
+                zIndex: zIndex.UI
+            }
+
+            const textDimensions = Render.get().measureText(player.getName(), "chat", size);
+            drawPos.x -= textDimensions.width / 2;
+            Render.get().drawText(textInfo);
+        })
         this.game.draw();
     }
 }

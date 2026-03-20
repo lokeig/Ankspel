@@ -40,6 +40,10 @@ class SpriteAnimator {
         return this.animation;
     }
 
+    public setSheet(sheet: SpriteSheet): void {
+        this.spriteSheet = sheet;
+    }
+
     public draw(pos: Vector, size: number, flip: boolean, angle: number, zIndex: number): void {
         const frame = this.animation.getFrame(this.currentFrame);
         this.spriteSheet.draw(pos, size, flip, angle, zIndex, frame);

@@ -1,7 +1,7 @@
 import { Vector } from "@math";
 import { ImageInfo } from "./images";
 import { Rect } from "./rect";
-import { FontInfo, FontName } from "./fonts";
+import { FontName } from "./fonts";
 
 type DrawInfo = {
     image: ImageInfo;
@@ -10,6 +10,7 @@ type DrawInfo = {
     flip: boolean;
     angle: number;
     opacity: number;
+    blendingMode?: string;
     zIndex: number;
 };
 
@@ -20,6 +21,7 @@ type DrawTextInfo = {
     size: number;
     color: string;
     opacity: number;
+    blendingMode?: string;
     zIndex: number;
 };
 
@@ -30,6 +32,7 @@ type DrawLineInfo = {
     width: number;
     sourceRect: Rect;
     opacity: number;
+    blendingMode?: string;
     zIndex: number;
 }
 

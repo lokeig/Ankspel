@@ -1,5 +1,5 @@
 const Fonts = {
-    chat: { src: '/assets/Fonts/duckGameFont.ttf', size: "16px" }
+    chat: { src: '/assets/Fonts/ByteBounce.ttf', size: "16px" }
 } as const;
 
 type FontName = keyof typeof Fonts;

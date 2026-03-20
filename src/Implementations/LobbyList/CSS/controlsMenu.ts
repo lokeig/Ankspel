@@ -13,12 +13,26 @@ class ControlsMenu {
     private backupControls: Controls = { ...this.currentControls };
     private controlInputs: Record<keyof Controls, HTMLInputElement>;
 
+    private colorInput: HTMLInputElement;
+    private nameInput: HTMLInputElement;
 
     constructor() {
         this.controlsMenu = document.getElementById('controlsMenu')!;
 
         this.cancelButton = document.getElementById('cancelControlsButton') as HTMLButtonElement;
         this.saveButton = document.getElementById('saveControlsButton') as HTMLButtonElement;
+
+        this.colorInput = document.getElementById('colorInput') as HTMLInputElement;
+        this.nameInput = document.getElementById('displayNameInput') as HTMLInputElement;
+
+        const savedColor = localStorage.getItem('color');
+        if (savedColor) {
+            this.colorInput.value = savedColor;
+        }
+        const savedName = localStorage.getItem('displayName');
+        if (savedName) {
+            this.nameInput.value = savedName;
+        }
 
         this.controlInputs = {
             jump: document.getElementById('jumpInput') as HTMLInputElement,
@@ -112,6 +126,9 @@ class ControlsMenu {
             }
         }
         localStorage.setItem('gameControls', JSON.stringify(this.currentControls));
+        localStorage.setItem('displayName', this.nameInput.value);
+        localStorage.setItem('color', this.colorInput.value);
+
         this.hide();
     }
 
@@ -123,6 +140,14 @@ class ControlsMenu {
 
     public hide(): void {
         this.controlsMenu.classList.add('hidden');
+    }
+
+    public getColor(player: number): string {
+        return this.colorInput.value;
+    }
+
+    public getName(player: number): string {
+        return this.nameInput.value;
     }
 
     public getControls(player: number): Controls {
@@ -138,7 +163,7 @@ class ControlsMenu {
                 ragdoll: "1",
                 strafe: "undefined",
                 menu: "undefined",
-                
+
             }
         }
         return this.currentControls;

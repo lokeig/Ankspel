@@ -52,7 +52,7 @@ class Shotgun extends Item {
         this.firearmInfo.knockback = new Vector(720, 240);
         this.firearmInfo.bulletRange = 8;
         this.firearmInfo.bulletRangeVariation = 1;
-        this.firearmInfo.bulletSpeed = 2400;
+        this.firearmInfo.bulletSpeed = 4800;
     }
 
     public update(deltaTime: number): void {

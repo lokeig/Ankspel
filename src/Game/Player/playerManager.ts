@@ -1,10 +1,9 @@
 import { IDManager } from "@common";
 import { Player } from "./player";
 import { Connection, GameMessage, MainMenu } from "@server";
-import { ImageName } from "@render";
 
 class PlayerManager {
-    private static players: Player[] = [];
+    private static players: Set<Player> = new Set();
     private static localPlayerCount = 0;
 
     public static update(deltaTime: number, maxY: number) {
@@ -45,24 +44,41 @@ class PlayerManager {
     }
 
     public static getPlayers(): Player[] {
-        return this.players;
+        return Array.from(this.players);
     }
 
-    public static create(color: ImageName): Player {
-        const controls = MainMenu.get().getControls(this.localPlayerCount);
+    public static removePlayer(id: number): Player | undefined {
+        const player = this.getPlayerFromID(id);
+        if (!player) {
+            return undefined;
+        }
+        if (player.character.isLocal()) {
+            this.localPlayerCount--;
+        }
+        this.players.delete(player);
+        return player;
+    }
+
+    public static create(): Player {
+        const mainMenu = MainMenu.get();
+
+        const color = mainMenu.getChosenColor(this.localPlayerCount);
+        const name = mainMenu.getName(this.localPlayerCount);
+        const controls = mainMenu.getControls(this.localPlayerCount);
+
         const id = IDManager.getBaseOffset() + this.localPlayerCount++;
 
-        const player = new Player(id, color, controls);
-        this.players.push(player);
+        const player = new Player(id, color, name, controls);
+        this.players.add(player);
 
-        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, color }));
+        Connection.get().sendGameMessage(GameMessage.NewPlayer, ({ id, color, name }));
 
         return player;
     }
 
-    public static spawn(id: number, color: ImageName): Player {
-        const player = new Player(id, color);
-        this.players.push(player);
+    public static spawn(id: number, color: string, name: string): Player {
+        const player = new Player(id, color, name);
+        this.players.add(player);
         return player;
     }
 
@@ -75,7 +91,12 @@ class PlayerManager {
     }
 
     public static getPlayerFromID(id: number): Player | undefined {
-        return this.players.find(player => player.getId() === id);
+        for (const player of this.players) {
+            if (player.getId() === id) {
+                return player;
+            }
+        }
+        return undefined;
     }
 }
 

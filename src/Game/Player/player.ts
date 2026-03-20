@@ -4,7 +4,7 @@ import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
-import { ImageName, Images, zIndex } from "@render";
+import { Images, zIndex } from "@render";
 import { PlayerSpawnDescription } from "@game/Map/PlayerSpawnDescription";
 import { AudioManager, Sound } from "@game/Audio";
 
@@ -14,16 +14,31 @@ class Player {
     private id: number;
     private score: number = 0;
     private gettingScore: boolean = false;
+    private color: string;
+    private name: string;
+
     private static plusOneSheet = new SpriteSheet(Images.plusOne);
 
-    constructor(id: number, color: ImageName, controls?: Controls) {
+    constructor(id: number, color: string, name: string, controls?: Controls) {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
         this.id = id;
+
+        this.color = color;
+        this.name = name;
+
         this.character = new PlayerCharacter(new Vector(), id, color);
         if (controls) {
             this.character.setControls(controls);
         }
         this.setupStateMachine();
+    }
+
+    public getColor(): string {
+        return this.color;
+    }
+
+    public getName(): string {
+        return this.name;
     }
 
     public givePoint(): void {
@@ -104,17 +119,18 @@ class Player {
 
     public draw(): void {
         this.stateMachine.draw();
+
         if (this.gettingScore) {
             const drawSize = new Vector(38, 30);
             const drawPos = this.character.activeBody.pos.clone();
             drawPos.x += this.character.activeBody.width / 2;
             drawPos.y += this.character.activeBody.height;
-
             drawPos.y -= 70;
-
             drawPos.subtract((drawSize).clone().divide(2));
+
             Player.plusOneSheet.draw(drawPos, drawSize, false, 0, zIndex.UI);
         }
+
     }
 }
 
