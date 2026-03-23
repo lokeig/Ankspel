@@ -1,13 +1,13 @@
 import { Vector } from "@math";
-import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
+import { Equippable, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Item } from "../item";
-import { EquipmentSlot, Frame, ItemInteraction, PlayerState, ProjectileEffect, ProjectileEffectType, SpriteSheet, Utility } from "@common";
+import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, PlayerState, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
-import { Images, Render, zIndex } from "@render";
+import { Images } from "@render";
 import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
 
-class Helmet extends Item {
+class Helmet extends Item implements Equippable {
     private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
     private static spriteSheet: SpriteSheet;
 
@@ -31,13 +31,13 @@ class Helmet extends Item {
     constructor(pos: Vector, id: number) {
         super(pos, Helmet.standardWidth, Helmet.standardHeight, id);
 
-        this.useInteractions.set(ItemInteraction.Activate, () => {
+        this.useInteractions.setUse(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Head };
             return [result];
         });
 
-        this.interactions().setOnPlayerState(this.onPlayerState.bind(this));
+        this.playerInteractions().setOnPlayerState(PlayerState.Ragdoll, () => [{ type: OnItemUseType.Unequip, value: this.equipmentSlot }]);
 
         this.target = {
             body: () => this.body,
@@ -47,22 +47,29 @@ class Helmet extends Item {
         }
     }
 
-    private onPlayerState(state: PlayerState): OnItemUseEffect[] {
-        if (state === PlayerState.Ragdoll) {
-            return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Head }];
-        }
-        return [];
+    public blocksSharpObject(): boolean {
+        return true;
     }
 
-    public onEquip(slot: EquipmentSlot): void {
-        if (slot === EquipmentSlot.Head) {
-            this.body.width = Helmet.equippedWidth;
-            this.body.height = Helmet.equippedHeight;
-            ProjectileManager.addCollidable(this.target);
-        }
+    public onPlayerAnimation(_anim: PlayerAnim, _holding: boolean): void {
+        return;
+    }
+
+    public tanksHeavyProp(): boolean {
+        return true;
+    }
+
+    public onEquip(): void {
+        this.equipmentSlot = EquipmentSlot.Head;
+
+        this.body.width = Helmet.equippedWidth;
+        this.body.height = Helmet.equippedHeight;
+        ProjectileManager.addCollidable(this.target);
     }
 
     public onUnequip(): void {
+        this.equipmentSlot = EquipmentSlot.Hand;
+
         this.body.width = Helmet.standardWidth;
         this.body.height = Helmet.standardHeight;
         ProjectileManager.removeCollidable(this.target);

@@ -34,11 +34,7 @@ class PlayerStandard implements IState<PlayerState> {
         const armOffset = new Vector(10, 28);
         this.player.armFront.setOffset(armOffset);
 
-        this.player.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.interactions().getOnPlayerState()) {
-                item.interactions().getOnPlayerState()!(PlayerState.Standard);
-            }
-        });
+        this.player.handleNewState(PlayerState.Standard);
     }
 
     public stateUpdate(deltaTime: number): void {

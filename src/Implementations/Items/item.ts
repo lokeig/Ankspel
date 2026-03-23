@@ -1,14 +1,17 @@
 import { Vector } from "@math";
-import { Lerp, lerpAngle, ProjectileEffect, ThrowType, Utility } from "@common";
+import { EquipmentSlot, Lerp, lerpAngle, PlayerState, ProjectileEffect, ThrowType, Utility } from "@common";
 import { DynamicObject } from "@core";
-import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
-import { IItem, Ownership } from "@item";
+import { ItemPlayerInteraction } from "@game/Item/itemUseInteractions";
+import { IItem, OnItemUseType, Ownership } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
 import { zIndex } from "@render";
 
 abstract class Item implements IItem {
-    protected useInteractions = new ItemUseInteractions;
+    protected useInteractions = new ItemPlayerInteraction;
+
     private ownership: Ownership = Ownership.None;
+    protected equipmentSlot: EquipmentSlot = EquipmentSlot.Hand;
+
     protected body: DynamicObject;
 
     protected localAngle: number = 0;
@@ -21,11 +24,14 @@ abstract class Item implements IItem {
     protected holdOffset = new Vector;
     protected handOffset = new Vector;
 
+
     private delete: boolean = false;
 
     constructor(pos: Vector, width: number, height: number, id: number) {
         this.body = new DynamicObject(pos, width, height);
         this.id = id;
+
+        this.useInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: this.equipmentSlot }] });
     }
 
     public update(deltaTime: number): void {
@@ -80,7 +86,7 @@ abstract class Item implements IItem {
         this.worldAngle += this.rotateSpeed * deltaTime;
     }
 
-    public interactions(): ItemUseInteractions {
+    public playerInteractions(): ItemPlayerInteraction {
         return this.useInteractions;
     }
 

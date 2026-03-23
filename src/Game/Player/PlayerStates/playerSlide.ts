@@ -38,12 +38,9 @@ class PlayerSlide implements IState<PlayerState> {
         }
         this.player.armFront.setOffset(armOffset);
 
-        this.player.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.interactions().getOnPlayerState()) {
-                const state = this.crouch ? PlayerState.Crouch : PlayerState.Slide;
-                item.interactions().getOnPlayerState()!(state);
-            }
-        });
+        const state = this.crouch ? PlayerState.Crouch : PlayerState.Slide;
+        this.player.handleNewState(state);
+
     }
 
     public stateUpdate(deltaTime: number): void {

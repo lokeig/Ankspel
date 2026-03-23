@@ -1,20 +1,17 @@
-import { EquipmentSlot, ProjectileEffect, ThrowType } from "@common";
+import { ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { Ownership } from "./itemUseType";
-import { ItemUseInteractions } from "./itemUseInteractions";
+import { ItemPlayerInteraction } from "./itemUseInteractions";
 import { Vector } from "@math";
 
 
 interface IItem {
     update(deltaTime: number): void;
     getBody(): DynamicObject;
-    interactions(): ItemUseInteractions;
+    playerInteractions(): ItemPlayerInteraction;
     
     setOwnership(value: Ownership): void;
     getOwnership(): Ownership;
-    
-    onEquip?(slot: EquipmentSlot): void;
-    onUnequip?(): void;
     
     throw(throwType: ThrowType): void;
     enabled(): boolean;
@@ -27,9 +24,7 @@ interface IItem {
     
     getHoldOffset(): Vector;
     getHandOffset(): Vector;
-    
-    onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean): void;
-    
+        
     getId(): number;
     
     draw(): void;

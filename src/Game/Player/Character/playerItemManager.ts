@@ -8,14 +8,14 @@ import { AudioManager, Sound } from "@game/Audio";
 import { SpawnerManager } from "@game/Spawner";
 
 class PlayerItemManager {
-    private playerBody: DynamicObject;
+    private playerBody: () => DynamicObject;
     private controls: PlayerControls;
     private equipment: PlayerEquipment;
     private lastHeldItem: IItem | null = null;
     public forcedThrowType: null | ThrowType = null;
     private id: number;
 
-    constructor(body: DynamicObject, controls: PlayerControls, equipment: PlayerEquipment, id: number) {
+    constructor(body: () => DynamicObject, controls: PlayerControls, equipment: PlayerEquipment, id: number) {
         this.playerBody = body;
         this.controls = controls;
         this.equipment = equipment;
@@ -29,8 +29,6 @@ class PlayerItemManager {
         if (!this.equipment.hasItem(EquipmentSlot.Hand)) {
             return;
         }
-        const item = this.equipment.getItem(EquipmentSlot.Hand);
-        this.handleInteractions(item);
     }
 
     private handlePickupOrThrow(): void {
@@ -63,7 +61,11 @@ class PlayerItemManager {
         Connection.get().sendGameMessage(GameMessage.PlayerEquipment, message);
     }
 
-    private handleInteractions(item: IItem): void {
+    public handleInteractions(): void {
+        if (!this.equipment.hasItem(EquipmentSlot.Hand)) {
+            return;
+        }
+        const item = this.equipment.getItem(EquipmentSlot.Hand);
         const inputInteractions: [() => boolean, ItemInteraction][] = [
             [() => this.controls.shoot(InputMode.Press), ItemInteraction.Activate],
             [() => this.controls.up(InputMode.Press), ItemInteraction.Up],
@@ -79,7 +81,7 @@ class PlayerItemManager {
     }
 
     private triggerInteraction(item: IItem, action: ItemInteraction): void {
-        const onInputFunction = item.interactions().get(action);
+        const onInputFunction = item.playerInteractions().getUse(action);
         if (!onInputFunction) {
             return;
         }
@@ -99,7 +101,6 @@ class PlayerItemManager {
         this.sendEquipmentMessage();
     }
 
-
     public handleEffects(item: IItem, effects: OnItemUseEffect[]) {
         effects.forEach((effect) => {
             switch (effect.type) {
@@ -107,11 +108,11 @@ class PlayerItemManager {
                     break;
                 }
                 case (OnItemUseType.Knockback): {
-                    this.playerBody.velocity.subtract(effect.value);
+                    this.playerBody().velocity.subtract(effect.value);
                     break;
                 }
                 case (OnItemUseType.Position): {
-                    this.playerBody.pos = effect.value;
+                    this.playerBody().pos = effect.value;
                     break;
                 }
                 case (OnItemUseType.Equip): {
@@ -130,12 +131,12 @@ class PlayerItemManager {
 
     private getNearbyItem(): IItem | null {
         const inSpawners = SpawnerManager.getSpawnerItems();
-        const onGround = ItemManager.getNearby(this.playerBody.pos, this.playerBody.width, this.playerBody.height);
+        const onGround = ItemManager.getNearby(this.playerBody().pos, this.playerBody().width, this.playerBody().height);
         const nearby = [...inSpawners, ...onGround];
 
         let fallbackItem: IItem | null = null;
         for (const item of nearby) {
-            if (!this.playerBody.collision(item.getBody().scale(30, 30))) {
+            if (!this.playerBody().collision(item.getBody().scale(30, 30))) {
                 continue;
             }
             if (item === this.lastHeldItem) {

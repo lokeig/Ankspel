@@ -19,11 +19,8 @@ class PlayerFlap implements IState<PlayerState> {
         const armOffset = new Vector(10, 28);
         this.player.armFront.setOffset(armOffset);
 
-        this.player.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.interactions().getOnPlayerState()) {
-                item.interactions().getOnPlayerState()!(PlayerState.Flap);
-            }
-        });
+        this.player.handleNewState(PlayerState.Flap);
+
     }
 
     public stateUpdate(deltaTime: number): void {

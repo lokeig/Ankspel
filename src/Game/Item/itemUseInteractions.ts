@@ -1,35 +1,27 @@
-import { ItemInteraction, PlayerAnim, PlayerState } from "@common";
+import { ItemInteraction, PlayerState } from "@common";
 import { ItemUseHandler } from "./itemUseHandler";
 import { OnItemUseEffect } from "./itemUseType";
 
-class ItemUseInteractions {
-    private interactions: Map<ItemInteraction, ItemUseHandler> = new Map();
-    private onPlayerAnim: ((anim: PlayerAnim, holding: boolean) => void) | undefined;
-    private onPlayerState: ((state: PlayerState) => OnItemUseEffect[]) | undefined;
+class ItemPlayerInteraction {
+    private useInteractions: Map<ItemInteraction, ItemUseHandler> = new Map();
+    private onPlayerState: Map<PlayerState, (() => OnItemUseEffect[])> = new Map();
 
-    public get(interaction: ItemInteraction): ItemUseHandler | undefined {
-        return this.interactions.get(interaction);
+    public getUse(interaction: ItemInteraction): ItemUseHandler | undefined {
+        return this.useInteractions.get(interaction);
     }
 
-    public set(interaction: ItemInteraction, onUse: ItemUseHandler): void {
-        this.interactions.set(interaction, onUse);
+    public setUse(interaction: ItemInteraction, onUse: ItemUseHandler): void {
+        this.useInteractions.set(interaction, onUse);
     }
 
-    public setOnPlayerAnimation(onAnim: (anim: PlayerAnim, holding: boolean) => void): void {
-        this.onPlayerAnim = onAnim;
+    public setOnPlayerState(state: PlayerState, fn: () => OnItemUseEffect[]): void {
+        this.onPlayerState.set(state, fn);
     }
 
-    public getOnPlayerAnimation(): ((anim: PlayerAnim, holding: boolean) => void) | undefined {
-        return this.onPlayerAnim;
+    public getOnPlayerState(state: PlayerState): (() => OnItemUseEffect[]) | undefined {
+        return this.onPlayerState.get(state);
     }
 
-    public setOnPlayerState(onState: (state: PlayerState) => OnItemUseEffect[]): void {
-        this.onPlayerState = onState;
-    }
-
-    public getOnPlayerState(): ((state: PlayerState) => OnItemUseEffect[]) | undefined {
-        return this.onPlayerState;
-    }
 }
 
-export { ItemUseInteractions };
+export { ItemPlayerInteraction };

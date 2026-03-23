@@ -1,6 +1,6 @@
 import { Utility } from "@common";
 import { SpawnerManager } from "@game/Spawner";
-import { ItemManager, OnItemUseType } from "@item";
+import { isEquippable, ItemManager, OnItemUseType } from "@item";
 import { Vector } from "@math";
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
@@ -32,7 +32,7 @@ class ItemMessageHandler {
             item.getBody().pos = Utility.Vector.convertNetwork(position);
             item.getBody().direction = direction;
             const local = false;
-            const effects = item.interactions().get(action)!(seed, local);
+            const effects = item.playerInteractions().getUse(action)!(seed, local);
             effects.forEach((effect) => {
                 switch (effect.type) {
                     case (OnItemUseType.Aim): {
@@ -62,7 +62,7 @@ class ItemMessageHandler {
 
         gameEvent.subscribe(GameMessage.ItemProjectileEffect, ({ id, pos, effect }) => {
             const item = ItemManager.getItemFromID(id);
-            if (!item) {
+            if (!item || !isEquippable(item)) {
                 return;
             }
             item.onProjectileEffect(effect, pos, true);

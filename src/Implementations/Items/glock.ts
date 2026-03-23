@@ -38,7 +38,7 @@ class Glock extends Item {
 
         this.setupFirearmInfo();
 
-        this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+        this.useInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
     }

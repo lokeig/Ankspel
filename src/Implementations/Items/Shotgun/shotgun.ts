@@ -37,7 +37,7 @@ class Shotgun extends Item {
         this.holdOffset = new Vector(14, -4);
         this.handOffset = new Vector(4, 0);
 
-        this.useInteractions.set(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+        this.useInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
         this.setupFirearmInfo();

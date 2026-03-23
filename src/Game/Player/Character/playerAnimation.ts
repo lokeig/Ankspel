@@ -102,7 +102,6 @@ class PlayerAnimation {
         if (blueString.length === 1) {
             blueString += "0";
         }
-
         return "#" + R.toString(16) + G.toString(16) + blueString;
     }
 

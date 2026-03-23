@@ -1,5 +1,5 @@
 import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
-import { OnItemUseEffect, OnItemUseType, Ownership } from "@item";
+import { Equippable, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Vector } from "@math";
 import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
@@ -7,7 +7,7 @@ import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { Item } from "../item";
 import { Images } from "@render";
 
-class Chestplate extends Item {
+class Chestplate extends Item implements Equippable {
     private static frames = {
         default: new Frame(),
         equipped: new Frame(),
@@ -30,7 +30,7 @@ class Chestplate extends Item {
         const height = 20;
         super(pos, width, height, id);
 
-        this.useInteractions.set(ItemInteraction.Activate, () => {
+        this.useInteractions.setUse(ItemInteraction.Activate, () => {
             this.setOwnership(Ownership.Equipped);
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Body };
             return [result];
@@ -42,27 +42,32 @@ class Chestplate extends Item {
             onProjectileHit: this.onProjectileHit.bind(this),
             enabled: () => !this.shouldBeDeleted()
         };
-
-        this.useInteractions.setOnPlayerAnimation((anim, holding) => {
-            this.drawOverShoulder = false;
-            if (holding) {
-                return;
-            }
-            switch (anim) {
-                case PlayerAnim.Walk: break;
-                case PlayerAnim.Idle: break;
-                case PlayerAnim.Turn: break;
-
-                default: return;
-            }
-            this.drawOverShoulder = true;
-        });
     }
 
-    public onEquip(slot: EquipmentSlot): void {
-        if (slot !== EquipmentSlot.Body) {
+    public blocksSharpObject(): boolean {
+        return true;
+    }
+
+    public onPlayerAnimation(anim: PlayerAnim, holding: boolean): void {
+        this.drawOverShoulder = false;
+        if (holding) {
             return;
         }
+        switch (anim) {
+            case PlayerAnim.Walk: break;
+            case PlayerAnim.Idle: break;
+            case PlayerAnim.Turn: break;
+
+            default: return;
+        }
+        this.drawOverShoulder = true;
+    }
+
+    public tanksHeavyProp(): boolean {
+        return true;
+    }
+
+    public onEquip(): void {
         this.body.width = 40;
         this.body.height = 40;
 

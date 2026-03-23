@@ -2,9 +2,8 @@ import { Vector } from "@math";
 import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, ProjectileEffect } from "@common";
 import { DynamicObject } from "@core";
 import { IItem, Ownership } from "@item";
-import { ItemUseInteractions } from "@game/Item/itemUseInteractions";
+import { ItemPlayerInteraction } from "@game/Item/itemUseInteractions";
 import { PlayerCharacter } from "@game/Player/Character/playerCharacter";
-import { zIndex } from "@render";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -30,7 +29,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     private owned: Ownership = Ownership.None;
     private currentState = false;
 
-    public useInteractions = new ItemUseInteractions();
+    public useInteractions = new ItemPlayerInteraction();
 
     constructor(player: PlayerCharacter, _id: number) {
         this.player = player;
@@ -60,7 +59,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
         this.player.activeBody = this.legs;
 
-        this.player.equipment.throw(EquipmentSlot.Hand, ThrowType.Drop);
         this.coyoteTime.setToReady();
 
         this.head.direction = this.player.standardBody.direction;
@@ -73,12 +71,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.headAngle = 0;
         this.legsAngle = 0;
 
-        this.player.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.interactions().getOnPlayerState()) {
-                const effects = item.interactions().getOnPlayerState()!(PlayerState.Ragdoll);
-                this.player.itemManager.handleEffects(item, effects);
-            }
-        });
+        this.player.handleNewState(PlayerState.Ragdoll);
 
         this.player.removeCollidable(this.player.standardBody);
 
@@ -90,6 +83,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     public stateUpdate(deltaTime: number): void {
         this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
+
         if (this.isHeld()) {
             this.updateOwned(deltaTime);
             return;
@@ -103,7 +97,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.updateTimers(deltaTime);
         this.updatePhysics(deltaTime);
         this.solveConstraints(deltaTime);
-        this.handleLocalInput(deltaTime);
+        this.handleInput(deltaTime);
         this.updateAngles();
         this.syncEquipment();
     }
@@ -206,7 +200,13 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.keepDistance(deltaTime, this.head, this.legs, this.height * PlayerRagdoll.LegHeadDistance, true);
     }
 
-    private handleLocalInput(_deltaTime: number): void {
+    private handleInput(_deltaTime: number): void {
+        if (this.player.isDead()) {
+            return;
+        }
+        if (this.player.isLocal()) {
+            this.player.itemManager.handleInteractions();
+        }
         if (!this.player.isDead() && this.player.isLocal()) {
 
         }
@@ -239,6 +239,14 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
         this.player.equipment.setBody(
             this.head.getCenter(),
+            new Vector(0, 18),
+            this.head.direction,
+            this.headAngle,
+            EquipmentSlot.Hand
+        );
+
+        this.player.equipment.setBody(
+            this.head.getCenter(),
             new Vector(0, 16),
             this.head.direction,
             this.headAngle,
@@ -248,6 +256,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private updateOwned(deltaTime: number): void {
         this.head.ignorePlatforms = true;
+        this.torso.ignorePlatforms = true;
 
         if (this.legs.direction !== this.head.direction) {
             this.torso.velocity.add(PlayerRagdoll.OwnedDirectionChangeImpulse / 2 * this.head.getDirectionMultiplier());
@@ -265,6 +274,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
 
         this.head.ignorePlatforms = false;
+        this.torso.ignorePlatforms = false;
     }
 
     private updateOnSpawner(deltaTime: number): void {
@@ -340,13 +350,12 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     public draw(): void {
         const flip = this.head.isFlip();
         this.player.animator.setAnimation(PlayerAnim.UpperRagdoll);
-
         this.player.animator.drawBody(this.getDrawPos(this.head), PlayerCharacter.drawSize, flip, this.headAngle);
-
         this.player.animator.setAnimation(PlayerAnim.LowerRagdoll);
         this.player.animator.drawBody(this.getDrawPos(this.legs), PlayerCharacter.drawSize, flip, this.legsAngle);
 
         this.player.animator.drawEquipment(this.player.equipment);
+        this.player.animator.drawHolding(this.player.equipment);
     }
 
     // For IItem
@@ -390,11 +399,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         return this.owned;
     }
 
-    public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
-        return;
-    }
-
-    public interactions(): ItemUseInteractions {
+    public playerInteractions(): ItemPlayerInteraction {
         return this.useInteractions;
     }
 

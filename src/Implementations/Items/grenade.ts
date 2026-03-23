@@ -37,7 +37,7 @@ class Grenade extends Item {
         this.holdOffset = new Vector(11, -6)
         this.body.bounceFactor = 0.3;
 
-        this.useInteractions.set(ItemInteraction.Activate, (seed: number, local: boolean) => {
+        this.useInteractions.setUse(ItemInteraction.Activate, (seed: number, local: boolean) => {
             this.activate(seed);
             this.locallyActivated = local;
             return [];

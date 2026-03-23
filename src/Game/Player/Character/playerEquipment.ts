@@ -1,6 +1,6 @@
 import { Vector } from "@math";
 import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility } from "@common";
-import { IItem, ItemManager, Ownership } from "@item";
+import { IItem, isEquippable, ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
 
 class PlayerEquipment {
@@ -18,7 +18,9 @@ class PlayerEquipment {
         const current = this.equipment.get(slot);
 
         if (current) {
-            current.onUnequip?.();
+            if (isEquippable(current) && current.getOwnership() === Ownership.Equipped) {
+                current.onUnequip();
+            }
             current.setOwnership(Ownership.None);
         }
         if (!item) {
@@ -30,7 +32,9 @@ class PlayerEquipment {
         const ownership = (slot === EquipmentSlot.Hand) ? Ownership.Held : Ownership.Equipped;
 
         item.setOwnership(ownership);
-        item.onEquip?.(slot);
+        if (isEquippable(item) && slot !== EquipmentSlot.Hand) {
+            item.onEquip();
+        }
     }
 
     public unequipAll(): void {
@@ -46,8 +50,10 @@ class PlayerEquipment {
         }
         const item = this.getItem(slot);
 
-        item.onUnequip?.();
         item.throw(throwType);
+        if (isEquippable(item) && item.getOwnership() === Ownership.Equipped) {
+            item.onUnequip();
+        }
         item.setOwnership(Ownership.None);
 
         Connection.get().sendGameMessage(GameMessage.ThrowItem, {

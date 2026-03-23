@@ -17,7 +17,7 @@ class PlayerArm {
 
     public setPosition(playerPos: Vector, playerDrawSize: number, offset: Vector, flip: boolean): void {
         offset = offset.clone();
-        offset.add(this.getRotationOffset());
+        // offset.add(this.getRotationOffset());
 
         const result = playerPos.clone();
 

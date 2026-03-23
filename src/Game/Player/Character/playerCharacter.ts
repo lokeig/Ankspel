@@ -1,4 +1,4 @@
-import { Controls, EquipmentSlot, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
+import { Controls, EquipmentSlot, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
 import { Vector } from "@math";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
@@ -11,6 +11,7 @@ import { PlayerEquipment } from "./playerEquipment";
 import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
+import { isEquippable } from "@item";
 
 class PlayerCharacter {
     public static readonly drawSize: number = 64;
@@ -69,7 +70,16 @@ class PlayerCharacter {
         this.controls = new PlayerControls(controls);
         this.movement = new PlayerMove(this.standardBody, this.controls);
         this.jump = new PlayerJump(this.standardBody, this.controls);
-        this.itemManager = new PlayerItemManager(this.standardBody, this.controls, this.equipment, this.id);
+        this.itemManager = new PlayerItemManager(() => this.activeBody, this.controls, this.equipment, this.id);
+    }
+
+    public handleNewState(state: PlayerState): void {
+        this.equipment.getAllEquippedItems().forEach((item) => {
+            if (item && item.playerInteractions().getOnPlayerState(state)) {
+                this.itemManager.handleEffects(item, item.playerInteractions().getOnPlayerState(state)!());
+            }
+        });
+
     }
 
     private setArmPos(): void {
@@ -111,6 +121,7 @@ class PlayerCharacter {
         this.jump.update(deltaTime);
         this.movement.update(deltaTime);
         this.itemManager.handle();
+        this.itemManager.handleInteractions();
     }
 
     public nonLocalUpdate(deltaTime: number): void {
@@ -133,8 +144,8 @@ class PlayerCharacter {
             AudioManager.get().play(Sound.land);
         }
         this.equipment.getAllEquippedItems().forEach(item => {
-            if (item?.interactions().getOnPlayerAnimation()) {
-                item.interactions().getOnPlayerAnimation()!(this.animator.getCurrentAnimation(), this.equipment.hasItem(EquipmentSlot.Hand));
+            if (isEquippable(item)) {
+                item.onPlayerAnimation(this.animator.getCurrentAnimation(), this.equipment.hasItem(EquipmentSlot.Hand));
             }
         })
     }
@@ -218,7 +229,6 @@ class PlayerCharacter {
 
         this.animator.drawArm(this.armFront.pos, this.armFront.getDrawSize(), this.armFront.angle, this.standardBody.isFlip());
         this.animator.drawTopLayers(this.equipment);
-
     };
 }
 
