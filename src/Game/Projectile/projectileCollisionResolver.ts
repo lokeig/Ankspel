@@ -27,7 +27,7 @@ class ProjectileCollisionResolver {
         const tiles = TileManager.getNearby(segment.start, 0, 0, segment.end);
 
         tiles.forEach(tile => {
-            if (tile.platform) {
+            if (tile.body.isPlatform()) {
                 return;
             }
             const result = this.collision(segment, tile.body);

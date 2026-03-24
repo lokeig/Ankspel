@@ -1,136 +1,103 @@
 import { Vector } from "@math";
-import { EquipmentSlot, Lerp, lerpAngle, PlayerState, ProjectileEffect, ThrowType, Utility } from "@common";
+import { EquipmentSlot, OnItemCollision, PlayerState, ProjectileEffect, ThrowType } from "@common";
 import { DynamicObject } from "@core";
-import { ItemPlayerInteraction } from "@game/Item/itemUseInteractions";
-import { IItem, OnItemUseType, Ownership } from "@item";
+import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
+import { IItem, ItemAngleHelper, ItemIgnore, ItemInfo, ItemPhysics, ItemPlayerCollision, ItemProjectileCollision, OnItemUseType, Ownership } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
 import { zIndex } from "@render";
 
 abstract class Item implements IItem {
-    protected useInteractions = new ItemPlayerInteraction;
+    private static emptyVector = new Vector;
+    protected static readonly MinItemDropSpeed: number = 300;
 
-    private ownership: Ownership = Ownership.None;
-    protected equipmentSlot: EquipmentSlot = EquipmentSlot.Hand;
+    public body: DynamicObject;
+    public angle = new ItemAngleHelper;
+    public ownership: Ownership = Ownership.None;
 
-    protected body: DynamicObject;
-
-    protected localAngle: number = 0;
-    private worldAngle: number = 0;
-    private rotateSpeed: number = 0;
-    private rotateLerp = new Lerp(15, lerpAngle);
-
-    protected id: number;
-
-    protected holdOffset = new Vector;
-    protected handOffset = new Vector;
-
-
+    private physics: ItemPhysics;
     private delete: boolean = false;
+
+    public info: ItemInfo;
+
+    public playerCollision: ItemPlayerCollision;
+    public projectileCollision!: ItemProjectileCollision;
+    public playerInteractions = new ItemPlayerInteraction;
+
+    public ignoring = new ItemIgnore;
 
     constructor(pos: Vector, width: number, height: number, id: number) {
         this.body = new DynamicObject(pos, width, height);
-        this.id = id;
+        this.info = {
+            id,
+            handOffset: Item.emptyVector,
+            holdOffset: Item.emptyVector,
+            weightFactor: 1
+        }
+        this.physics = new ItemPhysics(this.body, this.angle);
+        this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
+        this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
+    }
 
-        this.useInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: this.equipmentSlot }] });
+    public setProjectileCollision(body: DynamicObject, resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
+        this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled);
     }
 
     public update(deltaTime: number): void {
         const prevGrounded = this.body.grounded;
         const prevVelocity = Math.abs(this.body.velocity.y);
 
-        if (this.ownership === Ownership.None) {
-            this.updateItemPhysics(deltaTime);
-        } else {
-            this.body.setNewCollidableObjects();
-        }
-        this.itemUpdate(deltaTime);
-
+        this.ignoring.update(deltaTime);
+        this.physics.update(deltaTime, this.ownership);
+        
         const audioLandThreshold = 100;
         if (this.body.grounded && !prevGrounded && prevVelocity > audioLandThreshold) {
             AudioManager.get().play(Sound.land);
         }
     }
 
-    protected itemUpdate(_deltaTime: number): void {
-
-    }
-
-    public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
-        return;
-    }
-
-    private updateItemPhysics(deltaTime: number) {
-        this.body.friction = this.body.grounded ? 5 : 1;
-
-        this.updateAngle(deltaTime);
-        this.body.update(deltaTime);
-        if (this.body.collidingSide) {
-            this.rotateSpeed *= 0.5;
+    public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
+        if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
+            return [OnItemCollision.DropItem];
         }
-    }
-
-    private updateAngle(deltaTime: number): void {
-        const angle = this.worldAngle + this.localAngle;
-        const normalized = Utility.Angle.normalize(angle);
-        if (this.body.grounded && normalized !== 0 && normalized !== -Math.PI) {
-            this.rotateSpeed = 0;
-            if (!this.rotateLerp.isActive()) {
-                const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
-                this.rotateLerp.startLerp(normalized, target);
-            }
-        }
-        if (this.rotateLerp.isActive()) {
-            this.worldAngle = this.rotateLerp.update(deltaTime);
-        }
-
-        this.worldAngle += this.rotateSpeed * deltaTime;
-    }
-
-    public playerInteractions(): ItemPlayerInteraction {
-        return this.useInteractions;
-    }
-
-    public getBody(): DynamicObject {
-        return this.body;
-    }
-
-    public getAngle(): number {
-        return this.worldAngle + this.localAngle;
+        return [];
     }
 
     public setAngle(to: number): void {
-        this.worldAngle = to;
+        this.angle.worldAngle = to;
     }
 
-    public getHandOffset(): Vector {
-        return this.handOffset;
+    public getAngle(): number {
+        return this.angle.localAngle + this.angle.worldAngle;
     }
 
-    public getHoldOffset(): Vector {
-        return this.holdOffset;
+    public handleCollision(type: OnItemCollision): void {
+        switch (type) {
+            case OnItemCollision.DropItem: {
+                this.body.velocity.x *= -this.body.bounceFactor;
+                break;
+            }
+            case OnItemCollision.Headbonk: {
+                this.body.velocity.y *= -0.5;
+                break;
+            }
+        }
     }
 
-    public setOwnership(value: Ownership): void {
-        this.ownership = value;
-    }
-
-    public getOwnership(): Ownership {
-        return this.ownership;
-    }
-
-    protected getDrawPos(drawSize: number): Vector {
+    protected getDrawPos(drawSize: number | Vector): Vector {
+        let drawWidth: number = drawSize as number;
+        let drawHeight: number = drawSize as number;
+        if (drawSize instanceof Vector) {
+            drawWidth = drawSize.x;
+            drawHeight = drawSize.y;
+        }
         return new Vector(
-            this.body.pos.x + ((this.body.width - drawSize) / 2),
-            this.body.pos.y + ((this.body.height - drawSize) / 2)
+            this.body.pos.x + ((this.body.width - drawWidth) / 2),
+            this.body.pos.y + ((this.body.height - drawHeight) / 2)
         );
     }
 
     public enabled(): boolean {
         return true;
-    }
-
-    public getId(): number {
-        return this.id;
     }
 
     public throw(throwType: ThrowType): void {
@@ -140,27 +107,27 @@ abstract class Item implements IItem {
         switch (throwType) {
             case (ThrowType.Light): {
                 this.body.velocity.set(210 * direcMult, -210);
-                this.rotateSpeed = 10;
+                this.angle.rotateSpeed = 10;
                 break;
             }
             case (ThrowType.Hard): {
                 this.body.velocity.set(900 * direcMult, -300);
-                this.rotateSpeed = 15;
+                this.angle.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.HardDiagonal): {
                 this.body.velocity.set(900 * direcMult, -600);
-                this.rotateSpeed = 15;
+                this.angle.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.Drop): {
                 this.body.velocity.set(0 * direcMult, 0);
-                this.rotateSpeed = 5;
+                this.angle.rotateSpeed = 5;
                 break;
             }
             case (ThrowType.Upwards): {
                 this.body.velocity.set(0 * direcMult, -600);
-                this.rotateSpeed = 8;
+                this.angle.rotateSpeed = 8;
                 break;
             }
         }
@@ -175,11 +142,12 @@ abstract class Item implements IItem {
     }
 
     public setToDelete(): void {
+        this.projectileCollision.disable();
         this.delete = true;
     };
 
     protected getZIndex(): number {
-        switch (this.getOwnership()) {
+        switch (this.ownership) {
             case (Ownership.Equipped): {
                 return zIndex.Player;
             };

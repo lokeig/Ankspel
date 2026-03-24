@@ -1,9 +1,10 @@
 import { Vector } from "@math";
-import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, ProjectileEffect } from "@common";
+import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, OnItemCollision } from "@common";
 import { DynamicObject } from "@core";
-import { IItem, Ownership } from "@item";
-import { ItemPlayerInteraction } from "@game/Item/itemUseInteractions";
-import { PlayerCharacter } from "@game/Player/Character/playerCharacter";
+import { IItem, ItemIgnore, ItemPlayerCollision, ItemProjectileCollision, Ownership } from "@item";
+import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
+import { PlayerCharacter } from "../Character/playerCharacter";
+import { chownSync } from "fs";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -26,10 +27,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     private readonly width: number;
 
     private coyoteTime = new Countdown(0.15);
-    private owned: Ownership = Ownership.None;
     private currentState = false;
-
-    public useInteractions = new ItemPlayerInteraction();
+    
+    public ownership: Ownership = Ownership.None;
 
     constructor(player: PlayerCharacter, _id: number) {
         this.player = player;
@@ -40,6 +40,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.head = new DynamicObject(new Vector(), this.width, this.height);
         this.torso = new DynamicObject(new Vector(), this.width, this.width);
         this.legs = new DynamicObject(new Vector(), this.width, this.height);
+
+        this.body = this.legs;
 
         this.configurePhysics();
     }
@@ -123,7 +125,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.player.standardBody.pos.y -= PlayerRagdoll.ExitJumpHeight;
         this.player.standardBody.velocity = new Vector(this.torso.velocity.x, PlayerRagdoll.ExitVerticalSpeed);
 
-        this.owned = Ownership.None;
+        this.ownership = Ownership.None;
 
         this.player.addCollidableBody(this.player.standardBody);
 
@@ -289,11 +291,11 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     private isHeld(): boolean {
-        return this.owned === Ownership.Held;
+        return this.ownership === Ownership.Held;
     }
 
     private isOnSpawner(): boolean {
-        return this.owned === Ownership.InSpawner;
+        return this.ownership === Ownership.InSpawner;
     }
 
     private keepDistance(deltaTime: number, a: DynamicObject, b: DynamicObject, targetDistance: number, allowStretch: boolean): void {
@@ -360,47 +362,36 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     // For IItem
 
+    public playerInteractions = new ItemPlayerInteraction();
+    public playerCollision: ItemPlayerCollision = new ItemPlayerCollision(-1, this.onCollision.bind(this), this.handleCollision.bind(this));
+    public ignoring = new ItemIgnore();
+
     private static holdOffset = new Vector(0, -3);
     private static handOffset = new Vector();
 
-    public update(_deltaTime: number): void {
+    public body: DynamicObject;
+    public info = {
+        id: -1,
+        handOffset: PlayerRagdoll.handOffset,
+        holdOffset: PlayerRagdoll.holdOffset,
+        weightFactor: 1
+    };
+    public projectileCollision!: ItemProjectileCollision;
 
-    }
-
-    public getBody(): DynamicObject {
-        return this.legs;
-    }
-
-    public getAngle(): number {
-        return this.legsAngle;
-    }
-
-    public setAngle(_angle: number): void {
-
+    public update(deltaTime: number): void {
+        this.ignoring.update(deltaTime);
     }
 
     public enabled(): boolean {
         return this.currentState;
     }
 
-    public getHandOffset(): Vector {
-        return PlayerRagdoll.handOffset;
+    public getAngle(): number {
+        return this.legsAngle;
     }
 
-    public getHoldOffset(): Vector {
-        return PlayerRagdoll.holdOffset;
-    }
+    public setAngle(_to: number): void {
 
-    public setOwnership(value: Ownership): void {
-        this.owned = value;
-    }
-
-    public getOwnership(): Ownership {
-        return this.owned;
-    }
-
-    public playerInteractions(): ItemPlayerInteraction {
-        return this.useInteractions;
     }
 
     public throw(throwType: ThrowType): void {
@@ -432,8 +423,20 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
     }
 
-    public getId(): number {
-        return 0;
+    public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
+        // if (Math.abs(this.torso.velocity.x) > 25) {
+        //     return [OnItemCollision.DropItem];
+        // }
+        return [];
+    }
+
+    public handleCollision(type: OnItemCollision): void {
+        // switch (type) {
+        //     case OnItemCollision.DropItem: {
+        //         this.torso.velocity.x *= -this.torso.bounceFactor;
+        //         break;
+        //     }
+        // }
     }
 
     public shouldBeDeleted(): boolean {

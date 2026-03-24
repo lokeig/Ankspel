@@ -53,12 +53,12 @@ class Spawner {
                 this.contains = null;
                 return;
             }
-            if (this.contains.getOwnership() !== Ownership.InSpawner) {
+            if (this.contains.ownership !== Ownership.InSpawner) {
                 this.dropContaining();
                 return;
             }
             if (this.xPositionLerp.isActive()) {
-                const pos = this.contains.getBody().pos;
+                const pos = this.contains.body.pos;
                 pos.x = this.xPositionLerp.update(deltaTime);
                 pos.y = this.yPositionLerp.update(deltaTime);
             } else {
@@ -81,7 +81,7 @@ class Spawner {
     }
 
     private bobItemUpAndDown(deltaTime: number): void {
-        const itemBody = this.contains!.getBody();
+        const itemBody = this.contains!.body;
 
         const center = this.body.getCenter();
         center.x -= itemBody.width / 2;
@@ -114,7 +114,7 @@ class Spawner {
             return;
         }
 
-        Connection.get().sendGameMessage(GameMessage.SpawnerSpawn, { id: this.id, item: toSpawn, itemId: item.getId() });
+        Connection.get().sendGameMessage(GameMessage.SpawnerSpawn, { id: this.id, item: toSpawn, itemId: item.info.id });
 
         this.spawnCountdown.reset();
         this.setContaining(item);
@@ -127,8 +127,8 @@ class Spawner {
         const nearby = ItemManager.getNearby(this.body.pos, this.body.width, this.body.height);
         const maxSpeed = 100;
         for (const item of nearby) {
-            const lowEnoughSpeed = Math.abs(item.getBody().velocity.x) < maxSpeed && Math.abs(item.getBody().velocity.y) < maxSpeed;
-            if (item.getBody().collision(this.body) && lowEnoughSpeed) {
+            const lowEnoughSpeed = Math.abs(item.body.velocity.x) < maxSpeed && Math.abs(item.body.velocity.y) < maxSpeed;
+            if (item.body.collision(this.body) && lowEnoughSpeed) {
                 this.setContaining(item, true);
                 break;
             }
@@ -137,11 +137,11 @@ class Spawner {
 
     public setContaining(item: IItem, lerp: boolean = false): void {
         if (this.contains) {
-            this.contains.setOwnership(Ownership.None);
+            this.contains.ownership = Ownership.None;
         }
         this.contains = item;
 
-        const itemBody = item.getBody();
+        const itemBody = item.body;
         const center = this.body.getCenter();
 
         center.x -= itemBody.width / 2;
@@ -161,7 +161,7 @@ class Spawner {
             item.setAngle(0);
         }
 
-        item.setOwnership(Ownership.InSpawner);
+        item.ownership = Ownership.InSpawner;
     }
 
     public getId(): number {

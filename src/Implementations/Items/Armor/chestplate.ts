@@ -8,15 +8,9 @@ import { Item } from "../item";
 import { Images } from "@render";
 
 class Chestplate extends Item implements Equippable {
-    private static frames = {
-        default: new Frame(),
-        equipped: new Frame(),
-        overArm: new Frame()
-    };
+    private static frames = { default: new Frame(), equipped: new Frame(), overArm: new Frame() };
     private static spirte: SpriteSheet;
     private drawOverShoulder: boolean = false;
-
-    private target: ProjectileTarget;
 
     static {
         this.spirte = new SpriteSheet(Images.armor);
@@ -30,22 +24,14 @@ class Chestplate extends Item implements Equippable {
         const height = 20;
         super(pos, width, height, id);
 
-        this.useInteractions.setUse(ItemInteraction.Activate, () => {
-            this.setOwnership(Ownership.Equipped);
+        this.playerInteractions.setUse(ItemInteraction.Activate, () => {
+            this.ownership = Ownership.Equipped;
             const result: OnItemUseEffect = { type: OnItemUseType.Equip, value: EquipmentSlot.Body };
             return [result];
         });
 
-        this.target = {
-            body: () => this.body,
-            penetrationResistance: () => 5,
-            onProjectileHit: this.onProjectileHit.bind(this),
-            enabled: () => !this.shouldBeDeleted()
-        };
-    }
-
-    public blocksSharpObject(): boolean {
-        return true;
+        this.setProjectileCollision(this.body, 10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
+        this.projectileCollision.disable();
     }
 
     public onPlayerAnimation(anim: PlayerAnim, holding: boolean): void {
@@ -63,7 +49,7 @@ class Chestplate extends Item implements Equippable {
         this.drawOverShoulder = true;
     }
 
-    public tanksHeavyProp(): boolean {
+    public defensive(): boolean {
         return true;
     }
 
@@ -71,17 +57,18 @@ class Chestplate extends Item implements Equippable {
         this.body.width = 40;
         this.body.height = 40;
 
-        ProjectileManager.addCollidable(this.target);
+        this.projectileCollision.enable();
+    }
+
+    public takeDamage(): void {
+
     }
 
     public onUnequip(): void {
         this.body.width = 25;
         this.body.height = 20;
-        ProjectileManager.removeCollidable(this.target);
-    }
 
-    private onProjectileHit(effects: ProjectileEffect[], pos: Vector, local: boolean): void {
-        effects.forEach(effect => this.onProjectileEffect(effect, pos, local));
+        this.projectileCollision.disable();
     }
 
     public onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean) {
@@ -91,13 +78,12 @@ class Chestplate extends Item implements Equippable {
         if (effect.type === ProjectileEffectType.Damage) {
             this.setToDelete();
             AudioManager.get().play(Sound.ting);
-            Connection.get().sendGameMessage(GameMessage.ItemProjectileEffect, { id: this.id, effect, pos });
         }
     }
 
     public draw(): void {
         const drawSize = 32;
-        const frame = this.getOwnership() === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
+        const frame = this.ownership === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
         Chestplate.spirte.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
     }
 
@@ -107,11 +93,6 @@ class Chestplate extends Item implements Equippable {
         }
         const drawSize = 32;
         Chestplate.spirte.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), Chestplate.frames.overArm);
-    }
-
-    public setToDelete(): void {
-        super.setToDelete();
-        ProjectileManager.removeCollidable(this.target);
     }
 }
 

@@ -6,6 +6,7 @@ import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { SpawnerManager } from "@game/Spawner";
+import { CollisionManager } from "@game/Collision/collisionManager";
 
 class MapLoader {
     public static load(map: GameMap, host: boolean): string {
@@ -28,6 +29,7 @@ class MapLoader {
         ProjectileManager.clear();
         ParticleManager.clear();
         SpawnerManager.reset();
+        CollisionManager.clear();
     }
 
     private static loadTiles(map: GameMap): void {

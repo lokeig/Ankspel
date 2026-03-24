@@ -129,8 +129,8 @@ class PlayerAnimation {
         if (equipment.hasItem(slot)) {
             const item = equipment.getItem(slot);
 
-            offset.x *= item.getBody().getDirectionMultiplier();
-            const pos = item.getBody().pos;
+            offset.x *= item.body.getDirectionMultiplier();
+            const pos = item.body.pos;
             pos.add(offset);
 
 
@@ -145,8 +145,8 @@ class PlayerAnimation {
             if (!item.drawTopLayer) {
                 return;
             }
-            offset.x *= item.getBody().getDirectionMultiplier();
-            const pos = item.getBody().pos;
+            offset.x *= item.body.getDirectionMultiplier();
+            const pos = item.body.pos;
             pos.add(offset);
 
             item.drawTopLayer();

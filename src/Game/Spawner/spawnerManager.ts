@@ -44,7 +44,7 @@ class SpawnerManager {
         const result: IItem[] = [];
         this.spawners.forEach(spawner => {
             const contains = spawner.getContaining();
-            if (contains && contains.getOwnership() === Ownership.InSpawner) {
+            if (contains && contains.ownership === Ownership.InSpawner) {
                 result.push(contains);
             }
         })

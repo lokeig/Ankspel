@@ -68,7 +68,7 @@ class Player {
 
     public held(): boolean {
         const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
-        return ragdoll.getOwnership() !== Ownership.None;
+        return ragdoll.ownership !== Ownership.None;
     }
 
     public reload(): void {

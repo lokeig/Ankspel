@@ -23,7 +23,7 @@ class PlayerStandard implements IState<PlayerState> {
         const left = this.player.controls.left(); const right = this.player.controls.right();
         if ((left && this.player.standardBody.velocity.x > 20) || right && this.player.standardBody.velocity.x < -20) {
             animator.setAnimation(PlayerAnim.Turn);
-        } else if (Math.abs(this.player.standardBody.velocity.x) > 20) {
+        } else if (Math.abs(this.player.standardBody.velocity.x) > 2) {
             animator.setAnimation(PlayerAnim.Walk);
         } else {
             animator.setAnimation(PlayerAnim.Idle);

@@ -9,17 +9,15 @@ import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
 
 class Shotgun extends Item {
+    private static maxHandleOffset: number = -8;
+    private static frames = { gun: new Frame(), handle: new Frame() }
+    private static spriteSheet: SpriteSheet;
+    private static holdOffset = new Vector(14, -4);
+    private static handOffset = new Vector(4, 0);
+
     private handleOffset: number = 0;
     private handleLerp = new Lerp(6, lerpTriangle)
-
-    private static maxHandleOffset: number = -8;
-    private static frames = {
-        gun: new Frame(),
-        handle: new Frame()
-    }
-    private static spriteSheet: SpriteSheet;
     private firearmInfo!: FirearmHelper;
-
     private currentState: ShotgunState = ShotgunState.Loaded;
 
     static {
@@ -34,10 +32,10 @@ class Shotgun extends Item {
         const height = 15;
         super(pos, width, height, id);
 
-        this.holdOffset = new Vector(14, -4);
-        this.handOffset = new Vector(4, 0);
+        this.info.holdOffset = Shotgun.holdOffset;
+        this.info.handOffset = Shotgun.handOffset;
 
-        this.useInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+        this.playerInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
         this.setupFirearmInfo();
@@ -86,6 +84,14 @@ class Shotgun extends Item {
         this.currentState = this.firearmInfo.ammo === 0 ? ShotgunState.Empty : ShotgunState.Loaded;
         AudioManager.get().play(Sound.shotgunLoad);
         return [];
+    }
+
+    public getHandOffset(): Vector {
+        return Shotgun.handOffset;
+    }
+
+    public getHoldOffset(): Vector {
+        return Shotgun.holdOffset;
     }
 
     public draw(): void {

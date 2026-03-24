@@ -1,4 +1,4 @@
-import { GameObject } from "./gameObject";
+import { GameObject } from "../CoreObjects/gameObject";
 
 type CollisionObject = {
     body: GameObject;

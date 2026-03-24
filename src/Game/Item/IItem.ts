@@ -1,35 +1,41 @@
 import { ThrowType } from "@common";
 import { DynamicObject } from "@core";
-import { Ownership } from "./itemUseType";
-import { ItemPlayerInteraction } from "./itemUseInteractions";
+import { Ownership } from "./ItemPlayerUse/itemUseType";
+import { ItemPlayerInteraction } from "./ItemPlayerUse/itemUseInteractions";
 import { Vector } from "@math";
-
+import { ItemIgnore } from "./Helpers/itemIgnore";
+import { ItemAngleHelper } from "./Helpers/itemAngleHelper";
+import { ItemPlayerCollision } from "./Helpers/itemPlayerCollision";
+import { ItemProjectileCollision } from "./Helpers/itemProjectileCollision";
+import { ItemInfo } from "./itemInfo";
 
 interface IItem {
     update(deltaTime: number): void;
-    getBody(): DynamicObject;
-    playerInteractions(): ItemPlayerInteraction;
-    
-    setOwnership(value: Ownership): void;
-    getOwnership(): Ownership;
-    
-    throw(throwType: ThrowType): void;
-    enabled(): boolean;
-    
-    shouldBeDeleted(): boolean;
-    setToDelete(): void;
+
+    body: DynamicObject;
+    info: ItemInfo;
+
+    playerInteractions: ItemPlayerInteraction;
+    playerCollision: ItemPlayerCollision;
+    ignoring: ItemIgnore;
 
     getAngle(): number;
     setAngle(to: number): void;
-    
-    getHoldOffset(): Vector;
-    getHandOffset(): Vector;
-        
-    getId(): number;
-    
+
+    projectileCollision: ItemProjectileCollision;
+    ownership: Ownership;
+
+    throw(throwType: ThrowType): void;
+    enabled(): boolean;
+
+
+    shouldBeDeleted(): boolean;
+    setToDelete(): void;
+
     draw(): void;
     drawTopLayer?(): void;
 }
+
 
 type ItemConstructor = new (pos: Vector, id: number) => IItem
 

@@ -1,5 +1,0 @@
-enum onItemCollision {
-    Death,
-    Sharp,
-    
-} 

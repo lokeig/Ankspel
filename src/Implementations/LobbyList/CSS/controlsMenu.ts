@@ -44,7 +44,7 @@ class ControlsMenu {
             pickup: document.getElementById('pickupInput') as HTMLInputElement,
             ragdoll: document.getElementById('ragdollInput') as HTMLInputElement,
             strafe: document.getElementById('strafeInput') as HTMLInputElement,
-            menu: document.getElementById('menuInput') as HTMLInputElement
+            quack: document.getElementById('quackInput') as HTMLInputElement
         };
 
         this.cancelButton.addEventListener("click", () => {
@@ -112,7 +112,7 @@ class ControlsMenu {
                 pickup: "ArrowUp",
                 ragdoll: "e",
                 strafe: "Shift",
-                menu: "Escape",
+                quack: "q",
             };
         }
     }
@@ -162,8 +162,7 @@ class ControlsMenu {
                 pickup: "2",
                 ragdoll: "1",
                 strafe: "undefined",
-                menu: "undefined",
-
+                quack: "undefined",
             }
         }
         return this.currentControls;

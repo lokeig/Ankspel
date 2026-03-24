@@ -13,13 +13,13 @@ class PlayerMove {
         this.controls = controls;
     }
 
-    public update(deltaTime: number): void {
+    public update(deltaTime: number, weight: number): void {
         if (this.moveEnabled) {
-            this.move(deltaTime);
+            this.move(deltaTime, weight);
         }
     }
 
-    public move(deltaTime: number): void {
+    private move(deltaTime: number, weight: number): void {
         const left = this.controls.left();
         const right = this.controls.right();
 
@@ -35,7 +35,9 @@ class PlayerMove {
             this.playerCharacter.direction = Side.Right;
         }
 
-        this.playerCharacter.velocity.x += this.movespeed * this.controls.getMoveDirection() * deltaTime;
+        const speed = this.movespeed * weight;
+
+        this.playerCharacter.velocity.x += speed * this.controls.getMoveDirection() * deltaTime;
     }
 
     public willTurn(): boolean {

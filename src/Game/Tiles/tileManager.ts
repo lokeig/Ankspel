@@ -1,6 +1,6 @@
 import { Vector } from "@math";
 import { Grid, Utility, Direction, Side } from "@common";
-import { CollisionObject, GameObject } from "@core";
+import { GameObject } from "@core";
 import { ITile, TileConstructor } from "./ITile";
 
 class TileManager {
@@ -34,28 +34,15 @@ class TileManager {
         }
     }
 
-    public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): CollisionObject[] {
-        const result: CollisionObject[] = [];
+    public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): ITile[] {
+        const result: ITile[] = [];
 
         const accumulate = (gridPos: Vector) => {
             const tile = this.getTile(gridPos);
             if (!tile || !tile.enabled()) {
                 return;
             }
-            const tileObj = tile.body;
-
-            result.push({ body: tileObj, platform: tileObj.isPlatform() });
-
-            if (tile.body.getLip(Side.Left)) {
-                const lipLeft = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
-                lipLeft.pos.x -= tileObj.getLipWidth();
-                result.push({ body: lipLeft, platform: true });
-            }
-            if (tile.body.getLip(Side.Right)) {
-                const lipRight = new GameObject(tileObj.pos.clone(), tileObj.getLipWidth(), tileObj.height);
-                lipRight.pos.x += tileObj.width;
-                result.push({ body: lipRight, platform: true });
-            }
+            result.push(tile);
         };
 
         Grid.forNearby(pos, nextPos, width, height, accumulate);

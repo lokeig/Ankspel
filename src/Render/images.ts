@@ -9,13 +9,16 @@ const Images = {
     playerHandsBaseMultiply: { src: '/assets/Images/Player/playerHandsMultiply.png', frameWidth: 16, frameHeight: 16 },
     playerHandsOverlay: { src: '/assets/Images/Player/playerHandsOverlay.png', frameWidth: 16, frameHeight: 16 },
     playerHandsMask: { src: '/assets/Images/Player/playerHandsMask.png', frameWidth: 16, frameHeight: 16 },
+
     // Tiles
     tileIce: { src: '/assets/Images/Tiles/tileIce.png', frameWidth: 16, frameHeight: 16 },
     tileNature: { src: '/assets/Images/Tiles/natureTileset.png', frameWidth: 16, frameHeight: 16 },
     woodPlatform: { src: '/assets/Images/Tiles/woodPlatform.png', frameWidth: 16, frameHeight: 16 },
 
     // Items
-    prop: { src: '/assets/Images/Items/props.png', frameWidth: 16, frameHeight: 16 },
+    rock: { src: '/assets/Images/Items/rock.png', frameWidth: 16, frameHeight: 13 },
+    crate: { src: '/assets/Images/Items/crate.png', frameWidth: 16, frameHeight: 16 },
+
     shotgun: { src: '/assets/Images/Items/shotguns.png', frameWidth: 32, frameHeight: 32 },
     glock: { src: '/assets/Images/Items/glock.png', frameWidth: 20, frameHeight: 20 },
     grenade: { src: '/assets/Images/Items/grenade.png', frameWidth: 16, frameHeight: 16 },

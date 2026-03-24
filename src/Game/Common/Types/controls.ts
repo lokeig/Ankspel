@@ -8,7 +8,7 @@ type Controls = {
     pickup: string;
     ragdoll: string;
     strafe: string;
-    menu: string;
+    quack: string;
 };
 
 export type { Controls };

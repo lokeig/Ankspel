@@ -29,6 +29,8 @@ export { EquipmentSlot } from "./Types/equipmentSlot";
 export type { ProjectileEffect } from "./Types/projectileEffect";
 export { ProjectileEffectType } from "./Types/projectileEffect";
 export type { MaxMinPositions } from "./Types/maxMinPositions";
+export { OnItemCollision } from "./Types/onItemCollision";
+
 
 // Utility
 export { Utility } from "./Utility/utility";

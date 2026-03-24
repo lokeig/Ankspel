@@ -9,15 +9,14 @@ import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
 
 class Glock extends Item {
-    private static animations: Record<string, Animation> = {
-        default: new Animation(),
-        shoot: new Animation()
-    };
-    private animator: SpriteAnimator;
-    private firearmInfo!: FirearmHelper;
-
+    private static animations: Record<string, Animation> = { default: new Animation(), shoot: new Animation() };
     private static sprite: SpriteSheet;
     private flare: SmallFlare;
+    private static handOffset = new Vector(2, 2);
+    private static holdOffset = new Vector(10, -4);
+
+    private animator: SpriteAnimator;
+    private firearmInfo!: FirearmHelper;
 
     static {
         this.sprite = new SpriteSheet(Images.glock);
@@ -31,14 +30,15 @@ class Glock extends Item {
         const height = 15;
         super(pos, width, height, id);
 
-        this.handOffset = new Vector(2, 2);
-        this.holdOffset = new Vector(10, -4);
+        this.info.holdOffset = Glock.holdOffset;
+        this.info.handOffset = Glock.handOffset;
+
         this.animator = new SpriteAnimator(Glock.sprite, Glock.animations.default);
         this.flare = new SmallFlare()
 
         this.setupFirearmInfo();
 
-        this.useInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
+        this.playerInteractions.setUse(ItemInteraction.Activate, ((seed: number, local: boolean) => {
             return this.shoot(seed, local);
         }));
     }
@@ -85,6 +85,14 @@ class Glock extends Item {
     private drawFlare(): void {
         const pos = this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip());
         this.flare.draw(pos, this.body.isFlip(), this.getAngle());
+    }
+
+    public getHandOffset(): Vector {
+        return Glock.handOffset;
+    }
+
+    public getHoldOffset(): Vector {
+        return Glock.holdOffset;
     }
 
     public shouldBeDeleted(): boolean {

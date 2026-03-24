@@ -29,10 +29,10 @@ class ItemMessageHandler {
                 return;
             }
             item.setAngle(angle);
-            item.getBody().pos = Utility.Vector.convertNetwork(position);
-            item.getBody().direction = direction;
+            item.body.pos = Utility.Vector.convertNetwork(position);
+            item.body.direction = direction;
             const local = false;
-            const effects = item.playerInteractions().getUse(action)!(seed, local);
+            const effects = item.playerInteractions.getUse(action)!(seed, local);
             effects.forEach((effect) => {
                 switch (effect.type) {
                     case (OnItemUseType.Aim): {
@@ -45,6 +45,25 @@ class ItemMessageHandler {
         gameEvent.subscribe(GameMessage.AddSpawner, ({ config, id }) => {
             SpawnerManager.spawn(config, id);
         });
+
+        gameEvent.subscribe(GameMessage.ItemCollision, ({ id, type }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                console.log("Can't collide item: ", id, ", doesn't exist.")
+                return;
+            }
+            item.playerCollision.handleCollisionType(type);
+        });
+
+        gameEvent.subscribe(GameMessage.ItemProjectileEffect, ({ id, pos, effect }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                console.log("Can't effect item: ", id, ", doesn't exist.")
+                return;
+            }
+            item.projectileCollision.handleEffect(effect, pos);
+        });
+
 
         gameEvent.subscribe(GameMessage.SpawnerSpawn, ({ id, item, itemId }) => {
             const spawner = SpawnerManager.getSpawnerFromId(id);
@@ -81,8 +100,8 @@ class ItemMessageHandler {
                     }
                 })
             });
-            item.getBody().pos = Utility.Vector.convertNetwork(pos);
-            item.getBody().direction = direction;
+            item.body.pos = Utility.Vector.convertNetwork(pos);
+            item.body.direction = direction;
             item.throw(throwType);
         });
     }

@@ -1,10 +1,16 @@
 import { Vector } from "@math";
-import { EquipmentSlot, PlayerAnim, Side, ThrowType, Utility } from "@common";
-import { IItem, isEquippable, ItemManager, Ownership } from "@item";
+import { EquipmentSlot, Side, ThrowType, Utility } from "@common";
+import { Equippable, IItem, isEquippable, ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
+import { DynamicObject } from "@core";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
+    private body: () => DynamicObject;
+
+    constructor(body: () => DynamicObject) {
+        this.body = body;
+    }
 
     public hasItem(slot: EquipmentSlot): boolean {
         return this.equipment.get(slot) !== undefined;
@@ -18,10 +24,10 @@ class PlayerEquipment {
         const current = this.equipment.get(slot);
 
         if (current) {
-            if (isEquippable(current) && current.getOwnership() === Ownership.Equipped) {
-                current.onUnequip();
+            if (current.ownership === Ownership.Equipped) {
+                (current as Equippable).onUnequip();
             }
-            current.setOwnership(Ownership.None);
+            current.ownership = Ownership.None;
         }
         if (!item) {
             this.equipment.set(slot, undefined);
@@ -30,8 +36,8 @@ class PlayerEquipment {
         this.equipment.set(slot, item);
 
         const ownership = (slot === EquipmentSlot.Hand) ? Ownership.Held : Ownership.Equipped;
+        item.ownership = ownership;
 
-        item.setOwnership(ownership);
         if (isEquippable(item) && slot !== EquipmentSlot.Hand) {
             item.onEquip();
         }
@@ -43,23 +49,35 @@ class PlayerEquipment {
         })
     }
 
+    public getWeight(): number {
+        let result = 1;
+        this.equipment.forEach(item => {
+            if (item) {
+                result *= item.info.weightFactor;
+            }
+        })
+        return result;
+    }
 
     public throw(slot: EquipmentSlot, throwType: ThrowType) {
         if (!this.hasItem(slot)) {
             return;
         }
+
         const item = this.getItem(slot);
 
+        item.ignoring.set(this.body(), 0.1);
+
         item.throw(throwType);
-        if (isEquippable(item) && item.getOwnership() === Ownership.Equipped) {
-            item.onUnequip();
+        if (item.ownership === Ownership.Equipped) {
+            (item as Equippable).onUnequip();
         }
-        item.setOwnership(Ownership.None);
+        item.ownership = Ownership.None;
 
         Connection.get().sendGameMessage(GameMessage.ThrowItem, {
             id: ItemManager.getItemID(item)!,
-            pos: { x: item.getBody().pos.x, y: item.getBody().pos.y },
-            direction: item.getBody().direction,
+            pos: { x: item.body.pos.x, y: item.body.pos.y },
+            direction: item.body.direction,
             throwType
         });
 
@@ -71,13 +89,13 @@ class PlayerEquipment {
             return;
         }
         const item = this.getItem(slot);
-        item.getBody().setCenterToPos(center);
-        item.getBody().direction = direction;
+        item.body.setCenterToPos(center);
+        item.body.direction = direction;
         item.setAngle(angle);
 
         const angledOffset = Utility.Angle.rotateForce(offset, angle);
-        item.getBody().pos.x += angledOffset.x * item.getBody().getDirectionMultiplier();
-        item.getBody().pos.y += angledOffset.y;
+        item.body.pos.x += angledOffset.x * item.body.getDirectionMultiplier();
+        item.body.pos.y += angledOffset.y;
     }
 
     public getAllEquippedItems(): Map<EquipmentSlot, IItem | undefined> {
@@ -89,8 +107,8 @@ class PlayerEquipment {
             return false;
         }
         const item = this.getItem(EquipmentSlot.Hand);
-        const itemBody = item.getBody();
-        let holdOffset = item.getHoldOffset();
+        const itemBody = item.body;
+        let holdOffset = item.info.holdOffset;
 
         holdOffset = holdOffset.clone().subtract(offset);
 

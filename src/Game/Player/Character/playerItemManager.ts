@@ -22,22 +22,23 @@ class PlayerItemManager {
         this.id = id;
     }
 
-    public handle() {
+    public handle(nearby: IItem[]) {
         if (this.controls.pickup(InputMode.Press)) {
-            this.handlePickupOrThrow();
+            this.handlePickupOrThrow(nearby);
         }
         if (!this.equipment.hasItem(EquipmentSlot.Hand)) {
             return;
         }
     }
 
-    private handlePickupOrThrow(): void {
+    private handlePickupOrThrow(nearby: IItem[]): void {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
             const throwType = this.getThrowType();
             this.equipment.throw(EquipmentSlot.Hand, throwType);
+
             this.sendEquipmentMessage();
         } else {  // Pickup item
-            const nextItem = this.getNearbyItem();
+            const nextItem = this.getNearbyItem(nearby);
             if (nextItem) {
                 this.equipment.equip(nextItem, EquipmentSlot.Hand);
                 this.sendEquipmentMessage();
@@ -81,7 +82,7 @@ class PlayerItemManager {
     }
 
     private triggerInteraction(item: IItem, action: ItemInteraction): void {
-        const onInputFunction = item.playerInteractions().getUse(action);
+        const onInputFunction = item.playerInteractions.getUse(action);
         if (!onInputFunction) {
             return;
         }
@@ -91,9 +92,9 @@ class PlayerItemManager {
 
         this.handleEffects(item, onInputFunction(seed, local));
 
-        const pos = Utility.Vector.convertToNetwork(item.getBody().pos);
+        const pos = Utility.Vector.convertToNetwork(item.body.pos);
         const angle = item.getAngle();
-        const direction = item.getBody().direction;
+        const direction = item.body.direction;
         const id = ItemManager.getItemID(item)!;
 
         Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, pos, angle, action, direction, seed });
@@ -129,14 +130,10 @@ class PlayerItemManager {
         })
     }
 
-    private getNearbyItem(): IItem | null {
-        const inSpawners = SpawnerManager.getSpawnerItems();
-        const onGround = ItemManager.getNearby(this.playerBody().pos, this.playerBody().width, this.playerBody().height);
-        const nearby = [...inSpawners, ...onGround];
-
+    private getNearbyItem(nearby: IItem[]): IItem | null {
         let fallbackItem: IItem | null = null;
         for (const item of nearby) {
-            if (!this.playerBody().collision(item.getBody().scale(30, 30))) {
+            if (!this.playerBody().collision(item.body.scale(30, 30))) {
                 continue;
             }
             if (item === this.lastHeldItem) {

@@ -1,7 +1,6 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollision } from "@common";
 import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
-import { ImageName } from "@render";
 
 enum GameMessage {
     // ─── Connection ─────────────────────────
@@ -10,7 +9,6 @@ enum GameMessage {
 
     // ─── Player ─────────────────────────────
     PlayerInfo,
-    PlayerRagdollInfo,
     NewPlayer,
     PlayerLeave,
     PlayerSpawn,
@@ -25,6 +23,7 @@ enum GameMessage {
     DeactivateItem,
     ThrowItem,
     ItemProjectileEffect,
+    ItemCollision,
 
     // ─── Spawner ────────────────────────
     AddSpawner,
@@ -52,7 +51,6 @@ interface GameMessageMap {
 
     // ─── Player ─────────────────────────────
     [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
-    [GameMessage.PlayerRagdollInfo]: { id: number, velocity: NetworkVector, head: NetworkVector, body: NetworkVector, legs: NetworkVector };
     [GameMessage.NewPlayer]: { id: number, color: string, name: string };
     [GameMessage.PlayerLeave]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };
@@ -67,6 +65,7 @@ interface GameMessageMap {
     [GameMessage.ItemProjectileEffect]: { id: number, effect: ProjectileEffect, pos: Vector };
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
+    [GameMessage.ItemCollision]: { id: number, type: OnItemCollision };
 
     // ─── Spawner ────────────────────────
     [GameMessage.AddSpawner]: { config: SpawnerDescription, id: number };

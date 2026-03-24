@@ -24,6 +24,9 @@ defaultMap.setPlayerSpawn({ pos: new Vector(15, 14), direction: Side.Left });
 defaultMap.setPlayerSpawn({ pos: new Vector(15, 6), direction: Side.Left });
 defaultMap.setPlayerSpawn({ pos: new Vector(16, 14), direction: Side.Left });
 
+defaultMap.setItem("rock", new Vector(19, 13));
+defaultMap.setItem("crate", new Vector(20, 13));
+
 defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], startSpawned: true, timeBetweenSpawn: 10 });
 defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"], startSpawned: true, timeBetweenSpawn: 5 });
 defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: true, timeBetweenSpawn: 7 });

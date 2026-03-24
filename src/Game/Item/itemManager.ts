@@ -2,7 +2,7 @@ import { Grid, Utility, } from "@common";
 import { ItemConstructor, IItem, isItem } from "./IItem";
 import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
-import { Ownership } from "./itemUseType";
+import { Ownership } from "./ItemPlayerUse/itemUseType";
 import { Vector } from "@math";
 
 class ItemManager {
@@ -27,7 +27,7 @@ class ItemManager {
                 item.update(deltaTime);
             }
         }));
-        Grid.updateMapPositions<IItem>(this.items, e => e.getBody().pos);
+        Grid.updateMapPositions<IItem>(this.items, e => e.body.pos);
     }
 
     public static registerItem(type: string, constructor: ItemConstructor): void {
@@ -42,8 +42,8 @@ class ItemManager {
         const id = this.idManager.getNextID();
 
         const newItem = new constructor(Grid.getWorldPos(gridPos), id);
-        newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
-        newItem.getBody().pos.y -= newItem.getBody().height;
+        newItem.body.pos.x += (Grid.size - newItem.body.width) / 2;
+        newItem.body.pos.y -= newItem.body.height;
 
         this.addToMap(newItem);
         this.idManager.add(newItem);
@@ -61,15 +61,15 @@ class ItemManager {
             return null;
         }
         const newItem = new constructor(Grid.getWorldPos(gridPos), id);
-        newItem.getBody().pos.x += (Grid.size - newItem.getBody().width) / 2;
-        newItem.getBody().pos.y -= newItem.getBody().height;
+        newItem.body.pos.x += (Grid.size - newItem.body.width) / 2;
+        newItem.body.pos.y -= newItem.body.height;
 
         this.addToMap(newItem);
         this.idManager.setID(newItem, id);
         return newItem;
     }
 
-    public static getItems(pos: Vector): Set<IItem> | undefined {
+    private static getItems(pos: Vector): Set<IItem> | undefined {
         return this.items.get(Grid.key(pos));
     }
 
@@ -81,7 +81,7 @@ class ItemManager {
                 return;
             }
             itemSet.forEach(item => {
-                if (item.enabled() && item.getOwnership() === Ownership.None) {
+                if (item.enabled() && item.ownership === Ownership.None) {
                     result.push(item);
                 }
             });
@@ -92,7 +92,7 @@ class ItemManager {
     }
 
     private static addToMap(item: IItem) {
-        const gridPos = item.getBody().pos;
+        const gridPos = item.body.pos;
         const itemSet = this.getItems(gridPos);
         if (!itemSet) {
             this.items.set(Grid.key(gridPos), new Set());
@@ -118,7 +118,7 @@ class ItemManager {
 
     public static draw() {
         this.items.forEach(itemSet => itemSet.forEach(item => {
-            if (item.enabled() && item.getOwnership() === Ownership.None) {
+            if (item.enabled() && item.ownership === Ownership.None) {
                 item.draw();
             }
         }));
