@@ -8,22 +8,21 @@ class MapNetworkHandler {
     private static onMapStart: () => void;
 
     public static init() {
-        const gameEvent = Connection.get().gameEvent;
+        const connection = Connection.get();
+        const gameEvent = connection.gameEvent;
 
         gameEvent.subscribe(GameMessage.LoadMap, ({ id }) => {
             this.onMapLoad(id);
-            Connection.get().sendGameMessage(GameMessage.MapLoaded, {});
+            connection.sendGameMessage(GameMessage.MapLoaded, {});
         });
 
         gameEvent.subscribe(GameMessage.MapLoaded, () => {
-            if (!Connection.get().isHost()) {
+            if (!connection.isHost()) {
                 return;
             }
             this.readyCount++;
             this.checkReadyToStart();
         });
-
-
         gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapStart() });
     }
 
@@ -45,11 +44,9 @@ class MapNetworkHandler {
         if (this.readyCount !== totalPlayers - 1) {
             return;
         }
-
         this.readyCount = 0;
 
         Connection.get().sendGameMessage(GameMessage.StartMap, {});
-
         this.onMapStart();
     }
 

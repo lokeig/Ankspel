@@ -56,7 +56,7 @@ class PlayerItemManager {
         const message: GameMessageMap[GameMessage.PlayerEquipment] = { id: this.id, holding: null, head: null, body: null, boots: null };
         equipmentMap.forEach(([type, slot]) => {
             if (this.equipment.hasItem(slot)) {
-                message[type] = ItemManager.getItemID(this.equipment.getItem(slot))!;
+                message[type] = this.equipment.getItem(slot).info.id;
             }
         });
         Connection.get().sendGameMessage(GameMessage.PlayerEquipment, message);
@@ -95,7 +95,7 @@ class PlayerItemManager {
         const pos = Utility.Vector.convertToNetwork(item.body.pos);
         const angle = item.getAngle();
         const direction = item.body.direction;
-        const id = ItemManager.getItemID(item)!;
+        const id = item.info.id;
 
         Connection.get().sendGameMessage(GameMessage.ActivateItem, { id, pos, angle, action, direction, seed });
 

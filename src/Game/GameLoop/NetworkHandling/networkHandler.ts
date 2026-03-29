@@ -1,6 +1,6 @@
 import { PlayerManager } from "@player";
 import { Connection, GameMessage } from "@game/Server";
-import { Countdown, IDManager, Input } from "@common";
+import { Countdown, GameLoopState, IDManager, Input } from "@common";
 import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
@@ -9,25 +9,28 @@ import { DuckGame } from "../game";
 const tickRate = 60;
 
 class NetworkHandler {
+    private static onStart: () => void;
+    private static onState: (state: GameLoopState) => void;
     private static readyCount: number = 0;
     private static messageTimer = new Countdown(1 / tickRate);
-    private static onStart: () => void;
     private static readyToPlay: boolean = false;
+
 
     static init(game: DuckGame) {
         PlayerNetworkHandler.init(game);
         ItemMessageHandler.init();
         MapNetworkHandler.init();
 
-        Connection.get().onGameStart((userID) => {
+        const connection = Connection.get();
+        const gameEvent = connection.gameEvent;
+
+        connection.onGameStart((userID) => {
             IDManager.setBaseOffset(userID * (2 << 16));
             PlayerManager.create();
-            Connection.get().sendGameMessage(GameMessage.ReadyToPlay, {});
+            connection.sendGameMessage(GameMessage.ReadyToPlay, {});
             this.readyToPlay = true;
             this.checkReadyToStart();
         });
-
-        const gameEvent = Connection.get().gameEvent;
 
         gameEvent.subscribe(GameMessage.StartPlaying, () => {
             this.start()
@@ -40,7 +43,13 @@ class NetworkHandler {
 
         gameEvent.subscribe(GameMessage.ChatMessage, ({ sender, text }) => {
             game.chat.write({ sender, text, timeAlive: 0 });
-        })
+        });
+
+        gameEvent.subscribe(GameMessage.GameState, ({ state }) => {
+            if (!connection.isHost()) {
+                this.onState(state);
+            }
+        });
 
         Input.onKey("q", this.quickStart);
     }
@@ -78,6 +87,10 @@ class NetworkHandler {
 
     public static setOnStart(e: () => void) {
         this.onStart = e;
+    }
+
+    public static setOnState(e: (state: GameLoopState) => void): void {
+        this.onState = e;
     }
 
     public static update(deltaTime: number): void {

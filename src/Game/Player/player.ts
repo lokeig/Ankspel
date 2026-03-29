@@ -47,6 +47,11 @@ class Player {
         AudioManager.get().play(Sound.score);
     }
 
+    public setScore(score: number): void {
+        this.givePoint();
+        this.score = score;
+    }
+
     public getScore(): number {
         return this.score;
     }

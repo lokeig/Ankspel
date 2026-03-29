@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollision } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollision, GameLoopState } from "@common";
 import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
 
@@ -15,6 +15,7 @@ enum GameMessage {
     PlayerProjectileEffect,
     PlayerDead,
     PlayerEquipment,
+    PlayerScore,
 
     // ─── Items ──────────────────────────────
     SpawnItem,
@@ -36,7 +37,8 @@ enum GameMessage {
     StartMap,
 
     // ─── Other ────────────────────────────────
-    ChatMessage
+    ChatMessage,
+    GameState,
 }
 
 type NetworkVector = {
@@ -57,6 +59,7 @@ interface GameMessageMap {
     [GameMessage.PlayerProjectileEffect]: { id: number, type: ProjectileEffectType, effect: ProjectileEffect };
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
+    [GameMessage.PlayerScore]: { id: number, score: number };
 
     // ─── Items ──────────────────────────────
     [GameMessage.ThrowItem]: { id: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
@@ -79,6 +82,7 @@ interface GameMessageMap {
 
     // ─── Other ────────────────────────────────
     [GameMessage.ChatMessage]: { sender: number, text: string };
+    [GameMessage.GameState]: { state: GameLoopState };
 }
 
 export { GameMessage };

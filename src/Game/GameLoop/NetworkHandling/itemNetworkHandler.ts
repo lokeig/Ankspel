@@ -64,7 +64,6 @@ class ItemMessageHandler {
             item.projectileCollision.handleEffect(effect, pos);
         });
 
-
         gameEvent.subscribe(GameMessage.SpawnerSpawn, ({ id, item, itemId }) => {
             const spawner = SpawnerManager.getSpawnerFromId(id);
             if (!spawner) {

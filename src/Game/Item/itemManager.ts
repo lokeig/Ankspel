@@ -112,10 +112,6 @@ class ItemManager {
         }
     }
 
-    public static getItemID(item: IItem): number | undefined {
-        return this.idManager.getID(item);
-    }
-
     public static draw() {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.enabled() && item.ownership === Ownership.None) {

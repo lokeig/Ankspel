@@ -1,13 +1,13 @@
 import { StateMachine, Input } from "@common";
 import { ImageName, Images, Render } from "@render";
-import { MainMenu } from "@game/Server";
+import { Connection, MainMenu } from "@game/Server";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { DuckGame } from "./game";
 import { FrameHandler } from "./frameTimer";
 import { Sound, SoundInfo, SoundName } from "@game/Audio";
 import { AudioManager } from "@game/Audio/audioManager";
 
-import { GameLoopState } from "./gameLoopState";
+import { GameLoopState } from "../Common/Types/gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
@@ -28,7 +28,6 @@ class GameLoop {
         this.stateMachine.addState(GameLoopState.Playing, new Playing(this.game));
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(this.game));
         this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(this.game));
-
     }
 
     public async init() {
@@ -38,7 +37,8 @@ class GameLoop {
         await this.preloadAllFonts();
         NetworkHandler.init(this.game);
 
-        NetworkHandler.setOnStart(() => { this.startGame(); });
+        NetworkHandler.setOnStart(() => this.startGame());
+        NetworkHandler.setOnState((state: GameLoopState) => this.stateMachine.forceState(state));
     }
 
     private async preloadAllImages(): Promise<void> {
@@ -84,7 +84,8 @@ class GameLoop {
         this.lastTime = currentTime;
         Render.get().clear();
 
-        this.stateMachine.update(deltaTime);
+        const lockState = !Connection.get().isHost();
+        this.stateMachine.update(deltaTime, lockState);
 
         this.stateMachine.draw();
         Input.update();

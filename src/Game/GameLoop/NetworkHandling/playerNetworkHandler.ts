@@ -55,7 +55,7 @@ class PlayerNetworkHandler {
                 return;
             }
             player.character.delete();
-            game.chat.write({sender: id, text: (" left the lobby").toUpperCase(), timeAlive: 0 });
+            game.chat.write({ sender: id, text: (" left the lobby").toUpperCase(), timeAlive: 0 });
         })
 
         gameEvent.subscribe(GameMessage.PlayerDead, ({ id }) => {

@@ -18,6 +18,7 @@ export type { IState } from "./StateMachine/IState";
 
 // Types
 export type { Controls } from "./Types/controls";
+export { GameLoopState } from "./Types/gameLoopState";
 export { ThrowType } from "./Types/throwType";
 export { Direction, AxisDirection } from "./Types/direction";
 export { Side } from "./Types/side";
