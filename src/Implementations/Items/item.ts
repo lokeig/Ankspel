@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { EquipmentSlot, OnItemCollision, PlayerState, ProjectileEffect, ThrowType } from "@common";
+import { EquipmentSlot, OnItemCollision, OnItemCollisionType, PlayerState, ProjectileEffect, ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 import { IItem, ItemAngleHelper, ItemIgnore, ItemInfo, ItemPhysics, ItemPlayerCollision, ItemProjectileCollision, OnItemUseType, Ownership } from "@item";
@@ -44,6 +44,10 @@ abstract class Item implements IItem {
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled);
     }
 
+    public getCollisionKnockback(): Vector {
+        return new Vector(-this.body.velocity.x * (1.5 - this.info.weightFactor), Math.abs(this.body.velocity.x) * (1.5 - this.info.weightFactor) * 0.5);
+    }
+
     public update(deltaTime: number): void {
         const prevGrounded = this.body.grounded;
         const prevVelocity = Math.abs(this.body.velocity.y);
@@ -59,7 +63,7 @@ abstract class Item implements IItem {
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
         if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
-            return [OnItemCollision.DropItem];
+            return [{ type: OnItemCollisionType.Knockback, amount: this.getCollisionKnockback() }];
         }
         return [];
     }
@@ -72,13 +76,13 @@ abstract class Item implements IItem {
         return this.angle.localAngle + this.angle.worldAngle;
     }
 
-    public handleCollision(type: OnItemCollision): void {
-        switch (type) {
-            case OnItemCollision.DropItem: {
+    public handleCollision(collision: OnItemCollision): void {
+        switch (collision.type) {
+            case OnItemCollisionType.Knockback: {
                 this.body.velocity.x *= -this.body.bounceFactor;
                 break;
             }
-            case OnItemCollision.Headbonk: {
+            case OnItemCollisionType.Headbonk: {
                 this.body.velocity.y *= -0.5;
                 break;
             }
@@ -105,6 +109,10 @@ abstract class Item implements IItem {
     public throw(throwType: ThrowType): void {
         this.body.grounded = false;
         const direcMult = this.body.getDirectionMultiplier();
+        
+        if (this.body.getCollidingTile()) {
+            return;
+        }
 
         switch (throwType) {
             case (ThrowType.Light): {
@@ -157,7 +165,7 @@ abstract class Item implements IItem {
                 return zIndex.Player;
             }
             case (Ownership.InSpawner): {
-                return zIndex.Items;
+                return zIndex.Spawners;
             }
             case (Ownership.None): {
                 return zIndex.Items;

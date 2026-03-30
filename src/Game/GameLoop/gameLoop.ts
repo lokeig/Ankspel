@@ -88,7 +88,6 @@ class GameLoop {
         this.stateMachine.update(deltaTime, lockState);
 
         this.stateMachine.draw();
-        Input.update();
         NetworkHandler.update(deltaTime);
 
         this.frameHandler.newFrame(this.gameLoop);

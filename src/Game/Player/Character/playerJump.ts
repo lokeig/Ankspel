@@ -7,7 +7,7 @@ class PlayerJump {
     public isJumping: boolean = false;
     public jumpEnabled: boolean = true;
     private minJump: number = 350;
-    private jumpForce: number = 1200;
+    private jumpForce: number = 2000;
 
     private coyoteTime = new Countdown(0.15);
     private maxJumpTime = new Countdown(0.2);

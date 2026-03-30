@@ -13,6 +13,7 @@ class ItemManager {
     private static permanent: IItem[] = [];
 
     public static clear(): void {
+        this.items.forEach(itemset => itemset.forEach(item => item.setToDelete()));
         this.items = new Map();
         this.permanent.forEach(item => this.addToMap(item));
         this.idManager.reset();

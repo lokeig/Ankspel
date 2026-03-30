@@ -1,4 +1,4 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollision, GameLoopState } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollisionType, GameLoopState, OnItemCollision } from "@common";
 import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
 
@@ -68,7 +68,7 @@ interface GameMessageMap {
     [GameMessage.ItemProjectileEffect]: { id: number, effect: ProjectileEffect, pos: Vector };
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
-    [GameMessage.ItemCollision]: { id: number, type: OnItemCollision };
+    [GameMessage.ItemCollision]: { id: number, effect: OnItemCollision };
 
     // ─── Spawner ────────────────────────
     [GameMessage.AddSpawner]: { config: SpawnerDescription, id: number };

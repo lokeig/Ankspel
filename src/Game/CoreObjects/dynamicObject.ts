@@ -16,7 +16,7 @@ class DynamicObject extends GameObject {
     public ignoreFriction: boolean = false;
 
     public velocity = new Vector();
-    public gravity: number = 1260;
+    public gravity: number = 1700;
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 
@@ -71,6 +71,14 @@ class DynamicObject extends GameObject {
         this.pos.y = this.pos.y + this.velocity.y * deltaTime;
         const verticalCollidingTile = this.getVerticalTileCollision(deltaTime);
         if (verticalCollidingTile) {
+
+            if (this.velocity.y === 0) {
+                if (this.pos.y + this.height / 2 > verticalCollidingTile.pos.y + verticalCollidingTile.height / 2) {
+                    this.velocity.y = -1;
+                } else {
+                    this.velocity.y = 1;
+                }
+            }
             if (this.velocity.y > 0) {
                 this.handleBotCollision(verticalCollidingTile);
             } else {
@@ -85,7 +93,7 @@ class DynamicObject extends GameObject {
             if (!this.collision(collidable.body) || collidable.platform) {
                 continue;
             }
-            return collidable.body
+            return collidable.body;
         }
     }
 
@@ -102,15 +110,22 @@ class DynamicObject extends GameObject {
             if (this.ignorePlatforms || this.velocity.y < 0) {
                 continue;
             }
-            if (this.pos.y - (this.velocity.y * deltaTime) + this.height> collidable.body.pos.y) {
+            if (this.pos.y - (this.velocity.y * deltaTime) + this.height > collidable.body.pos.y) {
                 continue;
             }
             return collidable.body;
         }
     }
 
-    private handleSideCollision(gameObject: GameObject) {
+    private handleSideCollision(gameObject: GameObject): void {
         this.collidingSide = true;
+        if (this.velocity.x === 0) {
+            if (this.pos.x + this.width / 2 > gameObject.pos.x + gameObject.width / 2) {
+                this.velocity.x = -1;
+            } else {
+                this.velocity.x = 1;
+            }
+        }
 
         if (this.velocity.x > 0) {
             this.pos.x = gameObject.pos.x - this.width;

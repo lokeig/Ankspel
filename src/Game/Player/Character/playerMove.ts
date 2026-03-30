@@ -4,7 +4,7 @@ import { PlayerControls } from "./playerControls";
 
 class PlayerMove {
     public moveEnabled: boolean = true;
-    private movespeed: number = 3000;
+    private movespeed: number = 3500;
     private playerCharacter: DynamicObject;
     private controls: PlayerControls;
 
@@ -45,6 +45,9 @@ class PlayerMove {
     }
 
     public willTurn(): boolean {
+        if (this.controls.strafe()) {
+            return false;
+        }
         const willTurnLeft = this.controls.left(InputMode.Press) && !this.playerCharacter.isFlip();
         const willTurnRight = this.controls.right(InputMode.Press) && this.playerCharacter.isFlip();
         return (willTurnLeft || willTurnRight) && this.moveEnabled;

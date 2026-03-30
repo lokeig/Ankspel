@@ -1,5 +1,6 @@
 const Sound = {
     quack: "quack",
+    quackSwear: "quackSwear",
     glock: "glock",
     shotgunFire: "shotgunFire",
     shotgunLoad: "shotgunLoad",
@@ -18,6 +19,7 @@ const Sound = {
 
 const SoundInfo: Record<SoundName, { src: string }> = {
     quack: { src: "/assets/Sounds/quack.mp3" },
+    quackSwear: { src: "/assets/Sounds/quackSwear.mp3" },
     glock: { src: "/assets/Sounds/glock.mp3" },
     shotgunFire: { src: "/assets/Sounds/shotgunFire.mp3" },
     shotgunLoad: { src: "/assets/Sounds/shotgunLoad.mp3" },

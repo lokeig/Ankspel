@@ -207,16 +207,16 @@ class Spawner {
         framePos.x -= Spawner.frameDrawSize.x / 2;
         framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
 
-        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Tiles - 1);
+        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Spawners);
         if (this.contains) {
             this.contains.draw();
         }
         if (frontBall === 1) {
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items + 10);
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items - 10);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Spawners + 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Spawners - 10);
         } else {
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items - 10);
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items + 10);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Spawners - 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Spawners + 10);
         }
     }
 }

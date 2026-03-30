@@ -1,4 +1,4 @@
-import { Controls, EquipmentSlot, Input, InputMode, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
+import { Controls, Countdown, EquipmentSlot, Input, InputMode, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
 import { Vector } from "@math";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
@@ -12,7 +12,7 @@ import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
 import { Equippable, isEquippable } from "@item";
-import { OnItemCollision } from "@game/Common/Types/onItemCollision";
+import { OnItemCollision, OnItemCollisionType } from "@game/Common/Types/onItemCollision";
 import { PlayerItemCollisionManager } from "./playerItemCollisionManager";
 
 class PlayerCharacter {
@@ -38,6 +38,7 @@ class PlayerCharacter {
     public id: number;
     private collidableBodies: Map<DynamicObject, ProjectileTarget> = new Map();
     private quacking: boolean = false;
+    private swearing = new Countdown(0.2);
 
     constructor(pos: Vector, id: number, color: string) {
         this.standardBody = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
@@ -46,6 +47,7 @@ class PlayerCharacter {
         this.equipment = new PlayerEquipment(() => this.activeBody);
         this.id = id;
 
+        this.swearing.setToReady();
         this.itemCollisionManager = new PlayerItemCollisionManager(() => this.activeBody, this.handleItemCollisionEffect.bind(this));
 
         this.addCollidableBody(this.standardBody);
@@ -139,7 +141,6 @@ class PlayerCharacter {
         this.movement.update(deltaTime, weight);
         this.itemManager.handle(this.itemCollisionManager.handle(deltaTime));
         this.itemManager.handleInteractions();
-        this.handleQuack();
     }
 
     public standardBodyNonLocalUpdate(deltaTime: number): void {
@@ -152,10 +153,18 @@ class PlayerCharacter {
         const prevGrounded = this.standardBody.grounded;
         const prevVelocityY = Math.abs(this.standardBody.velocity.y);
 
-        this.updateControllers(deltaTime);
         this.standardBody.update(deltaTime);
+        if (Math.abs(this.standardBody.velocity.x) > 50) {
+            this.standardBody.frictionMultiplier = 1;
+        } else {
+            this.standardBody.frictionMultiplier = 2;
+        }
         this.setArmPos();
+        this.handleQuack(deltaTime);
+
+        this.updateControllers(deltaTime);
         this.updateAnimator(deltaTime);
+
         const audioThreshold = 200;
         if (this.standardBody.grounded && !prevGrounded && prevVelocityY > audioThreshold) {
             AudioManager.get().play(Sound.land);
@@ -171,8 +180,16 @@ class PlayerCharacter {
         });
     }
 
-    public handleQuack(): void {
-        this.quacking = (this.controls.quack(InputMode.Hold));
+    public handleQuack(deltaTime: number): void {
+        if (this.isDead()) {
+            this.quacking = false;
+            return;
+        }
+        this.swearing.update(deltaTime);
+        if (!this.isLocal()) {
+            return;
+        }
+        this.quacking = (this.controls.quack(InputMode.Hold) || !this.swearing.isDone());
         if (this.controls.quack(InputMode.Press)) {
             AudioManager.get().play(Sound.quack);
         }
@@ -241,19 +258,21 @@ class PlayerCharacter {
     }
 
     private handleItemCollisionEffect(effect: OnItemCollision) {
-        switch (effect) {
-            case (OnItemCollision.Death): {
+        switch (effect.type) {
+            case (OnItemCollisionType.Death): {
                 this.die(true);
                 break;
             }
-            case (OnItemCollision.DropItem): {
+            case (OnItemCollisionType.Knockback): {
+                this.swear();
                 this.equipment.throw(EquipmentSlot.Hand, ThrowType.Light);
+                this.activeBody.velocity.subtract(effect.amount);
                 break;
             }
-            case (OnItemCollision.Sharp): {
+            case (OnItemCollisionType.Sharp): {
 
             }
-            case (OnItemCollision.Headbonk): {
+            case (OnItemCollisionType.Headbonk): {
                 let helmet = null;
                 if (this.equipment.hasItem(EquipmentSlot.Head)) {
                     helmet = this.equipment.getItem(EquipmentSlot.Head) as Equippable;
@@ -265,6 +284,11 @@ class PlayerCharacter {
                 }
             }
         }
+    }
+
+    private swear(): void {
+        AudioManager.get().play(Sound.quackSwear);
+        this.swearing.reset();
     }
 
     public idleCollision(): boolean {

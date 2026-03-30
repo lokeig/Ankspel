@@ -45,13 +45,13 @@ class ItemMessageHandler {
             SpawnerManager.spawn(config, id);
         });
 
-        gameEvent.subscribe(GameMessage.ItemCollision, ({ id, type }) => {
+        gameEvent.subscribe(GameMessage.ItemCollision, ({ id, effect }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
                 console.log("Can't collide item: ", id, ", doesn't exist.")
                 return;
             }
-            item.playerCollision.handleCollisionType(type);
+            item.playerCollision.handleCollisionType(effect);
         });
 
         gameEvent.subscribe(GameMessage.ItemProjectileEffect, ({ id, pos, effect }) => {

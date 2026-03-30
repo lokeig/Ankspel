@@ -1,9 +1,7 @@
 import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { Equippable, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Vector } from "@math";
-import { Connection, GameMessage } from "@server";
 import { AudioManager, Sound } from "@game/Audio";
-import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { Item } from "../item";
 import { Images } from "@render";
 

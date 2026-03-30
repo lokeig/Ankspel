@@ -1,16 +1,14 @@
-import { OnItemCollision, ThrowType } from "@common";
+import { OnItemCollision, OnItemCollisionType, ThrowType } from "@common";
 import { Item } from "../item";
 import { DynamicObject } from "@core";
 import { Vector } from "@math";
 import { CollisionManager } from "@game/Collision/collisionManager";
 
 abstract class BaseProp extends Item {
-
     private collision = { body: this.body, platform: true };
 
     constructor(pos: Vector, width: number, height: number, id: number) {
         super(pos, width, height, id);
-
         CollisionManager.addCollidable(this.collision);
     }
 
@@ -23,21 +21,21 @@ abstract class BaseProp extends Item {
         const minVerticalSpeed = 250;
         const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;
         if (this.body.velocity.y > minVerticalSpeed && prevPos - offset < body.pos.y) {
-            return [OnItemCollision.Headbonk];
+            return [{ type: OnItemCollisionType.Headbonk }];
         }
         if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
-            return [OnItemCollision.DropItem];
+            return [{ type: OnItemCollisionType.Knockback, amount: this.getCollisionKnockback() }];
         }
         return [];
     }
 
-    public handleCollision(type: OnItemCollision): void {
-        switch (type) {
-            case OnItemCollision.DropItem: {
+    public handleCollision(collision: OnItemCollision): void {
+        switch (collision.type) {
+            case OnItemCollisionType.Knockback: {
                 this.body.velocity.x *= -this.body.bounceFactor;
                 break;
             }
-            case OnItemCollision.Headbonk: {
+            case OnItemCollisionType.Headbonk: {
                 this.body.velocity.y *= -0.5;
                 break;
             }

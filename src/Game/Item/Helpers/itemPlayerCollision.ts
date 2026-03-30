@@ -5,11 +5,11 @@ import { Connection, GameMessage } from "@server";
 class ItemPlayerCollision {
 
     private onCollisionCallback: (deltaTime: number, body: DynamicObject) => OnItemCollision[];
-    private handleCollisionCallback: (type: OnItemCollision) => void;
+    private handleCollisionCallback: (effect: OnItemCollision) => void;
 
     private id: number;
 
-    constructor(id: number, onCollision: (deltaTime: number, body: DynamicObject) => OnItemCollision[], handleCollision: (type: OnItemCollision) => void) {
+    constructor(id: number, onCollision: (deltaTime: number, body: DynamicObject) => OnItemCollision[], handleCollision: (effect: OnItemCollision) => void) {
         this.id = id;
         this.onCollisionCallback = onCollision;
         this.handleCollisionCallback = handleCollision;
@@ -20,7 +20,7 @@ class ItemPlayerCollision {
         effects.forEach(effect => {
             this.handleCollisionType(effect);
             if (this.id > 0) {
-                Connection.get().sendGameMessage(GameMessage.ItemCollision, ({ id: this.id, type: effect }));
+                Connection.get().sendGameMessage(GameMessage.ItemCollision, ({ id: this.id, effect }));
             }
         });
         return effects;

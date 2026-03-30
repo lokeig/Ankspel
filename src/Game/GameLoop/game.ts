@@ -7,7 +7,7 @@ import { Camera } from "@game/Camera";
 import { Parallax } from "@game/ParallaxBackground/parallax";
 import { MapManager } from "@game/Map";
 import { Connection } from "@server";
-import { IDManager, MaxMinPositions } from "@common";
+import { IDManager, Input, MaxMinPositions } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
 import { Render } from "@render";
@@ -21,7 +21,7 @@ class DuckGame {
     public chat = new Chat();
 
     public update(deltaTime: number): void {
-        const fixedStep = 0.1;
+        const fixedStep = 0.03;
         const maxIterations = 20;
 
         let remainingDelta = deltaTime;
@@ -30,8 +30,9 @@ class DuckGame {
         while (remainingDelta > 0 && iterations < maxIterations) {
             const currentDelta = Math.min(fixedStep, remainingDelta);
             remainingDelta -= currentDelta;
-
+            
             this.gameUpdate(currentDelta);
+            Input.update();
 
             iterations++;
         }
@@ -70,7 +71,7 @@ class DuckGame {
         SpawnerManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
         this.chat.update(deltaTime);
-        this.background.update(deltaTime, this.mapBounds);
+        this.background.update(deltaTime);
     }
 
     public draw(): void {
