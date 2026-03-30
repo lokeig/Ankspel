@@ -4,7 +4,6 @@ import { DynamicObject } from "@core";
 import { IItem, ItemIgnore, ItemPlayerCollision, ItemProjectileCollision, Ownership } from "@item";
 import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { chownSync } from "fs";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -42,6 +41,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.legs = new DynamicObject(new Vector(), this.width, this.height);
 
         this.body = this.legs;
+        this.info.id = this.player.id;
 
         this.configurePhysics();
     }
@@ -80,12 +80,14 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.player.addCollidableBody(this.head);
         this.player.addCollidableBody(this.torso);
         this.player.addCollidableBody(this.legs);
-
     }
 
     public stateUpdate(deltaTime: number): void {
         this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
-
+        if (this.player.isLocal() && !this.player.isDead()) {
+            this.player.handleQuack();
+        }
+        this.player.updateAnimator(deltaTime);
         if (this.isHeld()) {
             this.updateOwned(deltaTime);
             return;
@@ -171,7 +173,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         const jumpLeft = this.player.jump.getJumpRemaining();
         const jumpCharge = this.player.jump.getJumpForce() / 5;
         const impulse = jumpLeft * jumpCharge;
-
 
         this.head.velocity.y -= impulse;
         this.torso.velocity.y -= impulse;

@@ -15,16 +15,16 @@ class Parallax {
     }
 
     public update(deltaTime: number): void {
-        this.layers.forEach(layer => layer.update(deltaTime));
+        this.layers.forEach(layer => {
+            layer.update(deltaTime)
+        });
     }
 
     public draw(positions: MaxMinPositions, pos: Vector): void {
-
         const center = new Vector((positions.minX + positions.maxX) / 2, (positions.minY + positions.maxY) / 2);
         const offset = pos.subtract(center).multiply(0.5);
 
         this.layers.forEach(layer => {
-
             const render = Render.get();
 
             const maxScale = Math.max(
@@ -44,8 +44,17 @@ class Parallax {
 
             const scaledWidth = layer.getWidth() * scale;
             const scaledHeight = layer.getHeight() * scale;
+            if (!layer.tiles()) {
+                layer.draw(drawPos, new Vector(scaledWidth, scaledHeight));
+            } else {
+                drawPos.x = Math.floor(drawPos.x);
+                const width = Math.floor(scaledWidth);
+                for (let i = -1; i <= 1; i++) {
+                    const x = drawPos.x + width * i;
+                    layer.draw(new Vector(x, drawPos.y), new Vector(scaledWidth, scaledHeight));
+                }
+            }
 
-            layer.draw(drawPos, new Vector(scaledWidth, scaledHeight));
         });
     }
 

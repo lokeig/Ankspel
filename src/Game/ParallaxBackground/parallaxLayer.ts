@@ -5,9 +5,11 @@ interface ParallaxLayer {
 
     getWidth(): number;
     getHeight(): number;
+
     getZoomFactor(): number;
     getParallaxFactor(): number;
-    shouldClampToScreen(): boolean,
+
+    tiles(): boolean;
 
     draw(pos: Vector, size: Vector): void;
 }

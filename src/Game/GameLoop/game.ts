@@ -70,7 +70,7 @@ class DuckGame {
         SpawnerManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
         this.chat.update(deltaTime);
-        this.background.update(deltaTime);
+        this.background.update(deltaTime, this.mapBounds);
     }
 
     public draw(): void {

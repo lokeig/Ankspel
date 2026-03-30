@@ -20,9 +20,17 @@ class PlayerMove {
     }
 
     private move(deltaTime: number, weight: number): void {
+        const strafe = this.controls.strafe();
+        if (!strafe) {
+            this.setDirection();
+        }
+        const speed = this.movespeed * weight;
+        this.playerCharacter.velocity.x += speed * this.controls.getMoveDirection() * deltaTime;
+    }
+
+    private setDirection(): void {
         const left = this.controls.left();
         const right = this.controls.right();
-
         if (left && right) {
             if (this.controls.left(InputMode.Press)) {
                 this.playerCharacter.direction = Side.Left;
@@ -34,10 +42,6 @@ class PlayerMove {
         } else if (right) {
             this.playerCharacter.direction = Side.Right;
         }
-
-        const speed = this.movespeed * weight;
-
-        this.playerCharacter.velocity.x += speed * this.controls.getMoveDirection() * deltaTime;
     }
 
     public willTurn(): boolean {

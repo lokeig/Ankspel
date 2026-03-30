@@ -36,9 +36,11 @@ abstract class Item implements IItem {
         this.physics = new ItemPhysics(this.body, this.angle);
         this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
         this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
+
+        this.setProjectileCollision(0, (_e, _p, _b) => { }, () => false);
     }
 
-    public setProjectileCollision(body: DynamicObject, resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
+    public setProjectileCollision(resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled);
     }
 
@@ -48,7 +50,7 @@ abstract class Item implements IItem {
 
         this.ignoring.update(deltaTime);
         this.physics.update(deltaTime, this.ownership);
-        
+
         const audioLandThreshold = 100;
         if (this.body.grounded && !prevGrounded && prevVelocity > audioLandThreshold) {
             AudioManager.get().play(Sound.land);

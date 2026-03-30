@@ -52,7 +52,7 @@ interface GameMessageMap {
     [GameMessage.StartPlaying]: {};
 
     // ─── Player ─────────────────────────────
-    [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
+    [GameMessage.PlayerInfo]: { id: number, quacking: boolean, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.NewPlayer]: { id: number, color: string, name: string };
     [GameMessage.PlayerLeave]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };

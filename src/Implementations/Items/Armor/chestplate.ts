@@ -30,7 +30,7 @@ class Chestplate extends Item implements Equippable {
             return [result];
         });
 
-        this.setProjectileCollision(this.body, 10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
         this.projectileCollision.disable();
     }
 

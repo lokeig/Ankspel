@@ -20,7 +20,7 @@ class Crate extends BaseProp {
         this.info.holdOffset = Crate.holdOffset;
 
         this.info.weightFactor = 0.8;
-        this.setProjectileCollision(this.body, 10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
     }
 
     public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean): void {

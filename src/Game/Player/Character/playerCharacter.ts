@@ -1,4 +1,4 @@
-import { Controls, EquipmentSlot, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
+import { Controls, EquipmentSlot, Input, InputMode, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
 import { Vector } from "@math";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
@@ -35,8 +35,9 @@ class PlayerCharacter {
     public equipment!: PlayerEquipment;
     public itemManager!: PlayerItemManager;
 
-    private id: number;
+    public id: number;
     private collidableBodies: Map<DynamicObject, ProjectileTarget> = new Map();
+    private quacking: boolean = false;
 
     constructor(pos: Vector, id: number, color: string) {
         this.standardBody = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
@@ -81,7 +82,7 @@ class PlayerCharacter {
 
     public handleNewState(state: PlayerState): void {
         this.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.playerInteractions.getOnPlayerState(state)) {
+            if (this.isLocal() && item && item.playerInteractions.getOnPlayerState(state)) {
                 this.itemManager.handleEffects(item, item.playerInteractions.getOnPlayerState(state)!());
             }
         });
@@ -95,7 +96,13 @@ class PlayerCharacter {
         this.armFront.setPosition(this.getDrawPos(), PlayerCharacter.drawSize, offset, this.standardBody.isFlip());
         if (this.equipment.hasItem(EquipmentSlot.Hand)) {
             const offset = this.equipment.getItem(EquipmentSlot.Hand).info.holdOffset;
-            this.equipment.setBody(this.armFront.getCenter(), offset, this.standardBody.direction, this.armFront.angle, EquipmentSlot.Hand);
+            this.equipment.setBody(
+                this.armFront.getCenter(),
+                offset,
+                this.standardBody.direction,
+                this.armFront.angle,
+                EquipmentSlot.Hand
+            );
         }
     }
 
@@ -119,6 +126,10 @@ class PlayerCharacter {
         this.activeBody.setNewCollidableObjects();
     }
 
+    public updateAnimator(deltaTime: number): void {
+        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand), this.quacking);
+    }
+
     private updateControllers(deltaTime: number): void {
         if (this.standardBody.collidingUp) {
             this.jump.isJumping = false;
@@ -128,36 +139,54 @@ class PlayerCharacter {
         this.movement.update(deltaTime, weight);
         this.itemManager.handle(this.itemCollisionManager.handle(deltaTime));
         this.itemManager.handleInteractions();
+        this.handleQuack();
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    public standardBodyNonLocalUpdate(deltaTime: number): void {
         this.standardBody.update(deltaTime);
         this.setArmPos();
-        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.updateAnimator(deltaTime);
     }
 
-    public update(deltaTime: number): void {
+    public standardBodyUpdate(deltaTime: number): void {
         const prevGrounded = this.standardBody.grounded;
         const prevVelocityY = Math.abs(this.standardBody.velocity.y);
 
         this.updateControllers(deltaTime);
         this.standardBody.update(deltaTime);
         this.setArmPos();
-        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
-
+        this.updateAnimator(deltaTime);
         const audioThreshold = 200;
         if (this.standardBody.grounded && !prevGrounded && prevVelocityY > audioThreshold) {
             AudioManager.get().play(Sound.land);
         }
         this.setItemOnAnimation();
     }
-    
+
     private setItemOnAnimation(): void {
         this.equipment.getAllEquippedItems().forEach(item => {
             if (isEquippable(item)) {
                 item.onPlayerAnimation(this.animator.getCurrentAnimation(), this.equipment.hasItem(EquipmentSlot.Hand));
             }
         });
+    }
+
+    public handleQuack(): void {
+        this.quacking = (this.controls.quack(InputMode.Hold));
+        if (this.controls.quack(InputMode.Press)) {
+            AudioManager.get().play(Sound.quack);
+        }
+    }
+
+    public setQuacking(quack: boolean): void {
+        if (!this.quacking && quack) {
+            AudioManager.get().play(Sound.quack);
+        }
+        this.quacking = quack;
+    }
+
+    public isQuacking(): boolean {
+        return this.quacking;
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {

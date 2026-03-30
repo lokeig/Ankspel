@@ -43,7 +43,7 @@ class PlayerStandard implements IState<PlayerState> {
             return;
         }
         this.player.rotateArm(deltaTime);
-        this.player.update(deltaTime);
+        this.player.standardBodyUpdate(deltaTime);
         this.setCurrentAnimation();
         
         this.setEquipmentLocation();
@@ -63,7 +63,7 @@ class PlayerStandard implements IState<PlayerState> {
 
     private nonLocalUpdate(deltaTime: number): void {
         this.player.rotateArm(deltaTime);
-        this.player.nonLocalUpdate(deltaTime);
+        this.player.standardBodyNonLocalUpdate(deltaTime);
         this.setEquipmentLocation();
     }
 

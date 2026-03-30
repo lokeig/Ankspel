@@ -16,7 +16,6 @@ class ItemMessageHandler {
         gameEvent.subscribe(GameMessage.DeleteItem, ({ id }) => {
             const item = ItemManager.getItemFromID(id);
             if (!item) {
-                console.log("Can't delete item: ", id, ", doesn't exist.");
                 return;
             }
             item.setToDelete();
@@ -63,6 +62,7 @@ class ItemMessageHandler {
             }
             item.projectileCollision.handleEffect(effect, pos);
         });
+
 
         gameEvent.subscribe(GameMessage.SpawnerSpawn, ({ id, item, itemId }) => {
             const spawner = SpawnerManager.getSpawnerFromId(id);

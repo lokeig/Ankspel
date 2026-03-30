@@ -11,6 +11,7 @@ type DrawInfo = {
     angle: number;
     opacity: number;
     blendingMode?: string;
+    channel?: "red" | "green" | "blue" | "alpha"
     zIndex: number;
 };
 

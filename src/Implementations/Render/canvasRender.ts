@@ -23,9 +23,6 @@ class CanvasRender implements IRender {
         this.ctx = this.canvas.getContext('2d')!;
         this.colorCtx = this.colorBuffer.getContext("2d")!;
 
-        this.ctx.imageSmoothingEnabled = false;
-        this.colorCtx.imageSmoothingEnabled = false;
-
         this.canvas.style.imageRendering = "pixelated";
         this.colorBuffer.style.imageRendering = "pixelated";
     }
@@ -88,6 +85,8 @@ class CanvasRender implements IRender {
     }
 
     public render(): void {
+        this.ctx.imageSmoothingEnabled = false;
+        this.colorCtx.imageSmoothingEnabled = false;
         this.renderQueue.sort((a, b) => a.z - b.z);
         this.renderQueue.forEach(({ fn }) => fn());
         this.renderQueue.length = 0;

@@ -1,6 +1,8 @@
 const Images = {
     // Player
     playerBase: { src: '/assets/Images/Player/playerBase.png', frameWidth: 32, frameHeight: 32 },
+    playerBaseQuack: { src: '/assets/Images/Player/playerBaseQuack.png', frameWidth: 32, frameHeight: 32 },
+
     playerBaseMultiply: { src: '/assets/Images/Player/playerBaseMultiply.png', frameWidth: 32, frameHeight: 32 },
     playerOverlay: { src: '/assets/Images/Player/playerOverlay.png', frameWidth: 32, frameHeight: 32 },
     playerMask: { src: '/assets/Images/Player/playerMask.png', frameWidth: 32, frameHeight: 32 },

@@ -24,15 +24,15 @@ class ForestBaseLayer implements ParallaxLayer {
     }
 
     public getZoomFactor(): number {
-        return 1;
+        return 1.1;
+    }
+
+    public tiles(): boolean {
+        return true;
     }
 
     public getParallaxFactor(): number {
-        return 0;
-    }
-
-    public shouldClampToScreen(): boolean {
-        return true;
+        return 0.2;
     }
 
     public draw(pos: Vector, size: Vector): void {

@@ -55,7 +55,7 @@ class PlayerSlide implements IState<PlayerState> {
         this.handlePlatforms(deltaTime);
 
         this.player.rotateArm(deltaTime);
-        this.player.update(deltaTime);
+        this.player.standardBodyUpdate(deltaTime);
 
         if (this.crouch) {
             this.setEquipmentPositionsCrouch();
@@ -66,7 +66,7 @@ class PlayerSlide implements IState<PlayerState> {
 
     private nonLocalUpdate(deltaTime: number): void {
         this.player.rotateArm(deltaTime);
-        this.player.nonLocalUpdate(deltaTime);
+        this.player.standardBodyNonLocalUpdate(deltaTime);
         if (this.crouch) {
             this.setEquipmentPositionsCrouch();
         } else {
