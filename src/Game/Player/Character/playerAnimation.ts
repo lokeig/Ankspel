@@ -54,9 +54,6 @@ class PlayerAnimation {
     }
 
     constructor(color: string) {
-        color = this.getCleanedUpColor(color);
-        console.log(color)
-
         this.currAnim = PlayerAnim.Idle;
 
         this.bodyBaseSprite = new SpriteSheet(Images.playerBase);
@@ -80,29 +77,6 @@ class PlayerAnimation {
 
         this.bodyAnimator = new SpriteAnimator(this.bodyBaseSprite, PlayerAnimation.animations[this.currAnim]);
         this.armAnimator = new SpriteAnimator(this.handBaseSprite, PlayerAnimation.animations[this.currAnim]);
-    }
-
-    private getCleanedUpColor(original: string): string {
-        let R = Number("0x" + original.substring(1, 3));
-        let G = Number("0x" + original.substring(3, 5));
-        let B = Number("0x" + original.substring(5, 7));
-
-        // https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
-        const brightness = (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255;
-        const factor = brightness > 0.5 ? 20 : 50;
-        const offset = (1 - (brightness * 2)) * factor;
-
-        const handleColor = (color: number): string => {
-            color += offset;
-            color = Math.max(Math.min(Math.floor(color), 255), 0);
-            let str = color.toString(16);
-            if (str.length === 1) {
-                str = "0" + str;
-            }
-            return str;
-        }
-
-        return "#" + handleColor(R) + handleColor(G) + handleColor(B);
     }
 
     public setAnimation(animation: PlayerAnim) {

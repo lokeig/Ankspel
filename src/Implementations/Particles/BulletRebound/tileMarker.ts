@@ -23,7 +23,7 @@ class TileMarker {
         this.frames.f2.set(0, 1);
         this.frames.f2.set(0, 2);
         this.frames.f3.set(0, 3);
-        
+
         this.spriteSheet = new SpriteSheet(Images.bulletRebound);
     }
 

@@ -1,6 +1,12 @@
 const Sound = {
     quack: "quack",
     quackSwear: "quackSwear",
+
+    crateDestroy: "crateDestroy",
+    crateHit: "crateHit",
+    woodHit: "woodHit",
+    metalHit: "metalHit",
+
     glock: "glock",
     shotgunFire: "shotgunFire",
     shotgunLoad: "shotgunLoad",
@@ -20,6 +26,12 @@ const Sound = {
 const SoundInfo: Record<SoundName, { src: string }> = {
     quack: { src: "/assets/Sounds/quack.mp3" },
     quackSwear: { src: "/assets/Sounds/quackSwear.mp3" },
+
+    crateDestroy: { src: "/assets/Sounds/crateDestroy.mp3" },
+    crateHit: { src: "/assets/Sounds/crateHit.mp3" },
+    woodHit: { src: "/assets/Sounds/woodHit.mp3" },
+    metalHit: { src: "/assets/Sounds/metalHit.mp3" },
+
     glock: { src: "/assets/Sounds/glock.mp3" },
     shotgunFire: { src: "/assets/Sounds/shotgunFire.mp3" },
     shotgunLoad: { src: "/assets/Sounds/shotgunLoad.mp3" },

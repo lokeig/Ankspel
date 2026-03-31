@@ -5,6 +5,7 @@ import { PlayerNetworkHandler } from "./playerNetworkHandler";
 import { ItemMessageHandler } from "./itemNetworkHandler";
 import { MapNetworkHandler } from "./mapNetworkHandler";
 import { DuckGame } from "../game";
+import { AudioManager } from "@game/Audio";
 
 const tickRate = 60;
 
@@ -49,6 +50,10 @@ class NetworkHandler {
             if (!connection.isHost()) {
                 this.onState(state);
             }
+        });
+
+        gameEvent.subscribe(GameMessage.PlaySound, ({ sound }) => {
+            AudioManager.get().play(sound);
         });
 
         Input.onKey("q", this.quickStart);

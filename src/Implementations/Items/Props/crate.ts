@@ -2,6 +2,7 @@ import { Frame, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@com
 import { Images } from "@render";
 import { Vector } from "@math";
 import { BaseProp } from "./baseProp";
+import { AudioManager, Sound } from "@game/Audio";
 
 class Crate extends BaseProp {
     private static sprite = new SpriteSheet(Images.crate);
@@ -29,8 +30,12 @@ class Crate extends BaseProp {
         }
         if (effect.type === ProjectileEffectType.Damage) {
             this.timesHit++;
+
             if (this.timesHit > Crate.maxLives) {
+                AudioManager.get().play(Sound.crateDestroy);
                 this.setToDelete();
+            } else {
+                AudioManager.get().play(Sound.woodHit);
             }
         }
     }

@@ -14,13 +14,11 @@ defaultMap.setTile("iceTile", new Vector(15, 6));
 
 defaultMap.fillArea("natureTile", -47, 15, 50, 2);
 
-
 defaultMap.fillArea("woodPlatform", 3, 5, 4, 1);
 defaultMap.fillArea("woodPlatform", 5, 5, 1, 8);
 defaultMap.fillArea("woodPlatform", 5, 7, 4, 6);
 
 defaultMap.fillArea("iceTile", 30, 14, 4, 1);
-
 
 defaultMap.setPlayerSpawn({ pos: new Vector(8, 14), direction: Side.Left });
 defaultMap.setPlayerSpawn({ pos: new Vector(15, 14), direction: Side.Left });

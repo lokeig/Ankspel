@@ -89,17 +89,22 @@ abstract class Item implements IItem {
         }
     }
 
-    protected getDrawPos(drawSize: number | Vector): Vector {
+    protected getDrawPos(drawSize: number | Vector, offset: Vector = new Vector): Vector {
         let drawWidth: number = drawSize as number;
         let drawHeight: number = drawSize as number;
         if (drawSize instanceof Vector) {
             drawWidth = drawSize.x;
             drawHeight = drawSize.y;
         }
-        return new Vector(
+        const result = new Vector(
             this.body.pos.x + ((this.body.width - drawWidth) / 2),
             this.body.pos.y + ((this.body.height - drawHeight) / 2)
         );
+        if (offset) {
+            result.x -= offset.x / 2;
+            result.y -= offset.y / 2;
+        }
+        return result;
     }
 
     public enabled(): boolean {
@@ -109,7 +114,7 @@ abstract class Item implements IItem {
     public throw(throwType: ThrowType): void {
         this.body.grounded = false;
         const direcMult = this.body.getDirectionMultiplier();
-        
+
         if (this.body.getCollidingTile()) {
             return;
         }

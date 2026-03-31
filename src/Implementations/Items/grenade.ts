@@ -5,13 +5,14 @@ import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
-import { Images } from "@render";
+import { Images, Render, zIndex } from "@render";
 import { AudioManager, Sound } from "@game/Audio";
 
 class Grenade extends Item {
     private static spriteSheet: SpriteSheet;
     private static frames = { pinned: new Frame(), default: new Frame() };
     private static holdOffset = new Vector(11, -6);
+    private static pixelOffset = new Vector(1, -1);
 
     private firstBeep: boolean = false;
     private secondBeep: boolean = false;
@@ -30,7 +31,7 @@ class Grenade extends Item {
     }
 
     constructor(pos: Vector, id: number) {
-        const width = 8;
+        const width = 12;
         const height = 19;
         super(pos, width, height, id);
 
@@ -102,7 +103,9 @@ class Grenade extends Item {
     public draw(): void {
         const drawSize = 32;
         const frame = this.activated ? Grenade.frames.pinned : Grenade.frames.default;
-        Grenade.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame)
+        const drawPos = this.getDrawPos(drawSize, Grenade.pixelOffset);
+        drawPos.x -= 1;
+        Grenade.spriteSheet.draw(drawPos, drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame)
     }
 }
 

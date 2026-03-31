@@ -1,4 +1,5 @@
 import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollisionType, GameLoopState, OnItemCollision } from "@common";
+import { SoundName } from "@game/Audio";
 import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
 
@@ -39,6 +40,7 @@ enum GameMessage {
     // ─── Other ────────────────────────────────
     ChatMessage,
     GameState,
+    PlaySound
 }
 
 type NetworkVector = {
@@ -83,6 +85,8 @@ interface GameMessageMap {
     // ─── Other ────────────────────────────────
     [GameMessage.ChatMessage]: { sender: number, text: string };
     [GameMessage.GameState]: { state: GameLoopState };
+    [GameMessage.PlaySound]: { sound: SoundName };
+
 }
 
 export { GameMessage };

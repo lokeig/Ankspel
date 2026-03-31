@@ -22,9 +22,6 @@ class CanvasRender implements IRender {
 
         this.ctx = this.canvas.getContext('2d')!;
         this.colorCtx = this.colorBuffer.getContext("2d")!;
-
-        this.canvas.style.imageRendering = "pixelated";
-        this.colorBuffer.style.imageRendering = "pixelated";
     }
 
     public async loadImage(img: ImageInfo): Promise<void> {
@@ -63,8 +60,8 @@ class CanvasRender implements IRender {
         this.renderQueue.push({ z: textInfo.zIndex, fn: () => this.executeDrawText(textInfo, space) });
     }
 
-    public drawSquare(rect: Rect, zIndex: number, angle: number, color: string, space?: RenderSpace): void {
-        this.renderQueue.push({ z: zIndex, fn: () => this.executeDrawSquare(rect, angle, color, space) });
+    public drawSquare(rect: Rect, zIndex: number, angle: number, color: string, opacity: number, space?: RenderSpace): void {
+        this.renderQueue.push({ z: zIndex, fn: () => this.executeDrawSquare(rect, angle, color, opacity, space) });
     }
 
     public drawColor(drawInfo: DrawInfo, color: string, space?: RenderSpace): void {
@@ -224,12 +221,13 @@ class CanvasRender implements IRender {
         this.ctx.restore();
     }
 
-    public executeDrawSquare(rect: Rect, angle: number, color: string, space?: RenderSpace): void {
+    public executeDrawSquare(rect: Rect, angle: number, color: string, opacity: number, space?: RenderSpace): void {
         this.ctx.save();
         if (space === RenderSpace.Screen) {
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         }
         this.ctx.fillStyle = color;
+        this.ctx.globalAlpha = opacity;
         this.ctx.translate(rect.x + rect.width / 2, rect.y + rect.height / 2);
         this.ctx.rotate(angle);
 
@@ -248,8 +246,6 @@ class CanvasRender implements IRender {
         this.ctx.font = info.size + "px " + info.font;
         this.ctx.fillStyle = info.color;
 
-        this.ctx.shadowBlur = 7;
-        this.ctx.shadowColor = "black";
         this.ctx.fillText(info.text, Math.floor(info.pos.x), Math.floor(info.pos.y));
 
         this.ctx.restore();

@@ -65,8 +65,7 @@ class PlayerEquipment {
         }
 
         const item = this.getItem(slot);
-
-        item.ignoring.set(this.body(), 0.1);
+        item.ignoring.set(this.body(), 0.3);
 
         item.throw(throwType);
         if (item.ownership === Ownership.Equipped) {

@@ -131,11 +131,8 @@ class PlayerSlide implements IState<PlayerState> {
         }
         if (this.player.controls.down() || this.player.idleCollision()) {
             if (this.crouch) {
-                const maxCrouchSpeed = 400;
-                const validCrouch =
-                    Math.abs(this.player.standardBody.velocity.x) < maxCrouchSpeed
-                    || this.player.idleCollision();
-                if (validCrouch) {
+                const maxCrouchSpeed = 300;
+                if (Math.abs(this.player.standardBody.velocity.x) < maxCrouchSpeed) {
                     return PlayerState.Crouch;
                 }
             }

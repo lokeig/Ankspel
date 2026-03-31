@@ -15,7 +15,7 @@ class Cloud1Layer implements ParallaxLayer {
     }
 
     public update(deltaTime: number): void {
-        this.pos.x += (deltaTime * Cloud1Layer.speed);
+        this.pos.x += deltaTime * Cloud1Layer.speed;
     }
 
     public getZoomFactor(): number {
@@ -38,21 +38,25 @@ class Cloud1Layer implements ParallaxLayer {
         return 0.4;
     }
 
-    public shouldClampToScreen(): boolean {
-        return false;
-    }
-
-    public draw(pos: Vector, size: Vector): void {
+    private getDrawPos(pos: Vector, size: Vector): Vector {
         const scale = size.x / Cloud1Layer.size.x;
         const scaledOffset = new Vector(
             this.pos.x * scale,
             this.pos.y * scale
         );
-        const drawPos = pos.add(scaledOffset);
-        const buffer = 500;
-        const width = Render.get().getWidth() + size.x + buffer;
+        return pos.add(scaledOffset);
+    }
 
-        drawPos.x = (((drawPos.x % width) + width) % width) - size.x;
+    public draw(pos: Vector, size: Vector): void {
+        const drawPos = this.getDrawPos(pos, size);
+        const buffer = 100;
+        const width = Render.get().getWidth() + buffer;
+        if (drawPos.x > width) {
+            const scale = size.x / Cloud1Layer.size.x;
+
+            this.pos.x -= width / scale;
+            this.pos.x -= size.x / scale;
+        }
         Cloud1Layer.sheet.draw(drawPos, size, false, 0, zIndex.Background + 1);
     }
 }

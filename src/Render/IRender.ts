@@ -21,7 +21,7 @@ interface IRender {
 
     drawImage(drawInfo: DrawInfo, space?: RenderSpace): void;
     drawColor(drawInfo: DrawInfo, color: string, space?: RenderSpace): void;
-    drawSquare(rect: Rect, zIndex: number, angle: number, color: string, space?: RenderSpace): void;
+    drawSquare(rect: Rect, zIndex: number, angle: number, color: string, opacity: number, space?: RenderSpace): void;
     drawLine(lineInfo: DrawLineInfo, space?: RenderSpace): void;
 
     drawText(info: DrawTextInfo, space?: RenderSpace): void;

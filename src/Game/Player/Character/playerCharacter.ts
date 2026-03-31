@@ -192,13 +192,11 @@ class PlayerCharacter {
         this.quacking = (this.controls.quack(InputMode.Hold) || !this.swearing.isDone());
         if (this.controls.quack(InputMode.Press)) {
             AudioManager.get().play(Sound.quack);
+            Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.quack });
         }
     }
 
     public setQuacking(quack: boolean): void {
-        if (!this.quacking && quack) {
-            AudioManager.get().play(Sound.quack);
-        }
         this.quacking = quack;
     }
 
@@ -288,6 +286,7 @@ class PlayerCharacter {
 
     private swear(): void {
         AudioManager.get().play(Sound.quackSwear);
+        Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.quackSwear });
         this.swearing.reset();
     }
 

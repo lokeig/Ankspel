@@ -1,6 +1,5 @@
 import { Vector } from "@math";
-import { Grid, Utility, Direction, Side } from "@common";
-import { GameObject } from "@core";
+import { Grid, Utility, Direction } from "@common";
 import { ITile, TileConstructor } from "./ITile";
 
 class TileManager {

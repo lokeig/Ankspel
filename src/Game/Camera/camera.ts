@@ -9,8 +9,23 @@ class Camera {
     private targetZoom: number = 1;
     private targetPos: Vector = new Vector();
 
+    private timeDead: Map<Player, { time: number }> = new Map();
+    private static timeDeadPlayerCounts: number = 2;
+
     public update(deltaTime: number, bounds: MaxMinPositions) {
-        const players = PlayerManager.getPlayers().filter(player => !player.character.isDead());
+        this.timeDead.forEach(wrapper => wrapper.time += deltaTime);
+
+        const players = PlayerManager.getPlayers().filter(player => {
+            if (player.character.isDead() && !this.timeDead.has(player)) {
+                this.timeDead.set(player, { time: 0 });
+            }
+            const death = this.timeDead.get(player);
+            if (!death) {
+                return true;
+            }
+            return death.time < Camera.timeDeadPlayerCounts;
+        });
+
         if (players.length == 0) {
             this.setFrame(this.targetPos, this.targetZoom, deltaTime);
             return;
@@ -23,6 +38,7 @@ class Camera {
     }
 
     public initialize(bounds: MaxMinPositions): void {
+        this.timeDead = new Map();
         const players = PlayerManager.getPlayers();
 
         const positions = this.getPositions(players, bounds);

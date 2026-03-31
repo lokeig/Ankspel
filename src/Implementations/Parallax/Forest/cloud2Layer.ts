@@ -38,17 +38,25 @@ class Cloud2Layer implements ParallaxLayer {
         return 0.6;
     }
 
-    public draw(pos: Vector, size: Vector): void {
+    private getDrawPos(pos: Vector, size: Vector): Vector {
         const scale = size.x / Cloud2Layer.size.x;
         const scaledOffset = new Vector(
             this.pos.x * scale,
             this.pos.y * scale
         );
-        const drawPos = pos.add(scaledOffset);
-        const buffer = 500;
-        const width = Render.get().getWidth() + size.x + buffer;
+        return pos.add(scaledOffset);
+    }
 
-        drawPos.x = (((drawPos.x % width) + width) % width) - size.x;
+    public draw(pos: Vector, size: Vector): void {
+        const drawPos = this.getDrawPos(pos, size);
+        const buffer = 100;
+        const width = Render.get().getWidth() + buffer;
+        if (drawPos.x > width) {
+            const scale = size.x / Cloud2Layer.size.x;
+
+            this.pos.x -= width / scale;
+            this.pos.x -= size.x / scale;
+        }
         Cloud2Layer.sheet.draw(drawPos, size, false, 0, zIndex.Background + 1);
     }
 }
