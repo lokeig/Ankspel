@@ -10,7 +10,7 @@ class ScoreScreen implements IState<GameLoopState> {
     private game: DuckGame;
     private timer = new Countdown(ScoreScreen.timeInState);
     private opacityLerp = new Lerp(1 / ScoreScreen.timeInState, this.lerp.bind(this));
-    private finalThreshold = 1;
+    private finalThreshold = 5;
 
     constructor(game: DuckGame) {
         this.game = game;

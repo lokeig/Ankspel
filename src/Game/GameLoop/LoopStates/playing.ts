@@ -64,7 +64,7 @@ class Playing implements IState<GameLoopState> {
             }
             return GameLoopState.TrophiesScreen;
         }
-        const maxRounds = 1;
+        const maxRounds = 15;
         if (this.game.getRoundsPlayed() === maxRounds) {
             return GameLoopState.ScoreScreen;
         }

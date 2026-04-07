@@ -59,9 +59,24 @@ class Camera {
 
     private setFrame(targetPos: Vector, targetZoom: number, deltaTime: number) {
         const smoothFactor = 3;
-        this.currentPos.x += (targetPos.x - this.currentPos.x) * deltaTime * smoothFactor;
-        this.currentPos.y += (targetPos.y - this.currentPos.y) * deltaTime * smoothFactor;
-        this.currentZoom += (targetZoom - this.currentZoom) * deltaTime * smoothFactor;
+        let diffX = (targetPos.x - this.currentPos.x) * deltaTime * smoothFactor;
+        let diffY = (targetPos.y - this.currentPos.y) * deltaTime * smoothFactor;
+
+        const max = 0.1;
+        if (Math.abs(diffX) < max) {
+            diffX = 0;
+        }
+        if (Math.abs(diffY) < max) {
+            diffY = 0;
+        }
+        this.currentPos.x += diffX;
+        this.currentPos.y += diffY;
+
+        let zoomDiff = (targetZoom - this.currentZoom) * deltaTime * smoothFactor;
+        if (Math.abs(zoomDiff) < 0.005) {
+            zoomDiff = 0;
+        }
+        this.currentZoom += zoomDiff;
 
         Render.get().setCamera(this.currentPos, this.currentZoom);
     }
