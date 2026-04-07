@@ -97,10 +97,10 @@ abstract class BaseTile implements ITile {
         this.sprite.draw(this.body.pos, drawSize, flip, angle, zIndex.Tiles, BaseTile.lookup.tile(this.spriteIndex));
 
         if (this.body.getLip(Side.Left)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, zIndex.Tiles + 1, BaseTile.lookup.getLip(Side.Left));
+            this.sprite.draw(this.body.getLipDrawPos(Side.Left), drawSize, flip, angle, zIndex.Tiles, BaseTile.lookup.getLip(Side.Left));
         }
         if (this.body.getLip(Side.Right)) {
-            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, zIndex.Tiles + 1, BaseTile.lookup.getLip(Side.Right));
+            this.sprite.draw(this.body.getLipDrawPos(Side.Right), drawSize, flip, angle, zIndex.Tiles, BaseTile.lookup.getLip(Side.Right));
         }
     }
 }

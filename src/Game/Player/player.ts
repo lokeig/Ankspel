@@ -4,19 +4,22 @@ import { PlayerCharacter } from "./Character/playerCharacter";
 import { PlayerState, PlayerStandard, PlayerFlap, PlayerSlide, PlayerRagdoll } from "./PlayerStates";
 import { ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
-import { Images, zIndex } from "@render";
 import { PlayerSpawnDescription } from "@game/Map/PlayerSpawnDescription";
 import { AudioManager, Sound } from "@game/Audio";
+import { Images, zIndex } from "@render";
 
 class Player {
     public character!: PlayerCharacter;
+    private enabled: boolean = false;
     private stateMachine: StateMachine<PlayerState>;
     private id: number;
+
     private score: number = 0;
-    private gettingScore: boolean = false;
+    private trophies: number = 0;
+
     private color: string;
     private name: string;
-
+    private gettingScore: boolean = false;
     private static plusOneSheet = new SpriteSheet(Images.plusOne);
 
     constructor(id: number, color: string, name: string, controls?: Controls) {
@@ -54,6 +57,17 @@ class Player {
         }
 
         return "#" + handleColor(R) + handleColor(G) + handleColor(B);
+    }
+
+    public setEnabled(state: boolean, local: boolean = true) {
+        if (local) {
+            Connection.get().sendGameMessage(GameMessage.PlayerEnabled, { id: this.id, state });
+        }
+        this.enabled = state;
+    }
+
+    public isEnabled(): boolean {
+        return this.enabled;
     }
 
     public getColor(): string {
@@ -99,15 +113,27 @@ class Player {
         return ragdoll.ownership !== Ownership.None;
     }
 
+    public win(): void {
+        this.trophies++;
+    }
+
+    public setWins(trophies: number): void {
+        this.win();
+        this.trophies = trophies;
+    }
+
+    public getWins(): number {
+        return this.trophies;
+    }
+
     public reload(): void {
+        this.gettingScore = false;
         this.stateMachine.forceState(PlayerState.Standard);
         this.character.reset();
         this.stateMachine.enterState();
-        this.gettingScore = false;
     }
 
     public reset(): void {
-        this.reload();
         this.score = 0;
     }
 
@@ -147,18 +173,18 @@ class Player {
 
     public draw(): void {
         this.stateMachine.draw();
-
         if (this.gettingScore) {
+            const body = this.character.activeBody;
             const drawSize = new Vector(38, 30);
-            const drawPos = this.character.activeBody.pos.clone();
-            drawPos.x += this.character.activeBody.width / 2;
-            drawPos.y += this.character.activeBody.height;
+
+            const drawPos = body.pos.clone();
+            drawPos.x += body.width / 2;
+            drawPos.y += body.height;
             drawPos.y -= 70;
             drawPos.subtract((drawSize).clone().divide(2));
 
             Player.plusOneSheet.draw(drawPos, drawSize, false, 0, zIndex.UI);
         }
-
     }
 }
 

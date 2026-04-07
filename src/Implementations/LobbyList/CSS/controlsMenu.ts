@@ -143,6 +143,11 @@ class ControlsMenu {
     }
 
     public getColor(player: number): string {
+        switch (player) {
+            case 0: return this.colorInput.value;
+            case 1: return "#255faa"
+            case 2: return "#aa2573"
+        }
         return this.colorInput.value;
     }
 

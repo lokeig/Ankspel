@@ -67,7 +67,10 @@ class PlayerControls {
     }
 
     public quack(inputMode: InputMode = InputMode.Hold): boolean {
-        return this.getKey(this.controls.quack, inputMode);
+        const key = this.controls.quack;
+        return inputMode === InputMode.Press
+            ? Input.keyPress(key)
+            : Input.keyDown(key);
     }
 }
 

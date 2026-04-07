@@ -29,6 +29,7 @@
       "@common": ["src/Game/Common"],
       "@core": ["src/Game/CoreObjects"],
       "@server": ["src/Game/Server"],
+      "@menu": ["src/Game/Menus"],
       "@player": ["src/Game/Player"],
       "@item": ["src/Game/Item"],
       "@projectile": ["src/Game/Projectile"],

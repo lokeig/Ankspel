@@ -4,7 +4,7 @@ import { Player, PlayerManager } from "@player";
 import { Connection, GameMessage } from "@server";
 
 class Playing implements IState<GameLoopState> {
-    private newMapCountdown = new Countdown(5);
+    private newMapCountdown = new Countdown(4);
     private startNewMap: boolean = false;
     private game: DuckGame;
 
@@ -17,6 +17,8 @@ class Playing implements IState<GameLoopState> {
 
     public stateEntered(): void {
         this.startNewMap = false;
+        this.lastPlayer = null;
+        this.scoreGiven = false;
         if (Connection.get().isHost()) {
             Connection.get().sendGameMessage(GameMessage.GameState, { state: GameLoopState.Playing });
         }
@@ -27,57 +29,51 @@ class Playing implements IState<GameLoopState> {
         if (!Connection.get().isHost()) {
             return;
         }
-
         const remaining = PlayerManager.getPlayers().filter(player => !player.character.isDead());
-        if (remaining.length === 0) {
-            this.lastPlayer = null;
+        if (remaining.length < 2 && !this.startNewMap) {
+            this.startNewMap = true;
+            this.newMapCountdown.reset();
         }
-
-        if (remaining.length === 1) {
-            this.lastPlayer = remaining[0];
-        }
-
-        if (remaining.length === 0 || remaining.length === 1) {
-            if (!this.startNewMap) {
-                this.startNewMap = true;
-                this.newMapCountdown.reset();
-            }
-        }
-
         if (!this.startNewMap) {
             return;
         }
-
         this.newMapCountdown.update(deltaTime);
-        if (this.newMapCountdown.getPercentageReady() > 0.5 && !this.scoreGiven) {
-            this.scoreGiven = true;
-
-            if (this.lastPlayer) {
-                this.lastPlayer.givePoint();
-                const id = this.lastPlayer.getId();
-                const score = this.lastPlayer.getScore();
-                Connection.get().sendGameMessage(GameMessage.PlayerScore, { id, score });
-            }
+        if (this.scoreGiven || this.newMapCountdown.getPercentageReady() < 0.5) {
+            return;
         }
-        return;
+        if (!this.lastPlayer && remaining.length === 1) {
+            this.lastPlayer = remaining[0];
+        } else {
+            return;
+        }
+        this.scoreGiven = true;
 
+        this.lastPlayer.givePoint();
+        const id = this.lastPlayer.getId();
+        const score = this.lastPlayer.getScore();
+        Connection.get().sendGameMessage(GameMessage.PlayerScore, { id, score });
     }
 
     public stateChange(): GameLoopState {
-        const maxRounds = 10;
-        if (this.startNewMap && this.newMapCountdown.isDone() && this.game.getRoundsPlayed() > maxRounds) {
+        if (!this.startNewMap || !this.newMapCountdown.isDone()) {
+            return GameLoopState.Playing;
+        }
+        if (this.game.isFinalRound()) {
+            if (!this.lastPlayer) {
+                return GameLoopState.LoadingMap;
+            }
+            return GameLoopState.TrophiesScreen;
+        }
+        const maxRounds = 1;
+        if (this.game.getRoundsPlayed() === maxRounds) {
             return GameLoopState.ScoreScreen;
         }
-        if (this.startNewMap && this.newMapCountdown.isDone()) {
-            return GameLoopState.LoadingMap;
-        }
-        return GameLoopState.Playing;
+        return GameLoopState.LoadingMap;
     }
-
+    
 
     public stateExited(): void {
-        this.lastPlayer = null;
-        this.scoreGiven = false;
+        
     }
 
     public draw() {

@@ -108,7 +108,7 @@ class PlayerAnimation {
             pos.add(offset);
 
             item.draw();
-            pos
+            pos.subtract(offset);
         }
     }
 
@@ -123,7 +123,7 @@ class PlayerAnimation {
             pos.add(offset);
 
             item.drawTopLayer();
-            pos
+            pos.subtract(offset);
         }
     }
 

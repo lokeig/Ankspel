@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     margin: 0px;
     padding: 0px;
     overflow: hidden;
@@ -193,8 +194,8 @@ canvas {
     justify-content: space-between;
 }
 
-.footer-right,
-.footer-left {
+#footer-right,
+#footer-left {
     padding: 0 20px;
     display: flex;
     gap: 20px;
@@ -336,4 +337,83 @@ input[type=number]::-webkit-inner-spin-button {
 
 .hidden {
     display: none;
+}
+
+#scoreBoard {
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    height: 90%;
+    transform: translate(-50%, -50%);
+
+    aspect-ratio: 112 / 180;
+    background-image: url("Assets/Images/UI/scoreboard.png");
+    background-size: 100%;
+    image-rendering: pixelated;
+}
+
+#scores {
+    width: 81%;
+    margin: auto auto;
+    height: 85%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1%;
+    position: relative;
+    overflow: hidden;
+}
+
+.playerScore {
+    display: flex;
+    height: calc(95% / 6);
+    flex-shrink: 0;
+
+    background: linear-gradient(90deg,
+            rgba(var(--player-color-rgb), 0.6) 0%,
+            rgba(var(--player-color-rgb), 0.6) calc(100% / 9),
+
+            rgba(var(--player-color-rgb), 0.5) calc(100% / 9),
+            rgba(var(--player-color-rgb), 0.5) calc(100% * 2 / 9),
+
+            rgba(var(--player-color-rgb), 0.4) calc(100% * 2 / 9),
+            rgba(var(--player-color-rgb), 0.4) calc(100% * 3 / 9),
+
+            rgba(var(--player-color-rgb), 0.3) calc(100% * 3 / 9),
+            rgba(var(--player-color-rgb), 0.3) calc(100% * 4 / 9),
+
+            rgba(var(--player-color-rgb), 0.2) calc(100% * 4 / 9),
+            rgba(var(--player-color-rgb), 0.2) calc(100% * 5 / 9),
+
+            rgba(var(--player-color-rgb), 0.12) calc(100% * 5 / 9),
+            rgba(var(--player-color-rgb), 0.12) calc(100% * 6 / 9),
+
+            transparent calc(100% * 5 / 9),
+            transparent 100%);
+    image-rendering: pixelated;
+
+    padding: 0 12px;
+
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+
+    font-size: 40pt;
+    font-family: duckFont;
+}
+
+@font-face {
+    font-family: duckFont;
+    src: url(Assets/Fonts/ByteBounce.ttf);
+}
+
+.name {
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.score {
+    font-weight: bold;
+    font-size: 70px;
 }

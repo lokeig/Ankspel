@@ -5,7 +5,7 @@ import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
 import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
-import { Images, Render, zIndex } from "@render";
+import { Images } from "@render";
 import { AudioManager, Sound } from "@game/Audio";
 
 class Grenade extends Item {

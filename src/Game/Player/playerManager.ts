@@ -1,6 +1,7 @@
 import { IDManager } from "@common";
 import { Player } from "./player";
-import { Connection, GameMessage, MainMenu } from "@server";
+import { Connection, GameMessage } from "@server";
+import { MainMenu } from "@menu";
 
 class PlayerManager {
     private static players: Set<Player> = new Set();
@@ -10,6 +11,9 @@ class PlayerManager {
         const pending: Player[] = [];
 
         const updatePlayer = (player: Player) => {
+            if (!player.isEnabled()) {
+                return;
+            }
             player.update(deltaTime);
             player.character.equipment.getAllEquippedItems().forEach((item, slot) => {
                 if (item && item.shouldBeDeleted()) {
@@ -84,9 +88,13 @@ class PlayerManager {
 
     public static draw() {
         this.players.forEach(player => {
-            if (!player.held()) {
-                player.draw();
+            if (!player.isEnabled()) {
+                return;
             }
+            if (player.held()) {
+                return;
+            }
+            player.draw();
         })
     }
 

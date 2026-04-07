@@ -46,6 +46,9 @@ const Images = {
     ready: { src: '/assets/Images/UI/ready.png', frameWidth: 41, frameHeight: 9 },
     get: { src: '/assets/Images/UI/get.png', frameWidth: 25, frameHeight: 9 },
     plusOne: { src: '/assets/Images/UI/plusOne.png', frameWidth: 19, frameHeight: 15 },
+    scoreboard: { src: '/assets/Images/UI/scoreboard.png', frameWidth: 176, frameHeight: 180 },
+    doorLeft: { src: '/assets/Images/UI/doorLeft.png', frameWidth: 123, frameHeight: 175 },
+    doorRight: { src: '/assets/Images/UI/doorRight.png', frameWidth: 123, frameHeight: 175 },
 } as const;
 
 type ImageName = keyof typeof Images;

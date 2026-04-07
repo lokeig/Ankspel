@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="Assets/favicon.ico" type="image/x-icon">
-    
+
     <title>Canvas Game</title>
     <style>
         body {
@@ -44,15 +44,14 @@
             <div id="lobbylist"></div>
 
             <div class="serverlist-footer">
-                <div class="footer-left">
+                <div id="footer-left">
                     <button id="hostbutton">Host</button>
                     <button id="startbutton">Start</button>
                     <button id="settingsButton">Settings</button>
                 </div>
-                <div class="footer-right">
+                <div id="footer-right">
                     <button id="leavebutton">Leave</button>
                     <button id="joinbutton">Join</button>
-
                 </div>
             </div>
 
@@ -139,7 +138,12 @@
             </div>
         </div>
 
+        <div id="scoreBoard">
+            <div id="scores">
+            </div>
+        </div>
     </div>
+
 
     <script type="module" src="/src/index.ts"></script>
 </body>

@@ -33,6 +33,14 @@ class PlayerNetworkHandler {
             player.character.animator.setAnimation(anim);
         });
 
+        gameEvent.subscribe(GameMessage.PlayerEnabled, ({ id, state }) => {
+            const player = PlayerManager.getPlayerFromID(id);
+            if (!player) {
+                return;
+            }
+            player.setEnabled(state, false);
+        })
+
         gameEvent.subscribe(GameMessage.PlayerEquipment, ({ id, holding, head, body, boots }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             const convertion: [number | null, EquipmentSlot][] = [
