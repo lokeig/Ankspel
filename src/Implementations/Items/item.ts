@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { EquipmentSlot, OnItemCollision, PlayerState, ProjectileEffect, ThrowType } from "@common";
+import { EquipmentSlot, OnItemCollision, OnItemCollisionType, PlayerState, ProjectileEffect, ThrowType } from "@common";
 import { DynamicObject } from "@core";
 import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 import { IItem, ItemAngleHelper, ItemIgnore, ItemInfo, ItemPhysics, ItemPlayerCollision, ItemProjectileCollision, OnItemUseType, Ownership } from "@item";
@@ -36,11 +36,20 @@ abstract class Item implements IItem {
         this.physics = new ItemPhysics(this.body, this.angle);
         this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
         this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
+<<<<<<< HEAD
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, 0, () => { }, () => false);
+=======
+
+        this.setProjectileCollision(0, (_e, _p, _b) => { }, () => false);
+>>>>>>> 266aa2192caf8c6003b0a2462ddf11da68b3e656
     }
 
-    public setProjectileCollision(body: DynamicObject, resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
+    public setProjectileCollision(resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled);
+    }
+
+    public getCollisionKnockback(): Vector {
+        return new Vector(-this.body.velocity.x * (1.5 - this.info.weightFactor), Math.abs(this.body.velocity.x) * (1.5 - this.info.weightFactor) * 0.5);
     }
 
     public update(deltaTime: number): void {
@@ -58,7 +67,7 @@ abstract class Item implements IItem {
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
         if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
-            return [OnItemCollision.DropItem];
+            return [{ type: OnItemCollisionType.Knockback, amount: this.getCollisionKnockback() }];
         }
         return [];
     }
@@ -71,30 +80,35 @@ abstract class Item implements IItem {
         return this.angle.localAngle + this.angle.worldAngle;
     }
 
-    public handleCollision(type: OnItemCollision): void {
-        switch (type) {
-            case OnItemCollision.DropItem: {
+    public handleCollision(collision: OnItemCollision): void {
+        switch (collision.type) {
+            case OnItemCollisionType.Knockback: {
                 this.body.velocity.x *= -this.body.bounceFactor;
                 break;
             }
-            case OnItemCollision.Headbonk: {
+            case OnItemCollisionType.Headbonk: {
                 this.body.velocity.y *= -0.5;
                 break;
             }
         }
     }
 
-    protected getDrawPos(drawSize: number | Vector): Vector {
+    protected getDrawPos(drawSize: number | Vector, offset: Vector = new Vector): Vector {
         let drawWidth: number = drawSize as number;
         let drawHeight: number = drawSize as number;
         if (drawSize instanceof Vector) {
             drawWidth = drawSize.x;
             drawHeight = drawSize.y;
         }
-        return new Vector(
+        const result = new Vector(
             this.body.pos.x + ((this.body.width - drawWidth) / 2),
             this.body.pos.y + ((this.body.height - drawHeight) / 2)
         );
+        if (offset) {
+            result.x -= offset.x / 2;
+            result.y -= offset.y / 2;
+        }
+        return result;
     }
 
     public enabled(): boolean {
@@ -104,6 +118,10 @@ abstract class Item implements IItem {
     public throw(throwType: ThrowType): void {
         this.body.grounded = false;
         const direcMult = this.body.getDirectionMultiplier();
+
+        if (this.body.getCollidingTile()) {
+            return;
+        }
 
         switch (throwType) {
             case (ThrowType.Light): {
@@ -156,7 +174,7 @@ abstract class Item implements IItem {
                 return zIndex.Player;
             }
             case (Ownership.InSpawner): {
-                return zIndex.Items;
+                return zIndex.Spawners;
             }
             case (Ownership.None): {
                 return zIndex.Items;

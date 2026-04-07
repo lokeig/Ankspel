@@ -14,6 +14,11 @@ class ItemPhysics {
     public update(deltaTime: number, ownership: Ownership): void {
         if (ownership === Ownership.None) {
             this.updateItemPhysics(deltaTime);
+            if (Math.abs(this.body.velocity.x) > 50) {
+                this.body.frictionMultiplier = 1;
+            } else {
+                this.body.frictionMultiplier = 2;
+            }
         } else {
             this.body.setNewCollidableObjects();
         }

@@ -1,4 +1,5 @@
-import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollision } from "@common";
+import { PlayerState, PlayerAnim, Side, ThrowType, ItemInteraction, ProjectileEffect, ProjectileEffectType, OnItemCollisionType, GameLoopState, OnItemCollision } from "@common";
+import { SoundName } from "@game/Audio";
 import { SpawnerDescription } from "@game/Map";
 import { Vector } from "@math";
 
@@ -15,6 +16,7 @@ enum GameMessage {
     PlayerProjectileEffect,
     PlayerDead,
     PlayerEquipment,
+    PlayerScore,
 
     // ─── Items ──────────────────────────────
     SpawnItem,
@@ -36,7 +38,9 @@ enum GameMessage {
     StartMap,
 
     // ─── Other ────────────────────────────────
-    ChatMessage
+    ChatMessage,
+    GameState,
+    PlaySound
 }
 
 type NetworkVector = {
@@ -50,13 +54,14 @@ interface GameMessageMap {
     [GameMessage.StartPlaying]: {};
 
     // ─── Player ─────────────────────────────
-    [GameMessage.PlayerInfo]: { id: number, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
+    [GameMessage.PlayerInfo]: { id: number, quacking: boolean, velocity: NetworkVector, pos: NetworkVector, state: PlayerState, anim: PlayerAnim, side: Side };
     [GameMessage.NewPlayer]: { id: number, color: string, name: string };
     [GameMessage.PlayerLeave]: { id: number };
     [GameMessage.PlayerSpawn]: { id: number, pos: NetworkVector };
     [GameMessage.PlayerProjectileEffect]: { id: number, type: ProjectileEffectType, effect: ProjectileEffect };
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
+    [GameMessage.PlayerScore]: { id: number, score: number };
 
     // ─── Items ──────────────────────────────
     [GameMessage.ThrowItem]: { id: number, pos: NetworkVector, direction: Side, throwType: ThrowType };
@@ -65,7 +70,7 @@ interface GameMessageMap {
     [GameMessage.ItemProjectileEffect]: { id: number, effect: ProjectileEffect, pos: Vector };
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
-    [GameMessage.ItemCollision]: { id: number, type: OnItemCollision };
+    [GameMessage.ItemCollision]: { id: number, effect: OnItemCollision };
 
     // ─── Spawner ────────────────────────
     [GameMessage.AddSpawner]: { config: SpawnerDescription, id: number };
@@ -79,6 +84,9 @@ interface GameMessageMap {
 
     // ─── Other ────────────────────────────────
     [GameMessage.ChatMessage]: { sender: number, text: string };
+    [GameMessage.GameState]: { state: GameLoopState };
+    [GameMessage.PlaySound]: { sound: SoundName };
+
 }
 
 export { GameMessage };

@@ -3,6 +3,7 @@ import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
 import { ControlsMenu } from "./controlsMenu";
 import { Controls } from "@common";
+import { SocketAddress } from "net";
 
 class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
@@ -23,6 +24,10 @@ class MainMenuCSS implements IMainMenu {
     private hosting: boolean = false;
 
     constructor() {
+        const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+        this.resize(canvas);
+        window.addEventListener("resize", () => this.resize(canvas));
+
         this.mainDiv = document.getElementById("gameServerList")!;
         this.mainDiv = document.getElementById("gameServerList")!;
         const select = document.getElementById("playerColorSelect") as HTMLSelectElement;
@@ -96,6 +101,12 @@ class MainMenuCSS implements IMainMenu {
             this.startbutton.disabled = false;
             this.refresh(this.lastLobbies);
         });
+    }
+
+    private resize(canvas: HTMLCanvasElement): void {
+        const padding = 100;
+        canvas.width = window.innerWidth - padding;
+        canvas.height = window.innerHeight - padding;
     }
 
     private onControls(): void {

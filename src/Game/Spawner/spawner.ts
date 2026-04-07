@@ -3,7 +3,7 @@ import { GameObject } from "@core";
 import { SpawnerDescription } from "@game/Map/spawnerDescription";
 import { IItem, ItemManager, Ownership } from "@item";
 import { Vector } from "@math";
-import { Images, zIndex } from "@render";
+import { Images, Render, zIndex } from "@render";
 import { Connection, GameMessage } from "@server";
 
 class Spawner {
@@ -77,7 +77,7 @@ class Spawner {
         this.spawnCountdown.update(deltaTime);
         if (this.spawnCountdown.isDone()) {
             this.spawnNewItem();
-        } 
+        }
     }
 
     private bobItemUpAndDown(deltaTime: number): void {
@@ -141,15 +141,14 @@ class Spawner {
         }
         this.contains = item;
 
-        const itemBody = item.body;
         const center = this.body.getCenter();
 
-        center.x -= itemBody.width / 2;
-        center.y -= itemBody.height / 2;
+        center.x -= item.body.width / 2;
+        center.y -= item.body.height / 2;
 
         if (lerp) {
-            this.xPositionLerp.startLerp(itemBody.pos.x, center.x);
-            this.yPositionLerp.startLerp(itemBody.pos.y, center.y);
+            this.xPositionLerp.startLerp(item.body.pos.x, center.x);
+            this.yPositionLerp.startLerp(item.body.pos.y, center.y);
 
             const normalized = Utility.Angle.normalize(item.getAngle());
 
@@ -157,7 +156,7 @@ class Spawner {
             this.rotationLerp.startLerp(normalized, target);
 
         } else {
-            itemBody.pos = center;
+            item.body.pos = center;
             item.setAngle(0);
         }
 
@@ -168,26 +167,36 @@ class Spawner {
         return this.id;
     }
 
-    public draw(): void {
+    private drawFrame(center: Vector): void {
+        const framePos = center;
+        const frameYOffset = 7;
+
+        framePos.x -= Spawner.frameDrawSize.x / 2;
+        framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
+
+        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Spawners);
+    }
+
+    private drawBalls(center: Vector): void {
+        if (!this.contains) {
+            return;
+        }
         const ballDrawSize = 8;
 
-        const maxOffsetX = 20;
-        const maxOffsetY = 5;
+        const maxOffsetX = (this.contains.body.width) / 2;
+        const maxOffsetY = 3;
         const maxScaleOffset = 0.25;
 
         const speed = 5;
         const phase = this.ballLocation * speed;
 
-        const center = this.body.getCenter();
-
         const sin = Math.sin(phase);
         const cos = Math.cos(phase);
 
-        const ballScale = 1 + cos * maxScaleOffset;
-
         const offsetX = sin * maxOffsetX;
         const offsetY = cos * maxOffsetY;
-
+        
+        const ballScale = 1 + cos * maxScaleOffset;
         const ball1Size = ballDrawSize * ballScale;
         const ball2Size = ballDrawSize * (2 - ballScale);
 
@@ -201,23 +210,24 @@ class Spawner {
 
         const frontBall = cos > 0 ? 1 : 2;
 
-        const framePos = center;
-        const frameYOffset = 6;
+        this.contains.draw();
 
-        framePos.x -= Spawner.frameDrawSize.x / 2;
-        framePos.y = this.body.pos.y + Grid.size / 2 + this.body.height / 2 - Spawner.frameDrawSize.y + frameYOffset;
-
-        Spawner.frameSprite.draw(framePos, Spawner.frameDrawSize, false, 0, zIndex.Tiles - 1);
-        if (this.contains) {
-            this.contains.draw();
-        }
         if (frontBall === 1) {
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items + 10);
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items - 10);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Spawners + 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Spawners - 10);
         } else {
-            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Items - 10);
-            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Items + 10);
+            Spawner.ballSprite.draw(ball1Pos, ball1Size, false, 0, zIndex.Spawners - 10);
+            Spawner.ballSprite.draw(ball2Pos, ball2Size, false, 0, zIndex.Spawners + 10);
         }
+    }
+
+    public draw(): void {
+        const center = this.body.getCenter();
+        this.drawFrame(center.clone());
+        if (!this.contains) {
+            return;
+        }
+        this.drawBalls(center);
     }
 }
 

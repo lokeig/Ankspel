@@ -1,3 +1,20 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    display: block;
+}
+
 #gameServerList {
     position: absolute;
     top: 0;

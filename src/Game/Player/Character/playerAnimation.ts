@@ -21,8 +21,10 @@ class PlayerAnimation {
         [PlayerAnim.LowerRagdoll]: new Animation()
     };
     private holding: boolean = false;
+    private quacking: boolean = false;
 
     private bodyBaseSprite: SpriteSheet;
+    private bodyBaseQuackSprite: SpriteSheet;
     private bodyColorSprite: SpriteSheet;
     private bodyMultiplySprite: SpriteSheet;
     private bodyOverlaySprite: SpriteSheet;
@@ -52,12 +54,10 @@ class PlayerAnimation {
     }
 
     constructor(color: string) {
-        color = this.getCleanedUpColor(color);
-        console.log(color)
-
         this.currAnim = PlayerAnim.Idle;
 
         this.bodyBaseSprite = new SpriteSheet(Images.playerBase);
+        this.bodyBaseQuackSprite = new SpriteSheet(Images.playerBaseQuack);
         this.handBaseSprite = new SpriteSheet(Images.playerHandsBase);
 
         this.bodyMultiplySprite = new SpriteSheet(Images.playerBaseMultiply);
@@ -75,34 +75,8 @@ class PlayerAnimation {
         this.handColorSprite = new SpriteSheet(Images.playerHandsMask);
         this.handColorSprite.setColor(color);
 
-
         this.bodyAnimator = new SpriteAnimator(this.bodyBaseSprite, PlayerAnimation.animations[this.currAnim]);
         this.armAnimator = new SpriteAnimator(this.handBaseSprite, PlayerAnimation.animations[this.currAnim]);
-    }
-
-    private getCleanedUpColor(original: string): string {
-        let R = Number("0x" + original.substring(1, 3));
-        let G = Number("0x" + original.substring(3, 5));
-        let B = Number("0x" + original.substring(5, 7));
-
-        // https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
-        const brightness = (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255;
-
-        const factor = brightness > 0.5 ? 20 : 50;
-        const offset = (1 - (brightness * 2)) * factor;
-        R += offset;
-        G += offset;
-        B += offset;
-
-        R = Math.max(Math.min(Math.floor(R), 255), 0);
-        G = Math.max(Math.min(Math.floor(G), 255), 0);
-        B = Math.max(Math.min(Math.floor(B), 255), 0);
-
-        let blueString = B.toString(16);
-        if (blueString.length === 1) {
-            blueString += "0";
-        }
-        return "#" + R.toString(16) + G.toString(16) + blueString;
     }
 
     public setAnimation(animation: PlayerAnim) {
@@ -132,7 +106,6 @@ class PlayerAnimation {
             offset.x *= item.body.getDirectionMultiplier();
             const pos = item.body.pos;
             pos.add(offset);
-
 
             item.draw();
             pos
@@ -172,17 +145,21 @@ class PlayerAnimation {
     }
 
     public drawBody(pos: Vector, drawSize: number, flip: boolean, angle: number = 0): void {
-        const drawLayer = (sprite: SpriteSheet) => { this.bodyAnimator.setSheet(sprite), this.bodyAnimator.draw(pos, drawSize, flip, angle, zIndex.Player) };
-
-        drawLayer(this.bodyBaseSprite);
+        const drawLayer = (sprite: SpriteSheet) => {
+            this.bodyAnimator.setSheet(sprite);
+            this.bodyAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
+        };
+        !this.quacking ? drawLayer(this.bodyBaseSprite) : drawLayer(this.bodyBaseQuackSprite);
         drawLayer(this.bodyColorSprite);
         drawLayer(this.bodyMultiplySprite);
         drawLayer(this.bodyOverlaySprite);
     };
 
     public drawArm(pos: Vector, drawSize: number, angle: number, flip: boolean): void {
-        const drawLayer = (sprite: SpriteSheet) => { this.armAnimator.setSheet(sprite), this.armAnimator.draw(pos, drawSize, flip, angle, zIndex.Player) };
-
+        const drawLayer = (sprite: SpriteSheet) => {
+            this.armAnimator.setSheet(sprite);
+            this.armAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
+        };
         drawLayer(this.handBaseSprite);
         drawLayer(this.handColorSprite);
         drawLayer(this.handMultiplySprite);
@@ -235,10 +212,11 @@ class PlayerAnimation {
         }
     }
 
-    public update(deltaTime: number, holding: boolean): void {
+    public update(deltaTime: number, holding: boolean, quacking: boolean): void {
         this.bodyAnimator.update(deltaTime);
         this.armAnimator.update(deltaTime);
         this.holding = holding;
+        this.quacking = quacking;
     }
 }
 

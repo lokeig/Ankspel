@@ -8,14 +8,17 @@ import { AudioManager, Sound } from "@game/Audio";
 class Helmet extends Item implements Equippable {
     private static frames = { default: new Frame(), broken: new Frame(), equipped: new Frame() };
     private static spriteSheet: SpriteSheet;
+    private static pixelOffset = new Vector(0, -1);
 
     private damaged: boolean = false;
 
-    private static standardWidth: number = 30;
+    private static standardWidth: number = 20;
     private static standardHeight: number = 26;
 
-    private static equippedWidth: number = 24;
-    private static equippedHeight: number = 24;
+    private static equippedWidth: number = 22;
+    private static equippedHeight: number = 22;
+
+    private static holdOffset = new Vector(10, -4); 
 
     private equipmentSlot: EquipmentSlot = EquipmentSlot.Hand;
 
@@ -29,6 +32,7 @@ class Helmet extends Item implements Equippable {
 
     constructor(pos: Vector, id: number) {
         super(pos, Helmet.standardWidth, Helmet.standardHeight, id);
+        this.info.holdOffset = Helmet.holdOffset;
 
         this.playerInteractions.setUse(ItemInteraction.Activate, () => {
             this.ownership = Ownership.Equipped;
@@ -36,7 +40,7 @@ class Helmet extends Item implements Equippable {
             return [result];
         });
 
-        this.setProjectileCollision(this.body, 10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted())
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted())
 
         this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => [{ type: OnItemUseType.Unequip, value: this.equipmentSlot }]);
         this.projectileCollision.disable();
@@ -51,6 +55,7 @@ class Helmet extends Item implements Equippable {
     }
 
     public takeDamage(): void {
+        AudioManager.get().play(Sound.metalHit)
         this.damaged = true;
     }
 
@@ -70,7 +75,7 @@ class Helmet extends Item implements Equippable {
         this.projectileCollision.disable();
     }
 
-    public onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean) {
+    public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean) {
         if (!local || this.shouldBeDeleted()) {
             return;
         }
@@ -82,10 +87,8 @@ class Helmet extends Item implements Equippable {
 
     public draw(): void {
         const drawSize = 32;
-
         const frame = this.damaged ? Helmet.frames.broken : this.ownership === Ownership.Equipped ? Helmet.frames.equipped : Helmet.frames.default;
-
-        Helmet.spriteSheet.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
+        Helmet.spriteSheet.draw(this.getDrawPos(drawSize, Helmet.pixelOffset), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
     }
 }
 

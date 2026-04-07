@@ -1,4 +1,4 @@
-import { Controls, EquipmentSlot, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
+import { Controls, Countdown, EquipmentSlot, Input, InputMode, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType } from "@common";
 import { Vector } from "@math";
 import { DynamicObject } from "@core";
 import { PlayerArm } from "./playerArm";
@@ -12,7 +12,7 @@ import { Connection, GameMessage } from "@server";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
 import { AudioManager, Sound } from "@game/Audio";
 import { Equippable, isEquippable } from "@item";
-import { OnItemCollision } from "@game/Common/Types/onItemCollision";
+import { OnItemCollision, OnItemCollisionType } from "@game/Common/Types/onItemCollision";
 import { PlayerItemCollisionManager } from "./playerItemCollisionManager";
 
 class PlayerCharacter {
@@ -35,8 +35,10 @@ class PlayerCharacter {
     public equipment!: PlayerEquipment;
     public itemManager!: PlayerItemManager;
 
-    private id: number;
+    public id: number;
     private collidableBodies: Map<DynamicObject, ProjectileTarget> = new Map();
+    private quacking: boolean = false;
+    private swearing = new Countdown(0.2);
 
     constructor(pos: Vector, id: number, color: string) {
         this.standardBody = new DynamicObject(pos, PlayerCharacter.standardWidth, PlayerCharacter.standardHeight);
@@ -45,6 +47,7 @@ class PlayerCharacter {
         this.equipment = new PlayerEquipment(() => this.activeBody);
         this.id = id;
 
+        this.swearing.setToReady();
         this.itemCollisionManager = new PlayerItemCollisionManager(() => this.activeBody, this.handleItemCollisionEffect.bind(this));
 
         this.addCollidableBody(this.standardBody);
@@ -81,7 +84,7 @@ class PlayerCharacter {
 
     public handleNewState(state: PlayerState): void {
         this.equipment.getAllEquippedItems().forEach((item) => {
-            if (item && item.playerInteractions.getOnPlayerState(state)) {
+            if (this.isLocal() && item && item.playerInteractions.getOnPlayerState(state)) {
                 this.itemManager.handleEffects(item, item.playerInteractions.getOnPlayerState(state)!());
             }
         });
@@ -95,7 +98,13 @@ class PlayerCharacter {
         this.armFront.setPosition(this.getDrawPos(), PlayerCharacter.drawSize, offset, this.standardBody.isFlip());
         if (this.equipment.hasItem(EquipmentSlot.Hand)) {
             const offset = this.equipment.getItem(EquipmentSlot.Hand).info.holdOffset;
-            this.equipment.setBody(this.armFront.getCenter(), offset, this.standardBody.direction, this.armFront.angle, EquipmentSlot.Hand);
+            this.equipment.setBody(
+                this.armFront.getCenter(),
+                offset,
+                this.standardBody.direction,
+                this.armFront.angle,
+                EquipmentSlot.Hand
+            );
         }
     }
 
@@ -119,6 +128,10 @@ class PlayerCharacter {
         this.activeBody.setNewCollidableObjects();
     }
 
+    public updateAnimator(deltaTime: number): void {
+        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand), this.quacking);
+    }
+
     private updateControllers(deltaTime: number): void {
         if (this.standardBody.collidingUp) {
             this.jump.isJumping = false;
@@ -130,20 +143,27 @@ class PlayerCharacter {
         this.itemManager.handleInteractions();
     }
 
-    public nonLocalUpdate(deltaTime: number): void {
+    public standardBodyNonLocalUpdate(deltaTime: number): void {
         this.standardBody.update(deltaTime);
         this.setArmPos();
-        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.updateAnimator(deltaTime);
     }
 
-    public update(deltaTime: number): void {
+    public standardBodyUpdate(deltaTime: number): void {
         const prevGrounded = this.standardBody.grounded;
         const prevVelocityY = Math.abs(this.standardBody.velocity.y);
 
-        this.updateControllers(deltaTime);
         this.standardBody.update(deltaTime);
+        if (Math.abs(this.standardBody.velocity.x) > 50) {
+            this.standardBody.frictionMultiplier = 1;
+        } else {
+            this.standardBody.frictionMultiplier = 2;
+        }
         this.setArmPos();
-        this.animator.update(deltaTime, this.equipment.hasItem(EquipmentSlot.Hand));
+        this.handleQuack(deltaTime);
+
+        this.updateControllers(deltaTime);
+        this.updateAnimator(deltaTime);
 
         const audioThreshold = 200;
         if (this.standardBody.grounded && !prevGrounded && prevVelocityY > audioThreshold) {
@@ -151,13 +171,37 @@ class PlayerCharacter {
         }
         this.setItemOnAnimation();
     }
-    
+
     private setItemOnAnimation(): void {
         this.equipment.getAllEquippedItems().forEach(item => {
             if (isEquippable(item)) {
                 item.onPlayerAnimation(this.animator.getCurrentAnimation(), this.equipment.hasItem(EquipmentSlot.Hand));
             }
         });
+    }
+
+    public handleQuack(deltaTime: number): void {
+        if (this.isDead()) {
+            this.quacking = false;
+            return;
+        }
+        this.swearing.update(deltaTime);
+        if (!this.isLocal()) {
+            return;
+        }
+        this.quacking = (this.controls.quack(InputMode.Hold) || !this.swearing.isDone());
+        if (this.controls.quack(InputMode.Press)) {
+            AudioManager.get().play(Sound.quack);
+            Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.quack });
+        }
+    }
+
+    public setQuacking(quack: boolean): void {
+        this.quacking = quack;
+    }
+
+    public isQuacking(): boolean {
+        return this.quacking;
     }
 
     public rotateArm(deltaTime: number, forceup: Boolean = false): void {
@@ -212,19 +256,21 @@ class PlayerCharacter {
     }
 
     private handleItemCollisionEffect(effect: OnItemCollision) {
-        switch (effect) {
-            case (OnItemCollision.Death): {
+        switch (effect.type) {
+            case (OnItemCollisionType.Death): {
                 this.die(true);
                 break;
             }
-            case (OnItemCollision.DropItem): {
+            case (OnItemCollisionType.Knockback): {
+                this.swear();
                 this.equipment.throw(EquipmentSlot.Hand, ThrowType.Light);
+                this.activeBody.velocity.subtract(effect.amount);
                 break;
             }
-            case (OnItemCollision.Sharp): {
+            case (OnItemCollisionType.Sharp): {
 
             }
-            case (OnItemCollision.Headbonk): {
+            case (OnItemCollisionType.Headbonk): {
                 let helmet = null;
                 if (this.equipment.hasItem(EquipmentSlot.Head)) {
                     helmet = this.equipment.getItem(EquipmentSlot.Head) as Equippable;
@@ -236,6 +282,12 @@ class PlayerCharacter {
                 }
             }
         }
+    }
+
+    private swear(): void {
+        AudioManager.get().play(Sound.quackSwear);
+        Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.quackSwear });
+        this.swearing.reset();
     }
 
     public idleCollision(): boolean {

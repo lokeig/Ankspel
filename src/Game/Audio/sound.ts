@@ -1,4 +1,12 @@
 const Sound = {
+    quack: "quack",
+    quackSwear: "quackSwear",
+
+    crateDestroy: "crateDestroy",
+    crateHit: "crateHit",
+    woodHit: "woodHit",
+    metalHit: "metalHit",
+
     glock: "glock",
     shotgunFire: "shotgunFire",
     shotgunLoad: "shotgunLoad",
@@ -16,6 +24,14 @@ const Sound = {
 } as const;
 
 const SoundInfo: Record<SoundName, { src: string }> = {
+    quack: { src: "/assets/Sounds/quack.mp3" },
+    quackSwear: { src: "/assets/Sounds/quackSwear.mp3" },
+
+    crateDestroy: { src: "/assets/Sounds/crateDestroy.mp3" },
+    crateHit: { src: "/assets/Sounds/crateHit.mp3" },
+    woodHit: { src: "/assets/Sounds/woodHit.mp3" },
+    metalHit: { src: "/assets/Sounds/metalHit.mp3" },
+
     glock: { src: "/assets/Sounds/glock.mp3" },
     shotgunFire: { src: "/assets/Sounds/shotgunFire.mp3" },
     shotgunLoad: { src: "/assets/Sounds/shotgunLoad.mp3" },
@@ -27,8 +43,8 @@ const SoundInfo: Record<SoundName, { src: string }> = {
     beep: { src: "/assets/Sounds/beep.mp3" },
     ting: { src: "/assets/Sounds/ting.mp3" },
     click: { src: "/assets/Sounds/click.mp3" },
-    score: { src: "/assets/Sounds/score.mp3"},
-    death: { src: "/assets/Sounds/death.mp3"},
+    score: { src: "/assets/Sounds/score.mp3" },
+    death: { src: "/assets/Sounds/death.mp3" },
 };
 
 type SoundName = typeof Sound[keyof typeof Sound];

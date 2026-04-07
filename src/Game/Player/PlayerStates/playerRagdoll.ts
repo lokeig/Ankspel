@@ -1,10 +1,9 @@
 import { Vector } from "@math";
-import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, OnItemCollision } from "@common";
+import { Countdown, Utility, PlayerState, InputMode, ThrowType, IState, EquipmentSlot, PlayerAnim, OnItemCollisionType, OnItemCollision, Side } from "@common";
 import { DynamicObject } from "@core";
 import { IItem, ItemIgnore, ItemPlayerCollision, ItemProjectileCollision, Ownership } from "@item";
-import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 import { PlayerCharacter } from "../Character/playerCharacter";
-import { chownSync } from "fs";
+import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 
 class PlayerRagdoll implements IState<PlayerState>, IItem {
 
@@ -28,7 +27,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private coyoteTime = new Countdown(0.15);
     private currentState = false;
-    
+
     public ownership: Ownership = Ownership.None;
 
     constructor(player: PlayerCharacter, _id: number) {
@@ -42,6 +41,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.legs = new DynamicObject(new Vector(), this.width, this.height);
 
         this.body = this.legs;
+        this.info.id = this.player.id;
+        this.playerCollision = new ItemPlayerCollision(this.info.id, this.onCollision.bind(this), this.handleCollision.bind(this));
 
         this.configurePhysics();
     }
@@ -80,12 +81,13 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.player.addCollidableBody(this.head);
         this.player.addCollidableBody(this.torso);
         this.player.addCollidableBody(this.legs);
-
     }
 
     public stateUpdate(deltaTime: number): void {
         this.player.standardBody.pos.set(this.torso.pos.x, this.torso.pos.y);
+        this.player.handleQuack(deltaTime);
 
+        this.player.updateAnimator(deltaTime);
         if (this.isHeld()) {
             this.updateOwned(deltaTime);
             return;
@@ -137,20 +139,21 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
 
     private initializePositions(from: PlayerState): void {
         const basePos = this.player.standardBody.pos;
+        basePos.y += this.player.standardBody.height;
 
         if (from === PlayerState.Slide) {
             const mult = this.player.standardBody.getDirectionMultiplier();
-            const centerX = this.player.standardBody.getCenter().x;
+            const centerX = this.player.standardBody.getCenter().x - this.width / 2;
 
-            const offset = (i: number) => new Vector(centerX + (i * this.width / 3), basePos.y + this.height);
+            const offset = (i: number) => new Vector(centerX + (this.width / 3 * i), basePos.y - this.height - 5);
 
             this.head.pos = offset(-1 * mult);
             this.torso.pos = offset(0);
             this.legs.pos = offset(1 * mult);
         } else {
-            this.head.pos = basePos.clone();
-            this.torso.pos = basePos.clone().add(new Vector(0, this.height));
-            this.legs.pos = basePos.clone().add(new Vector(0, this.height * 2));
+            this.head.pos = basePos.clone().subtract(new Vector(0, this.height * 3));
+            this.torso.pos = basePos.clone().subtract(new Vector(0, this.height * 2));
+            this.legs.pos = basePos.clone().subtract(new Vector(0, this.height * 1));
         }
     }
 
@@ -169,9 +172,8 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
             return;
         }
         const jumpLeft = this.player.jump.getJumpRemaining();
-        const jumpCharge = this.player.jump.getJumpForce() / 5;
+        const jumpCharge = this.player.jump.getJumpForce() / 10;
         const impulse = jumpLeft * jumpCharge;
-
 
         this.head.velocity.y -= impulse;
         this.torso.velocity.y -= impulse;
@@ -363,7 +365,7 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     // For IItem
 
     public playerInteractions = new ItemPlayerInteraction();
-    public playerCollision: ItemPlayerCollision = new ItemPlayerCollision(-1, this.onCollision.bind(this), this.handleCollision.bind(this));
+    public playerCollision: ItemPlayerCollision;
     public ignoring = new ItemIgnore();
 
     private static holdOffset = new Vector(0, -3);
@@ -424,19 +426,19 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
     }
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
-        // if (Math.abs(this.torso.velocity.x) > 25) {
-        //     return [OnItemCollision.DropItem];
-        // }
+        if (Math.abs(this.torso.velocity.x) > 300) {
+            return [{ type: OnItemCollisionType.Knockback, amount: new Vector(-this.body.velocity.x, 0) }];
+        }
         return [];
     }
 
-    public handleCollision(type: OnItemCollision): void {
-        // switch (type) {
-        //     case OnItemCollision.DropItem: {
-        //         this.torso.velocity.x *= -this.torso.bounceFactor;
-        //         break;
-        //     }
-        // }
+    public handleCollision(effect: OnItemCollision): void {
+        switch (effect.type) {
+            case OnItemCollisionType.Knockback: {
+                this.torso.velocity.x *= -this.torso.bounceFactor;
+                break;
+            }
+        }
     }
 
     public shouldBeDeleted(): boolean {

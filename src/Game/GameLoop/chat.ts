@@ -1,7 +1,7 @@
 import { IDManager, Input } from "@common";
 import { Vector } from "@math";
 import { PlayerManager } from "@player";
-import { DrawTextInfo, Render, RenderSpace, zIndex } from "@render";
+import { DrawTextInfo, Rect, Render, RenderSpace, zIndex } from "@render";
 import { Connection, GameMessage } from "@server";
 
 type ChatMessage = {
@@ -16,7 +16,8 @@ class Chat {
     private currentInput = "";
 
     private maxLength: number = 64;
-    private size: number = 36;
+    private size: number = 30;
+    private lineHeight: number = this.size * 0.9;
 
     private static maxTimeAlive = 7;
 
@@ -89,20 +90,53 @@ class Chat {
         nameInfo.pos = pos.clone();
 
         const nameLength = render.measureText(nameInfo.text, nameInfo.font, nameInfo.size).width;
-        messageInfo.pos.x += nameLength;
+        const height = render.measureText(nameInfo.text, nameInfo.font, nameInfo.size).height;
 
+        messageInfo.pos.x += nameLength;
+        const messageLength = render.measureText(messageInfo.text, messageInfo.font, messageInfo.size).width;
         render.drawText(nameInfo, RenderSpace.Screen);
         render.drawText(messageInfo, RenderSpace.Screen);
 
-        pos.y -= this.size;
+        const createRect = (padding: number): Rect => {
+            return {
+                x: nameInfo.pos.x - padding,
+                y: nameInfo.pos.y - (height * 1.2) - padding,
+                width: nameLength + messageLength + padding * 2,
+                height: height + padding * 2
+            }
+        }
+        const padding = 5;
+        const borderSize = 2;
+        const angle = 0;
+
+        render.drawSquare(
+            createRect(padding + borderSize),
+            zIndex.UI - 1,
+            angle,
+            "#000000",
+            opacity * 0.5,
+            RenderSpace.Screen
+        );
+        render.drawSquare(
+            createRect(padding),
+            zIndex.UI - 1,
+            angle,
+            nameInfo.color,
+            opacity * 0.4,
+            RenderSpace.Screen
+        );
+
+        pos.y -= this.lineHeight;
     }
 
     public draw(): void {
         const render = Render.get();
         const pos = new Vector(20, render.getHeight());
-        pos.y -= this.size;
+        pos.y -= this.lineHeight;
         if (this.isChatOpen()) {
             this.drawText(IDManager.getBaseOffset(), pos, this.currentInput, 1);
+        } else {
+            pos.y -= this.lineHeight;
         }
 
         for (let i = this.messages.length - 1; i >= 0; i--) {

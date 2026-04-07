@@ -18,11 +18,12 @@ class PlayerNetworkHandler {
             player.character.setPos(Utility.Vector.convertNetwork(pos));
         });
 
-        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, pos, velocity, state, anim, side }) => {
+        gameEvent.subscribe(GameMessage.PlayerInfo, ({ id, quacking, pos, velocity, state, anim, side }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             if (state !== player.getCurrentState()) {
                 player.setState(state);
             }
+            player.character.setQuacking(quacking);
             player.character.setPos(Utility.Vector.convertNetwork(pos));
             player.character.activeBody.velocity = Utility.Vector.convertNetwork(velocity);
             if (player.character.standardBody.direction !== side) {
@@ -50,17 +51,19 @@ class PlayerNetworkHandler {
         });
 
         gameEvent.subscribe(GameMessage.PlayerLeave, ({ id }) => {
-            const player = PlayerManager.removePlayer(id);
-            if (!player) {
-                return;
-            }
+            const player = PlayerManager.removePlayer(id)!;
             player.character.delete();
-            game.chat.write({sender: id, text: (" left the lobby").toUpperCase(), timeAlive: 0 });
+            game.chat.write({ sender: id, text: (" left the lobby").toUpperCase(), timeAlive: 0 });
         })
 
         gameEvent.subscribe(GameMessage.PlayerDead, ({ id }) => {
             const player = PlayerManager.getPlayerFromID(id)!;
             player.character.die(false);
+        });
+
+        gameEvent.subscribe(GameMessage.PlayerScore, ({ id, score }) => {
+            const player = PlayerManager.getPlayerFromID(id)!;
+            player.setScore(score);
         });
     }
 
@@ -70,6 +73,7 @@ class PlayerNetworkHandler {
 
             Connection.get().sendGameMessageUnreliable(GameMessage.PlayerInfo, {
                 id,
+                quacking: player.character.isQuacking(),
                 pos: Utility.Vector.convertToNetwork(player.character.activeBody.pos),
                 velocity: Utility.Vector.convertToNetwork(player.character.activeBody.velocity),
                 state: player.getCurrentState(),

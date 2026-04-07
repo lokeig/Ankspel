@@ -65,8 +65,7 @@ class PlayerEquipment {
         }
 
         const item = this.getItem(slot);
-
-        item.ignoring.set(this.body(), 0.1);
+        item.ignoring.set(this.body(), 0.3);
 
         item.throw(throwType);
         if (item.ownership === Ownership.Equipped) {
@@ -75,7 +74,7 @@ class PlayerEquipment {
         item.ownership = Ownership.None;
 
         Connection.get().sendGameMessage(GameMessage.ThrowItem, {
-            id: ItemManager.getItemID(item)!,
+            id: item.info.id,
             pos: { x: item.body.pos.x, y: item.body.pos.y },
             direction: item.body.direction,
             throwType

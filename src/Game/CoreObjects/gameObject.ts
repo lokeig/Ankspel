@@ -45,12 +45,11 @@ class GameObject {
     }
 
     public collision(block: GameObject): boolean {
-        return (
-            this.pos.x < block.pos.x + block.width &&
-            this.pos.x + this.width > block.pos.x &&
-            this.pos.y < block.pos.y + block.height &&
-            this.pos.y + this.height > block.pos.y
-        );
+        const collisionX = this.pos.x + this.width > block.pos.x &&
+            block.pos.x + block.width > this.pos.x;
+        const collisionY = this.pos.y + this.height > block.pos.y &&
+            block.pos.y + block.height > this.pos.y;
+        return collisionX && collisionY;
     }
 
     public scale(scaleX: number, scaleY: number) {

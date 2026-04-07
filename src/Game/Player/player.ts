@@ -23,14 +23,37 @@ class Player {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
         this.id = id;
 
-        this.color = color;
         this.name = name;
+        this.color = this.getCleanedUpColor(color);
 
-        this.character = new PlayerCharacter(new Vector(), id, color);
+        this.character = new PlayerCharacter(new Vector(), id, this.color);
         if (controls) {
             this.character.setControls(controls);
         }
         this.setupStateMachine();
+    }
+
+    private getCleanedUpColor(original: string): string {
+        let R = Number("0x" + original.substring(1, 3));
+        let G = Number("0x" + original.substring(3, 5));
+        let B = Number("0x" + original.substring(5, 7));
+
+        // https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
+        const brightness = (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255;
+        const factor = brightness > 0.5 ? 20 : 50;
+        const offset = (1 - (brightness * 2)) * factor;
+
+        const handleColor = (color: number): string => {
+            color += offset;
+            color = Math.max(Math.min(Math.floor(color), 255), 0);
+            let str = color.toString(16);
+            if (str.length === 1) {
+                str = "0" + str;
+            }
+            return str;
+        }
+
+        return "#" + handleColor(R) + handleColor(G) + handleColor(B);
     }
 
     public getColor(): string {
@@ -45,6 +68,11 @@ class Player {
         this.score++;
         this.gettingScore = true;
         AudioManager.get().play(Sound.score);
+    }
+
+    public setScore(score: number): void {
+        this.givePoint();
+        this.score = score;
     }
 
     public getScore(): number {

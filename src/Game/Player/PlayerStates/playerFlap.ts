@@ -33,7 +33,7 @@ class PlayerFlap implements IState<PlayerState> {
         const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
         this.player.rotateArm(deltaTime, forceRotationUp);
 
-        this.player.update(deltaTime);
+        this.player.standardBodyUpdate(deltaTime);
         this.setCurrentAnimation();
         this.setEquipmentPosition();
     }
@@ -71,7 +71,7 @@ class PlayerFlap implements IState<PlayerState> {
         this.player.standardBody.velocity.y = Math.min(this.player.standardBody.velocity.y, this.flapSpeed);
         const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
         this.player.rotateArm(deltaTime, forceRotationUp)
-        this.player.nonLocalUpdate(deltaTime);
+        this.player.standardBodyNonLocalUpdate(deltaTime);
         this.setEquipmentPosition();
     }
 

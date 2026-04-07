@@ -1,4 +1,4 @@
-import { SpriteSheet } from "@common";
+import { ProjectileEffect, SpriteSheet } from "@common";
 import { Images } from "@render";
 import { Vector } from "@math";
 import { BaseProp } from "./baseProp";
@@ -16,6 +16,12 @@ class Rock extends BaseProp {
 
         this.info.holdOffset = Rock.holdOffset;
         this.info.weightFactor = 0.5;
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
+    }
+
+
+    public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
+
     }
 
     public getHoldOffset(): Vector {

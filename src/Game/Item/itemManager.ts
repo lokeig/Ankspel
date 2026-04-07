@@ -13,6 +13,7 @@ class ItemManager {
     private static permanent: IItem[] = [];
 
     public static clear(): void {
+        this.items.forEach(itemset => itemset.forEach(item => item.setToDelete()));
         this.items = new Map();
         this.permanent.forEach(item => this.addToMap(item));
         this.idManager.reset();
@@ -22,6 +23,7 @@ class ItemManager {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.shouldBeDeleted()) {
                 itemSet.delete(item);
+                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
                 this.idManager.removeObject(item)!;
             } else {
                 item.update(deltaTime);
@@ -110,10 +112,6 @@ class ItemManager {
         if (isItem(obj)) {
             return obj;
         }
-    }
-
-    public static getItemID(item: IItem): number | undefined {
-        return this.idManager.getID(item);
     }
 
     public static draw() {

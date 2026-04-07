@@ -61,6 +61,14 @@ class PlayerControls {
     public pickup(inputMode: InputMode = InputMode.Hold): boolean {
         return this.getKey(this.controls.pickup, inputMode);
     }
+
+    public strafe(inputMode: InputMode = InputMode.Hold): boolean {
+        return this.getKey(this.controls.strafe, inputMode);
+    }
+
+    public quack(inputMode: InputMode = InputMode.Hold): boolean {
+        return this.getKey(this.controls.quack, inputMode);
+    }
 }
 
 export { PlayerControls };
