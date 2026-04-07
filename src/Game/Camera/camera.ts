@@ -9,28 +9,34 @@ class Camera {
     private targetZoom: number = 1;
     private targetPos: Vector = new Vector();
 
-    private timeDead: Map<Player, { time: number }> = new Map();
-    private static timeDeadPlayerCounts: number = 2;
+    private deadPlayers: Map<Player, { time: number, pos: Vector }> = new Map();
+    private static deathDelay: number = 1;
 
     public update(deltaTime: number, bounds: MaxMinPositions) {
-        this.timeDead.forEach(wrapper => wrapper.time += deltaTime);
+        this.deadPlayers.forEach(wrapper => wrapper.time += deltaTime);
 
-        const players = PlayerManager.getPlayers().filter(player => {
-            if (player.character.isDead() && !this.timeDead.has(player)) {
-                this.timeDead.set(player, { time: 0 });
+        const playerPositions: Vector[] = [];
+
+        PlayerManager.getPlayers().forEach(player => {
+            const pos = player.character.activeBody.getCenter();
+
+            if (player.character.isDead() && !this.deadPlayers.has(player)) {
+                this.deadPlayers.set(player, { time: 0, pos: pos.clone() });
             }
-            const death = this.timeDead.get(player);
+            const death = this.deadPlayers.get(player);
             if (!death) {
-                return true;
+                playerPositions.push(pos);
+            } else if (death.time < Camera.deathDelay) {
+                playerPositions.push(death.pos);
             }
-            return death.time < Camera.timeDeadPlayerCounts;
         });
 
-        if (players.length == 0) {
+        if (playerPositions.length == 0) {
             this.setFrame(this.targetPos, this.targetZoom, deltaTime);
             return;
         }
-        const positions = this.getPositions(players, bounds);
+
+        const positions = this.getPositions(playerPositions, bounds);
         this.targetPos = this.calculateTargetPos(positions);
         this.targetZoom = this.calculateTargetZoom(positions, 200);
 
@@ -38,8 +44,8 @@ class Camera {
     }
 
     public initialize(bounds: MaxMinPositions): void {
-        this.timeDead = new Map();
-        const players = PlayerManager.getPlayers();
+        this.deadPlayers = new Map();
+        const players = PlayerManager.getPlayers().map(player => player.character.activeBody.getCenter());
 
         const positions = this.getPositions(players, bounds);
         const targetPos = this.calculateTargetPos(positions);
@@ -60,13 +66,12 @@ class Camera {
         Render.get().setCamera(this.currentPos, this.currentZoom);
     }
 
-    private getPositions(players: Player[], bounds: MaxMinPositions): MaxMinPositions {
+    private getPositions(players: Vector[], bounds: MaxMinPositions): MaxMinPositions {
         let minX = Infinity;
         let maxX = -Infinity;
         let minY = Infinity;
         let maxY = -Infinity;
-        for (const player of players) {
-            const pos = player.character.standardBody.getCenter();
+        for (const pos of players) {
             if (pos.x < minX) {
                 minX = pos.x;
             }

@@ -36,12 +36,7 @@ abstract class Item implements IItem {
         this.physics = new ItemPhysics(this.body, this.angle);
         this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
         this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
-<<<<<<< HEAD
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, 0, () => { }, () => false);
-=======
-
-        this.setProjectileCollision(0, (_e, _p, _b) => { }, () => false);
->>>>>>> 266aa2192caf8c6003b0a2462ddf11da68b3e656
     }
 
     public setProjectileCollision(resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {

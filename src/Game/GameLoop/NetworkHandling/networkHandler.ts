@@ -78,7 +78,6 @@ class NetworkHandler {
         PlayerManager.create();
         PlayerManager.create();
         PlayerManager.create();
-        PlayerManager.create();
 
         Connection.get().enableLocalMode();
 

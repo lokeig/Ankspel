@@ -20,7 +20,6 @@ class PlayerFlap implements IState<PlayerState> {
         this.player.armFront.setOffset(armOffset);
 
         this.player.handleNewState(PlayerState.Flap);
-
     }
 
     public stateUpdate(deltaTime: number): void {

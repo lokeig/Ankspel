@@ -1,17 +1,16 @@
-import { StateMachine, Input } from "@common";
-import { ImageName, Images, Render } from "@render";
-import { Connection, MainMenu } from "@game/Server";
+import { GameLoopState, StateMachine } from "@common";
+import { FontName, Fonts, ImageName, Images, Render } from "@render";
+import { Connection } from "@game/Server";
 import { NetworkHandler } from "./NetworkHandling/networkHandler";
 import { DuckGame } from "./game";
 import { FrameHandler } from "./frameTimer";
-import { Sound, SoundInfo, SoundName } from "@game/Audio";
-import { AudioManager } from "@game/Audio/audioManager";
+import { AudioManager, Sound, SoundInfo, SoundName } from "@game/Audio";
 
-import { GameLoopState } from "../Common/Types/gameLoopState";
 import { Playing } from "./LoopStates/playing";
 import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
-import { FontName, Fonts } from "src/Render/fonts";
+import { MainMenu } from "@menu";
+import { TrophiesScreen } from "./LoopStates/trophiesScreen";
 
 class GameLoop {
     private lastTime = 0;
@@ -28,6 +27,7 @@ class GameLoop {
         this.stateMachine.addState(GameLoopState.Playing, new Playing(this.game));
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(this.game));
         this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(this.game));
+        this.stateMachine.addState(GameLoopState.TrophiesScreen, new TrophiesScreen(this.game));
     }
 
     public async init() {

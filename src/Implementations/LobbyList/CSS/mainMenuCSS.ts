@@ -1,9 +1,9 @@
-import { Connection, IMainMenu } from "@game/Server";
+import { Connection } from "@game/Server";
 import { HostMenu } from "./hostMenuCSS";
 import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@shared";
 import { ControlsMenu } from "./controlsMenu";
 import { Controls } from "@common";
-import { SocketAddress } from "net";
+import { IMainMenu } from "@menu";
 
 class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
@@ -143,10 +143,10 @@ class MainMenuCSS implements IMainMenu {
             const item: HTMLDivElement = document.createElement("div");
             item.className = "lobbylist-item";
             item.innerHTML = `
-            <div class = "lobbylist-name lobbylist-column">${lobby.lobbyName}</div>
-            <div class = "lobbylist-host lobbylist-column">${lobby.host}</div>
-            <div class = "lobbylist-players lobbylist-column">${`${lobby.playerCount} / ${lobby.maxPlayers}`}</div>
-            <div class = "lobbylist-status lobbylist-column">${this.getStatus(lobby)}</div>
+                <div class = "lobbylist-name lobbylist-column">${lobby.lobbyName}</div>
+                <div class = "lobbylist-host lobbylist-column">${lobby.host}</div>
+                <div class = "lobbylist-players lobbylist-column">${`${lobby.playerCount} / ${lobby.maxPlayers}`}</div>
+                <div class = "lobbylist-status lobbylist-column">${this.getStatus(lobby)}</div>
             `
             item.dataset.lobbyID = lobby.lobbyID;
             if (lobby.lobbyID === this.selectedLobbyId) {
@@ -173,15 +173,12 @@ class MainMenuCSS implements IMainMenu {
             }
             return "Connected";
         }
-
         if (lobby.closed) {
             return "Closed";
         }
-
         if (lobby.playerCount === lobby.maxPlayers) {
             return "Full";
         }
-
         return "Open";
     }
 

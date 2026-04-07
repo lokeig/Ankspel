@@ -23,7 +23,7 @@ class ItemManager {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.shouldBeDeleted()) {
                 itemSet.delete(item);
-                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
+                // Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
                 this.idManager.removeObject(item)!;
             } else {
                 item.update(deltaTime);

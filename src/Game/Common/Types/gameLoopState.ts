@@ -1,5 +1,6 @@
 enum GameLoopState {
     ScoreScreen,
+    TrophiesScreen,
     Playing,
     LoadingMap,
     Editor

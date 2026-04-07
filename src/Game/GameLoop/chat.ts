@@ -19,7 +19,7 @@ class Chat {
     private size: number = 30;
     private lineHeight: number = this.size * 0.9;
 
-    private static maxTimeAlive = 7;
+    private static maxTimeAlive = 12;
 
     constructor() {
         Input.onAnyKey((key => {
@@ -27,13 +27,12 @@ class Chat {
                 this.toggle();
                 return;
             }
-
             if (!this.isChatOpen()) {
                 return;
             }
-
             if (key === "Backspace") {
                 this.currentInput = this.currentInput.substring(0, this.currentInput.length - 1);
+                return;
             }
             if (key.length === 1 && this.currentInput.length < this.maxLength) {
                 this.currentInput += key;
@@ -97,35 +96,35 @@ class Chat {
         render.drawText(nameInfo, RenderSpace.Screen);
         render.drawText(messageInfo, RenderSpace.Screen);
 
+        this.drawBox(nameInfo, pos, messageLength + nameLength, height)
+    }
+
+    private drawBox(info: DrawTextInfo, pos: Vector, width: number, height: number): void {
+        const render = Render.get();
+
         const createRect = (padding: number): Rect => {
             return {
-                x: nameInfo.pos.x - padding,
-                y: nameInfo.pos.y - (height * 1.2) - padding,
-                width: nameLength + messageLength + padding * 2,
+                x: info.pos.x - padding,
+                y: info.pos.y - (height * 1.2) - padding,
+                width: width + padding * 2,
                 height: height + padding * 2
             }
         }
         const padding = 5;
         const borderSize = 2;
         const angle = 0;
-
-        render.drawSquare(
-            createRect(padding + borderSize),
-            zIndex.UI - 1,
-            angle,
-            "#000000",
-            opacity * 0.5,
-            RenderSpace.Screen
-        );
-        render.drawSquare(
-            createRect(padding),
-            zIndex.UI - 1,
-            angle,
-            nameInfo.color,
-            opacity * 0.4,
-            RenderSpace.Screen
-        );
-
+        const drawBox = (rect: Rect, opac: number, color: string) => {
+            render.drawSquare(
+                rect,
+                zIndex.UI - 1,
+                angle,
+                color,
+                info.opacity * opac,
+                RenderSpace.Screen
+            );
+        }
+        drawBox(createRect(padding + borderSize), 0.5, "#000000");
+        drawBox(createRect(padding), 0.4, info.color);
         pos.y -= this.lineHeight;
     }
 
@@ -133,6 +132,7 @@ class Chat {
         const render = Render.get();
         const pos = new Vector(20, render.getHeight());
         pos.y -= this.lineHeight;
+
         if (this.isChatOpen()) {
             this.drawText(IDManager.getBaseOffset(), pos, this.currentInput, 1);
         } else {

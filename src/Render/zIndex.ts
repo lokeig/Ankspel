@@ -3,9 +3,9 @@ const BaseLayer = {
     Items: 50,
     Spawners: 75,
     Player: 100,
-    Tiles: 250,
     Projectiles: 500,
     Particles: 600,
+    Tiles: 750,
     UI: 1000,
 } as const;
 

@@ -9,7 +9,6 @@ class Chestplate extends Item implements Equippable {
     private static frames = { default: new Frame(), equipped: new Frame(), overArm: new Frame() };
     private static spirte: SpriteSheet;
     private drawOverShoulder: boolean = false;
-    private static pixelOffset = new Vector(1, 0);
 
     static {
         this.spirte = new SpriteSheet(Images.armor);
@@ -83,7 +82,7 @@ class Chestplate extends Item implements Equippable {
     public draw(): void {
         const drawSize = 32;
         const frame = this.ownership === Ownership.Equipped ? Chestplate.frames.equipped : Chestplate.frames.default;
-        Chestplate.spirte.draw(this.getDrawPos(drawSize, Chestplate.pixelOffset), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
+        Chestplate.spirte.draw(this.getDrawPos(drawSize), drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame);
     }
 
     public drawTopLayer(): void {

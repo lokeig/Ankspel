@@ -1,15 +1,15 @@
 import { ParticleManager } from "@game/Particles";
-import { ItemManager } from "@game/Item";
-import { PlayerManager } from "@game/Player";
-import { ProjectileManager } from "@game/Projectile";
+import { Player, PlayerManager } from "@player";
+import { ProjectileManager } from "@projectile";
 import { TileManager } from "@game/Tiles";
 import { Camera } from "@game/Camera";
 import { Parallax } from "@game/ParallaxBackground/parallax";
 import { MapManager } from "@game/Map";
 import { Connection } from "@server";
-import { IDManager, Input, MaxMinPositions } from "@common";
+import { Input, MaxMinPositions } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
+import { ItemManager } from "@item";
 import { Render } from "@render";
 import { Chat } from "./chat";
 
@@ -19,6 +19,8 @@ class DuckGame {
     private mapBounds!: MaxMinPositions;
     private roundsPlayed: number = 0;
     public chat = new Chat();
+
+    private inFinal: Player[] = [];
 
     public update(deltaTime: number): void {
         const fixedStep = 0.03;
@@ -30,7 +32,7 @@ class DuckGame {
         while (remainingDelta > 0 && iterations < maxIterations) {
             const currentDelta = Math.min(fixedStep, remainingDelta);
             remainingDelta -= currentDelta;
-            
+
             this.gameUpdate(currentDelta);
             Input.update();
 
@@ -43,6 +45,7 @@ class DuckGame {
     }
 
     public loadMap(id: number): void {
+        const players: Player[] = this.isFinalRound() ? this.inFinal : PlayerManager.getPlayers();
         const background = MapLoader.load(MapManager.getMap(id), Connection.get().isHost());
         const parallax = Parallax.getBackground(background);
         if (!parallax) {
@@ -56,6 +59,23 @@ class DuckGame {
 
     public getRoundsPlayed(): number {
         return this.roundsPlayed;
+    }
+
+    public restart(): void {
+        this.roundsPlayed = 0;
+        this.inFinal.length = 0;
+    }
+
+    public isFinalRound(): boolean {
+        return this.inFinal.length !== 0;
+    }
+
+    public setFinalRound(players: Player[]): void {
+        this.inFinal = players;
+        PlayerManager.getPlayers().forEach(player => {
+            const inFinal = players.includes(player);
+            player.setEnabled(inFinal);
+        })
     }
 
     private gameUpdate(deltaTime: number): void {

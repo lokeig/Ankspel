@@ -154,7 +154,6 @@ class Spawner {
 
             const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
             this.rotationLerp.startLerp(normalized, target);
-
         } else {
             item.body.pos = center;
             item.setAngle(0);
@@ -195,7 +194,7 @@ class Spawner {
 
         const offsetX = sin * maxOffsetX;
         const offsetY = cos * maxOffsetY;
-        
+
         const ballScale = 1 + cos * maxScaleOffset;
         const ball1Size = ballDrawSize * ballScale;
         const ball2Size = ballDrawSize * (2 - ballScale);
