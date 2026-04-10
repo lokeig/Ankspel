@@ -51,7 +51,11 @@ abstract class BaseProp extends Item {
         this.body.grounded = false;
         const direcMult = this.body.getDirectionMultiplier();
 
+        if (this.body.getCollidingTile()) {
+            return;
+        }
         const factor = this.info.weightFactor;
+
 
         switch (throwType) {
             case (ThrowType.Light): {

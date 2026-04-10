@@ -14,6 +14,7 @@ class LoadingMap implements IState<GameLoopState> {
     private get: SpriteSheet;
     private ready: SpriteSheet;
     private doorPosition = new Lerp(0.5, this.lerp.bind(this));
+    private startGame: boolean = false;
 
     private static doorSheetLeft = new SpriteSheet(Images.doorLeft);
     private static doorSheetRight = new SpriteSheet(Images.doorRight);
@@ -40,7 +41,7 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
 
-    public constructor(game: DuckGame) {
+    constructor(game: DuckGame) {
         this.game = game;
         this.startPlayingCountdown.setToReady();
 
@@ -48,6 +49,7 @@ class LoadingMap implements IState<GameLoopState> {
             this.game.loadMap(mapId);
         });
         MapNetworkHandler.setMapStart(() => {
+            this.startGame = true;
             this.startPlayingCountdown.reset();
             this.game.initialize();
         });
@@ -62,7 +64,7 @@ class LoadingMap implements IState<GameLoopState> {
         this.doorPosition.startLerp(0, 1);
         Connection.get().ignoreMessage(GameMessage.PlayerDead, GameMessage.PlayerInfo);
         PlayerManager.getLocal().forEach(player => player.character.controls.addLock("loadingMap"));
-        this.startPlayingCountdown.setToReady();
+        this.startPlayingCountdown.reset();
 
         if (!Connection.get().isHost()) {
             return;
@@ -81,7 +83,8 @@ class LoadingMap implements IState<GameLoopState> {
 
         if (this.doorPosition.isActive()) {
             this.doorPosition.update(deltaTime);
-        } else {
+        }
+        if (this.startGame) {
             this.startPlayingCountdown.update(deltaTime);
         }
     }
@@ -97,6 +100,7 @@ class LoadingMap implements IState<GameLoopState> {
         PlayerManager.getLocal().forEach(player => player.character.controls.removeLock("loadingMap"));
         Connection.get().ignoreMessage();
         PlayerManager.reload();
+        this.startGame = false;
     }
 
     public draw() {
@@ -122,8 +126,8 @@ class LoadingMap implements IState<GameLoopState> {
         offset -= drawWidth;
         xPos -= offset;
 
-        LoadingMap.doorSheetRight.draw(new Vector(xPos, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
-        LoadingMap.doorSheetLeft.draw(new Vector(offset, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
+        // LoadingMap.doorSheetRight.draw(new Vector(xPos, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
+        // LoadingMap.doorSheetLeft.draw(new Vector(offset, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
     }
 
     private drawGetReadyText(): void {

@@ -16,7 +16,6 @@ class NetworkHandler {
     private static messageTimer = new Countdown(1 / tickRate);
     private static readyToPlay: boolean = false;
 
-
     static init(game: DuckGame) {
         PlayerNetworkHandler.init(game);
         ItemMessageHandler.init();
