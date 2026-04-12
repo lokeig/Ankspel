@@ -40,7 +40,6 @@ class LoadingMap implements IState<GameLoopState> {
         return 1;
     }
 
-
     constructor(game: DuckGame) {
         this.game = game;
         this.startPlayingCountdown.setToReady();
@@ -61,17 +60,20 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
     public stateEntered(): void {
+        this.startPlayingCountdown.reset();
         this.doorPosition.startLerp(0, 1);
+        console.log("entered loading");
+        
         Connection.get().ignoreMessage(GameMessage.PlayerDead, GameMessage.PlayerInfo);
         PlayerManager.getLocal().forEach(player => player.character.controls.addLock("loadingMap"));
-        this.startPlayingCountdown.reset();
-
+        
         if (!Connection.get().isHost()) {
             return;
         }
         if (!this.game.isFinalRound()) {
             PlayerManager.getPlayers().forEach(player => player.setEnabled(true));
         }
+
         Connection.get().sendGameMessage(GameMessage.GameState, { state: GameLoopState.LoadingMap });
 
         const map = MapManager.getRandomMap();
@@ -106,7 +108,7 @@ class LoadingMap implements IState<GameLoopState> {
     public draw() {
         this.drawGetReadyText();
         this.game.draw();
-        this.drawDoors();
+        // this.drawDoors();
     }
 
     private drawDoors(): void {
@@ -126,8 +128,8 @@ class LoadingMap implements IState<GameLoopState> {
         offset -= drawWidth;
         xPos -= offset;
 
-        // LoadingMap.doorSheetRight.draw(new Vector(xPos, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
-        // LoadingMap.doorSheetLeft.draw(new Vector(offset, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
+        LoadingMap.doorSheetRight.draw(new Vector(xPos, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
+        LoadingMap.doorSheetLeft.draw(new Vector(offset, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
     }
 
     private drawGetReadyText(): void {
@@ -154,7 +156,7 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
     private drawPlayerNames(): void {
-        PlayerManager.getPlayers().forEach(player => {
+        PlayerManager.getEnabled().forEach(player => {
             const size = 16;
             const drawPos = player.character.activeBody.pos.clone();
 

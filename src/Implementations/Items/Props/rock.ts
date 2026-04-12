@@ -2,6 +2,7 @@ import { ProjectileEffect, SpriteSheet } from "@common";
 import { Images } from "@render";
 import { Vector } from "@math";
 import { BaseProp } from "./baseProp";
+import { AudioManager, Sound } from "@game/Audio";
 
 class Rock extends BaseProp {
     private static sprite = new SpriteSheet(Images.rock);
@@ -17,8 +18,9 @@ class Rock extends BaseProp {
         this.info.holdOffset = Rock.holdOffset;
         this.info.weightFactor = 0.5;
         this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
-    }
 
+        this.body.onBottomCollision = () => AudioManager.get().play(Sound.rock);
+    }
 
     public onProjectileEffect(_effect: ProjectileEffect, _pos: Vector, _local: boolean): void {
 

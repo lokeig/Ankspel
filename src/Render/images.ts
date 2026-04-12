@@ -20,13 +20,15 @@ const Images = {
     // Items
     rock: { src: '/assets/Images/Items/rock.png', frameWidth: 16, frameHeight: 13 },
     crate: { src: '/assets/Images/Items/crate.png', frameWidth: 16, frameHeight: 16 },
-
     shotgun: { src: '/assets/Images/Items/shotguns.png', frameWidth: 32, frameHeight: 32 },
     glock: { src: '/assets/Images/Items/glock.png', frameWidth: 20, frameHeight: 20 },
     grenade: { src: '/assets/Images/Items/grenade.png', frameWidth: 16, frameHeight: 16 },
     armor: { src: '/assets/Images/Items/armor.png', frameWidth: 16, frameHeight: 16 },
+    netGun: { src: '/assets/Images/Items/netGun.png', frameWidth: 32, frameHeight: 32 },
+    netGunGuage: { src: '/assets/Images/Items/netGunGuage.png', frameWidth: 8, frameHeight: 8 },
 
     // Projectiles
+    net: { src: '/assets/Images/Projectiles/net.png', frameWidth: 16, frameHeight: 16 },
     trail: { src: '/assets/Images/Projectiles/trail.png', frameWidth: 8, frameHeight: 1 },
 
     // Particles
@@ -36,6 +38,7 @@ const Images = {
     bulletGlow: { src: '/assets/Images/VFX/bulletGlow.png', frameWidth: 1, frameHeight: 5 },
     spawnerBall: { src: '/assets/Images/VFX/spawnerBall.png', frameWidth: 4, frameHeight: 4 },
     itemSpawner: { src: '/assets/Images/VFX/itemSpawner.png', frameWidth: 14, frameHeight: 6 },
+    dizzyStar: { src: '/assets/Images/VFX/dizzyStar.png', frameWidth: 9, frameHeight: 7 },
 
     // Background
     forest: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },
@@ -46,6 +49,7 @@ const Images = {
     ready: { src: '/assets/Images/UI/ready.png', frameWidth: 41, frameHeight: 9 },
     get: { src: '/assets/Images/UI/get.png', frameWidth: 25, frameHeight: 9 },
     plusOne: { src: '/assets/Images/UI/plusOne.png', frameWidth: 19, frameHeight: 15 },
+    plusWin: { src: '/assets/Images/UI/plusOneWin.png', frameWidth: 19, frameHeight: 15 },
     scoreboard: { src: '/assets/Images/UI/scoreboard.png', frameWidth: 176, frameHeight: 180 },
     doorLeft: { src: '/assets/Images/UI/doorLeft.png', frameWidth: 123, frameHeight: 175 },
     doorRight: { src: '/assets/Images/UI/doorRight.png', frameWidth: 123, frameHeight: 175 },

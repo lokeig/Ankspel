@@ -73,6 +73,16 @@ class PlayerNetworkHandler {
             const player = PlayerManager.getPlayerFromID(id)!;
             player.setScore(score);
         });
+
+        gameEvent.subscribe(GameMessage.PlayerWins, ({ id, wins }) => {
+            const player = PlayerManager.getPlayerFromID(id)!;
+            player.setWins(wins);
+        });
+
+        gameEvent.subscribe(GameMessage.PlayerItemCollision, ({ id, effect }) => {
+            const player = PlayerManager.getPlayerFromID(id)!;
+            player.character.handleItemCollisionEffect(effect, false);
+        })
     }
 
     public static sendLocalPlayersInfo(): void {

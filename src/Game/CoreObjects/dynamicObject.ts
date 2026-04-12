@@ -8,8 +8,6 @@ import { CollisionManager } from "@game/Collision/collisionManager";
 class DynamicObject extends GameObject {
     private collidableObjects: Array<CollisionObject> = [];
     public grounded: boolean = false;
-    public collidingSide: boolean = false;
-    public collidingUp: boolean = false;
 
     public friction: number = 10;
     public frictionMultiplier = 1;
@@ -24,6 +22,15 @@ class DynamicObject extends GameObject {
     public bounceFactor: number = 0;
     private smallestBounceValue = 1;
 
+    private prevSideCollision: boolean = false;
+    private prevHeadCollision: boolean = false;
+    private prevGrounded: boolean = false;
+
+    public onSideCollision: () => void = () => { };
+    public onSideLeave: () => void = () => { };
+    public onHeadCollision: () => void = () => { };
+    public onBottomCollision: () => void = () => { };
+
     constructor(pos: Vector, width: number, height: number) {
         super(pos, width, height);
     }
@@ -36,9 +43,6 @@ class DynamicObject extends GameObject {
         return this.direction === Side.Left;
     }
 
-    public collided(): boolean {
-        return this.grounded || this.collidingSide || this.collidingUp;
-    }
 
     public update(deltaTime: number) {
         this.velocityPhysicsUpdate(deltaTime);
@@ -63,15 +67,19 @@ class DynamicObject extends GameObject {
     }
 
     public updatePositions(deltaTime: number) {
-        this.pos.x = this.pos.x + this.velocity.x * deltaTime;
+        this.pos.x += this.velocity.x * deltaTime;
         const horizontalCollidingTile = this.getCollidingTile();
         if (horizontalCollidingTile) {
             this.handleSideCollision(horizontalCollidingTile);
+        } else {
+            if (this.prevSideCollision) {
+                this.onSideLeave();
+            }
+            this.prevSideCollision = false;
         }
-        this.pos.y = this.pos.y + this.velocity.y * deltaTime;
+        this.pos.y += this.velocity.y * deltaTime;
         const verticalCollidingTile = this.getVerticalTileCollision(deltaTime);
         if (verticalCollidingTile) {
-
             if (this.velocity.y === 0) {
                 if (this.pos.y + this.height / 2 > verticalCollidingTile.pos.y + verticalCollidingTile.height / 2) {
                     this.velocity.y = -1;
@@ -81,14 +89,18 @@ class DynamicObject extends GameObject {
             }
             if (this.velocity.y > 0) {
                 this.handleBotCollision(verticalCollidingTile);
+                this.prevHeadCollision = false;
             } else {
                 this.handleTopCollision(verticalCollidingTile);
+                this.prevGrounded = false;
             }
+        } else {
+            this.prevHeadCollision = false;
+            this.prevGrounded = false;
         }
     }
 
     public getCollidingTile(): GameObject | undefined {
-        this.collidingSide = false;
         for (const collidable of this.collidableObjects) {
             if (!this.collision(collidable.body) || collidable.platform) {
                 continue;
@@ -99,7 +111,6 @@ class DynamicObject extends GameObject {
 
     private getVerticalTileCollision(deltaTime: number): GameObject | undefined {
         this.grounded = false;
-        this.collidingUp = false;
         for (const collidable of this.collidableObjects) {
             if (!this.collision(collidable.body)) {
                 continue;
@@ -118,7 +129,6 @@ class DynamicObject extends GameObject {
     }
 
     private handleSideCollision(gameObject: GameObject): void {
-        this.collidingSide = true;
         if (this.velocity.x === 0) {
             if (this.pos.x + this.width / 2 > gameObject.pos.x + gameObject.width / 2) {
                 this.velocity.x = -1;
@@ -126,11 +136,14 @@ class DynamicObject extends GameObject {
                 this.velocity.x = 1;
             }
         }
-
         if (this.velocity.x > 0) {
             this.pos.x = gameObject.pos.x - this.width;
         } else {
             this.pos.x = gameObject.pos.x + gameObject.width;
+        }
+        if (!this.prevSideCollision) {
+            this.onSideCollision();
+            this.prevSideCollision = true;
         }
         if (Math.abs(this.velocity.x) > this.smallestBounceValue) {
             this.velocity.x *= -this.bounceFactor;
@@ -141,7 +154,10 @@ class DynamicObject extends GameObject {
 
     private handleTopCollision(gameObject: GameObject) {
         this.pos.y = gameObject.pos.y + gameObject.height;
-        this.collidingUp = true;
+        if (!this.prevHeadCollision) {
+            this.onHeadCollision();
+            this.prevHeadCollision = true;
+        }
         if (Math.abs(this.velocity.y) > this.smallestBounceValue) {
             this.velocity.y *= -this.bounceFactor;
         } else {
@@ -152,7 +168,10 @@ class DynamicObject extends GameObject {
     private handleBotCollision(gameObject: GameObject) {
         this.pos.y = gameObject.pos.y - this.height;
         this.grounded = true;
-
+        if (!this.prevGrounded) {
+            this.onBottomCollision();
+            this.prevGrounded = true;
+        }
         if (Math.abs(this.velocity.y) > this.smallestBounceValue) {
             this.velocity.y *= -this.bounceFactor;
         } else {
@@ -172,7 +191,6 @@ class DynamicObject extends GameObject {
         if (!this.grounded) {
             return false;
         }
-
         return this.collidableObjects.every(tile =>
             !this.collision(tile.body.scale(0, 5)) || tile.platform
         );

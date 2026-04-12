@@ -1,4 +1,4 @@
-import { GameObject } from "@core";
+import { DynamicObject, GameObject } from "@core";
 import { ProjectileTarget } from "./IProjectile";
 import { Vector } from "@math";
 import { TileManager } from "@game/Tiles";
@@ -8,7 +8,6 @@ type BulletHit =
     | { type: "target"; target: ProjectileTarget; pos: Vector; resistance: number };
 
 class ProjectileCollisionResolver {
-
     public static getCollisions(segment: { start: Vector, end: Vector }, targets: ProjectileTarget[]): BulletHit[] {
         const tileHits = this.getTileHits(segment);
         const targetHits = this.getTargetHits(segment, targets);

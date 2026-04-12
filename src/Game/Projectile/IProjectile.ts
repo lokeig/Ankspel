@@ -7,9 +7,7 @@ interface IProjectile {
     update(deltaTime: number, collidable: ProjectileTarget[]): void;
 
     getSegment(): {start: Vector, end: Vector};
-    setPos(pos: Vector): void;
-
-    getTrail(): ITrail;
+    getTrail(): ITrail | null;
 
     setLocal(): void;
 

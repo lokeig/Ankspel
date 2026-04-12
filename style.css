@@ -339,7 +339,8 @@ input[type=number]::-webkit-inner-spin-button {
     display: none;
 }
 
-#scoreBoard {
+#scoreBoard,
+#trophyBoard {
     position: absolute;
     display: none;
     top: 50%;
@@ -351,9 +352,11 @@ input[type=number]::-webkit-inner-spin-button {
     background-image: url("Assets/Images/UI/scoreboard.png");
     background-size: 100%;
     image-rendering: pixelated;
+    opacity: 0;
 }
 
-#scores {
+#scores,
+#wins {
     width: 81%;
     margin: auto auto;
     height: 85%;
@@ -403,9 +406,21 @@ input[type=number]::-webkit-inner-spin-button {
     font-family: duckFont;
 }
 
+.trophyRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 @font-face {
     font-family: duckFont;
     src: url(Assets/Fonts/ByteBounce.ttf);
+}
+
+.trophyIcon {
+    width: 34px;
+    height: 40px;
+    margin-left: 4px;
 }
 
 .name {

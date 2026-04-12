@@ -17,7 +17,9 @@ enum GameMessage {
     PlayerDead,
     PlayerEquipment,
     PlayerScore,
+    PlayerWins,
     PlayerEnabled,
+    PlayerItemCollision,
 
     // ─── Items ──────────────────────────────
     SpawnItem,
@@ -63,7 +65,9 @@ interface GameMessageMap {
     [GameMessage.PlayerDead]: { id: number };
     [GameMessage.PlayerEquipment]: { id: number, holding: number | null, head: number | null, body: number | null, boots: number | null, };
     [GameMessage.PlayerScore]: { id: number, score: number };
+    [GameMessage.PlayerWins]: { id: number, wins: number };
     [GameMessage.PlayerEnabled]: { id: number, state: boolean };
+    [GameMessage.PlayerItemCollision]: { id: number, effect: OnItemCollision };
 
     // ─── Items ──────────────────────────────
     [GameMessage.ThrowItem]: { id: number, pos: NetworkVector, direction: Side, throwType: ThrowType };

@@ -3,7 +3,7 @@ import { Connection } from "@game/Server";
 import { Render } from "@render";
 import { GameLoop } from "@game/GameLoop";
 
-import { MainMenuCSS, ScoreBoardCSS } from "@impl/LobbyList/CSS";
+import { MainMenuCSS, ScoreBoardCSS, TrophyBoardCSS } from "@impl/LobbyList/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
 import { MapManager } from "@game/Map";
@@ -24,5 +24,6 @@ registerDefaultNames();
 
 Connection.set(new MultiPeerServer(new WebSocket("https://ankspel.onrender.com")));
 MainMenu.set(new MainMenuCSS());
-ScoreBoard.set(new ScoreBoardCSS());
+ScoreBoard.setScore(new ScoreBoardCSS());
+ScoreBoard.setWins(new TrophyBoardCSS());
 new GameLoop(new RequestAnimationFrameTimer()).init();

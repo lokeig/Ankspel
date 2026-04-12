@@ -69,8 +69,8 @@ class Chestplate extends Item implements Equippable {
         this.projectileCollision.disable();
     }
 
-    public onProjectileEffect(effect: ProjectileEffect, pos: Vector, local: boolean) {
-        if (!local || this.shouldBeDeleted()) {
+    public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean) {
+        if (!local) {
             return;
         }
         if (effect.type === ProjectileEffectType.Damage) {

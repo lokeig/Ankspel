@@ -51,6 +51,21 @@ class PlayerCharacter {
         this.itemCollisionManager = new PlayerItemCollisionManager(() => this.activeBody, this.handleItemCollisionEffect.bind(this));
 
         this.addCollidableBody(this.standardBody);
+
+        this.standardBody.onHeadCollision = () => {
+            if (this.isLocal()) {
+                this.jump.isJumping = false;
+            }
+        }
+
+        this.standardBody.onSideCollision = () => { AudioManager.get().play(Sound.wallTouch) };
+        this.standardBody.onSideLeave = () => AudioManager.get().play(Sound.wallLeave);
+
+        this.standardBody.onBottomCollision = () => {
+            if (this.standardBody.velocity.y > 200) {
+                AudioManager.get().play(Sound.land);
+            }
+        }
     }
 
     public addCollidableBody(body: DynamicObject): void {
@@ -133,9 +148,6 @@ class PlayerCharacter {
     }
 
     private updateControllers(deltaTime: number): void {
-        if (this.standardBody.collidingUp) {
-            this.jump.isJumping = false;
-        }
         this.jump.update(deltaTime);
         const weight = this.equipment.getWeight();
         this.movement.update(deltaTime, weight);
@@ -150,9 +162,6 @@ class PlayerCharacter {
     }
 
     public standardBodyUpdate(deltaTime: number): void {
-        const prevGrounded = this.standardBody.grounded;
-        const prevVelocityY = Math.abs(this.standardBody.velocity.y);
-
         this.standardBody.update(deltaTime);
         if (Math.abs(this.standardBody.velocity.x) > 50) {
             this.standardBody.frictionMultiplier = 1;
@@ -165,10 +174,6 @@ class PlayerCharacter {
         this.updateControllers(deltaTime);
         this.updateAnimator(deltaTime);
 
-        const audioThreshold = 200;
-        if (this.standardBody.grounded && !prevGrounded && prevVelocityY > audioThreshold) {
-            AudioManager.get().play(Sound.land);
-        }
         this.setItemOnAnimation();
     }
 
@@ -216,7 +221,7 @@ class PlayerCharacter {
         }
     }
 
-    public die(local: boolean): void {
+    public die(local: boolean = true): void {
         if (this.dead) {
             return;
         }
@@ -243,7 +248,7 @@ class PlayerCharacter {
             switch (effect.type) {
                 case (ProjectileEffectType.Damage): {
                     if (local) {
-                        this.die(true);
+                        this.die();
                     }
                     break;
                 }
@@ -255,10 +260,13 @@ class PlayerCharacter {
         });
     }
 
-    private handleItemCollisionEffect(effect: OnItemCollision) {
+    public handleItemCollisionEffect(effect: OnItemCollision, local: boolean = true): void {
+        if (local) {
+            Connection.get().sendGameMessage(GameMessage.PlayerItemCollision, { id: this.id, effect });
+        }
         switch (effect.type) {
             case (OnItemCollisionType.Death): {
-                this.die(true);
+                this.die(local);
                 break;
             }
             case (OnItemCollisionType.Knockback): {
@@ -278,15 +286,17 @@ class PlayerCharacter {
                 if (helmet && helmet.defensive()) {
                     helmet.takeDamage()
                 } else {
-                    this.die(true);
+                    if (local) {
+                        this.die();
+                    }
                 }
+                break;
             }
         }
     }
 
     private swear(): void {
         AudioManager.get().play(Sound.quackSwear);
-        Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.quackSwear });
         this.swearing.reset();
     }
 

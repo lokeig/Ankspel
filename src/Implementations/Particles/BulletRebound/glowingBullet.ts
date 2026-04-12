@@ -1,51 +1,49 @@
 import { Vector } from "@math";
 import { Countdown, SpriteSheet, Utility } from "@common";
 import { Images } from "@render";
+import { DynamicObject } from "@core";
 
 class GlowingBullet {
     private static spriteSheet: SpriteSheet;
-    
-    private lifeTime = new Countdown(0.2);
-    private pos: Vector;
-    private angle: number;
-    private target: Vector;
 
-    private readonly height: number = Utility.Random.getInRange(2, 8);
-    private static readonly width: number = 2;
+    private lifeTime = new Countdown(0.4);
+    private body: DynamicObject;
 
-    private velocity = new Vector(Utility.Random.getInRange(50, 500), 0);
-    private rotateSpeed: number = Utility.Random.getInRange(-1, 1);
+    private readonly height: number = Utility.Random.getInRange(4, 12);
+    private readonly width: number = 2;
 
     static {
         this.spriteSheet = new SpriteSheet(Images.bulletGlow);
     }
 
     constructor(pos: Vector, angle: number) {
-        this.pos = pos.clone();
-        this.angle = Math.PI + angle + Utility.Random.getInRange(-Math.PI / 3, Math.PI / 3);
-        this.target = this.calculateTarget();
+        this.body = new DynamicObject(pos.clone(), 0, 0);
+
+        const angleVariation = Math.PI / 6;
+        const randomizedAngle = Math.PI + angle + Utility.Random.getInRange(-angleVariation, angleVariation);
+
+        this.body.velocity = Utility.Angle.rotateForce(
+            new Vector(Utility.Random.getInRange(150, 250), 0),
+            randomizedAngle
+        );
+        this.body.gravity = 440;
+        this.body.ignoreFriction = true;
+        this.body.bounceFactor = 0.8;
     }
 
-    private calculateTarget(): Vector {
-        const offset = Utility.Angle.rotateForce(new Vector(this.height, 0), this.angle);
-        return this.pos.clone().add(offset);
-    }
-    
     public update(deltaTime: number) {
         this.lifeTime.update(deltaTime);
-
-        const angledVelocity = Utility.Angle.rotateForce(this.velocity, this.angle);
-
-        this.pos.add(angledVelocity.multiply(deltaTime));
-        this.angle += this.rotateSpeed * deltaTime;
-        this.target = this.calculateTarget();
+        this.body.update(deltaTime);
     }
 
     public draw(): void {
-        const opacity = 1 - this.lifeTime.getPercentageReady();
-        GlowingBullet.spriteSheet.drawLine(this.pos, this.target, GlowingBullet.width, undefined, opacity);
-    }
+        const opacity = 1 - (this.lifeTime.getPercentageReady() * this.lifeTime.getPercentageReady());
+        const angle = Math.atan2(this.body.velocity.y, this.body.velocity.x);
+        const offset = Utility.Angle.rotateForce(new Vector(this.height, 0), angle);
+        const target = this.body.pos.clone().add(offset);
 
+        GlowingBullet.spriteSheet.drawLine(this.body.pos, target, this.width, undefined, opacity);
+    }
 
     public shouldBeDeleted(): boolean {
         return this.lifeTime.isDone();

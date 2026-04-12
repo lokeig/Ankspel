@@ -20,7 +20,9 @@ class Player {
     private color: string;
     private name: string;
     private gettingScore: boolean = false;
+    private gettingWin: boolean = false;
     private static plusOneSheet = new SpriteSheet(Images.plusOne);
+    private static plusTrophySheet = new SpriteSheet(Images.plusWin);
 
     constructor(id: number, color: string, name: string, controls?: Controls) {
         this.stateMachine = new StateMachine<PlayerState>(PlayerState.Standard);
@@ -93,6 +95,21 @@ class Player {
         return this.score;
     }
 
+    public win(): void {
+        this.gettingWin = true;
+        this.trophies++;
+        AudioManager.get().play(Sound.win);
+    }
+
+    public setWins(trophies: number): void {
+        this.win();
+        this.trophies = trophies;
+    }
+
+    public getWins(): number {
+        return this.trophies;
+    }
+
     public setSpawn(spawn: PlayerSpawnDescription): void {
         const worldPos = Grid.getWorldPos(spawn.pos);
         worldPos.y -= this.character.standardBody.height;
@@ -113,21 +130,10 @@ class Player {
         return ragdoll.ownership !== Ownership.None;
     }
 
-    public win(): void {
-        this.trophies++;
-    }
-
-    public setWins(trophies: number): void {
-        this.win();
-        this.trophies = trophies;
-    }
-
-    public getWins(): number {
-        return this.trophies;
-    }
 
     public reload(): void {
         this.gettingScore = false;
+        this.gettingWin = false;
         this.stateMachine.forceState(PlayerState.Standard);
         this.character.reset();
         this.stateMachine.enterState();
@@ -173,7 +179,7 @@ class Player {
 
     public draw(): void {
         this.stateMachine.draw();
-        if (this.gettingScore) {
+        if (this.gettingScore || this.gettingWin) {
             const body = this.character.activeBody;
             const drawSize = new Vector(38, 30);
 
@@ -183,7 +189,8 @@ class Player {
             drawPos.y -= 70;
             drawPos.subtract((drawSize).clone().divide(2));
 
-            Player.plusOneSheet.draw(drawPos, drawSize, false, 0, zIndex.UI);
+            const sprite = this.gettingScore ? Player.plusOneSheet : Player.plusTrophySheet;
+            sprite.draw(drawPos, drawSize, false, 0, zIndex.UI);
         }
     }
 }

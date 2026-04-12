@@ -37,6 +37,15 @@ abstract class Item implements IItem {
         this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
         this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
         this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, 0, () => { }, () => false);
+
+        this.body.onBottomCollision = () => {
+            const audioLandThreshold = 100;
+            if (this.body.velocity.y > audioLandThreshold) {
+                AudioManager.get().play(Sound.land);
+            }
+        }
+        this.body.onSideCollision = () => AudioManager.get().play(Sound.wallTouch);
+        this.body.onSideLeave = () => AudioManager.get().play(Sound.wallLeave);
     }
 
     public setProjectileCollision(resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
@@ -48,16 +57,8 @@ abstract class Item implements IItem {
     }
 
     public update(deltaTime: number): void {
-        const prevGrounded = this.body.grounded;
-        const prevVelocity = Math.abs(this.body.velocity.y);
-
         this.ignoring.update(deltaTime);
         this.physics.update(deltaTime, this.ownership);
-
-        const audioLandThreshold = 100;
-        if (this.body.grounded && !prevGrounded && prevVelocity > audioLandThreshold) {
-            AudioManager.get().play(Sound.land);
-        }
     }
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
@@ -117,7 +118,6 @@ abstract class Item implements IItem {
         if (this.body.getCollidingTile()) {
             return;
         }
-
         switch (throwType) {
             case (ThrowType.Light): {
                 this.body.velocity.set(210 * direcMult, -210);

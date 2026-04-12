@@ -18,8 +18,16 @@ const Sound = {
     beep: "beep",
     ting: "ting",
     click: "click",
-    score: "score",
     death: "death",
+    netGunFire: "netGunFire",
+
+    score: "score",
+    win: "win",
+
+    wallTouch: "wallTouch",
+    wallLeave: "wallLeave",
+
+    rock: "rock",
 
 } as const;
 
@@ -43,8 +51,16 @@ const SoundInfo: Record<SoundName, { src: string }> = {
     beep: { src: "/assets/Sounds/beep.mp3" },
     ting: { src: "/assets/Sounds/ting.mp3" },
     click: { src: "/assets/Sounds/click.mp3" },
-    score: { src: "/assets/Sounds/score.mp3" },
     death: { src: "/assets/Sounds/death.mp3" },
+    netGunFire: { src: "/assets/Sounds/netGunFire.mp3" },
+
+    score: { src: "/assets/Sounds/score.mp3" },
+    win: { src: "/assets/Sounds/win.mp3" },
+
+    wallTouch: { src: "/assets/Sounds/wallTouch.mp3" },
+    wallLeave: { src: "/assets/Sounds/wallLeave.mp3" },
+
+    rock: { src: "/assets/Sounds/rockHitGround.mp3" },
 };
 
 type SoundName = typeof Sound[keyof typeof Sound];

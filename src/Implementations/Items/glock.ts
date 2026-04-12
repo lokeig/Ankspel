@@ -1,10 +1,10 @@
 import { Vector } from "@math";
-import { SpriteAnimator, Animation, SpriteSheet, Utility, ItemInteraction } from "@common";
+import { SpriteAnimator, Animation, SpriteSheet, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
 import { FirearmHelper } from "./firearmInfo";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
-import { Images, zIndex } from "@render";
+import { Images } from "@render";
 import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
 

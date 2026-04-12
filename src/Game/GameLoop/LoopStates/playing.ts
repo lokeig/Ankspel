@@ -11,12 +11,14 @@ class Playing implements IState<GameLoopState> {
     private lastPlayer: Player | null = null;
     private scoreGiven = false;
 
-    public constructor(game: DuckGame) {
+    constructor(game: DuckGame) {
         this.game = game;
     }
 
     public stateEntered(): void {
+        console.log("entered playing");
         this.startNewMap = false;
+
         this.lastPlayer = null;
         this.scoreGiven = false;
         if (Connection.get().isHost()) {
@@ -29,7 +31,7 @@ class Playing implements IState<GameLoopState> {
         if (!Connection.get().isHost()) {
             return;
         }
-        const remaining = PlayerManager.getPlayers().filter(player => !player.character.isDead());
+        const remaining = PlayerManager.getEnabled().filter(player => !player.character.isDead());
         if (remaining.length < 2 && !this.startNewMap) {
             this.startNewMap = true;
             this.newMapCountdown.reset();
@@ -48,10 +50,16 @@ class Playing implements IState<GameLoopState> {
         }
         this.scoreGiven = true;
 
-        this.lastPlayer.givePoint();
         const id = this.lastPlayer.getId();
-        const score = this.lastPlayer.getScore();
-        Connection.get().sendGameMessage(GameMessage.PlayerScore, { id, score });
+        if (this.game.isFinalRound()) {
+            this.lastPlayer.win();
+            const wins = this.lastPlayer.getScore();
+            Connection.get().sendGameMessage(GameMessage.PlayerWins, { id, wins });
+        } else {
+            this.lastPlayer.givePoint();
+            const score = this.lastPlayer.getScore();
+            Connection.get().sendGameMessage(GameMessage.PlayerScore, { id, score });
+        }
     }
 
     public stateChange(): GameLoopState {
@@ -64,16 +72,16 @@ class Playing implements IState<GameLoopState> {
             }
             return GameLoopState.TrophiesScreen;
         }
-        const maxRounds = 15;
+        const maxRounds = 2;
         if (this.game.getRoundsPlayed() === maxRounds) {
             return GameLoopState.ScoreScreen;
         }
         return GameLoopState.LoadingMap;
     }
-    
+
 
     public stateExited(): void {
-        
+
     }
 
     public draw() {

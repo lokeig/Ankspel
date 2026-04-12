@@ -3,9 +3,8 @@ import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
 import { Connection, GameMessage, GameMessageMap } from "@server";
-import { IItem, ItemManager, OnItemUseEffect, OnItemUseType } from "@item";
+import { IItem, OnItemUseEffect, OnItemUseType } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
-import { SpawnerManager } from "@game/Spawner";
 
 class PlayerItemManager {
     private playerBody: () => DynamicObject;
@@ -22,16 +21,10 @@ class PlayerItemManager {
         this.id = id;
     }
 
-    public handle(nearby: IItem[]) {
-        if (this.controls.pickup(InputMode.Press)) {
-            this.handlePickupOrThrow(nearby);
-        }
-        if (!this.equipment.hasItem(EquipmentSlot.Hand)) {
+    public handle(nearby: IItem[]): void {
+        if (!this.controls.pickup(InputMode.Press)) {
             return;
         }
-    }
-
-    private handlePickupOrThrow(nearby: IItem[]): void {
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
             const throwType = this.getThrowType();
             this.equipment.throw(EquipmentSlot.Hand, throwType);

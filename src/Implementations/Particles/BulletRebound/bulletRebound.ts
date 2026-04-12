@@ -11,7 +11,7 @@ class BulletReboundVFX implements IParticle {
     constructor(pos: Vector, angle: number, normal: AxisDirection) {
         this.marker = new TileMarker(pos, normal);
 
-        const glowingBulletCount = 3;
+        const glowingBulletCount = 5;
         this.glowingBullets = new Array<GlowingBullet>(glowingBulletCount);
 
         for (let i = 0; i < glowingBulletCount; i++) {

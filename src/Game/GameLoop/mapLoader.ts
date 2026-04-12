@@ -46,7 +46,7 @@ class MapLoader {
         const playerSpawns = map.getSpawns();
         const spawnCount = playerSpawns.length;
 
-        const players = PlayerManager.getPlayers();
+        const players = PlayerManager.getEnabled();
         const playerCount = players.length;
 
         const base = Math.floor(playerCount / spawnCount);

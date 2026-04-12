@@ -3,7 +3,6 @@ import { DynamicObject } from "@core";
 import { Connection, GameMessage } from "@server";
 
 class ItemPlayerCollision {
-
     private onCollisionCallback: (deltaTime: number, body: DynamicObject) => OnItemCollision[];
     private handleCollisionCallback: (effect: OnItemCollision) => void;
 

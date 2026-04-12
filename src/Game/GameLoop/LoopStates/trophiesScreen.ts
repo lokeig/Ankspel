@@ -3,12 +3,12 @@ import { DuckGame } from "../game";
 import { Connection, GameMessage } from "@server";
 import { Render, RenderSpace, zIndex } from "@render";
 import { PlayerManager } from "@player";
+import { ScoreBoard } from "@menu";
 
 class TrophiesScreen implements IState<GameLoopState> {
     private static timeInState = 4;
     private game: DuckGame;
     private timer = new Countdown(TrophiesScreen.timeInState);
-
     private opacityLerp = new Lerp(1 / TrophiesScreen.timeInState, this.lerp.bind(this));
 
     constructor(game: DuckGame) {
@@ -31,9 +31,23 @@ class TrophiesScreen implements IState<GameLoopState> {
         return 1;
     }
 
+    private handlePlayerScores(): void {
+        const scores: { score: number, name: string, color: string }[] = [];
+        const players = PlayerManager.getPlayers();
+        players.sort((a, b) => b.getWins() - a.getWins());
+        players.forEach(player => {
+            scores.push({ score: player.getWins(), name: player.getName(), color: player.getColor() });
+        });
+        ScoreBoard.getWins().refresh(scores);
+    }
+
     public stateEntered(): void {
+        console.log("entered trophy");
+
         this.timer.reset();
         this.opacityLerp.startLerp(0, 1);
+        ScoreBoard.getWins().show();
+        this.handlePlayerScores();
 
         if (!Connection.get().isHost()) {
             return;
@@ -44,6 +58,7 @@ class TrophiesScreen implements IState<GameLoopState> {
     public stateUpdate(deltaTime: number) {
         this.game.update(deltaTime);
         const opacity = this.opacityLerp.update(deltaTime);
+        ScoreBoard.getWins().setOpacity(opacity);
         this.timer.update(deltaTime);
     }
 
@@ -56,6 +71,8 @@ class TrophiesScreen implements IState<GameLoopState> {
 
     public stateExited(): void {
         PlayerManager.getPlayers().forEach(player => player.reset());
+        ScoreBoard.getWins().hide();
+        this.game.restart();
     }
 
     public draw() {

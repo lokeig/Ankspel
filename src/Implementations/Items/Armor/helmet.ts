@@ -76,7 +76,7 @@ class Helmet extends Item implements Equippable {
     }
 
     public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean) {
-        if (!local || this.shouldBeDeleted()) {
+        if (!local) {
             return;
         }
         if (effect.type === ProjectileEffectType.Damage) {

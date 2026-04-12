@@ -10,8 +10,7 @@ import { NatureTile } from "./Tiles/natureTile";
 import { Platform } from "./Tiles/platform";
 import { Parallax } from "@game/ParallaxBackground/parallax";
 import { ForestParallax } from "./Parallax/defaultParallaxes";
-import { Rock } from "./Items/Props/rock";
-import { Crate } from "./Items/Props/crate";
+import { Crate, NetGun, Rock } from "./Items";
 
 function registerDefaultNames() {
     ItemManager.registerItem("shotgun", Shotgun);
@@ -21,6 +20,7 @@ function registerDefaultNames() {
     ItemManager.registerItem("helmet", Helmet);
     ItemManager.registerItem("rock", Rock);
     ItemManager.registerItem("crate", Crate);
+    ItemManager.registerItem("netGun", NetGun);
 
     TileManager.registerTile("iceTile", IceTile);
     TileManager.registerTile("natureTile", NatureTile);

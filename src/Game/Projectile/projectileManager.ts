@@ -21,13 +21,13 @@ class ProjectileManager {
 
         for (const projectile of this.projectiles) {
             if (projectile.shouldBeDeleted()) {
-                projectile.getTrail().setToDelete();
+                projectile.getTrail()?.setToDelete();
                 this.projectiles.delete(projectile);
                 continue;
             }
 
             projectile.update(deltaTime, targets);
-            projectile.getTrail().setTarget(projectile.getSegment().end);
+            projectile.getTrail()?.setTarget(projectile.getSegment().end);
         }
     }
 
@@ -46,7 +46,9 @@ class ProjectileManager {
             newProjectile.setLocal();
         }
         this.projectiles.add(newProjectile);
-        this.trails.add(newProjectile.getTrail());
+        if (newProjectile.getTrail()) {
+            this.trails.add(newProjectile.getTrail()!);
+        }
     }
 
     public static getProjectiles(): IProjectile[] {

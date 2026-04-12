@@ -45,7 +45,6 @@ class DuckGame {
     }
 
     public loadMap(id: number): void {
-        const players: Player[] = this.isFinalRound() ? this.inFinal : PlayerManager.getPlayers();
         const background = MapLoader.load(MapManager.getMap(id), Connection.get().isHost());
         const parallax = Parallax.getBackground(background);
         if (!parallax) {

@@ -61,6 +61,17 @@ class Vector {
         return this;
     }
 
+    public normalize(): Vector {
+        const length = Math.sqrt(this.lengthSquared());
+        this.x /=  length;
+        this.y /= length;
+        return this;
+    }
+
+    public lengthSquared(): number {
+        return (this.x * this.x) + (this.y * this.y);
+    }
+
     public clone(): Vector {
         return new Vector(this.x, this.y);
     }

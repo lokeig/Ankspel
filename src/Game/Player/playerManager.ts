@@ -25,7 +25,7 @@ class PlayerManager {
                 player.character.die(true);
             }
         };
-        this.getPlayers().forEach(player => {
+        this.getEnabled().forEach(player => {
             if (player.held()) {
                 pending.push(player);
                 return;
@@ -44,7 +44,11 @@ class PlayerManager {
     }
 
     public static getLocal(): Player[] {
-        return this.getPlayers().filter(player => player.character.isLocal());
+        return Array.from(this.players).filter(player => player.character.isLocal());   
+    }
+
+    public static getEnabled(): Player[] {
+        return Array.from(this.players).filter(player => player.isEnabled());
     }
 
     public static getPlayers(): Player[] {

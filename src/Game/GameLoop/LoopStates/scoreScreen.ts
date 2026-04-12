@@ -10,7 +10,7 @@ class ScoreScreen implements IState<GameLoopState> {
     private game: DuckGame;
     private timer = new Countdown(ScoreScreen.timeInState);
     private opacityLerp = new Lerp(1 / ScoreScreen.timeInState, this.lerp.bind(this));
-    private finalThreshold = 5;
+    private finalThreshold = 1;
 
     constructor(game: DuckGame) {
         this.game = game;
@@ -39,18 +39,20 @@ class ScoreScreen implements IState<GameLoopState> {
         players.forEach(player => {
             scores.push({ score: player.getScore(), name: player.getName(), color: player.getColor() });
         });
-        ScoreBoard.get().refresh(scores);
+        ScoreBoard.getScore().refresh(scores);
     }
 
     public stateEntered(): void {
+        console.log("entered score");
+
         this.game.restart();
-        ScoreBoard.get().show();
+        ScoreBoard.getScore().show();
         PlayerManager.getLocal().forEach(player => player.character.controls.addLock("scoreScreen"));
         this.handlePlayerScores();
 
         this.timer.reset();
         this.opacityLerp.startLerp(0, 1);
-        ScoreBoard.get().setOpacity(0);
+        ScoreBoard.getScore().setOpacity(0);
 
         if (!Connection.get().isHost()) {
             return;
@@ -63,7 +65,7 @@ class ScoreScreen implements IState<GameLoopState> {
         this.timer.update(deltaTime);
 
         const opacity = this.opacityLerp.update(deltaTime);
-        ScoreBoard.get().setOpacity(opacity);
+        ScoreBoard.getScore().setOpacity(opacity);
     }
 
     public stateChange(): GameLoopState {
@@ -72,6 +74,8 @@ class ScoreScreen implements IState<GameLoopState> {
         }
         const players = PlayerManager.getPlayers().filter(player => player.getScore() >= this.finalThreshold);
         if (players.length === 1) {
+            players[0].win();
+            Connection.get().sendGameMessage(GameMessage.PlayerWins, { id: players[0].getId(), wins: players[0].getWins() });
             return GameLoopState.TrophiesScreen;
         }
         if (players.length > 1) {
@@ -81,7 +85,7 @@ class ScoreScreen implements IState<GameLoopState> {
     }
 
     public stateExited(): void {
-        ScoreBoard.get().hide();
+        ScoreBoard.getScore().hide();
         PlayerManager.getLocal().forEach(player => player.character.controls.removeLock("scoreScreen"));
     }
 

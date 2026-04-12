@@ -17,7 +17,7 @@ class Camera {
 
         const playerPositions: Vector[] = [];
 
-        PlayerManager.getPlayers().forEach(player => {
+        PlayerManager.getEnabled().forEach(player => {
             const pos = player.character.activeBody.getCenter();
 
             if (player.character.isDead() && !this.deadPlayers.has(player)) {
@@ -45,7 +45,7 @@ class Camera {
 
     public initialize(bounds: MaxMinPositions): void {
         this.deadPlayers = new Map();
-        const players = PlayerManager.getPlayers().map(player => player.character.activeBody.getCenter());
+        const players = PlayerManager.getEnabled().map(player => player.character.activeBody.getCenter());
 
         const positions = this.getPositions(players, bounds);
         const targetPos = this.calculateTargetPos(positions);

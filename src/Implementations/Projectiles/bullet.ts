@@ -15,7 +15,7 @@ class Bullet implements IProjectile {
     private local: boolean = false;
     private lifespan!: Countdown;
     private delete: boolean = false;
-    public trail!: BulletTrail;
+    private trail!: BulletTrail;
 
     constructor(pos: Vector, angle: number, speed: number, blockRange: number) {
         const lifespan = blockRange * Grid.size / speed;
@@ -91,10 +91,6 @@ class Bullet implements IProjectile {
 
     public getSegment(): { start: Vector; end: Vector; } {
         return { start: this.prevPos, end: this.pos };
-    }
-
-    public setPos(pos: Vector): void {
-        this.pos = pos;
     }
 
     public setToDelete(): void {
