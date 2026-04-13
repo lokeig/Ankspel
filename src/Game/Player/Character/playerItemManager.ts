@@ -3,7 +3,7 @@ import { PlayerControls } from "./playerControls";
 import { PlayerEquipment } from "./playerEquipment";
 import { InputMode, ThrowType, Utility, ItemInteraction, EquipmentSlot } from "@common";
 import { Connection, GameMessage, GameMessageMap } from "@server";
-import { IItem, OnItemUseEffect, OnItemUseType } from "@item";
+import { IItem, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
 
 class PlayerItemManager {

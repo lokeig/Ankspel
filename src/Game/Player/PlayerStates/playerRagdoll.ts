@@ -110,6 +110,9 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         if (this.player.isDead() || this.isHeld()) {
             return PlayerState.Ragdoll;
         }
+        if (this.player.netted) {
+            return PlayerState.Net;
+        }
         const exit = this.player.controls.ragdoll() || this.player.controls.jump(InputMode.Press);
 
         if (exit && !this.coyoteTime.isDone()) {
@@ -134,7 +137,6 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         this.player.removeCollidable(this.head);
         this.player.removeCollidable(this.torso);
         this.player.removeCollidable(this.legs);
-
     }
 
     private initializePositions(from: PlayerState): void {

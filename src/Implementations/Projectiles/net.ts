@@ -22,7 +22,7 @@ class Net implements IProjectile {
             velocity.x *= -1;
         }
         if (velocity.y === 0) {
-            velocity.y = -500;
+            velocity.y = -200;
         }
 
         this.body.velocity = velocity;
@@ -51,6 +51,7 @@ class Net implements IProjectile {
             }
             collisionObject.onProjectileHit([{ type: ProjectileEffectType.Net, duration: 5 }], this.body.pos, this.local);
             this.setToDelete();
+            break;
         }
         if (this.body.velocity.y !== 0 || this.body.velocity.x !== 0) {
             this.angle = Math.atan2(this.body.velocity.y, this.body.velocity.x);

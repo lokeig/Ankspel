@@ -4,6 +4,7 @@ enum PlayerState {
     Crouch,
     Flap,
     Ragdoll,
+    Net,
 }
 
 export { PlayerState };

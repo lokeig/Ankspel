@@ -51,7 +51,13 @@ class PlayerFlap implements IState<PlayerState> {
 
     public stateChange(): PlayerState {
         const controls = this.player.controls;
-        if (controls.ragdoll() || this.player.isDead()) {
+        if (this.player.isDead()) {
+            return PlayerState.Ragdoll;
+        }
+        if (this.player.netted) {
+            return PlayerState.Net;
+        }
+        if (this.player.controls.ragdoll()) {
             return PlayerState.Ragdoll;
         }
         if (controls.down()) {

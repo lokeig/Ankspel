@@ -16,9 +16,10 @@ class PlayerAnimation {
         [PlayerAnim.Fall]: new Animation(),
         [PlayerAnim.Slide]: new Animation(),
         [PlayerAnim.Turn]: new Animation(),
-        [PlayerAnim.ItemHolding]: new Animation(),
         [PlayerAnim.UpperRagdoll]: new Animation(),
-        [PlayerAnim.LowerRagdoll]: new Animation()
+        [PlayerAnim.LowerRagdoll]: new Animation(),
+        [PlayerAnim.Netted]: new Animation(),
+        [PlayerAnim.ItemHolding]: new Animation(),
     };
     private holding: boolean = false;
     private quacking: boolean = false;
@@ -51,6 +52,7 @@ class PlayerAnimation {
         this.animations.upperRagdoll.addFrame(8, 0);
         this.animations.lowerRagdoll.addFrame(9, 0);
         this.animations.itemHolding.addFrame(8, 0)
+        this.animations.netted.addFrame(0, 1);
     }
 
     constructor(color: string) {

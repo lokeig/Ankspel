@@ -2,7 +2,7 @@ import { Frame, ItemInteraction, SpriteSheet, Utility } from "@common";
 import { Item } from "./item";
 import { Vector } from "@math";
 import { Images } from "@render";
-import { OnItemUseEffect } from "@item";
+import { OnItemUseEffect, OnItemUseType } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
 import { ProjectileManager } from "@projectile";
 import { Net } from "@impl/Projectiles";
@@ -15,6 +15,7 @@ class NetGun extends Item {
     private static holdOffset = new Vector(10, -4);
     private static gaugeFrames: Array<Frame> = new Array(4);
     private static muzzleOffset = new Vector(30, 0);
+    private static knockback = new Vector(500, 200);
 
     private ammo: number = 4;
 
@@ -55,10 +56,20 @@ class NetGun extends Item {
             this.ammo--;
             AudioManager.get().play(Sound.netGunFire);
             ProjectileManager.addProjectile(new Net(this.getMuzzlePos(), this.getAngle(), this.body.direction), local);
+            return [{ type: OnItemUseType.Knockback, value: this.getKnockback() }];
         } else {
             AudioManager.get().play(Sound.click);
         }
         return [];
+    }
+
+    private getKnockback(): Vector {
+        const result = Utility.Angle.rotateForce(new Vector(NetGun.knockback.x, 0), this.getAngle());
+        result.x *= this.body.getDirectionMultiplier();
+        if (this.getAngle() === 0) {
+            result.y += NetGun.knockback.y;
+        }
+        return result;
     }
 
     public draw(): void {

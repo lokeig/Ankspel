@@ -34,6 +34,7 @@ class PlayerCharacter {
     public movement!: PlayerMove;
     public equipment!: PlayerEquipment;
     public itemManager!: PlayerItemManager;
+    public netted: boolean = false;
 
     public id: number;
     private collidableBodies: Map<DynamicObject, ProjectileTarget> = new Map();
@@ -254,6 +255,10 @@ class PlayerCharacter {
                 }
                 case (ProjectileEffectType.Knockback): {
                     body.velocity.add(effect.amount);
+                    break;
+                }
+                case (ProjectileEffectType.Net): {
+                    this.netted = true
                     break;
                 }
             }

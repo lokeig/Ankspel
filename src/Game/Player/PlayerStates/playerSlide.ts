@@ -126,7 +126,13 @@ class PlayerSlide implements IState<PlayerState> {
 
 
     public stateChange(): PlayerState {
-        if (this.player.controls.ragdoll() || this.player.isDead()) {
+        if (this.player.isDead()) {
+            return PlayerState.Ragdoll;
+        }
+        if (this.player.netted) {
+            return PlayerState.Net;
+        }
+        if (this.player.controls.ragdoll()) {
             return PlayerState.Ragdoll;
         }
         if (this.player.controls.down() || this.player.idleCollision()) {

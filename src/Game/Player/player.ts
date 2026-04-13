@@ -7,6 +7,7 @@ import { Connection, GameMessage } from "@server";
 import { PlayerSpawnDescription } from "@game/Map/PlayerSpawnDescription";
 import { AudioManager, Sound } from "@game/Audio";
 import { Images, zIndex } from "@render";
+import { PlayerNetted } from "./PlayerStates/playerNetted";
 
 class Player {
     public character!: PlayerCharacter;
@@ -36,6 +37,25 @@ class Player {
             this.character.setControls(controls);
         }
         this.setupStateMachine();
+    }
+
+    private setupStateMachine(): void {
+        this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
+        this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.character));
+        const crouch = true;
+        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
+        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
+
+        const netted = new PlayerNetted(this.character, this.id);
+        const ragdoll = new PlayerRagdoll(this.character, this.id);
+
+        ItemManager.addPermanent(ragdoll, this.id);
+        ItemManager.addPermanent(netted, this.id);
+
+        this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
+        this.stateMachine.addState(PlayerState.Net, netted);
+
+        this.stateMachine.enterState();
     }
 
     private getCleanedUpColor(original: string): string {
@@ -141,21 +161,6 @@ class Player {
 
     public reset(): void {
         this.score = 0;
-    }
-
-    private setupStateMachine(): void {
-        this.stateMachine.addState(PlayerState.Standard, new PlayerStandard(this.character));
-        this.stateMachine.addState(PlayerState.Flap, new PlayerFlap(this.character));
-        const crouch = true;
-        this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
-        this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
-
-        const ragdoll = new PlayerRagdoll(this.character, this.id);
-
-        ItemManager.addPermanent(ragdoll, this.id);
-
-        this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
-        this.stateMachine.enterState();
     }
 
     public getStateInstance(state: PlayerState): IState<PlayerState> {

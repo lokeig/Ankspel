@@ -16,7 +16,7 @@ class PlayerManager {
             }
             player.update(deltaTime);
             player.character.equipment.getAllEquippedItems().forEach((item, slot) => {
-                if (item && item.shouldBeDeleted()) {
+                if (item && (item.shouldBeDeleted() || !item.enabled())) {
                     player.character.equipment.equip(null, slot);
                 }
             });

@@ -4,8 +4,8 @@ import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
 
 class PlayerStandard implements IState<PlayerState> {
-
     private player: PlayerCharacter;
+
     constructor(player: PlayerCharacter) {
         this.player = player;
     }
@@ -45,7 +45,7 @@ class PlayerStandard implements IState<PlayerState> {
         this.player.rotateArm(deltaTime);
         this.player.standardBodyUpdate(deltaTime);
         this.setCurrentAnimation();
-        
+
         this.setEquipmentLocation();
     }
 
@@ -68,7 +68,13 @@ class PlayerStandard implements IState<PlayerState> {
     }
 
     public stateChange(): PlayerState {
-        if (this.player.controls.ragdoll() || this.player.isDead()) {
+        if (this.player.isDead()) {
+            return PlayerState.Ragdoll;
+        }
+        if (this.player.netted) {
+            return PlayerState.Net;
+        }
+        if (this.player.controls.ragdoll()) {
             return PlayerState.Ragdoll;
         }
         if (this.player.controls.jump(InputMode.Press) && !this.player.standardBody.grounded && !this.player.jump.isJumping) {
