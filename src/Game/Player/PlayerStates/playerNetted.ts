@@ -40,8 +40,10 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         const armOffset = new Vector(10, 28);
         this.player.armFront.setOffset(armOffset);
 
-        this.player.jump.jumpEnabled = false;
-        this.player.movement.moveEnabled = false;
+        if (this.player.isLocal()) {
+            this.player.jump.jumpEnabled = false;
+            this.player.movement.moveEnabled = false;
+        }
         this.player.handleNewState(PlayerState.Net);
         this.setCurrentAnimation();
     }
@@ -93,8 +95,10 @@ class PlayerNetted implements IState<PlayerState>, IItem {
     }
 
     public stateExited(): void {
-        this.player.jump.jumpEnabled = true;
-        this.player.movement.moveEnabled = true;
+        if (this.player.isLocal()) {
+            this.player.jump.jumpEnabled = true;
+            this.player.movement.moveEnabled = true;
+        }
         this.player.netted = false;
         this.ownership = Ownership.None;
     }
@@ -132,7 +136,7 @@ class PlayerNetted implements IState<PlayerState>, IItem {
     }
 
     public setToDelete(): void {
-        
+
     }
 
     public shouldBeDeleted(): boolean {

@@ -58,10 +58,7 @@ class PlayerCharacter {
                 this.jump.isJumping = false;
             }
         }
-
-        this.standardBody.onSideCollision = () => { AudioManager.get().play(Sound.wallTouch) };
-        this.standardBody.onSideLeave = () => AudioManager.get().play(Sound.wallLeave);
-
+        
         this.standardBody.onBottomCollision = () => {
             if (this.standardBody.velocity.y > 200) {
                 AudioManager.get().play(Sound.land);
