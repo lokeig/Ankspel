@@ -4,6 +4,7 @@ import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
 import { Ownership } from "./ItemPlayerUse/itemUseType";
 import { Vector } from "@math";
+import { GameObject } from "@core";
 
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
@@ -75,7 +76,7 @@ class ItemManager {
         return this.items.get(Grid.key(pos));
     }
 
-    public static getNearby(pos: Vector, width: number, height: number, nextPos: Vector = pos): IItem[] {
+    public static getNearby(body: GameObject, nextPos: Vector = body.pos): IItem[] {
         const result: IItem[] = [];
         const accumulate = (gridPos: Vector): void => {
             const itemSet = this.getItems(gridPos);
@@ -83,13 +84,16 @@ class ItemManager {
                 return;
             }
             itemSet.forEach(item => {
+                if (item.body === body) {
+                    return;
+                }
                 if (item.enabled() && item.ownership === Ownership.None) {
                     result.push(item);
                 }
             });
         }
 
-        Grid.forNearby(pos, nextPos, width, height, accumulate);
+        Grid.forNearby(body.pos, nextPos, body.width, body.height, accumulate);
         return result;
     }
 

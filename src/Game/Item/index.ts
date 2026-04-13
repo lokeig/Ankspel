@@ -17,3 +17,4 @@ export { ItemIgnore } from "./Helpers/itemIgnore";
 export { ItemPhysics } from "./Helpers/itemPhysics";
 export { ItemPlayerCollision } from "./Helpers/itemPlayerCollision";
 export { ItemProjectileCollision } from "./Helpers/itemProjectileCollision";
+export { ItemPlayerInteraction } from "./ItemPlayerUse/itemUseInteractions";

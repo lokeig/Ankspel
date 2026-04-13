@@ -2,9 +2,10 @@ import { Vector } from "@math";
 import { PlayerState, IState, EquipmentSlot, Countdown, ThrowType, OnItemCollision, OnItemCollisionType } from "@common";
 import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
-import { IItem, ItemIgnore, ItemPlayerCollision, ItemProjectileCollision, Ownership } from "@item";
+import { IItem, ItemIgnore, ItemPlayerCollision, ItemPlayerInteraction, ItemProjectileCollision, Ownership } from "@item";
 import { DynamicObject } from "@core";
-import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
+import { DizzyStars } from "@impl/Particles";
+import { ParticleManager } from "@game/Particles";
 
 class PlayerNetted implements IState<PlayerState>, IItem {
     private player: PlayerCharacter;
@@ -49,12 +50,12 @@ class PlayerNetted implements IState<PlayerState>, IItem {
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.setEquipmentLocation();
         if (!this.player.isLocal()) {
             this.nonLocalUpdate(deltaTime);
             return;
         }
         this.timer.update(deltaTime);
-        this.setEquipmentLocation();
         if (this.ownership !== Ownership.None) {
             return;
         }
@@ -119,7 +120,14 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         return 0;
     }
 
-    public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
+    public onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
+        const offset = 5;
+        const minVerticalSpeed = 400;
+        const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;
+        if ((prevPos - offset < body.pos.y)) {
+            console.log("Buzzin")
+            return [{ type: OnItemCollisionType.Headbonk }];
+        }
         if (Math.abs(this.body.velocity.x) > 300) {
             return [{ type: OnItemCollisionType.Knockback, amount: new Vector(-this.body.velocity.x, 0) }];
         }
@@ -130,6 +138,11 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         switch (effect.type) {
             case OnItemCollisionType.Knockback: {
                 this.body.velocity.x *= -this.body.bounceFactor;
+                break;
+            }
+            case OnItemCollisionType.Headbonk: {
+                ParticleManager.addParticle(new DizzyStars(this.body.getCenter()));
+                this.body.velocity.y *= -0.5;
                 break;
             }
         }

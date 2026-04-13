@@ -97,7 +97,7 @@ class Spawner {
 
     public getContaining(): IItem | null {
         return this.contains;
-    }
+        }
 
     private dropContaining(): void {
         this.contains = null;
@@ -124,7 +124,7 @@ class Spawner {
         if (this.contains) {
             return;
         }
-        const nearby = ItemManager.getNearby(this.body.pos, this.body.width, this.body.height);
+        const nearby = ItemManager.getNearby(this.body);
         const maxSpeed = 100;
         for (const item of nearby) {
             const lowEnoughSpeed = Math.abs(item.body.velocity.x) < maxSpeed && Math.abs(item.body.velocity.y) < maxSpeed;
