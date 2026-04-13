@@ -22,6 +22,7 @@ class ItemPhysics {
         } else {
             this.body.setNewCollidableObjects();
         }
+        this.body.onSideCollision = () => this.itemAngle.rotateSpeed *= 0.5;
     }
 
     private updateItemPhysics(deltaTime: number) {
@@ -29,9 +30,6 @@ class ItemPhysics {
 
         this.itemAngle.updateAngle(deltaTime, this.body.grounded);
         this.body.update(deltaTime);
-        if (this.body.collidingSide) {
-            this.itemAngle.rotateSpeed *= 0.5;
-        }
     }
 }
 
