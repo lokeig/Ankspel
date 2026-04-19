@@ -18,9 +18,7 @@ class Helmet extends Item implements Equippable {
     private static equippedWidth: number = 22;
     private static equippedHeight: number = 22;
 
-    private static holdOffset = new Vector(10, -4); 
-
-    private equipmentSlot: EquipmentSlot = EquipmentSlot.Hand;
+    private static holdOffset = new Vector(10, -4);
 
     static {
         this.spriteSheet = new SpriteSheet(Images.armor);
@@ -40,10 +38,8 @@ class Helmet extends Item implements Equippable {
             return [result];
         });
 
-        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted())
-
-        this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => [{ type: OnItemUseType.Unequip, value: this.equipmentSlot }]);
-        this.projectileCollision.disable();
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted(), () => [ProjectileEffectType.Damage])
+        this.projectileCollision!.disable();
     }
 
     public onPlayerAnimation(_anim: PlayerAnim, _holding: boolean): void {
@@ -60,19 +56,19 @@ class Helmet extends Item implements Equippable {
     }
 
     public onEquip(): void {
-        this.equipmentSlot = EquipmentSlot.Head;
+        this.currentSlot = EquipmentSlot.Head;
 
         this.body.width = Helmet.equippedWidth;
         this.body.height = Helmet.equippedHeight;
-        this.projectileCollision.enable();
+        this.projectileCollision!.enable();
     }
 
     public onUnequip(): void {
-        this.equipmentSlot = EquipmentSlot.Hand;
+        this.currentSlot = EquipmentSlot.Hand;
 
         this.body.width = Helmet.standardWidth;
         this.body.height = Helmet.standardHeight;
-        this.projectileCollision.disable();
+        this.projectileCollision!.disable();
     }
 
     public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean) {

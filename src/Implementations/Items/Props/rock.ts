@@ -1,4 +1,4 @@
-import { ProjectileEffect, SpriteSheet } from "@common";
+import { ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { Images } from "@render";
 import { Vector } from "@math";
 import { BaseProp } from "./baseProp";
@@ -17,7 +17,7 @@ class Rock extends BaseProp {
 
         this.info.holdOffset = Rock.holdOffset;
         this.info.weightFactor = 0.5;
-        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted(), () => [ProjectileEffectType.Damage]);
 
         this.body.onBottomCollision = () => AudioManager.get().play(Sound.rock);
     }

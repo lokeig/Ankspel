@@ -2,6 +2,7 @@ import { SpawnerDescription } from "@game/Map";
 import { Spawner } from "./spawner";
 import { IItem, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
+import { GameObject } from "@core";
 
 class SpawnerManager {
     private static spawners: Spawner[] = [];
@@ -40,11 +41,17 @@ class SpawnerManager {
         return this.idToSpawner.get(id);
     }
 
-    public static getSpawnerItems(): IItem[] {
+    public static getSpawnerItems(body: GameObject): IItem[] {
         const result: IItem[] = [];
         this.spawners.forEach(spawner => {
             const contains = spawner.getContaining();
-            if (contains && contains.ownership === Ownership.InSpawner) {
+            if (!contains) {
+                return;
+            }
+            if (contains.body === body) {
+                return;
+            }
+            if (contains.ownership === Ownership.InSpawner) {
                 result.push(contains);
             }
         })

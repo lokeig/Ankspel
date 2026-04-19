@@ -44,7 +44,7 @@ class SpriteAnimator {
         this.spriteSheet = sheet;
     }
 
-    public draw(pos: Vector, size: number, flip: boolean, angle: number, zIndex: number): void {
+    public draw(pos: Vector, size: number | Vector, flip: boolean, angle: number, zIndex: number): void {
         const frame = this.animation.getFrame(this.currentFrame);
         this.spriteSheet.draw(pos, size, flip, angle, zIndex, frame);
     }

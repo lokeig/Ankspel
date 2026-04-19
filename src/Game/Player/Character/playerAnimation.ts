@@ -1,7 +1,7 @@
 import { Animation, SpriteAnimator, SpriteSheet, PlayerAnim, EquipmentSlot } from "@common";
 import { PlayerEquipment } from "./playerEquipment";
 import { Vector } from "@math";
-import { ImageName, Images, Render, RenderSpace, zIndex } from "@render";
+import { Images, zIndex } from "@render";
 
 class PlayerAnimation {
     private currAnim: PlayerAnim;
@@ -146,10 +146,10 @@ class PlayerAnimation {
         this.drawItemTopLayer(equipment, EquipmentSlot.Hand);
     }
 
-    public drawBody(pos: Vector, drawSize: number, flip: boolean, angle: number = 0): void {
+    public drawBody(pos: Vector, drawSize: number, flip: boolean, angle: number = 0, z: number = zIndex.Player): void {
         const drawLayer = (sprite: SpriteSheet) => {
             this.bodyAnimator.setSheet(sprite);
-            this.bodyAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
+            this.bodyAnimator.draw(pos, drawSize, flip, angle, z);
         };
         !this.quacking ? drawLayer(this.bodyBaseSprite) : drawLayer(this.bodyBaseQuackSprite);
         drawLayer(this.bodyColorSprite);
@@ -157,10 +157,10 @@ class PlayerAnimation {
         drawLayer(this.bodyOverlaySprite);
     };
 
-    public drawArm(pos: Vector, drawSize: number, angle: number, flip: boolean): void {
+    public drawArm(pos: Vector, drawSize: number, angle: number, flip: boolean, z: number = zIndex.Player): void {
         const drawLayer = (sprite: SpriteSheet) => {
             this.armAnimator.setSheet(sprite);
-            this.armAnimator.draw(pos, drawSize, flip, angle, zIndex.Player);
+            this.armAnimator.draw(pos, drawSize, flip, angle, z);
         };
         drawLayer(this.handBaseSprite);
         drawLayer(this.handColorSprite);

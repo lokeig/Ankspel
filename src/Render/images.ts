@@ -12,6 +12,8 @@ const Images = {
     playerHandsOverlay: { src: '/assets/Images/Player/playerHandsOverlay.png', frameWidth: 16, frameHeight: 16 },
     playerHandsMask: { src: '/assets/Images/Player/playerHandsMask.png', frameWidth: 16, frameHeight: 16 },
 
+    playerFeather: { src: '/assets/Images/Player/feather.png', frameWidth: 12, frameHeight: 4 },
+
     // Tiles
     tileIce: { src: '/assets/Images/Tiles/tileIce.png', frameWidth: 16, frameHeight: 16 },
     tileNature: { src: '/assets/Images/Tiles/natureTileset.png', frameWidth: 16, frameHeight: 16 },
@@ -26,6 +28,8 @@ const Images = {
     armor: { src: '/assets/Images/Items/armor.png', frameWidth: 16, frameHeight: 16 },
     netGun: { src: '/assets/Images/Items/netGun.png', frameWidth: 32, frameHeight: 32 },
     netGunGuage: { src: '/assets/Images/Items/netGunGuage.png', frameWidth: 8, frameHeight: 8 },
+    mine: { src: '/assets/Images/Items/mine.png', frameWidth: 18, frameHeight: 10 },
+    mineFlash: { src: '/assets/Images/Items/mineFlash.png', frameWidth: 48, frameHeight: 48 },
 
     // Projectiles
     net: { src: '/assets/Images/Projectiles/net.png', frameWidth: 16, frameHeight: 16 },
@@ -39,6 +43,8 @@ const Images = {
     spawnerBall: { src: '/assets/Images/VFX/spawnerBall.png', frameWidth: 4, frameHeight: 4 },
     itemSpawner: { src: '/assets/Images/VFX/itemSpawner.png', frameWidth: 14, frameHeight: 6 },
     dizzyStar: { src: '/assets/Images/VFX/dizzyStar.png', frameWidth: 9, frameHeight: 7 },
+    smokeFront: { src: '/assets/Images/VFX/smoke.png', frameWidth: 44, frameHeight: 42 },
+    smokeBack: { src: '/assets/Images/VFX/smokeBack.png', frameWidth: 44, frameHeight: 42 },
 
     // Background
     forest: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },

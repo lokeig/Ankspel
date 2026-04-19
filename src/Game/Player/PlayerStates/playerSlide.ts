@@ -32,7 +32,7 @@ class PlayerSlide implements IState<PlayerState> {
         }
         this.player.standardBody.pos.y += PlayerCharacter.standardHeight - this.player.standardBody.height;
 
-        let armOffset = new Vector(16, 42);
+        let armOffset = new Vector(16, 40);
         if (this.crouch) {
             armOffset = new Vector(10, 34);
         }
@@ -44,10 +44,6 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.player.isLocal()) {
-            this.nonLocalUpdate(deltaTime);
-            return;
-        }
         const animation = this.crouch ? PlayerAnim.Crouch : PlayerAnim.Slide;
         this.player.animator.setAnimation(animation);
 
@@ -55,18 +51,9 @@ class PlayerSlide implements IState<PlayerState> {
         this.handlePlatforms(deltaTime);
 
         this.player.rotateArm(deltaTime);
-        this.player.standardBodyUpdate(deltaTime);
+        this.player.updateBody(deltaTime);
+        this.player.update(deltaTime);
 
-        if (this.crouch) {
-            this.setEquipmentPositionsCrouch();
-        } else {
-            this.setEquipmentPositionsSlide();
-        }
-    }
-
-    private nonLocalUpdate(deltaTime: number): void {
-        this.player.rotateArm(deltaTime);
-        this.player.standardBodyNonLocalUpdate(deltaTime);
         if (this.crouch) {
             this.setEquipmentPositionsCrouch();
         } else {
@@ -109,6 +96,9 @@ class PlayerSlide implements IState<PlayerState> {
     }
 
     private handlePlatforms(deltaTime: number): void {
+        if (!this.player.isLocal()) {
+            return;
+        }
         this.player.jump.jumpEnabled = true;
         if (this.player.controls.jump(InputMode.Press)) {
             this.platformIgnoreTime.reset();

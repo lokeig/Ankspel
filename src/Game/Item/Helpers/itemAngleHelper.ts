@@ -7,13 +7,15 @@ class ItemAngleHelper {
 
     private rotateLerp = new Lerp(15, lerpAngle);
 
+    public landPerfectly: boolean = false;
+
     public updateAngle(deltaTime: number, grounded: boolean): void {
         const angle = this.worldAngle + this.localAngle;
         const normalized = Utility.Angle.normalize(angle);
         if (grounded && normalized !== 0 && normalized !== -Math.PI) {
             this.rotateSpeed = 0;
             if (!this.rotateLerp.isActive()) {
-                const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
+                const target = !this.landPerfectly && Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
                 this.rotateLerp.startLerp(normalized, target);
             }
         }

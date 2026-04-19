@@ -1,7 +1,7 @@
 import { Vector } from "@math";
 import { GameObject } from "@core";
 import { ITrail } from "./ITrail";
-import { ProjectileEffect } from "@common";
+import { ProjectileEffect, ProjectileEffectType } from "@common";
 
 interface IProjectile {
     update(deltaTime: number, collidable: ProjectileTarget[]): void;
@@ -22,6 +22,7 @@ type ProjectileTarget = {
     penetrationResistance: () => number;
     onProjectileHit: (effects: ProjectileEffect[], pos: Vector, local: boolean) => void;
     enabled: () => boolean;
+    interactions: () => ProjectileEffectType[]
 }
 
 type CollisionCallback = (effect: ProjectileEffect[]) => void;

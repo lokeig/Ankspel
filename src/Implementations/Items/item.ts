@@ -1,10 +1,11 @@
 import { Vector } from "@math";
-import { EquipmentSlot, OnItemCollision, OnItemCollisionType, PlayerState, ProjectileEffect, ThrowType } from "@common";
+import { EquipmentSlot, OnItemCollision, OnItemCollisionType, PlayerState, ProjectileEffect, ProjectileEffectType, ThrowType, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { ItemPlayerInteraction } from "@game/Item/ItemPlayerUse/itemUseInteractions";
 import { IItem, ItemAngleHelper, ItemIgnore, ItemInfo, ItemPhysics, ItemPlayerCollision, ItemProjectileCollision, OnItemUseType, Ownership } from "@item";
 import { AudioManager, Sound } from "@game/Audio";
 import { zIndex } from "@render";
+import { addSmokeCloud, ParticleManager, Smoke } from "@game/Particles";
 
 abstract class Item implements IItem {
     private static emptyVector = new Vector;
@@ -20,10 +21,11 @@ abstract class Item implements IItem {
     public info: ItemInfo;
 
     public playerCollision: ItemPlayerCollision;
-    public projectileCollision: ItemProjectileCollision;
+    public projectileCollision: ItemProjectileCollision | null = null;
     public playerInteractions = new ItemPlayerInteraction;
 
     public ignoring = new ItemIgnore;
+    public currentSlot: EquipmentSlot = EquipmentSlot.Hand;
 
     constructor(pos: Vector, width: number, height: number, id: number) {
         this.body = new DynamicObject(pos, width, height);
@@ -35,8 +37,8 @@ abstract class Item implements IItem {
         }
         this.physics = new ItemPhysics(this.body, this.angle);
         this.playerCollision = new ItemPlayerCollision(id, this.onCollision.bind(this), this.handleCollision.bind(this));
-        this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: EquipmentSlot.Hand }] });
-        this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, 0, () => { }, () => false);
+        this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => { return [{ type: OnItemUseType.Unequip, value: this.currentSlot }] });
+        this.playerInteractions.setOnPlayerState(PlayerState.Net, () => { return [{ type: OnItemUseType.Unequip, value: this.currentSlot }] });
 
         this.body.onBottomCollision = () => {
             const audioLandThreshold = 100;
@@ -48,8 +50,13 @@ abstract class Item implements IItem {
         this.body.onSideLeave = () => AudioManager.get().play(Sound.wallLeave);
     }
 
-    public setProjectileCollision(resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
-        this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled);
+    public setProjectileCollision(
+        resistence: number,
+        onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void,
+        enabled: () => boolean,
+        interactions: () => ProjectileEffectType[]
+    ) {
+        this.projectileCollision = new ItemProjectileCollision(this.body, this.info.id, resistence, onHit, enabled, interactions);
     }
 
     public getCollisionKnockback(): Vector {
@@ -68,14 +75,6 @@ abstract class Item implements IItem {
         return [];
     }
 
-    public setAngle(to: number): void {
-        this.angle.worldAngle = to;
-    }
-
-    public getAngle(): number {
-        return this.angle.localAngle + this.angle.worldAngle;
-    }
-
     public handleCollision(collision: OnItemCollision): void {
         switch (collision.type) {
             case OnItemCollisionType.Knockback: {
@@ -88,6 +87,15 @@ abstract class Item implements IItem {
             }
         }
     }
+
+    public setAngle(to: number): void {
+        this.angle.worldAngle = to;
+    }
+
+    public getAngle(): number {
+        return this.angle.localAngle + this.angle.worldAngle;
+    }
+
 
     protected getDrawPos(drawSize: number | Vector, offset: Vector = new Vector): Vector {
         let drawWidth: number = drawSize as number;
@@ -113,34 +121,35 @@ abstract class Item implements IItem {
 
     public throw(throwType: ThrowType): void {
         this.body.grounded = false;
-        const direcMult = this.body.getDirectionMultiplier();
+        const factor = this.body.getDirectionMultiplier() * this.info.weightFactor;
 
         if (this.body.getCollidingTile()) {
+            this.angle.rotateSpeed = 10;
             return;
         }
         switch (throwType) {
             case (ThrowType.Light): {
-                this.body.velocity.set(210 * direcMult, -210);
+                this.body.velocity.set(210 * factor, -210 * this.info.weightFactor);
                 this.angle.rotateSpeed = 10;
                 break;
             }
             case (ThrowType.Hard): {
-                this.body.velocity.set(900 * direcMult, -300);
+                this.body.velocity.set(900 * factor, -300 * this.info.weightFactor);
                 this.angle.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.HardDiagonal): {
-                this.body.velocity.set(900 * direcMult, -600);
+                this.body.velocity.set(900 * factor, -600 * this.info.weightFactor);
                 this.angle.rotateSpeed = 15;
                 break;
             }
             case (ThrowType.Drop): {
-                this.body.velocity.set(0 * direcMult, 0);
+                this.body.velocity.set(0 * factor, 0);
                 this.angle.rotateSpeed = 5;
                 break;
             }
             case (ThrowType.Upwards): {
-                this.body.velocity.set(0 * direcMult, -600);
+                this.body.velocity.set(0 * factor, -600 * this.info.weightFactor);
                 this.angle.rotateSpeed = 8;
                 break;
             }
@@ -156,7 +165,11 @@ abstract class Item implements IItem {
     }
 
     public setToDelete(): void {
-        this.projectileCollision.disable();
+        const minScale = 0.3;
+        const maxScale = 0.7;
+        const variance = 10;
+        addSmokeCloud(this.body.getCenter(), minScale, maxScale, variance, 4);
+        this.projectileCollision?.disable();
         this.delete = true;
     };
 

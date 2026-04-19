@@ -3,6 +3,7 @@ import { EquipmentSlot, Side, ThrowType, Utility } from "@common";
 import { Equippable, IItem, isEquippable, ItemManager, Ownership } from "@item";
 import { Connection, GameMessage } from "@server";
 import { DynamicObject } from "@core";
+import { addSmokeCloud } from "@game/Particles";
 
 class PlayerEquipment {
     private equipment: Map<EquipmentSlot, IItem | undefined> = new Map();
@@ -40,6 +41,10 @@ class PlayerEquipment {
 
         if (isEquippable(item) && slot !== EquipmentSlot.Hand) {
             item.onEquip();
+            const minScale = 0.5;
+            const maxScale = 1;
+            const variance = 5;
+            addSmokeCloud(this.body().getCenter(), minScale, maxScale, variance, 2);
         }
     }
 
@@ -49,7 +54,7 @@ class PlayerEquipment {
         })
     }
 
-    public getWeight(): number {
+    public getWeightFactor(): number {
         let result = 1;
         this.equipment.forEach(item => {
             if (item) {

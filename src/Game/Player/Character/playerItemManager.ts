@@ -11,8 +11,10 @@ class PlayerItemManager {
     private controls: PlayerControls;
     private equipment: PlayerEquipment;
     private lastHeldItem: IItem | null = null;
-    public forcedThrowType: null | ThrowType = null;
     private id: number;
+
+    public enabled: boolean = true;
+    public forcedThrowType: null | ThrowType = null;
 
     constructor(body: () => DynamicObject, controls: PlayerControls, equipment: PlayerEquipment, id: number) {
         this.playerBody = body;
@@ -22,7 +24,7 @@ class PlayerItemManager {
     }
 
     public handle(nearby: IItem[]): void {
-        if (!this.controls.pickup(InputMode.Press)) {
+        if (!this.controls.pickup(InputMode.Press) || !this.enabled) {
             return;
         }
         if (this.equipment.hasItem(EquipmentSlot.Hand)) { // Throw item
@@ -118,6 +120,11 @@ class PlayerItemManager {
                 }
                 case (OnItemUseType.Unequip): {
                     this.equipment.throw(effect.value, ThrowType.Drop);
+                    break;
+                }
+                case (OnItemUseType.Throw): {
+                    this.equipment.throw(effect.value, this.getThrowType());
+                    break;
                 }
             }
         })

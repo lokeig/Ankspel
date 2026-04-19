@@ -23,8 +23,9 @@ class ItemManager {
     public static update(deltaTime: number) {
         this.items.forEach(itemSet => itemSet.forEach(item => {
             if (item.shouldBeDeleted()) {
+                Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
                 itemSet.delete(item);
-                // Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
+                item.setToDelete();
                 this.idManager.removeObject(item)!;
             } else {
                 item.update(deltaTime);
@@ -52,7 +53,8 @@ class ItemManager {
         this.idManager.add(newItem);
 
         if (!noMessage) {
-            Connection.get().sendGameMessage(GameMessage.SpawnItem, { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
+            Connection.get().sendGameMessage(GameMessage.SpawnItem,
+                { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
         }
 
         return newItem;

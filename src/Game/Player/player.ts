@@ -147,7 +147,9 @@ class Player {
 
     public held(): boolean {
         const ragdoll = this.stateMachine.getInstance(PlayerState.Ragdoll) as PlayerRagdoll;
-        return ragdoll.ownership !== Ownership.None;
+        const netted = this.stateMachine.getInstance(PlayerState.Net) as PlayerNetted;
+
+        return ragdoll.ownership !== Ownership.None || netted.ownership !== Ownership.None;
     }
 
 

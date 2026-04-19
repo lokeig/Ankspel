@@ -1,9 +1,9 @@
-import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
+import { EquipmentSlot, Frame, ItemInteraction, PlayerAnim, PlayerState, ProjectileEffect, ProjectileEffectType, SpriteSheet } from "@common";
 import { Equippable, OnItemUseEffect, OnItemUseType, Ownership } from "@item";
 import { Vector } from "@math";
 import { AudioManager, Sound } from "@game/Audio";
 import { Item } from "../item";
-import { Images, Render, zIndex } from "@render";
+import { Images } from "@render";
 
 class Chestplate extends Item implements Equippable {
     private static frames = { default: new Frame(), equipped: new Frame(), overArm: new Frame() };
@@ -28,8 +28,16 @@ class Chestplate extends Item implements Equippable {
             return [result];
         });
 
-        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted());
-        this.projectileCollision.disable();
+        this.playerInteractions.setOnPlayerState(PlayerState.Ragdoll, () => {
+            if (this.ownership === Ownership.Equipped) {
+                return [];
+            } else {
+                return [{ type: OnItemUseType.Unequip, value: this.currentSlot }];
+            }
+        });
+
+        this.setProjectileCollision(10, this.onProjectileEffect.bind(this), () => !this.shouldBeDeleted(), () => [ProjectileEffectType.Damage]);
+        this.projectileCollision!.disable();
     }
 
     public onPlayerAnimation(anim: PlayerAnim, holding: boolean): void {
@@ -52,21 +60,23 @@ class Chestplate extends Item implements Equippable {
     }
 
     public onEquip(): void {
+        this.currentSlot = EquipmentSlot.Body;
         this.body.width = 40;
         this.body.height = 40;
 
-        this.projectileCollision.enable();
+        this.projectileCollision!.enable();
+    }
+
+    public onUnequip(): void {
+        this.currentSlot = EquipmentSlot.Hand;
+        this.body.width = 25;
+        this.body.height = 20;
+
+        this.projectileCollision!.disable();
     }
 
     public takeDamage(): void {
 
-    }
-
-    public onUnequip(): void {
-        this.body.width = 25;
-        this.body.height = 20;
-
-        this.projectileCollision.disable();
     }
 
     public onProjectileEffect(effect: ProjectileEffect, _pos: Vector, local: boolean) {

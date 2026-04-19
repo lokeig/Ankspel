@@ -1,4 +1,4 @@
-import { ProjectileEffect } from "@common";
+import { ProjectileEffect, ProjectileEffectType } from "@common";
 import { DynamicObject } from "@core";
 import { Vector } from "@math";
 import { ProjectileManager, ProjectileTarget } from "@projectile";
@@ -6,10 +6,16 @@ import { Connection, GameMessage } from "@server";
 
 class ItemProjectileCollision {
     private target: ProjectileTarget;
-
     private handleEffectCallback: (effect: ProjectileEffect, pos: Vector) => void;
 
-    constructor(body: DynamicObject, id: number, resistence: number, onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void, enabled: () => boolean) {
+    constructor(
+        body: DynamicObject,
+        id: number,
+        resistence: number,
+        onHit: (effect: ProjectileEffect, pos: Vector, local: boolean) => void,
+        enabled: () => boolean,
+        interactions: () => ProjectileEffectType[]
+    ) {
         this.target = {
             body: () => body,
             penetrationResistance: () => resistence,
@@ -20,8 +26,8 @@ class ItemProjectileCollision {
                 }
             }),
             enabled,
+            interactions
         };
-
         ProjectileManager.addCollidable(this.target);
 
         this.handleEffectCallback = (effect, pos) => onHit(effect, pos, true);

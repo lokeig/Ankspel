@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { ProjectileEffectType, Side, SpriteSheet, Utility } from "@common";
+import { Countdown, ProjectileEffectType, Side, SpriteSheet, Utility } from "@common";
 import { DynamicObject } from "@core";
 import { IProjectile, ProjectileTarget } from "@projectile";
 import { Images, zIndex } from "@render";
@@ -11,6 +11,7 @@ class Net implements IProjectile {
 
     private local: boolean = false;
     private delete: boolean = false;
+    private deleteTimer = new Countdown(0.25);
 
     constructor(pos: Vector, angle: number, direction: Side) {
         const speed = 800;
@@ -36,6 +37,7 @@ class Net implements IProjectile {
     }
 
     public update(deltaTime: number, collidable: ProjectileTarget[]): void {
+
         this.body.ignoreFriction = !this.body.grounded;
         this.body.update(deltaTime);
 
@@ -43,18 +45,31 @@ class Net implements IProjectile {
             if (!collisionObject.enabled()) {
                 continue;
             }
+            if (!collisionObject.interactions().includes(ProjectileEffectType.Net)) {
+                continue;
+            }
             if (!collisionObject.body().collision(this.body)) {
                 continue;
             }
-            if (collisionObject.penetrationResistance() !== 2) {
-                continue;
-            }
-            collisionObject.onProjectileHit([{ type: ProjectileEffectType.Net, duration: 5 }], this.body.pos, this.local);
+            collisionObject.onProjectileHit(
+                [
+                    { type: ProjectileEffectType.Net, duration: 5 },
+                    { type: ProjectileEffectType.Knockback, amount: this.body.velocity.clone().multiply(0.5) }
+                ],
+                this.body.pos,
+                this.local
+            );
             this.setToDelete();
             break;
         }
         if (this.body.velocity.y !== 0 || this.body.velocity.x !== 0) {
             this.angle = Math.atan2(this.body.velocity.y, this.body.velocity.x);
+            this.deleteTimer.reset();
+        } else {
+            this.deleteTimer.update(deltaTime);
+            if (this.deleteTimer.isDone()) {
+                this.setToDelete();
+            }
         }
     }
 
@@ -67,7 +82,7 @@ class Net implements IProjectile {
     }
 
     public shouldBeDeleted(): boolean {
-        return this.delete || (Math.abs(this.body.velocity.x) < 10 && this.body.velocity.y === 0);
+        return this.delete;
     }
 
     public setLocal(): void {

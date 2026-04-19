@@ -23,16 +23,13 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.player.isLocal()) {
-            this.nonLocalUpdate(deltaTime);
-            return;
-        }
         this.player.standardBody.velocity.y = Math.min(this.player.standardBody.velocity.y, this.flapSpeed);
 
         const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
         this.player.rotateArm(deltaTime, forceRotationUp);
 
-        this.player.standardBodyUpdate(deltaTime);
+        this.player.updateBody(deltaTime);
+        this.player.update(deltaTime);
         this.setCurrentAnimation();
         this.setEquipmentPosition();
     }
@@ -64,20 +61,15 @@ class PlayerFlap implements IState<PlayerState> {
             return PlayerState.Crouch;
         }
         if (controls.jump() && !this.player.standardBody.grounded) {
-            return PlayerState.Flap
+            if (this.player.equipment.getWeightFactor() > 0.6) {
+                return PlayerState.Flap
+            }
         }
         return PlayerState.Standard;
     }
 
     public stateExited(): void {
-    }
-
-    private nonLocalUpdate(deltaTime: number): void {
-        this.player.standardBody.velocity.y = Math.min(this.player.standardBody.velocity.y, this.flapSpeed);
-        const forceRotationUp = this.player.equipment.hasItem(EquipmentSlot.Hand);
-        this.player.rotateArm(deltaTime, forceRotationUp)
-        this.player.standardBodyNonLocalUpdate(deltaTime);
-        this.setEquipmentPosition();
+    
     }
 
     public draw(): void {

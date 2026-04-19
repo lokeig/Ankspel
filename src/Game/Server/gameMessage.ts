@@ -29,6 +29,7 @@ enum GameMessage {
     ThrowItem,
     ItemProjectileEffect,
     ItemCollision,
+    ItemDestroyed,
 
     // ─── Spawner ────────────────────────
     AddSpawner,
@@ -77,6 +78,7 @@ interface GameMessageMap {
     [GameMessage.ActivateItem]: { id: number, pos: NetworkVector, angle: number, direction: Side, action: ItemInteraction, seed: number };
     [GameMessage.DeactivateItem]: { id: number };
     [GameMessage.ItemCollision]: { id: number, effect: OnItemCollision };
+    [GameMessage.ItemDestroyed]: { id: number };
 
     // ─── Spawner ────────────────────────
     [GameMessage.AddSpawner]: { config: SpawnerDescription, id: number };

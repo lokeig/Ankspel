@@ -6,11 +6,11 @@ import { DynamicObject } from "@core";
 class GlowingBullet {
     private static spriteSheet: SpriteSheet;
 
-    private lifeTime = new Countdown(0.4);
+    private lifeTime = new Countdown(Utility.Random.getInRange(0.2, 1.6));
     private body: DynamicObject;
 
     private readonly height: number = Utility.Random.getInRange(4, 12);
-    private readonly width: number = 2;
+    private readonly width: number = 3;
 
     static {
         this.spriteSheet = new SpriteSheet(Images.bulletGlow);
@@ -20,13 +20,13 @@ class GlowingBullet {
         this.body = new DynamicObject(pos.clone(), 0, 0);
 
         const angleVariation = Math.PI / 6;
-        const randomizedAngle = Math.PI + angle + Utility.Random.getInRange(-angleVariation, angleVariation);
+        const randomizedAngle = angle + Utility.Random.getInRange(-angleVariation, angleVariation);
 
         this.body.velocity = Utility.Angle.rotateForce(
-            new Vector(Utility.Random.getInRange(150, 250), 0),
+            new Vector(Utility.Random.getInRange(150, 450), 0),
             randomizedAngle
         );
-        this.body.gravity = 440;
+        this.body.gravity = 840;
         this.body.ignoreFriction = true;
         this.body.bounceFactor = 0.8;
     }

@@ -60,7 +60,16 @@ class ItemMessageHandler {
                 console.log("Can't effect item: ", id, ", doesn't exist.")
                 return;
             }
-            item.projectileCollision.handleEffect(effect, pos);
+            item.projectileCollision?.handleEffect(effect, pos);
+        });
+
+        gameEvent.subscribe(GameMessage.ItemDestroyed, ({ id }) => {
+            const item = ItemManager.getItemFromID(id);
+            if (!item) {
+                console.log("Can't destroy item: ", id, ", doesn't exist.")
+                return;
+            }
+            item.onDestroy?.();
         });
 
 

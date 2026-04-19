@@ -4,10 +4,12 @@ import { PlayerCharacter } from "../Character/playerCharacter";
 import { PlayerAnim } from "../../Common/Types/playerAnim";
 import { IItem, ItemIgnore, ItemPlayerCollision, ItemPlayerInteraction, ItemProjectileCollision, Ownership } from "@item";
 import { DynamicObject } from "@core";
-import { DizzyStars } from "@impl/Particles";
-import { ParticleManager } from "@game/Particles";
+import { zIndex } from "@render";
 
 class PlayerNetted implements IState<PlayerState>, IItem {
+    private static holdOffset = new Vector(14, -5);
+    private static handOffset = new Vector();
+
     private player: PlayerCharacter;
     private timer = new Countdown(10);
     public ownership = Ownership.None;
@@ -29,6 +31,8 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         this.body = player.standardBody;
         this.info.id = id;
         this.playerCollision = new ItemPlayerCollision(this.info.id, this.onCollision.bind(this), this.handleCollision.bind(this));
+        this.info.handOffset = PlayerNetted.handOffset;
+        this.info.holdOffset = PlayerNetted.holdOffset;
     }
 
     private setCurrentAnimation() {
@@ -37,35 +41,47 @@ class PlayerNetted implements IState<PlayerState>, IItem {
     }
 
     public stateEntered(): void {
+        if (this.player.isLocal()) {
+            this.player.movement.moveEnabled = false;
+            this.player.jump.jumpEnabled = false;
+            this.player.itemManager.enabled = false;
+        }
         this.timer.reset();
         const armOffset = new Vector(10, 28);
         this.player.armFront.setOffset(armOffset);
 
-        if (this.player.isLocal()) {
-            this.player.jump.jumpEnabled = false;
-            this.player.movement.moveEnabled = false;
-        }
         this.player.handleNewState(PlayerState.Net);
-        this.setCurrentAnimation();
     }
 
     public stateUpdate(deltaTime: number): void {
+        this.setFriction();
+        this.setCurrentAnimation();
+        this.player.update(deltaTime);
+        this.timer.update(deltaTime);
         this.setEquipmentLocation();
-        if (!this.player.isLocal()) {
-            this.nonLocalUpdate(deltaTime);
+
+        if (this.ownership !== Ownership.None) { // is owned by player or spawner
             return;
         }
-        this.timer.update(deltaTime);
-        if (this.ownership !== Ownership.None) {
+        this.body.ignoreFriction = !this.body.grounded;
+        this.player.updateBody(deltaTime);
+        if (!this.player.isLocal()) {
             return;
         }
         if (this.player.controls.jump() && this.player.standardBody.grounded) {
             this.player.standardBody.velocity.y -= 150;
             const dir = this.player.controls.getMoveDirection();
-            this.player.standardBody.velocity.x += 100 * dir;
+            this.player.standardBody.velocity.x = 100 * dir;
             this.timer.update(0.33);
         }
-        this.player.standardBodyUpdate(deltaTime);
+    }
+
+    private setFriction(): void {
+        if (Math.abs(this.player.standardBody.velocity.x) > 120) {
+            this.player.standardBody.frictionMultiplier = 0.7;
+        } else {
+            this.player.standardBody.frictionMultiplier = 1;
+        }
     }
 
     private setEquipmentLocation() {
@@ -80,11 +96,6 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         });
     }
 
-    private nonLocalUpdate(deltaTime: number): void {
-        this.player.standardBodyNonLocalUpdate(deltaTime);
-        this.setEquipmentLocation();
-    }
-
     public stateChange(): PlayerState {
         if (this.player.isDead()) {
             return PlayerState.Ragdoll;
@@ -97,19 +108,23 @@ class PlayerNetted implements IState<PlayerState>, IItem {
 
     public stateExited(): void {
         if (this.player.isLocal()) {
-            this.player.jump.jumpEnabled = true;
             this.player.movement.moveEnabled = true;
+            this.player.jump.jumpEnabled = true;
+            this.player.itemManager.enabled = true;
         }
+        this.player.standardBody.frictionMultiplier = 1;
+        this.player.standardBody.ignoreFriction = false;
         this.player.netted = false;
         this.ownership = Ownership.None;
     }
 
     public draw(): void {
-        this.player.draw();
+        const z = this.ownership === Ownership.InSpawner ? zIndex.Spawners : zIndex.Player;
+        this.player.draw(z);
     }
 
-    public update(_deltaTime: number): void {
-
+    public update(deltaTime: number): void {
+        this.ignoring.update(deltaTime);
     }
 
     public setAngle(_to: number): void {
@@ -120,12 +135,11 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         return 0;
     }
 
-    public onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
+    private onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
         const offset = 5;
-        const minVerticalSpeed = 400;
+        const minVerticalSpeed = 300;
         const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;
-        if ((prevPos - offset < body.pos.y)) {
-            console.log("Buzzin")
+        if ((prevPos - offset < body.pos.y) && this.body.velocity.y > minVerticalSpeed) {
             return [{ type: OnItemCollisionType.Headbonk }];
         }
         if (Math.abs(this.body.velocity.x) > 300) {
@@ -134,14 +148,13 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         return [];
     }
 
-    public handleCollision(effect: OnItemCollision): void {
+    private handleCollision(effect: OnItemCollision): void {
         switch (effect.type) {
             case OnItemCollisionType.Knockback: {
                 this.body.velocity.x *= -this.body.bounceFactor;
                 break;
             }
             case OnItemCollisionType.Headbonk: {
-                ParticleManager.addParticle(new DizzyStars(this.body.getCenter()));
                 this.body.velocity.y *= -0.5;
                 break;
             }
@@ -169,15 +182,15 @@ class PlayerNetted implements IState<PlayerState>, IItem {
         }
         switch (throwType) {
             case (ThrowType.Light): {
-                this.body.velocity.set(210 * direcMult, -210);
+                this.body.velocity.set(110 * direcMult, -210);
                 break;
             }
             case (ThrowType.Hard): {
-                this.body.velocity.set(900 * direcMult, -300);
+                this.body.velocity.set(500 * direcMult, -300);
                 break;
             }
             case (ThrowType.HardDiagonal): {
-                this.body.velocity.set(900 * direcMult, -600);
+                this.body.velocity.set(500 * direcMult, -600);
                 break;
             }
             case (ThrowType.Drop): {

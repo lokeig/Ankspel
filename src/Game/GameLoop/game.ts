@@ -23,7 +23,7 @@ class DuckGame {
     private inFinal: Player[] = [];
 
     public update(deltaTime: number): void {
-        const fixedStep = 0.03;
+        const fixedStep = 0.02;
         const maxIterations = 20;
 
         let remainingDelta = deltaTime;

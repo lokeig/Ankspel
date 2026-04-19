@@ -1,6 +1,7 @@
 import { Vector } from "@math";
 import { SpriteAnimator, SpriteSheet, Animation, Utility } from "@common";
 import { Images, zIndex } from "@render";
+import { addSmokeCloud, ParticleManager, Smoke } from "@game/Particles";
 
 class ExplosionParticle {
     private pos: Vector;
@@ -36,6 +37,10 @@ class ExplosionParticle {
         this.animator.update(deltaTime);
         if (this.animator.animationDone()) {
             this.setToDelete = true;
+            const minScale = 0.7;
+            const maxScale = 1;
+            const variance = 15;
+            addSmokeCloud(this.pos, minScale, maxScale, variance, 4);
         }
     }
 

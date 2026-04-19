@@ -15,7 +15,7 @@ class PlayerItemCollisionManager {
     public handle(deltaTime: number): IItem[] {
         const body = this.body();
 
-        const inSpawners = SpawnerManager.getSpawnerItems();
+        const inSpawners = SpawnerManager.getSpawnerItems(body);
         const onGround = ItemManager.getNearby(body);
         const nearby = [...inSpawners, ...onGround];
 

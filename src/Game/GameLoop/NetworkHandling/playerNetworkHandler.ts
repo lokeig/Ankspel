@@ -51,7 +51,10 @@ class PlayerNetworkHandler {
             ];
             convertion.forEach(([id, slot]) => {
                 if (id !== null && ItemManager.getItemFromID(id)) {
-                    player.character.equipment.equip(ItemManager.getItemFromID(id)!, slot);
+                    const item = ItemManager.getItemFromID(id)!;
+                    if (player.character.equipment.getItem(slot) !== item) {
+                        player.character.equipment.equip(ItemManager.getItemFromID(id)!, slot);
+                    }
                 } else {
                     player.character.equipment.equip(null, slot);
                 }

@@ -11,6 +11,9 @@ class PlayerStandard implements IState<PlayerState> {
     }
 
     private setCurrentAnimation() {
+        if (!this.player.isLocal()) {
+            return;
+        }
         const animator = this.player.animator;
         if (!this.player.standardBody.grounded) {
             if (this.player.standardBody.velocity.y < 0) {
@@ -38,12 +41,9 @@ class PlayerStandard implements IState<PlayerState> {
     }
 
     public stateUpdate(deltaTime: number): void {
-        if (!this.player.isLocal()) {
-            this.nonLocalUpdate(deltaTime);
-            return;
-        }
         this.player.rotateArm(deltaTime);
-        this.player.standardBodyUpdate(deltaTime);
+        this.player.updateBody(deltaTime);
+        this.player.update(deltaTime);
         this.setCurrentAnimation();
 
         this.setEquipmentLocation();
@@ -61,11 +61,6 @@ class PlayerStandard implements IState<PlayerState> {
         });
     }
 
-    private nonLocalUpdate(deltaTime: number): void {
-        this.player.rotateArm(deltaTime);
-        this.player.standardBodyNonLocalUpdate(deltaTime);
-        this.setEquipmentLocation();
-    }
 
     public stateChange(): PlayerState {
         if (this.player.isDead()) {
@@ -78,7 +73,9 @@ class PlayerStandard implements IState<PlayerState> {
             return PlayerState.Ragdoll;
         }
         if (this.player.controls.jump(InputMode.Press) && !this.player.standardBody.grounded && !this.player.jump.isJumping) {
-            return PlayerState.Flap;
+            if (this.player.equipment.getWeightFactor() > 0.6) {
+                return PlayerState.Flap;
+            }
         }
         if (this.player.controls.down()) {
             if (Math.abs(this.player.standardBody.velocity.x) < 180 || !this.player.standardBody.grounded) {

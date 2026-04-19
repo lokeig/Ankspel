@@ -14,8 +14,14 @@ class BulletReboundVFX implements IParticle {
         const glowingBulletCount = 5;
         this.glowingBullets = new Array<GlowingBullet>(glowingBulletCount);
 
+        let glowAngle = angle;
+        if (normal === AxisDirection.Left || normal === AxisDirection.Right) {
+            glowAngle = Math.PI - angle;
+        } else {
+            glowAngle *= -1;
+        }
         for (let i = 0; i < glowingBulletCount; i++) {
-            const bulletGlow = new GlowingBullet(pos, angle);
+            const bulletGlow = new GlowingBullet(pos, glowAngle);
             this.glowingBullets[i] = bulletGlow;
         }
     }
@@ -25,8 +31,7 @@ class BulletReboundVFX implements IParticle {
             glow.update(deltaTime);
 
             if (glow.shouldBeDeleted()) {
-                this.glowingBullets = [];
-                break;
+                this.glowingBullets = this.glowingBullets.filter(toRemove => toRemove !== glow);
             }
         }
         if (!this.marker) {

@@ -102,13 +102,13 @@ class CanvasRender implements IRender {
         }
         this.ctx.globalAlpha = drawInfo.opacity;
         if (drawInfo.flip) {
-            const translateAmount = Math.floor(drawInfo.world.x + drawInfo.world.width / 2)
-            this.ctx.translate(translateAmount, Math.floor(drawInfo.world.y));
+            const translateAmount = (drawInfo.world.x + drawInfo.world.width / 2)
+            this.ctx.translate(translateAmount, (drawInfo.world.y));
             this.ctx.scale(-1, 1);
-            this.ctx.translate(-translateAmount, - Math.floor(drawInfo.world.y));
+            this.ctx.translate(-translateAmount, - (drawInfo.world.y));
         }
 
-        this.ctx.translate(Math.floor(drawInfo.world.x + drawInfo.world.width / 2), Math.floor(drawInfo.world.y + drawInfo.world.height / 2));
+        this.ctx.translate((drawInfo.world.x + drawInfo.world.width / 2), (drawInfo.world.y + drawInfo.world.height / 2));
         this.ctx.rotate(drawInfo.angle);
 
         if (drawInfo.blendingMode) {
@@ -121,10 +121,10 @@ class CanvasRender implements IRender {
             Math.floor(drawInfo.source.y),
             Math.floor(drawInfo.source.width),
             Math.floor(drawInfo.source.height),
-            Math.floor(-drawInfo.world.width / 2),
-            Math.floor(-drawInfo.world.height / 2),
-            Math.floor(drawInfo.world.width),
-            Math.floor(drawInfo.world.height),
+            (-drawInfo.world.width / 2),
+            (-drawInfo.world.height / 2),
+            (drawInfo.world.width),
+            (drawInfo.world.height),
         );
 
         this.ctx.restore();
@@ -137,8 +137,8 @@ class CanvasRender implements IRender {
             return;
         }
 
-        const w = Math.floor(drawInfo.world.width);
-        const h = Math.floor(drawInfo.world.height);
+        const w = (drawInfo.world.width);
+        const h = (drawInfo.world.height);
 
         this.colorBuffer.width = w;
         this.colorBuffer.height = h;
@@ -167,7 +167,7 @@ class CanvasRender implements IRender {
         this.colorCtx.fillRect(0, 0, w, h);
 
         this.ctx.save();
-        this.ctx.translate(Math.floor(drawInfo.world.x + w / 2), Math.floor(drawInfo.world.y + h / 2));
+        this.ctx.translate((drawInfo.world.x + w / 2), (drawInfo.world.y + h / 2));
 
         if (drawInfo.flip) {
             this.ctx.scale(-1, 1);
@@ -181,10 +181,10 @@ class CanvasRender implements IRender {
 
         this.ctx.drawImage(
             this.colorBuffer,
-            Math.floor(-drawInfo.world.width / 2),
-            Math.floor(-drawInfo.world.height / 2),
-            Math.floor(drawInfo.world.width),
-            Math.floor(drawInfo.world.height)
+            (-drawInfo.world.width / 2),
+            (-drawInfo.world.height / 2),
+            (drawInfo.world.width),
+            (drawInfo.world.height)
         );
 
         this.ctx.restore();
@@ -197,8 +197,8 @@ class CanvasRender implements IRender {
             return;
         }
 
-        const dx = Math.floor(info.end.x - info.start.x);
-        const dy = Math.floor(info.end.y - info.start.y);
+        const dx = (info.end.x - info.start.x);
+        const dy = (info.end.y - info.start.y);
         const length = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
 
@@ -246,7 +246,7 @@ class CanvasRender implements IRender {
         this.ctx.font = info.size + "px " + info.font;
         this.ctx.fillStyle = info.color;
 
-        this.ctx.fillText(info.text, Math.floor(info.pos.x), Math.floor(info.pos.y));
+        this.ctx.fillText(info.text, (info.pos.x), (info.pos.y));
 
         this.ctx.restore();
     }
@@ -267,10 +267,17 @@ class CanvasRender implements IRender {
         const xOffset = newWidth / 2 - pos.x;
         const yOffset = newHeight / 2 - pos.y;
 
-        this.ctx.scale(zoom, zoom);
-        this.ctx.translate(xOffset, yOffset);
+        const snappedX = Math.round(xOffset * zoom) / zoom;
+        const snappedY = Math.round(yOffset * zoom) / zoom;
 
-        this.cameraPos = pos.clone();
+        this.ctx.setTransform(
+            zoom, 0,
+            0, zoom,
+            snappedX * zoom,
+            snappedY * zoom
+        );
+
+        this.cameraPos = new Vector(snappedX, snappedY);
         this.cameraZoom = zoom;
     }
 

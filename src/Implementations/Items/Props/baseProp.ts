@@ -3,8 +3,6 @@ import { Item } from "../item";
 import { DynamicObject } from "@core";
 import { Vector } from "@math";
 import { CollisionManager } from "@game/Collision/collisionManager";
-import { ParticleManager } from "@game/Particles";
-import { DizzyStars } from "@impl/Particles";
 
 abstract class BaseProp extends Item {
     private collision = { body: this.body, platform: true };
@@ -20,7 +18,7 @@ abstract class BaseProp extends Item {
 
     public onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
         const offset = 5;
-        const minVerticalSpeed = 400;
+        const minVerticalSpeed = 300;
         const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;
         if (this.body.velocity.y > minVerticalSpeed && prevPos - offset < body.pos.y) {
             return [{ type: OnItemCollisionType.Headbonk }];
@@ -38,7 +36,6 @@ abstract class BaseProp extends Item {
                 break;
             }
             case OnItemCollisionType.Headbonk: {
-                ParticleManager.addParticle(new DizzyStars(this.body.getCenter()));
                 this.body.velocity.y *= -0.5;
                 break;
             }
@@ -49,39 +46,6 @@ abstract class BaseProp extends Item {
         super.setToDelete();
         CollisionManager.removeCollidable(this.collision);
     }
-
-    public throw(throwType: ThrowType): void {
-        this.body.grounded = false;
-        const direcMult = this.body.getDirectionMultiplier();
-
-        if (this.body.getCollidingTile()) {
-            return;
-        }
-        const factor = this.info.weightFactor;
-        switch (throwType) {
-            case (ThrowType.Light): {
-                this.body.velocity.set(210 * direcMult * factor, -210 * factor);
-                break;
-            }
-            case (ThrowType.Hard): {
-                this.body.velocity.set(900 * direcMult * factor, -300 * factor);
-                break;
-            }
-            case (ThrowType.HardDiagonal): {
-                this.body.velocity.set(900 * direcMult * factor, -600 * factor);
-                break;
-            }
-            case (ThrowType.Drop): {
-                this.body.velocity.set(0 * direcMult * factor, 0 * factor);
-                break;
-            }
-            case (ThrowType.Upwards): {
-                this.body.velocity.set(0 * direcMult * factor, -600 * factor);
-                break;
-            }
-        }
-    }
-
 }
 
 export { BaseProp };

@@ -53,6 +53,10 @@ class Spawner {
                 this.contains = null;
                 return;
             }
+            if (!this.contains.enabled()) {
+                this.contains = null;
+                return;
+            }
             if (this.contains.ownership !== Ownership.InSpawner) {
                 this.dropContaining();
                 return;
@@ -80,24 +84,31 @@ class Spawner {
         }
     }
 
+    private getStartPos(itemBody: GameObject): Vector {
+        const result = this.body.getCenter();
+        result.y += this.body.height / 2;
+        
+        const standardOffset = 5;
+        result.x -= itemBody.width / 2;
+        result.y -= itemBody.height + standardOffset;
+
+        return result;
+    }
+
     private bobItemUpAndDown(deltaTime: number): void {
-        const itemBody = this.contains!.body;
-
-        const center = this.body.getCenter();
-        center.x -= itemBody.width / 2;
-        center.y -= itemBody.height / 2;
-
         this.yBobbingLocation += deltaTime;
-
+        
         const offset = Spawner.yBobbingMax * Math.sin(this.yBobbingLocation * Spawner.yBobbingSpeed);
+        const itemBody = this.contains!.body;
+        const start = this.getStartPos(itemBody);
 
-        itemBody.pos.y = center.y + offset;
-        itemBody.pos.x = center.x;
+        itemBody.pos.x = start.x;
+        itemBody.pos.y = start.y + offset;
     }
 
     public getContaining(): IItem | null {
         return this.contains;
-        }
+    }
 
     private dropContaining(): void {
         this.contains = null;
@@ -105,6 +116,9 @@ class Spawner {
 
     private spawnNewItem(): void {
         const toSpawn = this.itemPool[Utility.Random.getInteger(0, this.itemPool.length - 1)];
+        if (this.contains) {
+            this.dropContaining();
+        }
 
         const noMessage = true;
         const item = ItemManager.create(toSpawn, this.body.pos, noMessage);
@@ -140,22 +154,18 @@ class Spawner {
             this.contains.ownership = Ownership.None;
         }
         this.contains = item;
-
-        const center = this.body.getCenter();
-
-        center.x -= item.body.width / 2;
-        center.y -= item.body.height / 2;
+        const start = this.getStartPos(item.body);
 
         if (lerp) {
-            this.xPositionLerp.startLerp(item.body.pos.x, center.x);
-            this.yPositionLerp.startLerp(item.body.pos.y, center.y);
+            this.xPositionLerp.startLerp(item.body.pos.x, start.x);
+            this.yPositionLerp.startLerp(item.body.pos.y, start.y);
 
             const normalized = Utility.Angle.normalize(item.getAngle());
 
             const target = Math.abs(normalized) > Math.PI / 2 ? Math.PI : 0;
             this.rotationLerp.startLerp(normalized, target);
         } else {
-            item.body.pos = center;
+            item.body.pos = start;
             item.setAngle(0);
         }
 

@@ -22,15 +22,15 @@ interface IItem {
     getAngle(): number;
     setAngle(to: number): void;
 
-    projectileCollision: ItemProjectileCollision;
+    projectileCollision: ItemProjectileCollision | null;
     ownership: Ownership;
 
     throw(throwType: ThrowType): void;
     enabled(): boolean;
 
-
     shouldBeDeleted(): boolean;
     setToDelete(): void;
+    onDestroy?(): void;
 
     draw(): void;
     drawTopLayer?(): void;

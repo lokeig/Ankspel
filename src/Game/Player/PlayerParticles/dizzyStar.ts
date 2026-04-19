@@ -1,8 +1,9 @@
 import { Vector } from "@math";
 import { Countdown, SpriteSheet } from "@common";
 import { Images, zIndex } from "@render";
+import { IParticle } from "@game/Particles";
 
-class DizzyStars {
+class DizzyStars implements IParticle {
     private static spriteSheet: SpriteSheet;
     private static drawDimensions = new Vector(Images.dizzyStar.frameWidth, Images.dizzyStar.frameHeight).multiply(2);
 

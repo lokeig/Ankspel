@@ -7,15 +7,13 @@ import { Item } from "./item";
 import { Bullet } from "@impl/Projectiles";
 import { Images } from "@render";
 import { AudioManager, Sound } from "@game/Audio";
+import { Connection, GameMessage } from "@server";
 
 class Grenade extends Item {
     private static spriteSheet: SpriteSheet;
     private static frames = { pinned: new Frame(), default: new Frame() };
     private static holdOffset = new Vector(11, -6);
     private static pixelOffset = new Vector(1, -1);
-
-    private firstBeep: boolean = false;
-    private secondBeep: boolean = false;
     private explosionDelay = new Countdown(2);
 
     private activated: boolean = false;
@@ -47,30 +45,21 @@ class Grenade extends Item {
     }
 
     public update(deltaTime: number): void {
-        if (this.activated) {
-            this.explodingUpdate(deltaTime);
-        }
         super.update(deltaTime);
 
-        if (this.explosionDelay.isDone()) {
-            this.explode();
+        if (!this.locallyActivated) {
+            return;
         }
-    }
-
-    private explodingUpdate(deltaTime: number): void {
         this.explosionDelay.update(deltaTime);
-        if (!this.firstBeep && this.explosionDelay.getPercentageReady() > 1 / 3) {
-            this.firstBeep = true;
-            AudioManager.get().play(Sound.beep);
-        }
-        if (!this.secondBeep && this.explosionDelay.getPercentageReady() > 2 / 3) {
-            this.secondBeep = true;
-            AudioManager.get().play(Sound.beep);
+        if (this.explosionDelay.isDone()) {
+            Connection.get().sendGameMessage(GameMessage.ItemDestroyed, { id: this.info.id });
+            this.explode();
         }
     }
 
     private explode(): void {
         ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
+
         this.setToDelete();
 
         const amountOfBullets = 24;
@@ -87,6 +76,10 @@ class Grenade extends Item {
         AudioManager.get().play(Sound.explode);
     }
 
+    public onDestroy(): void {
+        this.explode();
+    }
+
     private activate(seed: number): void {
         if (this.activated) {
             return;
@@ -96,15 +89,10 @@ class Grenade extends Item {
         this.activated = true;
     }
 
-    public getHoldOffset(): Vector {
-        return Grenade.holdOffset;
-    }
-
     public draw(): void {
         const drawSize = 32;
         const frame = this.activated ? Grenade.frames.pinned : Grenade.frames.default;
         const drawPos = this.getDrawPos(drawSize, Grenade.pixelOffset);
-        drawPos.x -= 1;
         Grenade.spriteSheet.draw(drawPos, drawSize, this.body.isFlip(), this.getAngle(), this.getZIndex(), frame)
     }
 }

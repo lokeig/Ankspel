@@ -6,7 +6,8 @@ enum OnItemUseType {
     Position,
     Aim,
     Equip,
-    Unequip
+    Unequip,
+    Throw
 }
 
 enum Ownership {
@@ -22,6 +23,7 @@ interface OnItemUseMap {
     [OnItemUseType.Aim]: number,
     [OnItemUseType.Equip]: EquipmentSlot,
     [OnItemUseType.Unequip]: EquipmentSlot,
+    [OnItemUseType.Throw]: EquipmentSlot
 }
 
 type OnItemUseEffect = {
