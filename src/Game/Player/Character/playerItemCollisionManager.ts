@@ -25,10 +25,7 @@ class PlayerItemCollisionManager {
                     return;
                 }
                 const effects = item.playerCollision.handleLocally(deltaTime, body);
-                effects.forEach(effect => {
-                    this.effectHandler(effect);
-                    item.ignoring.set(body, 0.3);
-                });
+                effects.forEach(effect => this.effectHandler(effect));
             }
         });
         return nearby;

@@ -30,10 +30,12 @@ const Images = {
     netGunGuage: { src: '/assets/Images/Items/netGunGuage.png', frameWidth: 8, frameHeight: 8 },
     mine: { src: '/assets/Images/Items/mine.png', frameWidth: 18, frameHeight: 10 },
     mineFlash: { src: '/assets/Images/Items/mineFlash.png', frameWidth: 48, frameHeight: 48 },
+    bazooka: { src: '/assets/Images/Items/bazooka.png', frameWidth: 30, frameHeight: 13 },
 
     // Projectiles
     net: { src: '/assets/Images/Projectiles/net.png', frameWidth: 16, frameHeight: 16 },
     trail: { src: '/assets/Images/Projectiles/trail.png', frameWidth: 8, frameHeight: 1 },
+    missile: { src: '/assets/Images/Projectiles/missile.png', frameWidth: 14, frameHeight: 8 },
 
     // Particles
     explosion: { src: '/assets/Images/VFX/explosion.png', frameWidth: 64, frameHeight: 64 },

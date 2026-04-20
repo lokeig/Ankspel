@@ -12,6 +12,7 @@ import { Parallax } from "@game/ParallaxBackground/parallax";
 import { ForestParallax } from "./Parallax/defaultParallaxes";
 import { Crate, NetGun, Rock } from "./Items";
 import { Mine } from "./Items/mine";
+import { Bazooka } from "./Items/bazooka";
 
 function registerDefaultNames() {
     ItemManager.registerItem("shotgun", Shotgun);
@@ -23,6 +24,7 @@ function registerDefaultNames() {
     ItemManager.registerItem("crate", Crate);
     ItemManager.registerItem("netGun", NetGun);
     ItemManager.registerItem("mine", Mine);
+    ItemManager.registerItem("bazooka", Bazooka);
 
     TileManager.registerTile("iceTile", IceTile);
     TileManager.registerTile("natureTile", NatureTile);

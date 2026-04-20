@@ -10,7 +10,7 @@ class Feather {
     static {
         this.animation.addRow(0, 4);
         this.animation.repeat = true;
-        this.animation.fps = 20;
+        this.animation.fps = 10;
     }
 
     private body: DynamicObject;
@@ -34,17 +34,19 @@ class Feather {
         this.body.velocity.y = Utility.Random.getInRange(-150, 20);
 
         this.body.gravity = 190;
+        this.body.ignoreFriction = true;
     }
 
     public update(deltaTime: number) {
         this.body.update(deltaTime)
         if (this.body.grounded) {
+            this.body.ignoreFriction = false;
             return;
         }
         this.swayNumber += deltaTime;
-        const swayingDistance = 400;
-        const swayingFrequency = 4;
-        this.body.velocity.x = Math.cos(this.swayNumber * Math.PI * swayingFrequency) * swayingDistance;
+        const swayingDistance = 100;
+        const swayingFrequency = 1.5;
+        this.body.velocity.x = Math.cos(this.swayNumber * swayingFrequency) * swayingDistance;
         this.animator.update(deltaTime);
 
     }

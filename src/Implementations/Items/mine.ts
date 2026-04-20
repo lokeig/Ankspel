@@ -1,5 +1,5 @@
 import { Vector } from "@math";
-import { SpriteSheet, Countdown, ItemInteraction, SeededRNG, Animation, SpriteAnimator, EquipmentSlot, OnItemCollision, Frame } from "@common";
+import { SpriteSheet, Countdown, ItemInteraction, SeededRNG, Animation, SpriteAnimator, EquipmentSlot, OnItemCollision, Frame, OnItemCollisionType } from "@common";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
 import { ProjectileManager } from "@game/Projectile";
@@ -19,6 +19,8 @@ class Mine extends Item {
         default: new Frame(0, 0),
         activated: new Frame(0, 1),
         activatedBlink: new Frame(0, 2),
+        steppedOn: new Frame(0, 3),
+        steppedOnBlink: new Frame(0, 4),
     };
     private static blinkInterval: number = 0.4;
     private static holdOffset = new Vector(11, -6);
@@ -51,7 +53,7 @@ class Mine extends Item {
         super.update(deltaTime);
         this.counter += deltaTime;
 
-        if (this.activated && this.steppedOn && this.lastFrameCollision && !this.thisFrameCollision) {
+        if (this.steppedOn && this.lastFrameCollision && !this.thisFrameCollision) {
             Connection.get().sendGameMessage(GameMessage.ItemDestroyed, { id: this.info.id });
             this.explode();
         }
@@ -61,15 +63,24 @@ class Mine extends Item {
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
         if (this.activated) {
-            if (!this.steppedOn) {
-                AudioManager.get().play(Sound.beep);
-                Connection.get().sendGameMessage(GameMessage.PlaySound, { sound: Sound.beep });
-                this.steppedOn = true;
-            }
             this.thisFrameCollision = true;
+            if (!this.steppedOn && this.body.grounded && !this.lastFrameCollision) {
+                this.steppedOn = true;
+                return [{ type: OnItemCollisionType.SteppedOn }];
+            }
             return [];
         } else {
             return super.onCollision(_deltaTime, _body);
+        }
+    }
+
+    public handleCollision(collision: OnItemCollision): void {
+        if (!this.activated) {
+            return super.handleCollision(collision);
+        }
+        if (collision.type === OnItemCollisionType.SteppedOn) {
+            AudioManager.get().play(Sound.beep);
+            this.steppedOn = true;
         }
     }
 
@@ -77,14 +88,11 @@ class Mine extends Item {
         ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
         this.setToDelete();
 
-        const amountOfBullets = 20;
+        const amountOfBullets = 10;
         for (let i = 0; i < amountOfBullets; i++) {
-            const angleRandomness = Math.PI / 24;
-            let angle = i * 2 * Math.PI / amountOfBullets;
-            angle -= this.rng.getInRange(-angleRandomness, angleRandomness);
-
+            const angle = i * 2 * Math.PI / amountOfBullets;
             const pos = this.body.getCenter();
-            const bullet = new Bullet(pos, angle, 3400, 7);
+            const bullet = new Bullet(pos, angle, 3400, 4);
 
             ProjectileManager.addProjectile(bullet, this.locallyActivated);
         }
@@ -111,7 +119,9 @@ class Mine extends Item {
         const drawPos = this.getDrawPos(mineDrawSize);
 
         let frame = Mine.frames.default;
-        if (this.activated) {
+        if (this.steppedOn) {
+            frame = (this.counter) % (Mine.blinkInterval * 2) < Mine.blinkInterval ? Mine.frames.steppedOn : Mine.frames.steppedOnBlink;
+        } else if (this.activated) {
             frame = (this.counter) % (Mine.blinkInterval * 2) < Mine.blinkInterval ? Mine.frames.activated : Mine.frames.activatedBlink;
         }
         const z = this.getZIndex();

@@ -6,3 +6,5 @@ export { Chestplate } from "./Armor/chestplate";
 export { NetGun } from "./netGun";
 export { Crate } from "./Props/crate";
 export { Rock } from "./Props/rock";
+export { Mine } from "./mine";
+export { Bazooka } from "./bazooka";

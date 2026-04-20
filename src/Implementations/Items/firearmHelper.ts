@@ -13,6 +13,12 @@ class FirearmHelper {
     public bulletSpeed: number = 1000;
     public bulletRange: number = 10;
     public bulletRangeVariation: number = 0;
+    public createBullet: (pos: Vector, angle: number, local: boolean, range: number) => void = () => { };
+
+    constructor() {
+        this.createBullet = (pos, angle, local, range) =>
+            ProjectileManager.addProjectile(new Bullet(pos, angle, this.bulletSpeed, range), local);
+    }
 
     public shoot(centerPos: Vector, angle: number, flip: boolean, seed: number, local: boolean): OnItemUseEffect[] {
         if (this.ammo < 1) {
@@ -27,7 +33,7 @@ class FirearmHelper {
             const shotAngle = baseAngle + rng.getInRange(-this.bulletAngleVariation, this.bulletAngleVariation);
             const range = this.bulletRange + rng.getInRange(-this.bulletRangeVariation, this.bulletRangeVariation);
 
-            ProjectileManager.addProjectile(new Bullet(this.getMuzzleOffset(centerPos, angle, flip), shotAngle, this.bulletSpeed, range), local);
+            this.createBullet(this.getMuzzleOffset(centerPos, angle, flip), shotAngle, local, range);
         }
         return [{ type: OnItemUseType.Knockback, value: this.getKnockback(angle, flip) }];
     }

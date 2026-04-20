@@ -33,10 +33,10 @@ defaultMap.setItemSpawner({ pos: new Vector(12, 13), possibleItems: ["glock"], s
 defaultMap.setItemSpawner({ pos: new Vector(18, 13), possibleItems: ["grenade"], startSpawned: true, timeBetweenSpawn: 5 });
 defaultMap.setItemSpawner({ pos: new Vector(3, 4), possibleItems: ["shotgun"], startSpawned: true, timeBetweenSpawn: 7 });
 defaultMap.setItemSpawner({ pos: new Vector(9, 4), possibleItems: ["helmet", "chestplate"], startSpawned: false, timeBetweenSpawn: 5 });
-defaultMap.setItemSpawner({ pos: new Vector(13, 13), possibleItems: ["helmet"], startSpawned: false, timeBetweenSpawn: 5 });
+defaultMap.setItemSpawner({ pos: new Vector(13, 13), possibleItems: ["bazooka"], startSpawned: true, timeBetweenSpawn: 5 });
 defaultMap.setItemSpawner({ pos: new Vector(14, 13), possibleItems: ["chestplate"], startSpawned: true, timeBetweenSpawn: 5 });
 defaultMap.setItemSpawner({ pos: new Vector(21, 13), possibleItems: ["netGun"], startSpawned: true, timeBetweenSpawn: 5 });
 
 defaultMap.setBackground("forest");
-
+  
 export { defaultMap };

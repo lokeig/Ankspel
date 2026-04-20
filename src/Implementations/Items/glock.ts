@@ -1,7 +1,7 @@
 import { Vector } from "@math";
 import { SpriteAnimator, Animation, SpriteSheet, ItemInteraction } from "@common";
 import { OnItemUseEffect } from "@game/Item";
-import { FirearmHelper } from "./firearmInfo";
+import { FirearmHelper } from "./firearmHelper";
 import { Item } from "./item";
 import { SmallFlare } from "@impl/Particles";
 import { Images } from "@render";

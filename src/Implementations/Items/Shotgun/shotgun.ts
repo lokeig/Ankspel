@@ -1,7 +1,7 @@
 import { Vector } from "@math";
 import { Lerp, lerpTriangle, SpriteSheet, Utility, Frame, ItemInteraction } from "@common";
 import { ShotgunState } from "./shotgunState";
-import { FirearmHelper } from "../firearmInfo";
+import { FirearmHelper } from "../firearmHelper";
 import { Item } from "../item";
 import { OnItemUseEffect } from "@item";
 import { Images, zIndex } from "@render";
