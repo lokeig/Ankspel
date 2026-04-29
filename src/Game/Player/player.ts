@@ -50,11 +50,7 @@ class Player {
         const netted = new PlayerNetted(this.character, this.id + 50);
 
         ItemManager.addPermanent(ragdoll, this.id);
-<<<<<<< HEAD
         ItemManager.addPermanent(netted, this.id + 50);
-=======
-        ItemManager.addPermanent(netted, this.id + 10);
->>>>>>> 4c16af84934d144569ef0e220d3c1a39edb26d85
 
         this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.addState(PlayerState.Net, netted);

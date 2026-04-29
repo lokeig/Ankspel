@@ -15,25 +15,6 @@ class LoadingMap implements IState<GameLoopState> {
     private ready: SpriteSheet;
     private startGame: boolean = false;
 
-<<<<<<< HEAD
-    private lerp(a: number, b: number, t: number): number {
-        const opacThreshold = 0.3;
-        if (t < opacThreshold) {
-            t *= 1 / opacThreshold;
-            t = t * t * (3 - 2 * t);
-            return a + (b - a) * t;
-        }
-        if (t > 1 - opacThreshold) {
-            t = 1 - t;
-            t *= 1 / opacThreshold;
-            t = t * t * (3 - 2 * t);
-            return a + (b - a) * t;
-        }
-        return 1;
-    }
-
-=======
->>>>>>> 4c16af84934d144569ef0e220d3c1a39edb26d85
     constructor(game: DuckGame) {
         this.game = game;
         this.startPlayingCountdown.setToReady();

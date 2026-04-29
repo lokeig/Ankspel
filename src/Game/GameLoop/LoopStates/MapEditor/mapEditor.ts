@@ -30,7 +30,11 @@ class MapEditor implements IState<GameLoopState> {
         this.handleCamera(deltaTime);
 
         if (Input.mouseDown()) {
-            TileManager.setTile("iceTile", Grid.getGridPos(this.mousePos));
+            if (TileManager.getTile(Grid.getGridPos(this.mousePos))) {
+                TileManager.deleteTile(Grid.getGridPos(this.mousePos));
+            } else {
+                TileManager.setTile("iceTile", Grid.getGridPos(this.mousePos));
+            }
         }
 
         Input.update();
