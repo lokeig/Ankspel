@@ -1,4 +1,4 @@
-import { Countdown, GameLoopState, IState, Lerp, SpriteSheet } from "@common";
+import { Countdown, GameLoopState, IState, Lerp, SpriteSheet, Utility } from "@common";
 import { DuckGame } from "../game";
 import { Connection, GameMessage } from "@server";
 import { MapNetworkHandler } from "../NetworkHandling/mapNetworkHandler";
@@ -15,14 +15,6 @@ class LoadingMap implements IState<GameLoopState> {
     private ready: SpriteSheet;
     private doorPosition = new Lerp(0.5, this.lerp.bind(this));
     private startGame: boolean = false;
-
-    private static doorSheetLeft = new SpriteSheet(Images.doorLeft);
-    private static doorSheetRight = new SpriteSheet(Images.doorRight);
-
-    static {
-        this.doorSheetLeft.setRenderSpace(RenderSpace.Screen);
-        this.doorSheetRight.setRenderSpace(RenderSpace.Screen);
-    }
 
     private lerp(a: number, b: number, t: number): number {
         const opacThreshold = 0.3;
@@ -44,8 +36,8 @@ class LoadingMap implements IState<GameLoopState> {
         this.game = game;
         this.startPlayingCountdown.setToReady();
 
-        MapNetworkHandler.setMapLoad((mapId: number) => {
-            this.game.loadMap(mapId);
+        MapNetworkHandler.setMapLoad((mapId: number, seed: number) => {
+            this.game.loadMap(mapId, seed);
         });
         MapNetworkHandler.setMapStart(() => {
             this.startGame = true;
@@ -77,7 +69,8 @@ class LoadingMap implements IState<GameLoopState> {
         Connection.get().sendGameMessage(GameMessage.GameState, { state: GameLoopState.LoadingMap });
 
         const map = MapManager.getRandomMap();
-        MapNetworkHandler.hostInitializeMap(map);
+        const seed = Utility.Random.seed();
+        MapNetworkHandler.hostInitializeMap(map, seed);
     }
 
     public stateUpdate(deltaTime: number) {
@@ -108,28 +101,6 @@ class LoadingMap implements IState<GameLoopState> {
     public draw() {
         this.drawGetReadyText();
         this.game.draw();
-        // this.drawDoors();
-    }
-
-    private drawDoors(): void {
-        const screenHeight = Math.floor(Render.get().getHeight()) + 1;
-        const screenWidth = Math.floor(Render.get().getWidth()) + 1;
-
-        const drawWidth = (Images.doorLeft.frameWidth / Images.doorLeft.frameHeight) * screenHeight;
-
-        let xPos = screenWidth - Math.floor(drawWidth);
-        let offset: number;
-        if (this.doorPosition.isActive()) {
-            const extra = 13 * drawWidth / Images.doorLeft.frameWidth;
-            offset = this.doorPosition.update(0) * (screenWidth / 2 + extra);
-        } else {
-            offset = 1;
-        }
-        offset -= drawWidth;
-        xPos -= offset;
-
-        LoadingMap.doorSheetRight.draw(new Vector(xPos, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
-        LoadingMap.doorSheetLeft.draw(new Vector(offset, 0), new Vector(drawWidth, screenHeight), false, 0, zIndex.UI);
     }
 
     private drawGetReadyText(): void {

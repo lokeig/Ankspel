@@ -11,6 +11,7 @@ import { ScoreScreen } from "./LoopStates/scoreScreen";
 import { LoadingMap } from "./LoopStates/loadingMap";
 import { MainMenu } from "@menu";
 import { TrophiesScreen } from "./LoopStates/trophiesScreen";
+import { MapEditor } from "./LoopStates/MapEditor/mapEditor";
 
 class GameLoop {
     private lastTime = 0;
@@ -20,7 +21,7 @@ class GameLoop {
 
     constructor(timer: FrameHandler) {
         this.frameHandler = timer;
-        const initalState = GameLoopState.LoadingMap;
+        const initalState = GameLoopState.Editor;
         this.stateMachine = new StateMachine(initalState);
 
         this.game = new DuckGame();
@@ -28,6 +29,8 @@ class GameLoop {
         this.stateMachine.addState(GameLoopState.LoadingMap, new LoadingMap(this.game));
         this.stateMachine.addState(GameLoopState.ScoreScreen, new ScoreScreen(this.game));
         this.stateMachine.addState(GameLoopState.TrophiesScreen, new TrophiesScreen(this.game));
+        this.stateMachine.addState(GameLoopState.Editor, new MapEditor());
+
     }
 
     public async init() {

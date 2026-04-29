@@ -6,7 +6,7 @@ import { Camera } from "@game/Camera";
 import { Parallax } from "@game/ParallaxBackground/parallax";
 import { MapManager } from "@game/Map";
 import { Connection } from "@server";
-import { Input, MaxMinPositions } from "@common";
+import { Input, MaxMinPositions, Utility } from "@common";
 import { MapLoader } from "./mapLoader";
 import { SpawnerManager } from "@game/Spawner";
 import { ItemManager } from "@item";
@@ -15,7 +15,7 @@ import { Chat } from "./chat";
 
 class DuckGame {
     private camera = new Camera();
-    private background!: Parallax;
+    private background: Parallax | null = null;
     private mapBounds!: MaxMinPositions;
     private roundsPlayed: number = 0;
     public chat = new Chat();
@@ -44,8 +44,8 @@ class DuckGame {
         this.camera.initialize(this.mapBounds);
     }
 
-    public loadMap(id: number): void {
-        const background = MapLoader.load(MapManager.getMap(id), Connection.get().isHost());
+    public loadMap(id: number, seed: number): void {
+        const background = MapLoader.load(MapManager.getMap(id), seed, Connection.get().isHost());
         const parallax = Parallax.getBackground(background);
         if (!parallax) {
             console.error(parallax, " does not exist");
@@ -90,11 +90,15 @@ class DuckGame {
         SpawnerManager.update(deltaTime);
         this.camera.update(deltaTime, this.mapBounds);
         this.chat.update(deltaTime);
-        this.background.update(deltaTime);
+        if (this.background) {
+            this.background.update(deltaTime);
+        }
     }
 
     public draw(): void {
-        this.background.draw(this.mapBounds, this.camera.getCurrentPos());
+        if (this.background) {
+            this.background.draw(this.mapBounds, this.camera.getCurrentPos());
+        }
 
         ProjectileManager.draw();
         ItemManager.draw();

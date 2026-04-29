@@ -86,7 +86,7 @@ interface GameMessageMap {
 
     // ─── Map ────────────────────────────────
     [GameMessage.ResetMap]: {};
-    [GameMessage.LoadMap]: { id: number };
+    [GameMessage.LoadMap]: { id: number, seed: number };
     [GameMessage.MapLoaded]: {};
     [GameMessage.StartMap]: {};
 

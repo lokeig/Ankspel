@@ -61,6 +61,10 @@ class Spawner {
                 this.dropContaining();
                 return;
             }
+            if (!this.contains.body.collision(this.body)) {
+                this.dropContaining();
+                return;
+            }
             if (this.xPositionLerp.isActive()) {
                 const pos = this.contains.body.pos;
                 pos.x = this.xPositionLerp.update(deltaTime);
@@ -119,9 +123,7 @@ class Spawner {
         if (this.contains) {
             this.dropContaining();
         }
-
-        const noMessage = true;
-        const item = ItemManager.create(toSpawn, this.body.pos, noMessage);
+        const item = ItemManager.create(toSpawn, this.body.pos);
 
         if (!item) {
             console.error("Error updating spawner ", toSpawn, ", doesn't exist");
@@ -136,7 +138,7 @@ class Spawner {
 
     private suckInNewItem(): void {
         if (this.contains) {
-            return;
+            this.dropContaining();
         }
         const nearby = ItemManager.getNearby(this.body);
         const maxSpeed = 100;

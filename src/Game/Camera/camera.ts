@@ -44,9 +44,11 @@ class Camera {
     }
 
     public initialize(bounds: MaxMinPositions): void {
-        this.deadPlayers = new Map();
+        this.deadPlayers.clear();
         const players = PlayerManager.getEnabled().map(player => player.character.activeBody.getCenter());
-
+        if (players.length === 0) {
+            return;
+        }
         const positions = this.getPositions(players, bounds);
         const targetPos = this.calculateTargetPos(positions);
         const targetZoom = this.calculateTargetZoom(positions, 200);

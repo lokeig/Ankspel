@@ -4,15 +4,15 @@ import { Connection, GameMessage } from "@server";
 class MapNetworkHandler {
     private static readyCount: number = 0;
 
-    private static onMapLoad: (mapId: number) => void;
+    private static onMapLoad: (mapId: number, seed: number) => void;
     private static onMapStart: () => void;
 
     public static init() {
         const connection = Connection.get();
         const gameEvent = connection.gameEvent;
 
-        gameEvent.subscribe(GameMessage.LoadMap, ({ id }) => {
-            this.onMapLoad(id);
+        gameEvent.subscribe(GameMessage.LoadMap, ({ id, seed }) => {
+            this.onMapLoad(id, seed);
             connection.sendGameMessage(GameMessage.MapLoaded, {});
         });
 
@@ -26,11 +26,11 @@ class MapNetworkHandler {
         gameEvent.subscribe(GameMessage.StartMap, ({ }) => { this.onMapStart() });
     }
 
-    public static hostInitializeMap(mapId: number): void {
+    public static hostInitializeMap(id: number, seed: number): void {
         this.readyCount = 0;
 
-        Connection.get().sendGameMessage(GameMessage.LoadMap, { id: mapId });
-        this.onMapLoad(mapId);
+        Connection.get().sendGameMessage(GameMessage.LoadMap, { id, seed });
+        this.onMapLoad(id, seed);
 
         this.checkReadyToStart();
     }
@@ -50,7 +50,7 @@ class MapNetworkHandler {
         this.onMapStart();
     }
 
-    public static setMapLoad(callback: (mapId: number) => void): void {
+    public static setMapLoad(callback: (mapId: number, seed: number) => void): void {
         this.onMapLoad = callback;
     }
 

@@ -10,7 +10,7 @@ class TileManager {
         this.tiles = new Map;
     }
 
-    private static getTile(gridPos: Vector): ITile | undefined {
+    public static getTile(gridPos: Vector): ITile | undefined {
         return this.tiles.get(Grid.key(gridPos));
     }
 

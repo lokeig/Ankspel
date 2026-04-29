@@ -51,6 +51,17 @@ class Vector {
         return this;
     }
 
+    public mod(amount: number | Vector): Vector {
+        if (amount instanceof Vector) {
+            this.x %= amount.x;
+            this.y %= amount.y;
+        } else {
+            this.x %= amount;
+            this.y %= amount;
+        }
+        return this;
+    }
+
     public distanceToSquared(end: Vector): number {
         return Math.pow(end.x - this.x, 2) + Math.pow(end.y - this.y, 2);
     }
@@ -63,7 +74,7 @@ class Vector {
 
     public normalize(): Vector {
         const length = Math.sqrt(this.lengthSquared());
-        this.x /=  length;
+        this.x /= length;
         this.y /= length;
         return this;
     }

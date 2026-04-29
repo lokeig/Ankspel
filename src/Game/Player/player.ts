@@ -46,11 +46,11 @@ class Player {
         this.stateMachine.addState(PlayerState.Crouch, new PlayerSlide(this.character, crouch));
         this.stateMachine.addState(PlayerState.Slide, new PlayerSlide(this.character, !crouch));
 
-        const netted = new PlayerNetted(this.character, this.id);
         const ragdoll = new PlayerRagdoll(this.character, this.id);
+        const netted = new PlayerNetted(this.character, this.id + 50);
 
         ItemManager.addPermanent(ragdoll, this.id);
-        ItemManager.addPermanent(netted, this.id);
+        ItemManager.addPermanent(netted, this.id + 50);
 
         this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.addState(PlayerState.Net, netted);

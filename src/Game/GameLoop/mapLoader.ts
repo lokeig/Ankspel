@@ -1,22 +1,24 @@
 import { TileManager } from "@game/Tiles";
 import { GameMap } from "../Map/gameMap";
 import { PlayerManager } from "@player";
-import { Grid, MaxMinPositions, Utility } from "@common";
+import { Grid, MaxMinPositions, SeededRNG, Utility } from "@common";
 import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { SpawnerManager } from "@game/Spawner";
 import { CollisionManager } from "@game/Collision/collisionManager";
+import { Connection, GameMessage } from "@server";
 
 class MapLoader {
-    public static load(map: GameMap, host: boolean): string {
+    public static load(map: GameMap, seed: number, host: boolean): string {
         this.reset();
         this.loadTiles(map);
 
+        const rng = new SeededRNG(seed);
+        this.loadSpawners(map);
+        this.loadPlayerSpawns(map, rng);
         if (host) {
-            this.loadPlayerSpawns(map);
             this.loadItems(map);
-            this.loadSpawners(map);
         }
 
         return map.getBackground();
@@ -42,17 +44,17 @@ class MapLoader {
         map.getItemSpawners().forEach(spawner => SpawnerManager.create(spawner));
     }
 
-    private static loadPlayerSpawns(map: GameMap) {
+    private static loadPlayerSpawns(map: GameMap, seed: SeededRNG) {
         const playerSpawns = map.getSpawns();
         const spawnCount = playerSpawns.length;
 
-        const players = PlayerManager.getEnabled();
+        const players = PlayerManager.getEnabled().sort((a, b) => a.getId() - b.getId());
         const playerCount = players.length;
 
         const base = Math.floor(playerCount / spawnCount);
         const extra = playerCount % spawnCount;
 
-        const order = Utility.Random.order(spawnCount);
+        const order = seed.order(spawnCount);
 
         let index = 0;
         for (let i = 0; i < spawnCount && i < playerCount; i++) {
@@ -68,7 +70,15 @@ class MapLoader {
 
     private static loadItems(map: GameMap) {
         map.getItems().forEach(item => {
-            ItemManager.create(item.type, item.gridPos);
+            const newItem = ItemManager.create(item.type, item.gridPos);
+            if (!newItem) {
+                return;
+            }
+            Connection.get().sendGameMessage(GameMessage.SpawnItem, {
+                id: newItem.info.id,
+                pos: Utility.Vector.convertToNetwork(item.gridPos),
+                type: item.type
+            });
         });
     }
 
@@ -95,7 +105,7 @@ class MapLoader {
         });
         maxX += Grid.size;
         maxY += Grid.size;
-        
+
         return { minX, maxX, minY, maxY };
     }
 }

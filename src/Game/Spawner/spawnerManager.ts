@@ -1,7 +1,6 @@
 import { SpawnerDescription } from "@game/Map";
 import { Spawner } from "./spawner";
 import { IItem, Ownership } from "@item";
-import { Connection, GameMessage } from "@server";
 import { GameObject } from "@core";
 
 class SpawnerManager {
@@ -23,8 +22,6 @@ class SpawnerManager {
         this.spawners.push(newSpawner);
 
         this.idToSpawner.set(id, newSpawner);
-
-        Connection.get().sendGameMessage(GameMessage.AddSpawner, { config, id });
     }
 
     public static spawn(config: SpawnerDescription, id: number): void {

@@ -29,6 +29,7 @@ interface IRender {
 
     render(): void;
 
+    getScreen(): Rect;
     getWidth(): number;
     getHeight(): number;
 }

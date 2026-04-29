@@ -289,6 +289,11 @@ class CanvasRender implements IRender {
         return this.cameraZoom;
     }
 
+    public getScreen(): Rect {
+        const rect = this.canvas.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    }
+
     public getWidth(): number {
         return this.canvas.width;
     }

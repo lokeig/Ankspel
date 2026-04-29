@@ -1,4 +1,6 @@
+import { GameObject } from "@core";
 import { Vector } from "@math";
+import { Render } from "@render";
 
 class Input {
     private static keysDown: Set<string> = new Set();
@@ -40,7 +42,7 @@ class Input {
         window.addEventListener("mousedown", (e) => {
             this.mouseClickBool = true;
             this.mouseDownBool = true;
-            this.mousePos = new Vector(e.clientX, e.clientY);
+            this.mousePos.set(e.clientX, e.clientY);
         });
 
         window.addEventListener("mouseup", () => {
@@ -48,7 +50,7 @@ class Input {
         });
 
         window.addEventListener("mousemove", (e) => {
-            this.mousePos = new Vector(e.clientX, e.clientY);
+            this.mousePos.set(e.clientX, e.clientY);
         });
     }
 
@@ -99,7 +101,20 @@ class Input {
     }
 
     public static getMousePos(): Vector {
-        return this.mousePos;
+        const pos = Render.get().getCameraPos();
+        const zoom = Render.get().getCameraZoom();
+        const rect = Render.get().getScreen();
+
+        let x = this.mousePos.x - rect.x;
+        let y = this.mousePos.y - rect.y;
+
+        x /= zoom;
+        y /= zoom;
+
+        x -= pos.x;
+        y -= pos.y;
+
+        return new Vector(x, y);
     }
 
     public static update(): void {

@@ -59,8 +59,7 @@ const Images = {
     plusOne: { src: '/assets/Images/UI/plusOne.png', frameWidth: 19, frameHeight: 15 },
     plusWin: { src: '/assets/Images/UI/plusOneWin.png', frameWidth: 19, frameHeight: 15 },
     scoreboard: { src: '/assets/Images/UI/scoreboard.png', frameWidth: 176, frameHeight: 180 },
-    doorLeft: { src: '/assets/Images/UI/doorLeft.png', frameWidth: 123, frameHeight: 175 },
-    doorRight: { src: '/assets/Images/UI/doorRight.png', frameWidth: 123, frameHeight: 175 },
+    cursors: { src: '/assets/Images/UI/cursors.png', frameWidth: 16, frameHeight: 16 },
 } as const;
 
 type ImageName = keyof typeof Images;

@@ -37,9 +37,11 @@ class Smoke implements IParticle {
         const size = Smoke.drawDimensions.clone().multiply(this.drawScale);
         size.x = Math.round(size.x);
         size.y = Math.round(size.y);
+
         const drawPos = this.pos.clone().subtract(size.clone().divide(2));
         drawPos.x = Math.round(drawPos.x);
         drawPos.y = Math.round(drawPos.y);
+        
         Smoke.frontSprite.draw(drawPos, size, this.flipped, this.angle, zIndex.Particles - 1);
         Smoke.backSprite.draw(drawPos, size, this.flipped, this.angle, zIndex.Particles - 2);
     }

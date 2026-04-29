@@ -1,6 +1,5 @@
-import { Grid, Utility, } from "@common";
+import { Grid, } from "@common";
 import { ItemConstructor, IItem, isItem } from "./IItem";
-import { IDManager } from "@game/Common/IDManager/idManager";
 import { Connection, GameMessage } from "@server";
 import { Ownership } from "./ItemPlayerUse/itemUseType";
 import { Vector } from "@math";
@@ -9,15 +8,19 @@ import { GameObject } from "@core";
 class ItemManager {
     private static items: Map<string, Set<IItem>> = new Map();
     private static register: Map<string, ItemConstructor> = new Map();
+    private static idToItem: Map<number, IItem> = new Map();
 
-    private static idManager = new IDManager;
     private static permanent: IItem[] = [];
+    private static currentId = 1;
 
     public static clear(): void {
         this.items.forEach(itemset => itemset.forEach(item => item.setToDelete()));
-        this.items = new Map();
-        this.permanent.forEach(item => this.addToMap(item));
-        this.idManager.reset();
+        this.items.clear();
+        this.idToItem.clear();
+        this.permanent.forEach(item => {
+            this.idToItem.set(item.info.id, item);
+            this.addToMap(item)
+        });
     }
 
     public static update(deltaTime: number) {
@@ -26,7 +29,7 @@ class ItemManager {
                 Connection.get().sendGameMessage(GameMessage.DeleteItem, { id: item.info.id });
                 itemSet.delete(item);
                 item.setToDelete();
-                this.idManager.removeObject(item)!;
+                this.idToItem.delete(item.info.id);
             } else {
                 item.update(deltaTime);
             }
@@ -38,24 +41,19 @@ class ItemManager {
         this.register.set(type, constructor);
     }
 
-    public static create(type: string, gridPos: Vector, noMessage: boolean = false): IItem | null {
+    public static create(type: string, gridPos: Vector): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
         }
-        const id = this.idManager.getNextID();
+        const id = this.currentId++;
 
         const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.body.pos.x += (Grid.size - newItem.body.width) / 2;
         newItem.body.pos.y -= newItem.body.height;
 
         this.addToMap(newItem);
-        this.idManager.add(newItem);
-
-        if (!noMessage) {
-            Connection.get().sendGameMessage(GameMessage.SpawnItem,
-                { type, id, pos: Utility.Vector.convertToNetwork(gridPos) });
-        }
+        this.idToItem.set(id, newItem);
 
         return newItem;
     }
@@ -70,7 +68,7 @@ class ItemManager {
         newItem.body.pos.y -= newItem.body.height;
 
         this.addToMap(newItem);
-        this.idManager.setID(newItem, id);
+        this.idToItem.set(id, newItem);
         return newItem;
     }
 
@@ -109,15 +107,11 @@ class ItemManager {
     }
 
     public static addPermanent(item: IItem, id: number): void {
-        this.idManager.setPermanentID(item, id);
         this.permanent.push(item);
     }
 
     public static getItemFromID(id: number): IItem | undefined {
-        const obj = this.idManager.getObject(id);
-        if (isItem(obj)) {
-            return obj;
-        }
+        return this.idToItem.get(id);
     }
 
     public static draw() {
