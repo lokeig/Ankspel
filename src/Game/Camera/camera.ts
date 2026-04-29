@@ -13,7 +13,7 @@ class Camera {
     private static deathDelay: number = 1;
 
     public update(deltaTime: number, bounds: MaxMinPositions) {
-        this.deadPlayers.forEach(wrapper => wrapper.time += deltaTime);
+        this.deadPlayers.forEach(object => object.time += deltaTime);
 
         const playerPositions: Vector[] = [];
 
@@ -30,12 +30,10 @@ class Camera {
                 playerPositions.push(death.pos);
             }
         });
-
-        if (playerPositions.length == 0) {
+        if (playerPositions.length === 0) {
             this.setFrame(this.targetPos, this.targetZoom, deltaTime);
             return;
         }
-
         const positions = this.getPositions(playerPositions, bounds);
         this.targetPos = this.calculateTargetPos(positions);
         this.targetZoom = this.calculateTargetZoom(positions, 200);

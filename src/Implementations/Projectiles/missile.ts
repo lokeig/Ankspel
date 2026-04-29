@@ -1,10 +1,13 @@
 import { Vector } from "@math";
-import { Countdown, ProjectileEffectType, Side, SpriteSheet, Utility } from "@common";
+import { Countdown, Grid, ProjectileEffectType, Side, SpriteSheet, Utility } from "@common";
 import { DynamicObject } from "@core";
-import { IProjectile, ProjectileTarget } from "@projectile";
+import { IProjectile, ProjectileManager, ProjectileTarget } from "@projectile";
 import { Images, zIndex } from "@render";
 import { ParticleManager } from "@game/Particles";
 import { ExplosionVFX } from "@impl/Particles";
+import { AudioManager, Sound } from "@game/Audio";
+import { Bullet } from "./bullet";
+import { TileManager } from "@game/Tiles";
 
 class Missile implements IProjectile {
     private body: DynamicObject;
@@ -13,7 +16,6 @@ class Missile implements IProjectile {
 
     private local: boolean = false;
     private delete: boolean = false;
-    private deleteTimer = new Countdown(0.25);
 
     constructor(pos: Vector, angle: number) {
         const speed = 800;
@@ -28,9 +30,11 @@ class Missile implements IProjectile {
         this.body.ignoreFriction = true;
         this.body.ignoreGravity = true;
 
-        this.body.onHeadCollision = () => this.setToDelete();
-        this.body.onBottomCollision = () => this.setToDelete();
-        this.body.onSideCollision = () => this.setToDelete();
+        this.body.onHeadCollision = () => this.explode();
+        this.body.onBottomCollision = () => this.explode();
+        this.body.onSideCollision = () => this.explode();
+
+        AudioManager.get().play(Sound.missile);
     }
 
     public getTrail(): null {
@@ -38,7 +42,6 @@ class Missile implements IProjectile {
     }
 
     public update(deltaTime: number, collidable: ProjectileTarget[]): void {
-
         this.body.ignoreFriction = !this.body.grounded;
         this.body.update(deltaTime);
 
@@ -49,35 +52,35 @@ class Missile implements IProjectile {
             if (!collisionObject.body().collision(this.body)) {
                 continue;
             }
-            collisionObject.onProjectileHit(
-                [
-                    { type: ProjectileEffectType.Damage },
-                    { type: ProjectileEffectType.Knockback, amount: this.body.velocity.clone().multiply(1) }
-                ],
-                this.body.pos,
-                this.local
-            );
-            this.setToDelete();
+            this.explode();
             break;
-        }
-        if (this.body.velocity.y !== 0 || this.body.velocity.x !== 0) {
-            this.angle = Math.atan2(this.body.velocity.y, this.body.velocity.x);
-            this.deleteTimer.reset();
-        } else {
-            this.deleteTimer.update(deltaTime);
-            if (this.deleteTimer.isDone()) {
-                this.setToDelete();
-            }
         }
     }
 
+    private explode(): void {
+        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter(), false));
+        AudioManager.get().play(Sound.explode);
+        const amountOfBullets = 24;
+        for (let i = 0; i < amountOfBullets; i++) {
+            let angle = i * 2 * Math.PI / amountOfBullets;
+
+            const pos = this.body.pos;
+            const bullet = new Bullet(pos, angle, 3400, 3);
+
+            ProjectileManager.addProjectile(bullet, this.local);
+        }
+        const radius = 2;
+        TileManager.deleteArea(Grid.getGridPos(this.body.getCenter()), radius);
+
+        this.setToDelete();
+    }
 
     public getSegment(): { start: Vector; end: Vector; } {
         return { start: this.body.pos, end: this.body.pos.add(new Vector(this.body.width, this.body.height)) };
     }
 
     public setToDelete(): void {
-        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
+        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter(), false));
         this.delete = true;
     }
 

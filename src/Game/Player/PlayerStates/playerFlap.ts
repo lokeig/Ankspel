@@ -69,7 +69,7 @@ class PlayerFlap implements IState<PlayerState> {
     }
 
     public stateExited(): void {
-    
+
     }
 
     public draw(): void {

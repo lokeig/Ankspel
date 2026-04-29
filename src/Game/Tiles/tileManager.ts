@@ -20,6 +20,9 @@ class TileManager {
             console.error("Tried to add non registered tile: ", name);
             return;
         }
+        if (this.tiles.has(Grid.key(gridPos))) {
+            this.deleteTile(gridPos);
+        }
         const tile = new tileConstructor(Grid.getWorldPos(gridPos), Grid.size);
         this.tiles.set(Grid.key(gridPos), tile);
 
@@ -30,6 +33,36 @@ class TileManager {
             const neighbourTile = this.getTile(this.shift(gridPos, direction));
             neighbourTile!.body.setNeighbour(Utility.Direction.getReverseDirection(direction));
             neighbourTile!.update();
+        }
+    }
+
+    public static deleteTile(gridPos: Vector): void {
+        const tile = this.tiles.get(Grid.key(gridPos));
+        if (!tile) {
+            return;
+        }
+        this.tiles.delete(Grid.key(gridPos));
+        for (const direction of tile.body.getNeighbours()) {
+            const neighbourTile = this.getTile(this.shift(gridPos, direction));
+            neighbourTile!.body.removeNeighbour(Utility.Direction.getReverseDirection(direction));
+            neighbourTile!.update();
+        }
+    }
+
+    public static deleteArea(gridPos: Vector, radius: number): void {
+        let startX = gridPos.x - radius;
+        let startY = gridPos.y - radius;
+
+        for (let x = startX; x <= gridPos.x + radius; x++) {
+            for (let y = startY; y <= gridPos.y + radius; y++) {
+
+                let dx = x - gridPos.x;
+                let dy = y - gridPos.y;
+
+                if (dx * dx + dy * dy <= radius * radius) {
+                    this.deleteTile(new Vector(x, y));
+                }
+            }
         }
     }
 

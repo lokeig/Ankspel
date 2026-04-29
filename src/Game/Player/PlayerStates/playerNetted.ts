@@ -136,6 +136,9 @@ class PlayerNetted implements IState<PlayerState>, IItem {
     }
 
     private onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
+        if (this.ignoring.has(body)) {
+            return [];
+        }
         const offset = 5;
         const minVerticalSpeed = 300;
         const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;

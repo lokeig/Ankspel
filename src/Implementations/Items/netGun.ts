@@ -15,7 +15,7 @@ class NetGun extends Item {
     private static holdOffset = new Vector(10, -4);
     private static gaugeFrames: Array<Frame> = new Array(4);
     private static muzzleOffset = new Vector(30, 0);
-    private static knockback = new Vector(500, 200);
+    private static knockback = new Vector(700, 200);
 
     private ammo: number = 4;
 

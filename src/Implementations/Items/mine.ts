@@ -29,11 +29,11 @@ class Mine extends Item {
 
     private activated: boolean = false;
     private steppedOn: boolean = false;
+    private steppableCooldown = new Countdown(0.4);
     private thisFrameCollision: boolean = false;
     private lastFrameCollision: boolean = false;
 
     private locallyActivated!: boolean;
-    private rng!: SeededRNG;
 
     constructor(pos: Vector, id: number) {
         const width = 16;
@@ -52,7 +52,9 @@ class Mine extends Item {
     public update(deltaTime: number): void {
         super.update(deltaTime);
         this.counter += deltaTime;
-
+        if (this.activated) {
+            this.steppableCooldown.update(deltaTime);
+        }
         if (this.steppedOn && this.lastFrameCollision && !this.thisFrameCollision) {
             Connection.get().sendGameMessage(GameMessage.ItemDestroyed, { id: this.info.id });
             this.explode();
@@ -63,8 +65,11 @@ class Mine extends Item {
 
     public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
         if (this.activated) {
+            if (!this.steppableCooldown.isDone()) {
+                return [];
+            }
             this.thisFrameCollision = true;
-            if (!this.steppedOn && this.body.grounded && !this.lastFrameCollision) {
+            if (!this.steppedOn && this.body.grounded) {
                 this.steppedOn = true;
                 return [{ type: OnItemCollisionType.SteppedOn }];
             }
@@ -75,7 +80,7 @@ class Mine extends Item {
     }
 
     public handleCollision(collision: OnItemCollision): void {
-        if (!this.activated) {
+        if (!this.activated && !this.steppableCooldown.isDone()) {
             return super.handleCollision(collision);
         }
         if (collision.type === OnItemCollisionType.SteppedOn) {
@@ -85,7 +90,7 @@ class Mine extends Item {
     }
 
     private explode(): void {
-        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
+        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter(), true));
         this.setToDelete();
 
         const amountOfBullets = 10;
@@ -99,14 +104,13 @@ class Mine extends Item {
         AudioManager.get().play(Sound.explode);
     }
 
-    private activate(seed: number): void {
+    private activate(_seed: number): void {
         if (this.activated) {
             return;
         }
         AudioManager.get().play(Sound.beep);
         this.angle.landPerfectly = true;
         this.activated = true;
-        this.rng = new SeededRNG(seed);
         AudioManager.get().play(Sound.pullPin);
     }
 
@@ -126,7 +130,7 @@ class Mine extends Item {
         }
         const z = this.getZIndex();
         Mine.baseSprite.draw(drawPos, mineDrawSize, this.body.isFlip(), this.getAngle(), z, frame);
-        if (frame === Mine.frames.activatedBlink) {
+        if (frame === Mine.frames.activatedBlink || frame === Mine.frames.steppedOnBlink) {
             const flashSize = 96;
             const flashPos = this.getDrawPos(flashSize);
             Mine.flashSprite.draw(flashPos, flashSize, false, 0, z - 1);

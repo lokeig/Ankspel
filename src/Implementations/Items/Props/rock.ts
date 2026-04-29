@@ -31,7 +31,7 @@ class Rock extends BaseProp {
     }
 
     public draw(): void {
-        Rock.sprite.draw(this.getDrawPos(Rock.drawSize), Rock.drawSize, this.body.isFlip(), this.angle.worldAngle, this.getZIndex())
+        Rock.sprite.draw(this.getDrawPos(Rock.drawSize), Rock.drawSize, this.body.isFlip(), this.angle.world, this.getZIndex())
     }
 }
 

@@ -13,9 +13,9 @@ class LoadingMap implements IState<GameLoopState> {
 
     private get: SpriteSheet;
     private ready: SpriteSheet;
-    private doorPosition = new Lerp(0.5, this.lerp.bind(this));
     private startGame: boolean = false;
 
+<<<<<<< HEAD
     private lerp(a: number, b: number, t: number): number {
         const opacThreshold = 0.3;
         if (t < opacThreshold) {
@@ -32,6 +32,8 @@ class LoadingMap implements IState<GameLoopState> {
         return 1;
     }
 
+=======
+>>>>>>> 4c16af84934d144569ef0e220d3c1a39edb26d85
     constructor(game: DuckGame) {
         this.game = game;
         this.startPlayingCountdown.setToReady();
@@ -53,21 +55,19 @@ class LoadingMap implements IState<GameLoopState> {
 
     public stateEntered(): void {
         this.startPlayingCountdown.reset();
-        this.doorPosition.startLerp(0, 1);
         console.log("entered loading");
         
         Connection.get().ignoreMessage(GameMessage.PlayerDead, GameMessage.PlayerInfo);
-        PlayerManager.getLocal().forEach(player => player.character.controls.addLock("loadingMap"));
+        PlayerManager.getLocal().forEach(player => player.lockControls("loadingMap"));
         
         if (!Connection.get().isHost()) {
             return;
         }
+        Connection.get().sendGameMessage(GameMessage.GameState, { state: GameLoopState.LoadingMap });
+
         if (!this.game.isFinalRound()) {
             PlayerManager.getPlayers().forEach(player => player.setEnabled(true));
         }
-
-        Connection.get().sendGameMessage(GameMessage.GameState, { state: GameLoopState.LoadingMap });
-
         const map = MapManager.getRandomMap();
         const seed = Utility.Random.seed();
         MapNetworkHandler.hostInitializeMap(map, seed);
@@ -75,10 +75,6 @@ class LoadingMap implements IState<GameLoopState> {
 
     public stateUpdate(deltaTime: number) {
         this.game.update(deltaTime);
-
-        if (this.doorPosition.isActive()) {
-            this.doorPosition.update(deltaTime);
-        }
         if (this.startGame) {
             this.startPlayingCountdown.update(deltaTime);
         }
@@ -92,7 +88,7 @@ class LoadingMap implements IState<GameLoopState> {
     }
 
     public stateExited(): void {
-        PlayerManager.getLocal().forEach(player => player.character.controls.removeLock("loadingMap"));
+        PlayerManager.getLocal().forEach(player => player.unlockControls("loadingMap"));
         Connection.get().ignoreMessage();
         PlayerManager.reload();
         this.startGame = false;

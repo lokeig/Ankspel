@@ -440,7 +440,10 @@ class PlayerRagdoll implements IState<PlayerState>, IItem {
         }
     }
 
-    private onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
+    private onCollision(_deltaTime: number, body: DynamicObject): OnItemCollision[] {
+        if (this.ignoring.has(body)) {
+            return [];
+        }
         if (Math.abs(this.torso.velocity.x) > 300) {
             return [{ type: OnItemCollisionType.Knockback, amount: new Vector(-this.body.velocity.x, 0) }];
         }

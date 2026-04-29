@@ -45,7 +45,6 @@ class PlayerStandard implements IState<PlayerState> {
         this.player.updateBody(deltaTime);
         this.player.update(deltaTime);
         this.setCurrentAnimation();
-
         this.setEquipmentLocation();
     }
 
