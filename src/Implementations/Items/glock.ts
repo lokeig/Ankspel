@@ -47,7 +47,7 @@ class Glock extends Item {
         this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
-        this.firearmInfo.knockback = new Vector(450, 120);
+        this.firearmInfo.knockback = new Vector(750, 120);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
         this.firearmInfo.bulletRange = 16;
         this.firearmInfo.bulletSpeed = 4000;

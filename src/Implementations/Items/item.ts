@@ -68,7 +68,10 @@ abstract class Item implements IItem {
         this.physics.update(deltaTime, this.ownership);
     }
 
-    public onCollision(_deltaTime: number, _body: DynamicObject): OnItemCollision[] {
+    public onCollision(_deltaTime: number, body: DynamicObject): OnItemCollision[] {
+        if (this.ignoring.has(body)) {
+            return [];
+        }
         if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
             return [{ type: OnItemCollisionType.Knockback, amount: this.getCollisionKnockback() }];
         }
@@ -89,11 +92,11 @@ abstract class Item implements IItem {
     }
 
     public setAngle(to: number): void {
-        this.angle.worldAngle = to;
+        this.angle.world = to;
     }
 
     public getAngle(): number {
-        return this.angle.localAngle + this.angle.worldAngle;
+        return this.angle.local + this.angle.world;
     }
 
 

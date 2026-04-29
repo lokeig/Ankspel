@@ -41,7 +41,7 @@ class Crate extends BaseProp {
 
     public draw(): void {
         const frame = Crate.frames[this.timesHit];
-        Crate.sprite.draw(this.getDrawPos(Crate.drawSize), Crate.drawSize, this.body.isFlip(), this.angle.worldAngle, this.getZIndex(), frame)
+        Crate.sprite.draw(this.getDrawPos(Crate.drawSize), Crate.drawSize, this.body.isFlip(), this.angle.world, this.getZIndex(), frame)
     }
 }
 

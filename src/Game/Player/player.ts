@@ -50,7 +50,7 @@ class Player {
         const ragdoll = new PlayerRagdoll(this.character, this.id);
 
         ItemManager.addPermanent(ragdoll, this.id);
-        ItemManager.addPermanent(netted, this.id);
+        ItemManager.addPermanent(netted, this.id + 10);
 
         this.stateMachine.addState(PlayerState.Ragdoll, ragdoll);
         this.stateMachine.addState(PlayerState.Net, netted);
@@ -79,6 +79,14 @@ class Player {
         }
 
         return "#" + handleColor(R) + handleColor(G) + handleColor(B);
+    }
+
+    public lockControls(lock: string): void {
+        this.character.controls.addLock(lock);
+    }
+
+    public unlockControls(lock: string): void {
+        this.character.controls.removeLock(lock);
     }
 
     public setEnabled(state: boolean, local: boolean = true) {

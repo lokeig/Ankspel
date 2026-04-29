@@ -47,7 +47,7 @@ class Shotgun extends Item {
         this.firearmInfo.bulletCount = 6;
         this.firearmInfo.bulletAngleVariation = Math.PI / 30;
         this.firearmInfo.muzzleOffset = new Vector(28, -10);
-        this.firearmInfo.knockback = new Vector(720, 240);
+        this.firearmInfo.knockback = new Vector(920, 240);
         this.firearmInfo.bulletRange = 8;
         this.firearmInfo.bulletRangeVariation = 1;
         this.firearmInfo.bulletSpeed = 4800;

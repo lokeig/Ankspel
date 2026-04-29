@@ -58,7 +58,7 @@ class Grenade extends Item {
     }
 
     private explode(): void {
-        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter()));
+        ParticleManager.addParticle(new ExplosionVFX(this.body.getCenter(), true));
 
         this.setToDelete();
 

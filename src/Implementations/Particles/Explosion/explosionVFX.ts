@@ -20,7 +20,7 @@ class ExplosionVFX implements IParticle {
         this.whiteBackground.setRenderSpace(RenderSpace.Screen);
     }
 
-    constructor(pos: Vector) {
+    constructor(pos: Vector, private flash: boolean) {
         const radius = 50;
         const amount = 8;
 
@@ -55,7 +55,7 @@ class ExplosionVFX implements IParticle {
     }
 
     public draw(): void {
-        if (!this.whiteTimer.isDone()) {
+        if (this.flash && !this.whiteTimer.isDone()) {
             const render = Render.get();
             const screen = new Vector(render.getWidth(), render.getHeight());
             ExplosionVFX.whiteBackground.draw(new Vector(), screen, false, 0, zIndex.Particles, ExplosionVFX.whiteFrame);

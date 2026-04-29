@@ -21,11 +21,10 @@ class PlayerItemCollisionManager {
 
         nearby.forEach(item => {
             if (item.body.collision(body)) {
-                if (item.ignoring.has(body)) {
-                    return;
-                }
                 const effects = item.playerCollision.handleLocally(deltaTime, body);
                 effects.forEach(effect => this.effectHandler(effect));
+
+                item.ignoring.set(this.body(), 0.3);
             }
         });
         return nearby;

@@ -17,16 +17,16 @@ abstract class BaseProp extends Item {
     }
 
     public onCollision(deltaTime: number, body: DynamicObject): OnItemCollision[] {
+        if (this.ignoring.has(body)) {
+            return [];
+        }
         const offset = 5;
         const minVerticalSpeed = 300;
         const prevPos = this.body.pos.y + this.body.height - this.body.velocity.y * deltaTime;
         if (this.body.velocity.y > minVerticalSpeed && prevPos - offset < body.pos.y) {
             return [{ type: OnItemCollisionType.Headbonk }];
         }
-        if (Math.abs(this.body.velocity.x) > Item.MinItemDropSpeed) {
-            return [{ type: OnItemCollisionType.Knockback, amount: this.getCollisionKnockback() }];
-        }
-        return [];
+        return super.onCollision(deltaTime, body);
     }
 
     public handleCollision(collision: OnItemCollision): void {

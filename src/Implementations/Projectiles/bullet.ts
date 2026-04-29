@@ -61,7 +61,7 @@ class Bullet implements IProjectile {
                 return;
             }
             body = hit.target.body();
-            const knockback = this.velocity.clone().divide(10);
+            const knockback = this.velocity.clone().divide(20);
             hit.target.onProjectileHit([{ type: ProjectileEffectType.Damage }, { type: ProjectileEffectType.Knockback, amount: knockback }], hit.pos, this.local);
         } else {
             body = hit.tile;

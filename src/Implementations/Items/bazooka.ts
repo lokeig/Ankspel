@@ -37,34 +37,36 @@ class Bazooka extends Item {
         this.firearmInfo.knockback = new Vector(650, 220);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
 
-        this.firearmInfo.createBullet = (pos, angle, local, range) => {
+        this.firearmInfo.createBullet = (pos, angle, local, _range) => {
             ProjectileManager.addProjectile(new Missile(pos, angle), local);
         }
     }
 
     public update(deltaTime: number): void {
-        if (this.reloading.isDone()) {
-            this.isReloading = false;
-        }
         if (this.isReloading) {
             this.reloading.update(deltaTime);
-        } else {
+        }
+        if (this.ownership !== Ownership.Held && this.isReloading) {
+            this.isReloading = false;
             this.reloading.reset();
         }
-        if (this.ownership === Ownership.None) {
-            this.isReloading = false;
+        if (!this.reloading.isDone()) {
+            const percent = this.reloading.getPercentageReady();
+            let localAngle = -Math.sin((percent * Math.PI)) * 1.5;
+            this.angle.local = localAngle;
+        } else {
+            this.angle.local = 0;
         }
-        const percent = this.reloading.getPercentageReady();
-        let localAngle = -Math.sin((percent * Math.PI)) * 1.5;
-        this.angle.localAngle = localAngle;
         super.update(deltaTime);
     }
 
     public shoot(seed: number, local: boolean): OnItemUseEffect[] {
-        if (!this.isReloading) {
-            this.isReloading = true;
+        if (this.reloading.isDone()) {
+            this.isReloading = false;
+            this.reloading.reset();
             return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
-        } else {;
+        } else {
+            this.isReloading = true;
             return [];
         }
     }
