@@ -8,6 +8,7 @@ class Input {
     private static mouseClickBool: boolean = false;
     private static mouseDownBool: boolean = false;
     private static mousePos: Vector = new Vector();
+    private static scrollAmount: number = 0;
 
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
     private static onAnyKeyFunction: Set<((key: string) => void)> = new Set();
@@ -52,6 +53,10 @@ class Input {
         window.addEventListener("mousemove", (e) => {
             this.mousePos.set(e.clientX, e.clientY);
         });
+
+        window.addEventListener("wheel", (e) => {
+            this.scrollAmount = e.deltaY;
+        })
     }
 
     public static onKey(key: string, e: () => void): void {
@@ -63,6 +68,10 @@ class Input {
 
     public static onAnyKey(fn: (key: string) => void): void {
         this.onAnyKeyFunction.add(fn);
+    }
+
+    public static getScroll(): number {
+        return this.scrollAmount;
     }
 
     public static removeOnKey(key: string, e: () => void): void {
@@ -120,6 +129,7 @@ class Input {
     public static update(): void {
         this.mouseClickBool = false;
         this.keysPressed.clear();
+        this.scrollAmount = 0;
     }
 }
 
