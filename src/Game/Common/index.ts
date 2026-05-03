@@ -28,6 +28,7 @@ export { PlayerAnim } from "./Types/playerAnim";
 export { ItemInteraction } from "./Types/itemInteraction";
 export { EquipmentSlot } from "./Types/equipmentSlot";
 export type { MaxMinPositions } from "./Types/maxMinPositions";
+export { SelectionType } from "./Types/selection";
 
 export type { ProjectileEffect } from "./Types/projectileEffect";
 export { ProjectileEffectType } from "./Types/projectileEffect";

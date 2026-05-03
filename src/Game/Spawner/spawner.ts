@@ -21,7 +21,7 @@ class Spawner {
     private yPositionLerp = new Lerp(5, lerpEase);
     private rotationLerp = new Lerp(10, lerpAngle);
 
-    private ballLocation: number = 0;
+    private ballLocation: number = Math.PI / 2;
     private static ballSprite = new SpriteSheet(Images.spawnerBall);
     private static frameSprite = new SpriteSheet(Images.itemSpawner);
     private static frameDrawSize = new Vector(28, 12);

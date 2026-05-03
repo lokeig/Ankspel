@@ -5,22 +5,36 @@ class ControlsMenu {
 
     private cancelButton: HTMLButtonElement;
     private saveButton: HTMLButtonElement;
-    private activeInput: HTMLInputElement | null = null;
-    private keyHandler: ((e: KeyboardEvent) => void) | null = null;
+    private resetButton: HTMLButtonElement;
 
     private currentControls: Controls = this.loadControls();
-
     private backupControls: Controls = { ...this.currentControls };
+
     private controlInputs: Record<keyof Controls, HTMLInputElement>;
+    private activeControl: keyof Controls | null = null;
 
     private colorInput: HTMLInputElement;
     private nameInput: HTMLInputElement;
+
+    public static defaultControls: Controls = {
+        jump: " ",
+        left: "a",
+        right: "d",
+        down: "s",
+        up: "w",
+        shoot: "ArrowLeft",
+        pickup: "ArrowUp",
+        ragdoll: "e",
+        strafe: "Shift",
+        quack: "q",
+    };
 
     constructor() {
         this.controlsMenu = document.getElementById('controlsMenu')!;
 
         this.cancelButton = document.getElementById('cancelControlsButton') as HTMLButtonElement;
         this.saveButton = document.getElementById('saveControlsButton') as HTMLButtonElement;
+        this.resetButton = document.getElementById('resetControlsButton') as HTMLButtonElement;
 
         this.colorInput = document.getElementById('colorInput') as HTMLInputElement;
         this.nameInput = document.getElementById('displayNameInput') as HTMLInputElement;
@@ -51,34 +65,41 @@ class ControlsMenu {
             this.currentControls = { ...this.backupControls };
             this.hide();
         });
-        this.saveButton.addEventListener('click', () => this.saveControls());
+        this.saveButton.addEventListener("click", () => this.saveControls());
+        this.resetButton.addEventListener("click", () => this.resetControls())
 
+        window.addEventListener("keydown", (e) => this.handleKeyDown(e));
         for (const key in this.controlInputs) {
             const k = key as keyof Controls;
             const input = this.controlInputs[k];
-            input.addEventListener("focus", () => this.startKeyCapture(input, k));
-            input.addEventListener("click", () => this.startKeyCapture(input, k));
+            input.addEventListener("focus", () => this.startKeyCapture(k));
+            input.addEventListener("click", () => this.startKeyCapture(k));
+            input.addEventListener("blur", () => {
+                this.activeControl = null;
+            });
         }
     }
 
-    private startKeyCapture(input: HTMLInputElement, control: keyof Controls) {
-        if (this.keyHandler && this.activeInput) {
-            window.removeEventListener("keydown", this.keyHandler);
-        }
-        this.activeInput = input;
-
-        this.keyHandler = (e: KeyboardEvent) => {
-            e.preventDefault();
-            input.value = this.displayKey(e.key);
-            this.currentControls[control] = e.key;
-
-            window.removeEventListener("keydown", this.keyHandler!);
-            this.activeInput = null;
-            this.keyHandler = null;
-        };
-
-        window.addEventListener("keydown", this.keyHandler);
+    private startKeyCapture(control: keyof Controls) {
+        this.activeControl = control;
     }
+
+    private handleKeyDown(e: KeyboardEvent): void {
+        if (!this.activeControl) {
+            return;
+        }
+        e.preventDefault();
+
+        const key = e.key;
+        const input = this.controlInputs[this.activeControl];
+
+        input.value = this.displayKey(key);
+        this.currentControls[this.activeControl] = key;
+
+        input.blur();
+
+        this.activeControl = null;
+    };
 
     private displayKey(key: string): string {
         if (key === " ") {
@@ -97,23 +118,17 @@ class ControlsMenu {
         }
     }
 
+    private resetControls(): void {
+        this.currentControls = { ...ControlsMenu.defaultControls };
+        this.populateInputs();
+    }
+
     private loadControls(): Controls {
         const saved = localStorage.getItem('gameControls');
         if (saved) {
             return JSON.parse(saved);
         } else {
-            return {
-                jump: " ",
-                left: "a",
-                right: "d",
-                down: "s",
-                up: "w",
-                shoot: "ArrowLeft",
-                pickup: "ArrowUp",
-                ragdoll: "e",
-                strafe: "Shift",
-                quack: "q",
-            };
+            return { ...ControlsMenu.defaultControls };
         }
     }
 

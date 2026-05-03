@@ -1,4 +1,3 @@
-import { GameObject } from "@core";
 import { Vector } from "@math";
 import { Render } from "@render";
 
@@ -13,9 +12,10 @@ class Input {
     private static onKeyFunction: Map<string, (Set<(() => void)>)> = new Map();
     private static onAnyKeyFunction: Set<((key: string) => void)> = new Set();
 
-    public static init(): void {
+    public static init(canvas: HTMLElement): void {
         window.addEventListener('keydown', e => {
-            if (document.querySelector('.modal:not(.hidden)')) {
+            const element = e.target as HTMLElement;
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
                 return;
             }
             this.onAnyKeyFunction.forEach(fn => fn(e.key));
@@ -40,21 +40,21 @@ class Input {
             this.keysPressed.delete(key);
         });
 
-        window.addEventListener("mousedown", (e) => {
+        canvas.addEventListener("mousedown", (e) => {
             this.mouseClickBool = true;
             this.mouseDownBool = true;
             this.mousePos.set(e.clientX, e.clientY);
         });
 
-        window.addEventListener("mouseup", () => {
+        canvas.addEventListener("mouseup", () => {
             this.mouseDownBool = false;
         });
 
-        window.addEventListener("mousemove", (e) => {
+        canvas.addEventListener("mousemove", (e) => {
             this.mousePos.set(e.clientX, e.clientY);
         });
 
-        window.addEventListener("wheel", (e) => {
+        canvas.addEventListener("wheel", (e) => {
             this.scrollAmount = e.deltaY;
         })
     }

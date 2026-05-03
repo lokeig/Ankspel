@@ -1,4 +1,4 @@
-import { IDManager } from "@common";
+import { Controls, IDManager } from "@common";
 import { Player } from "./player";
 import { Connection, GameMessage } from "@server";
 import { MainMenu } from "@menu";

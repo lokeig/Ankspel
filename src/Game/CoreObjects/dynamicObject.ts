@@ -18,7 +18,7 @@ class DynamicObject extends GameObject {
     public ignoreGravity: boolean = false;
     public ignorePlatforms: boolean = false;
 
-    public direction: Side = Side.Left;
+    public direction: Side = Side.Right;
     public bounceFactor: number = 0;
     private smallestBounceValue = 1;
 

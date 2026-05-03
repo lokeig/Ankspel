@@ -119,6 +119,10 @@ class TileManager {
         this.register.set(name, tile);
     }
 
+    public static getRegisteredNames(): string[] {
+        return Array.from(this.register.keys());
+    }
+
     public static draw(): void {
         for (const tile of this.tiles.values()) {
             tile.draw();

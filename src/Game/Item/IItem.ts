@@ -4,7 +4,6 @@ import { Ownership } from "./ItemPlayerUse/itemUseType";
 import { ItemPlayerInteraction } from "./ItemPlayerUse/itemUseInteractions";
 import { Vector } from "@math";
 import { ItemIgnore } from "./Helpers/itemIgnore";
-import { ItemAngleHelper } from "./Helpers/itemAngleHelper";
 import { ItemPlayerCollision } from "./Helpers/itemPlayerCollision";
 import { ItemProjectileCollision } from "./Helpers/itemProjectileCollision";
 import { ItemInfo } from "./itemInfo";

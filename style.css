@@ -1,3 +1,20 @@
+:root {
+    --bg: #2a2a2a;
+    --bg-dark: #1a1a1a;
+    --bg-light: #353535;
+    --bg-selected: #192e0c;
+
+    --text: #dfdfdf;
+    --text-dim: #a4a4a4;
+
+    --border: 4px solid #000000;
+
+    --shadow-inset: inset -4px -4px 0 #222222, inset 4px 4px 0 #555555;
+    --shadow-inset-selected: inset -4px -4px 0 #034219, inset 4px 4px 0 #2fd14f;
+
+    --font: duckFont;
+}
+
 html,
 body {
     margin: 0px;
@@ -14,7 +31,6 @@ body {
 
 canvas {
     display: block;
-    cursor: none;
 }
 
 #gameServerList {
@@ -23,110 +39,47 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #dbdbdb;
+    background: var(--bg);
     color: white;
-    font-family: Arial;
+    font-family: var(--font);
     display: none;
     flex-direction: column;
+    border: var(--border);
 }
 
 .serverlist-header {
-    background: linear-gradient(145deg, #373b42, #2b2e34);
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border-bottom: var(--border);
     width: 100%;
-    height: 5%;
     display: flex;
     align-items: center;
 }
 
-.serverlist-header h1 {
-    font-size: 1.3em;
-    color: #dfdfdf;
+.serverlist-header span {
+    padding: 4px 0px;
+    font-size: 46px;
+    color: var(--text);
     margin-left: 20px;
 }
 
 .lobby-desc {
-    background: linear-gradient(135deg, #3d4450, #323841);
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border-bottom: var(--border);
     width: 100%;
-    height: 4%;
-    box-sizing: border-box;
     display: flex;
-    align-items: center;
-    flex-direction: row;
     text-align: left;
-    border: 1px solid;
-    border-color: #202731;
-    color: #a4a4a4;
+    color: var(--text-dim);
     overflow-y: auto;
-    scrollbar-gutter: stable;
 }
 
-.button-style-dropdown {
-    padding: 10px 90px 10px 20px;
-    text-align: left;
-    background: #3d4450;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.135);
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background 0.2s;
-    appearance: auto;
-
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 20px center;
-    background-size: 12px;
-}
-
-.button-style-dropdown:focus {
-    outline: none;
-    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.135);
-    border: none;
-}
-
-.button-style-dropdown:hover {
-    background: #505a6e;
-
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 20px center;
-    background-size: 12px;
-
-}
-
-.button-style-dropdown option {
-    background: #3d4450;
-    color: white;
-}
 
 #lobbylist {
-    scrollbar-gutter: stable;
     flex: 1;
     overflow-y: auto;
-    background: linear-gradient(135deg, #282b32, #23262e);
     display: flex;
     flex-direction: column;
-}
-
-.lobby-desc::-webkit-scrollbar,
-#lobbylist::-webkit-scrollbar {
-    width: 8px;
-}
-
-#lobbylist::-webkit-scrollbar-thumb {
-    background: #434e5d;
-    border-radius: 4px;
-}
-
-#lobbylist::-webkit-scrollbar-thumb:hover {
-    background-color: #65768e;
 }
 
 .lobbylist-item {
@@ -135,20 +88,20 @@ canvas {
     display: flex;
     flex-direction: row;
     text-align: left;
-    transition: background 0.1s;
     cursor: pointer;
     align-items: center;
     justify-content: space-between;
-    color: #ccc;
+    color: var(--text);
 }
 
 .lobbylist-item.selected {
-    background: linear-gradient(90deg, #21415c 55%, #078bff00 95%);
-    color: rgb(237, 237, 237);
+    background: var(--bg-selected);
+    box-shadow: var(--shadow-inset-selected);
+    color: var(--text);
 }
 
 .lobbylist-column {
-    font-size: 1.1em;
+    font-size: 2em;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -156,7 +109,7 @@ canvas {
 
 .lobbylist-name {
     padding-left: 25px;
-    width: 45%;
+    width: 35%;
 }
 
 .lobbylist-host {
@@ -164,16 +117,11 @@ canvas {
 }
 
 .lobbylist-players {
-    width: 15%;
+    width: 25%;
 }
 
 .lobbylist-status {
     flex: 1;
-}
-
-
-.right-border {
-    border-color: #ffffff4f;
 }
 
 .controls-grid {
@@ -184,48 +132,54 @@ canvas {
 }
 
 .serverlist-footer {
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border-top: var(--border);
+    padding: 10px 0px;
     display: flex;
-    background: linear-gradient(15deg, #373b42, #2b2e34);
     width: 100%;
-    border: 1px solid;
-    box-sizing: border-box;
-    border-color: #2a313d;
-    height: 8%;
-    align-items: center;
     justify-content: space-between;
 }
 
 #footer-right,
 #footer-left {
-    padding: 0 20px;
     display: flex;
-    gap: 20px;
+    padding: 0px 10px;
+    gap: 14px;
 }
 
 button {
-    padding: 12px 50px;
-    background: #3d4450;
-    border: none;
-    border-radius: 3px;
-    color: white;
-    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.135);
-    font-size: 1.2em;
+    font-family: var(--font);
+    font-size: 38px;
+    padding: 10px 30px;
+    text-align: center;
+    color: var(--text);
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border: var(--border);
     cursor: pointer;
-    transition: background 0.2s;
-}
-
-.button-unavailable {
-    background-color: #ffffff00;
 }
 
 button:hover {
-    background: #5b6577;
+    background: var(--bg-light);
+    transform: translate(0, -2px);
+}
+
+button:disabled {
+    cursor: default;
+    color: var(--text-dim);
+    opacity: 0.4;
+    transform: none;
+}
+
+button:disabled:hover {
+    background: var(--bg);
 }
 
 .modal {
-    font-family: Arial;
+    font-family: var(--font);
     flex-direction: row;
-    color: #dfdfdf;
+    color: var(--text);
     position: fixed;
     display: grid;
     top: 0;
@@ -237,7 +191,10 @@ button:hover {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #373a4b, #2a2d3e);
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border: var(--border);
+    font-size: 30px;
     margin: auto;
     padding: 20px;
     display: flex;
@@ -248,11 +205,16 @@ button:hover {
 }
 
 .modal-content input {
+    font-family: var(--font);
     width: 220px;
 }
 
 #controlsMenu input {
     width: 120px;
+}
+
+#displayNameInput {
+    flex: 0 0 200px
 }
 
 .modal-buttons {
@@ -263,45 +225,21 @@ button:hover {
     gap: 0;
 }
 
-#settingsMenu .modal-content button {
-    width: 100%;
-}
-
-#closeButton {
-    margin-top: 40px;
-}
-
-#colorInput {
-    padding: 0;
-    height: 35px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
 .modal-buttons button {
     flex: 1;
     padding: 12px 0;
-    border-radius: 5px;
     margin: 0 5px;
 }
 
 .modal h2 {
-    font-size: 1.5em;
     margin: 0;
     margin-bottom: 20px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: default;
-    background: #3d4450;
 }
 
 .input-row {
     display: flex;
     align-items: center;
     margin-bottom: 12px;
-    gap: 5px;
 }
 
 .input-row label {
@@ -309,31 +247,51 @@ button:disabled {
     width: 120px;
     margin: 0;
     padding: 0;
-    font-weight: 600;
 }
 
 .input-row input {
     flex: 1;
     padding: 8px 12px;
-    border-radius: 5px;
-    border: 2px solid transparent;
-    background-color: #3b3f54;
-    color: #fff;
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border: var(--border);
+    color: var(--text);
+
     font-size: 1em;
     box-sizing: border-box;
     outline: none;
 }
 
-.input-row input:focus {
-    border: 2px solid;
-    background-color: #484e6f;
-    border-color: #2e5893;
+input:focus {
+    background: var(--bg-selected);
+    box-shadow: var(--shadow-inset-selected);
 }
 
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+input[type="color"] {
+    appearance: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border: var(--border);
+    height: 40px;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border: none;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    box-shadow: var(--shadow-inset);
+    padding: 0;
 }
 
 .hidden {
@@ -404,7 +362,7 @@ input[type=number]::-webkit-inner-spin-button {
     justify-content: center;
 
     font-size: 40pt;
-    font-family: duckFont;
+    font-family: var(--font);
 }
 
 .trophyRow {
@@ -432,4 +390,176 @@ input[type=number]::-webkit-inner-spin-button {
 .score {
     font-weight: bold;
     font-size: 70px;
+}
+
+#mapEditorMenu {
+    width: 420px;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-height: 100%;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+    border-bottom: var(--border);
+}
+
+.menu-item {
+    padding: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg);
+    box-shadow: var(--shadow-inset);
+    border-top: var(--border);
+    border-right: var(--border);
+    cursor: pointer;
+}
+
+.menu-item span {
+    font-size: 28px;
+    font-family: var(--font);
+    flex: 0;
+    opacity: 0.8;
+}
+
+.menu-item:hover {
+    background: var(--bg-light);
+    box-shadow: var(--shadow-inset);
+    transform: translate(0, -2px);
+}
+
+.menu-item.selected {
+    background: var(--bg-selected);
+    box-shadow: var(--shadow-inset-selected);
+}
+
+.menu-group-content {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #000000;
+    border-left: var(--border);
+    text-align: left;
+}
+
+.menu-group-header {
+    padding: 14px;
+    font-size: 30px;
+    font-family: var(--font);
+    border-top: var(--border);
+
+    background: var(--bg-light);
+    border-left: var(--border);
+    border-right: var(--border);
+    box-shadow: var(--shadow-inset);
+}
+
+.menu-icon-wrapper {
+    height: 40px;
+    width: 60px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-icon {
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+::-webkit-scrollbar-thumb {
+    box-shadow: var(--shadow-inset);
+    background: var(--bg);
+    border: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-light);
+}
+
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+    border: var(--border);
+}
+
+#mapEditorSettings {
+    max-height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    width: 400px;
+    border-bottom: var(--border);
+}
+
+.menu-item input[type="checkbox"] {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+
+    background: var(--bg-dark);
+    border: var(--border);
+
+    box-shadow: var(--shadow-inset);
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+.menu-item input[type="checkbox"]:checked {
+    background: var(--bg-selected);
+    box-shadow: var(--shadow-inset-selected);
+}
+
+.menu-item input[type="text"],
+.menu-item input[type="number"] {
+    flex: 1;
+    width: 30px;
+    text-align: center;
+    padding: 4px;
+
+    background: var(--bg-dark);
+    color: white;
+
+    border: var(--border);
+
+    box-shadow: var(--shadow-inset);
+
+    font-family: var(--font);
+    font-size: 28px;
+}
+
+.menu-item input[type="text"] {
+    width: 200px;
+    text-align: left;
+}
+
+input:focus {
+    outline: none;
+}
+
+.menu-item input[type="number"]:focus,
+.menu-item input[type="text"]:focus {
+    background: var(--bg-selected);
+    box-shadow: var(--shadow-inset-selected);
+}
+
+#mapEditorButtons {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    justify-content: center;
+    display: none;
 }

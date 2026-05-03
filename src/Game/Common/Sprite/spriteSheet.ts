@@ -16,6 +16,10 @@ class SpriteSheet {
         this.image = image;
     }
 
+    public setImage(info: ImageInfo) {
+        this.image = info;
+    }
+
     public setColor(color: string | null) {
         this.color = color;
     }

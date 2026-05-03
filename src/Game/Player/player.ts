@@ -140,11 +140,11 @@ class Player {
 
     public setSpawn(spawn: PlayerSpawnDescription): void {
         const worldPos = Grid.getWorldPos(spawn.pos);
-        worldPos.y -= this.character.standardBody.height;
         worldPos.x += (Grid.size - this.character.standardBody.width) / 2;
+        worldPos.y -= this.character.standardBody.height - Grid.size;
 
-        this.character.setPos(worldPos);
         this.character.standardBody.direction = spawn.direction;
+        this.character.setPos(worldPos);
 
         Connection.get().sendGameMessage(GameMessage.PlayerSpawn, { id: this.id, pos: Utility.Vector.convertToNetwork(worldPos) });
     }

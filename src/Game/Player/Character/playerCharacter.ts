@@ -114,6 +114,7 @@ class PlayerCharacter {
             offset = this.equipment.getItem(EquipmentSlot.Hand).info.handOffset;
         }
         this.armFront.setPosition(this.getDrawPos(), PlayerCharacter.drawSize, offset, this.standardBody.isFlip());
+
         if (this.equipment.hasItem(EquipmentSlot.Hand)) {
             const offset = this.equipment.getItem(EquipmentSlot.Hand).info.holdOffset;
             this.equipment.setBody(

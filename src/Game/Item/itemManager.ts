@@ -41,19 +41,33 @@ class ItemManager {
         this.register.set(type, constructor);
     }
 
-    public static create(type: string, gridPos: Vector): IItem | null {
+    public static getRegisteredNames(): string[] {
+        return Array.from(this.register.keys());
+    }
+
+    public static getConstructor(type: string): ItemConstructor | undefined {
+        return this.register.get(type);
+    }
+
+    public static createNewRaw(type: string, gridPos: Vector, id: number = -1): IItem | null {
         const constructor = this.register.get(type);
         if (!constructor) {
             return null;
         }
-        const id = this.currentId++;
-
         const newItem = new constructor(Grid.getWorldPos(gridPos), id);
         newItem.body.pos.x += (Grid.size - newItem.body.width) / 2;
-        newItem.body.pos.y -= newItem.body.height;
+        newItem.body.pos.y += (Grid.size - newItem.body.height);
+        return newItem;
+    }
 
+    public static create(type: string, gridPos: Vector): IItem | null {
+        const newItem = this.createNewRaw(type, gridPos, this.currentId);
+        if (!newItem) {
+            return null;
+        }
+        this.currentId++;
         this.addToMap(newItem);
-        this.idToItem.set(id, newItem);
+        this.idToItem.set(newItem.info.id, newItem);
 
         return newItem;
     }

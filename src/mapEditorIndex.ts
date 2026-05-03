@@ -1,33 +1,36 @@
-import { GameLoopState, Input } from "@common";
+import { Controls, Input } from "@common";
 import { Connection } from "@game/Server";
 import { Render } from "@render";
 import { GameLoop } from "@game/GameLoop";
-import { MainMenuCSS, MapEditorMenuCSS, ScoreBoardCSS, TrophyBoardCSS } from "@impl/Menus/CSS";
+import { MainMenuCSS, MapEditorMenuCSS } from "@impl/Menus/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
-import { MapManager } from "@game/Map";
-import { defaultMap } from "@impl/Maps";
 import { RequestAnimationFrameTimer } from "@impl/FrameTimer/requestAnimationFrame";
 import { HTMLAudio } from "@impl/Audio/HTMLAudio";
 import { AudioManager } from "@game/Audio/audioManager";
 import { registerDefaultNames } from "@impl/register";
-import { MainMenu, MapEditorMenu, ScoreBoard } from "@menu";
+import { MainMenu, MapEditorMenu } from "@menu";
+import { MapEditor } from "@game/MapEditor/mapEditor";
+import { ControlsMenu } from "@impl/Menus/CSS/controlsMenu";
 import { resizeCanvas } from "@impl/Menus/CSS/resizeCanvas";
 
 Input.init(document.getElementById("gameCanvas")!);
 Render.set(new CanvasRender("gameCanvas"));
 AudioManager.set(new HTMLAudio());
-MapManager.addMap(defaultMap);
 registerDefaultNames();
 
 Connection.set(new MultiPeerServer(new WebSocket("https://ankspel.onrender.com")));
-MainMenu.set(new MainMenuCSS());
 MapEditorMenu.set(new MapEditorMenuCSS());
-ScoreBoard.setScore(new ScoreBoardCSS());
-ScoreBoard.setWins(new TrophyBoardCSS());
 
+const saved = localStorage.getItem('gameControls');
+let controls: Controls;
+if (saved) {
+    controls = JSON.parse(saved);
+} else {
+    controls = { ...ControlsMenu.defaultControls };
+}
 resizeCanvas("gameCanvas");
 
-new GameLoop(new RequestAnimationFrameTimer()).init();
+new MapEditor(controls, new RequestAnimationFrameTimer()).init();
 
 

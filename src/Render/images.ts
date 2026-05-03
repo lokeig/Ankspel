@@ -52,6 +52,7 @@ const Images = {
     forest: { src: '/assets/Images/ParallaxBackgrounds/forest.png', frameWidth: 320, frameHeight: 240 },
     cloud1: { src: '/assets/Images/ParallaxBackgrounds/cloud1.png', frameWidth: 43, frameHeight: 12 },
     cloud2: { src: '/assets/Images/ParallaxBackgrounds/cloud2.png', frameWidth: 21, frameHeight: 10 },
+    backgroundIcons: { src: '/assets/Images/ParallaxBackgrounds/backgroundIcons.png', frameWidth: 16, frameHeight: 16 },
 
     // UI
     ready: { src: '/assets/Images/UI/ready.png', frameWidth: 41, frameHeight: 9 },

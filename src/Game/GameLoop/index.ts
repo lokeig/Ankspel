@@ -1,2 +1,2 @@
 export { GameLoop } from "./gameLoop";
-export type { FrameHandler } from "./frameTimer";
+export type { FrameHandler } from "./frameHandler";

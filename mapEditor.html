@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="Assets/favicon.ico" type="image/x-icon">
+
+    <title>Canvas Game</title>
+    <style>
+        body {
+            text-align: center;
+            background: #222;
+            color: white;
+        }
+
+        canvas {
+            background: black;
+            display: block;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div style="position: relative; display: inline-block;">
+        <canvas id="gameCanvas" width="1200" height="800"></canvas>
+        <div id="mapEditorMenu">
+        </div>
+
+        <div id="mapEditorSettings">
+        </div>
+
+        <div id="mapEditorButtons">
+            <button id="saveButton">Save</button>
+            <button id="exitButton">Exit</button>
+            <button id="uploadButton">Upload</button>
+        </div>
+    </div>
+
+
+    <script type="module" src="/src/mapEditorIndex.ts"></script>
+</body>
+
+</html>

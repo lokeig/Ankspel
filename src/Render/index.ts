@@ -14,3 +14,4 @@ export type { FontInfo, FontName } from "./fonts";
 
 
 export { BaseLayer as zIndex } from "./zIndex";
+export { preloadAll } from "./preload";
