@@ -40,6 +40,7 @@ canvas {
     width: 100%;
     height: 100%;
     background: var(--bg);
+    box-shadow: var(--shadow-inset);
     color: white;
     font-family: var(--font);
     display: none;
@@ -281,7 +282,7 @@ input[type="color"] {
     cursor: pointer;
     border: var(--border);
     height: 40px;
-}
+    }
 
 input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
@@ -289,8 +290,8 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 }
 
 input[type="color"]::-webkit-color-swatch {
+    box-shadow: inset -4px -4px 0 #12121260, inset 4px 4px 0 #cecece68;
     border: none;
-    box-shadow: var(--shadow-inset);
     padding: 0;
 }
 

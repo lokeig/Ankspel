@@ -13,8 +13,6 @@ import { ForestParallax } from "./Parallax/defaultParallaxes";
 import { Crate, NetGun, Rock } from "./Items";
 import { Mine } from "./Items/mine";
 import { Bazooka } from "./Items/bazooka";
-import { ImageInfo, Images } from "@render";
-import { Frame } from "@common";
 
 function registerDefaultNames() {
     ItemManager.registerItem("shotgun", Shotgun);

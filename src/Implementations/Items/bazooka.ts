@@ -6,6 +6,8 @@ import { Images } from "@render";
 import { FirearmHelper } from "./firearmHelper";
 import { ProjectileManager } from "@projectile";
 import { Missile } from "@impl/Projectiles";
+import { AudioManager, Sound } from "@game/Audio";
+import { addSmokeCloud } from "@game/Particles";
 
 class Bazooka extends Item {
     private static sprite = new SpriteSheet(Images.bazooka);
@@ -32,7 +34,7 @@ class Bazooka extends Item {
 
     private setupFirearmInfo(): void {
         this.firearmInfo = new FirearmHelper();
-        this.firearmInfo.ammo = Infinity;
+        this.firearmInfo.ammo = 3;
         this.firearmInfo.bulletAngleVariation = 0;
         this.firearmInfo.knockback = new Vector(650, 220);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
@@ -60,10 +62,22 @@ class Bazooka extends Item {
         super.update(deltaTime);
     }
 
+    public shouldBeDeleted(): boolean {
+        return super.shouldBeDeleted() || (this.deleteHelper() && this.firearmInfo.ammo === 0);
+    }
+
     public shoot(seed: number, local: boolean): OnItemUseEffect[] {
+        if (this.firearmInfo.ammo === 0) {
+            AudioManager.get().play(Sound.click);
+            return [];
+        }
         if (this.reloading.isDone()) {
             this.isReloading = false;
             this.reloading.reset();
+            const minScale = 1;
+            const maxScale = 2;
+            const variance = 30;
+            addSmokeCloud(this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip()), minScale, maxScale, variance, 4);
             return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);
         } else {
             this.isReloading = true;

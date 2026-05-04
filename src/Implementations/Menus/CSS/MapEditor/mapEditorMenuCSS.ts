@@ -105,8 +105,16 @@ class MapEditorMenuCSS implements IMapEditorMenu {
         return this.selectedItem![menuName];
     }
 
-    public getParallaxIcon(): [ImageInfo, Frame] {
-        return [this.selectedItem![menuImage], this.selectedItem![menuFrame]];
+    public getParallaxIcon(): [ImageInfo, Frame, string] {
+        return [this.selectedItem![menuImage], this.selectedItem![menuFrame], this.selectedItem![menuName]];
+    }
+
+    public getParallax(name: string): [ImageInfo, Frame] | null {
+        const entry = MenuItems.parallaxes.find(e => e[menuName] === name);
+        if (!entry) {
+            return null;
+        }
+        return [entry[menuImage], entry[menuFrame]];
     }
 
     public getSpawner(pos: Vector): SpawnerDescription {

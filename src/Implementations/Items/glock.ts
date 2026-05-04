@@ -7,6 +7,7 @@ import { SmallFlare } from "@impl/Particles";
 import { Images } from "@render";
 import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
+import { addSmokeCloud } from "@game/Particles";
 
 class Glock extends Item {
     private static animations: Record<string, Animation> = { default: new Animation(), shoot: new Animation() };
@@ -47,7 +48,7 @@ class Glock extends Item {
         this.firearmInfo = new FirearmHelper();
         this.firearmInfo.ammo = 9;
         this.firearmInfo.bulletAngleVariation = Math.PI / 36;
-        this.firearmInfo.knockback = new Vector(750, 120);
+        this.firearmInfo.knockback = new Vector(650, 120);
         this.firearmInfo.muzzleOffset = new Vector(23, -6);
         this.firearmInfo.bulletRange = 16;
         this.firearmInfo.bulletSpeed = 4000;
@@ -69,6 +70,10 @@ class Glock extends Item {
             AudioManager.get().play(Sound.glock);
             this.flare.reset();
         } else {
+            const minScale = 0.3;
+            const maxScale = 0.7;
+            const variance = 10;
+            addSmokeCloud(this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip()), minScale, maxScale, variance, 4);
             AudioManager.get().play(Sound.click);
         }
         return this.firearmInfo.shoot(this.body.getCenter(), this.getAngle(), this.body.isFlip(), seed, local);

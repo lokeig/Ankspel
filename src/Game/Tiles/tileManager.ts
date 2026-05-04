@@ -60,7 +60,11 @@ class TileManager {
                 let dy = y - gridPos.y;
 
                 if (dx * dx + dy * dy <= radius * radius) {
-                    this.deleteTile(new Vector(x, y));
+                    const pos = new Vector(x, y);
+                    if (this.getTile(pos)?.body.isPlatform()) {
+                        continue;
+                    }
+                    this.deleteTile(pos);
                 }
             }
         }

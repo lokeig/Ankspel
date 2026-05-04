@@ -3,11 +3,15 @@ import { TileManager } from "@game/Tiles";
 import { Vector } from "@math";
 import { MapEditorMenu } from "@menu";
 import { ImageInfo, Images, preloadAll, Render, zIndex } from "@render";
-import { IItem, ItemManager } from "@item";
+import { IItem, ItemInfo, ItemManager } from "@item";
 import { Spawner } from "@game/Spawner";
 import { Player } from "@player";
 import { FrameHandler } from "@game/GameLoop";
 import { GameMap } from "@game/Map/gameMap";
+import { SpawnerDescription } from "@game/Map/spawnerDescription";
+import { ItemDescription } from "@game/Map/itemDescription";
+import { TileDescription } from "@game/Map/tileDescription";
+import { PlayerSpawnDescription } from "@game/Map/PlayerSpawnDescription";
 
 class MapEditor {
     private cameraPos = new Vector();
@@ -20,10 +24,11 @@ class MapEditor {
     private selection: SelectionType | null = null;
     private frameHandler: FrameHandler;
 
-    private items: Map<string, IItem> = new Map();
-    private parallax: [Vector, ImageInfo, Frame] | null = null;
-    private playerSpawns: Map<string, Player> = new Map();
-    private spawners: Map<string, Spawner> = new Map();
+    private tiles: Map<string, TileDescription> = new Map();
+    private items: Map<string, [ItemDescription, IItem]> = new Map();
+    private parallax: [Vector, ImageInfo, Frame, string] | null = null;
+    private playerSpawns: Map<string, [PlayerSpawnDescription, Player]> = new Map();
+    private spawners: Map<string, [SpawnerDescription, Spawner]> = new Map();
 
     private static zoomSpeed: number = 0.05;
     private static moveSpeed: number = 700;
@@ -39,7 +44,7 @@ class MapEditor {
 
     public update(deltaTime: number): void {
         this.selection = MapEditorMenu.get().getSelection();
-        this.spawners.forEach(spawner => spawner.update(deltaTime));
+        this.spawners.forEach(spawner => spawner[1].update(deltaTime));
         this.handleCamera(deltaTime);
         if (Input.mouseClick()) {
             this.setDeleteMode(Grid.getGridPos(Input.getMousePos()));
@@ -83,8 +88,11 @@ class MapEditor {
             case SelectionType.Tile: {
                 if (this.deleteMode) {
                     TileManager.deleteTile(pos);
+                    this.tiles.delete(Grid.key(pos));
                 } else {
-                    TileManager.setTile(MapEditorMenu.get().getCurrentName(), pos);
+                    const type = MapEditorMenu.get().getCurrentName();
+                    TileManager.setTile(type, pos);
+                    this.tiles.set(Grid.key(pos), { type, pos });
                 }
                 break;
             }
@@ -93,11 +101,12 @@ class MapEditor {
                     this.items.delete(Grid.key(pos));
                     return;
                 }
-                const item = ItemManager.createNewRaw(MapEditorMenu.get().getCurrentName(), pos);
+                const type = MapEditorMenu.get().getCurrentName();
+                const item = ItemManager.createNewRaw(type, pos);
                 if (!item) {
                     return;
                 }
-                this.items.set(Grid.key(pos), item);
+                this.items.set(Grid.key(pos), [{ type, gridPos: pos, }, item]);
                 if (this.flipMode) {
                     item.body.direction = Side.Left;
                 }
@@ -110,7 +119,7 @@ class MapEditor {
                     const player = new Player(-1, "#ffffff", "dummy");
                     const direction = this.flipMode ? Side.Left : Side.Right;
                     player.setSpawn({ pos, direction });
-                    this.playerSpawns.set(Grid.key(pos), player);
+                    this.playerSpawns.set(Grid.key(pos), [{ pos, direction }, player]);
                 }
                 break;
             }
@@ -124,13 +133,13 @@ class MapEditor {
                         const firstItem = info.possibleItems[0];
                         spawner.setContaining(ItemManager.createNewRaw(firstItem, new Vector())!);
                     }
-                    this.spawners.set(Grid.key(pos), spawner);
+                    this.spawners.set(Grid.key(pos), [info, spawner]);
                 }
                 break;
             }
             case SelectionType.Parallax: {
-                const [image, frame] = MapEditorMenu.get().getParallaxIcon();
-                this.parallax = [pos, image, frame];
+                const [image, frame, name] = MapEditorMenu.get().getParallaxIcon();
+                this.parallax = [pos, image, frame, name];
                 break;
             }
         }
@@ -170,8 +179,56 @@ class MapEditor {
 
     public getMap(): GameMap {
         const map = new GameMap();
-        TileManager.getTiles().forEach(tile => map.setTile(tile, ))
+        this.tiles.forEach(tile => map.setTile(tile.type, tile.pos));
+        this.spawners.forEach(spawner => map.setItemSpawner(spawner[0]));
+        this.playerSpawns.forEach(player => map.setPlayerSpawn(player[0]));
+        this.items.forEach(item => map.setItem(item[0].type, item[0].gridPos));
+        if (this.parallax) {
+            map.setBackground(this.parallax[3]);
+        }
         return map;
+    }
+
+    public load(map: GameMap): void {
+        this.tiles.clear();
+        this.items.clear();
+        this.playerSpawns.clear();
+        this.spawners.clear();
+        this.parallax = null;
+        TileManager.clear();
+
+        map.getTiles().forEach(tile => {
+            TileManager.setTile(tile.type, tile.pos);
+            this.tiles.set(Grid.key(tile.pos), tile);
+        });
+        map.getItems().forEach(itemDesc => {
+            const item = ItemManager.createNewRaw(itemDesc.type, itemDesc.gridPos);
+            if (!item) {
+                return;
+            };
+            this.items.set(Grid.key(itemDesc.gridPos), [itemDesc, item]);
+        });
+        map.getSpawns().forEach(spawn => {
+            const player = new Player(-1, "#ffffff", "dummy");
+            player.setSpawn(spawn);
+            this.playerSpawns.set(Grid.key(spawn.pos), [spawn, player]);
+        });
+        map.getItemSpawners().forEach(spawnerDesc => {
+            const spawner = new Spawner(spawnerDesc, -1);
+            if (spawnerDesc.possibleItems.length > 0) {
+                const firstItem = spawnerDesc.possibleItems[0];
+                const item = ItemManager.createNewRaw(firstItem, new Vector());
+                if (item) {
+                    spawner.setContaining(item);
+                }
+            }
+            this.spawners.set(Grid.key(spawnerDesc.pos), [spawnerDesc, spawner]);
+        });
+        const background = map.getBackground();
+        if (background && MapEditorMenu.get().getParallax(background)) {
+            const [image, frame] = MapEditorMenu.get().getParallax(background)!;
+            this.parallax = [new Vector(-10, -10), image, frame, background];
+        }
     }
 
     private drawGrid(): void {
@@ -230,9 +287,9 @@ class MapEditor {
         this.drawGrid();
         this.drawParallax();
         TileManager.draw();
-        this.spawners.forEach(spawner => spawner.draw());
-        this.playerSpawns.forEach(spawn => spawn.draw());
-        this.items.forEach(item => item.draw());
+        this.spawners.forEach(spawner => spawner[1].draw());
+        this.playerSpawns.forEach(spawn => spawn[1].draw());
+        this.items.forEach(item => item[1].draw());
         Render.get().render();
     }
 

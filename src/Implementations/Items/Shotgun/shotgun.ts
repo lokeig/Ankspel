@@ -7,6 +7,7 @@ import { OnItemUseEffect } from "@item";
 import { Images, zIndex } from "@render";
 import { AudioManager } from "@game/Audio/audioManager";
 import { Sound } from "@game/Audio";
+import { addSmokeCloud } from "@game/Particles";
 
 class Shotgun extends Item {
     private static maxHandleOffset: number = -8;
@@ -67,6 +68,10 @@ class Shotgun extends Item {
             return this.reload();
         } else {
             AudioManager.get().play(Sound.click);
+            const minScale = 0.3;
+            const maxScale = 0.7;
+            const variance = 10;
+            addSmokeCloud(this.firearmInfo.getMuzzleOffset(this.body.getCenter(), this.getAngle(), this.body.isFlip()), minScale, maxScale, variance, 4);
             return [];
         }
     }

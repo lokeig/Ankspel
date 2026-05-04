@@ -1,18 +1,18 @@
 import { Controls, Input } from "@common";
 import { Connection } from "@game/Server";
 import { Render } from "@render";
-import { GameLoop } from "@game/GameLoop";
-import { MainMenuCSS, MapEditorMenuCSS } from "@impl/Menus/CSS";
+import { MapEditorMenuCSS } from "@impl/Menus/CSS";
 import { CanvasRender } from "@impl/Render";
 import { MultiPeerServer } from "@impl/Server/WebRTC";
 import { RequestAnimationFrameTimer } from "@impl/FrameTimer/requestAnimationFrame";
 import { HTMLAudio } from "@impl/Audio/HTMLAudio";
 import { AudioManager } from "@game/Audio/audioManager";
 import { registerDefaultNames } from "@impl/register";
-import { MainMenu, MapEditorMenu } from "@menu";
-import { MapEditor } from "@game/MapEditor/mapEditor";
+import { MapEditorMenu } from "@menu";
 import { ControlsMenu } from "@impl/Menus/CSS/controlsMenu";
 import { resizeCanvas } from "@impl/Menus/CSS/resizeCanvas";
+import { MapEditor } from "@game/MapEditor";
+import { GameMap } from "@game/Map";
 
 Input.init(document.getElementById("gameCanvas")!);
 Render.set(new CanvasRender("gameCanvas"));
@@ -31,6 +31,50 @@ if (saved) {
 }
 resizeCanvas("gameCanvas");
 
-new MapEditor(controls, new RequestAnimationFrameTimer()).init();
+const mapEditor = new MapEditor(controls, new RequestAnimationFrameTimer());
+const saveButton = document.getElementById("saveButton") as HTMLButtonElement;
+saveButton.addEventListener("click", async () => {
+    const map = mapEditor.getMap();
+    const json = JSON.stringify(map, null, 2);
 
+    const handle = await window.showSaveFilePicker({
+        suggestedName: "map.json",
+        types: [
+            {
+                accept: { "application/json": [".json"] }
+            }
+        ]
+    });
+    const writable = await handle.createWritable();
+    await writable.write(json);
+    await writable.close();
+});
+const loadInput = document.getElementById("loadInput") as HTMLInputElement;
+const loadButton = document.getElementById("loadButton") as HTMLButtonElement;
 
+loadButton.addEventListener("click", () => {
+    loadInput.click();
+});
+loadInput.addEventListener("change", () => {
+    const file = loadInput.files?.[0];
+    if (!file) {
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const jsonText = reader.result as string;
+            const data = JSON.parse(jsonText);
+
+            const map = GameMap.fromJson(data);
+            mapEditor.load(map);
+
+        } catch (err) {
+            console.error("Failed to load map:", err);
+        }
+    };
+
+    reader.readAsText(file);
+});
+
+mapEditor.init();

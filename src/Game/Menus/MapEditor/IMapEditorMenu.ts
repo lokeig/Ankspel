@@ -7,7 +7,8 @@ interface IMapEditorMenu {
     getSelection(): SelectionType;
     getCurrentName(): string;
     getSpawner(pos: Vector): SpawnerDescription;
-    getParallaxIcon(): [ImageInfo, Frame];
+    getParallaxIcon(): [ImageInfo, Frame, string];
+    getParallax(name: string): [ImageInfo, Frame] | null;
     show(): void;
     hide(): void;
 }
