@@ -37,17 +37,30 @@ saveButton.addEventListener("click", async () => {
     const map = mapEditor.getMap();
     const json = JSON.stringify(map, null, 2);
 
-    const handle = await (window as any).window.showSaveFilePicker({
-        suggestedName: "map.json",
-        types: [
-            {
-                accept: { "application/json": [".json"] }
-            }
-        ]
-    });
-    const writable = await handle.createWritable();
-    await writable.write(json);
-    await writable.close();
+    if ('showSaveFilePicker' in window) {
+        const handle = await (window as any).showSaveFilePicker({
+            suggestedName: "map.json",
+            types: [
+                {
+                    accept: { "application/json": [".json"] }
+                }
+            ]
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(json);
+        await writable.close();
+    } else {
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "map.json";
+        a.click();
+
+        URL.revokeObjectURL(url);
+    }
 });
 const loadInput = document.getElementById("loadInput") as HTMLInputElement;
 const loadButton = document.getElementById("loadButton") as HTMLButtonElement;
