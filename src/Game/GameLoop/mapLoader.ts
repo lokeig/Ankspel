@@ -1,13 +1,14 @@
 import { TileManager } from "@game/Tiles";
 import { GameMap } from "../Map/gameMap";
 import { PlayerManager } from "@player";
-import { Grid, MaxMinPositions, SeededRNG, Utility } from "@common";
+import { Grid, MaxMinPositions, SeededRNG, Side, Utility } from "@common";
 import { ItemManager } from "@item";
 import { ProjectileManager } from "@projectile";
 import { ParticleManager } from "@game/Particles";
 import { SpawnerManager } from "@game/Spawner";
 import { CollisionManager } from "@game/Collision/collisionManager";
 import { Connection, GameMessage } from "@server";
+import { Vector } from "@math";
 
 class MapLoader {
     public static load(map: GameMap, seed: number, host: boolean): string {
@@ -44,13 +45,17 @@ class MapLoader {
         map.getItemSpawners().forEach(spawner => SpawnerManager.create(spawner));
     }
 
-    private static loadPlayerSpawns(map: GameMap, seed: SeededRNG) {
+    private static loadPlayerSpawns(map: GameMap, seed: SeededRNG): void {
         const playerSpawns = map.getSpawns();
         const spawnCount = playerSpawns.length;
 
         const players = PlayerManager.getEnabled().sort((a, b) => a.getId() - b.getId());
         const playerCount = players.length;
 
+        if (spawnCount === 0) {
+            players.forEach(player => player.setSpawn({ pos: new Vector(), direction: Side.Right }));
+            return;
+        }
         const base = Math.floor(playerCount / spawnCount);
         const extra = playerCount % spawnCount;
 

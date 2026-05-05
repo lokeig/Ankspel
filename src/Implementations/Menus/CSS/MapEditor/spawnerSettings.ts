@@ -7,7 +7,9 @@ spawnerSettingsHeader.textContent = "Settings";
 const spawnerSettingsContent = document.createElement("div");
 spawnerSettingsContent.classList.add("menu-group-content");
 
-// Start Spawned
+// =============
+// Time Spawned
+// =============
 const startSpawned = document.createElement("div");
 startSpawned.classList.add("menu-item");
 
@@ -27,7 +29,9 @@ startSpawned.appendChild(checkbox);
 startSpawned.appendChild(startSpawnedLabel);
 spawnerSettingsContent.appendChild(startSpawned);
 
+// =============
 // Time interval
+// =============
 const timeInterval = document.createElement("div");
 timeInterval.classList.add("menu-item");
 
@@ -43,7 +47,7 @@ input.addEventListener("input", () => {
     }
     if (value < 0) {
         input.value = "0";
-    }
+        }
 });
 timeInterval.addEventListener("click", (e) => {
     if (e.target === input) {
@@ -59,7 +63,9 @@ timeInterval.appendChild(input);
 timeInterval.appendChild(intervalLabel);
 spawnerSettingsContent.appendChild(timeInterval);
 
+// =============
 // Containing
+// =============
 const containing = document.createElement("div");
 containing.classList.add("menu-item");
 
@@ -67,6 +73,7 @@ const textInput = document.createElement("input");
 textInput.type = "text";
 textInput.placeholder = "...enter item names";
 textInput.id = "containing";
+textInput.width = 20;
 
 textInput.addEventListener("blur", () => {
     const values = getValidItemArray(textInput.value);

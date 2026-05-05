@@ -28,6 +28,7 @@
 
         <canvas id="gameCanvas" width="1200" height="800"></canvas>
 
+        <!-- Server List -->
         <div id="gameServerList">
 
             <div class="serverlist-header">
@@ -43,11 +44,13 @@
 
             <div id="lobbylist"></div>
 
+            <!-- Footer -->
             <div class="serverlist-footer">
                 <div id="footer-left">
                     <button id="hostbutton">Host</button>
                     <button id="startbutton">Start</button>
                     <button id="settingsButton">Settings</button>
+                    <button id="lobbySettingsButton">Lobby</button>
                     <a href="mapEditor.html"><button id="mapEditorButton">Map Editor</button></a>
                 </div>
                 <div id="footer-right">
@@ -58,86 +61,104 @@
 
         </div>
 
-        <div id="settingsMenu" class="modal hidden">
-            <div class="modal-content">
-
-            </div>
-        </div>
-
-        <div id="controlsMenu" class="modal hidden">
-            <div class="modal-content">
-                <h2>Edit Controls</h2>
-
-                <div class="controls-grid">
-                    <div class="input-row"><label for="jumpInput">Jump:</label><input id="jumpInput" readonly
-                            placeHolder="Press key">
-                    </div>
-                    <div class="input-row"><label for="leftInput">Left:</label><input id="leftInput" readonly
-                            placeHolder="Press key">
-                    </div>
-                    <div class="input-row"><label for="rightInput">Right:</label><input id="rightInput" readonly
-                            placeHolder="Press key">
-                    </div>
-                    <div class="input-row"><label for="downInput">Down:</label><input id="downInput" readonly
-                            placeHolder="Press key">
-                    </div>
-                    <div class="input-row"><label for="upInput">Up:</label><input id="upInput" readonly
-                            placeholder="Press key"></div>
-                    <div class="input-row"><label for="shootInput">Shoot:</label><input id="shootInput" readonly
-                            placeholder="pressKey">
-                    </div>
-                    <div class="input-row"><label for="pickupInput">Pickup:</label><input id="pickupInput" readonly
-                            placeholder="pressKey"></div>
-                    <div class="input-row"><label for="ragdollInput">Ragdoll:</label><input id="ragdollInput" readonly
-                            placeholder="pressKey"></div>
-                    <div class="input-row"><label for="strafeInput">Strafe:</label><input id="strafeInput" readonly
-                            placeholder="pressKey"></div>
-                    <div class="input-row"><label for="quackInput">Quack:</label><input id="quackInput" readonly
-                            placeholder="pressKey">
-                    </div>
-                </div>
-
-                <h2>Player Settings</h2>
-
-                <div class="input-row">
-                    <label for="displayNameInput">Name:</label>
-                    <input id="displayNameInput" type="text" placeholder="Enter name">
-                </div>
-
-                <div class="input-row">
-                    <label for="colorInput">Color:</label>
-                    <input id="colorInput" type="color">
-                </div>
-
-                <div class="modal-buttons">
-                    <button id="cancelControlsButton">Cancel</button>
-                    <button id="resetControlsButton">Reset</button>
-                    <button id="saveControlsButton" class="saveButton">Save</button>
-                </div>
-            </div>
-        </div>
-
+        <!-- Host Menu -->
         <div id="hostMenu" class="modal hidden">
             <div class="modal-content">
-                <h2>Create Lobby</h2>
+                <span>Create Lobby</span>
 
-                <div class="input-row">
-                    <label for="lobbyNameInput">Lobby Name: </label>
-                    <input type="text" id="lobbyNameInput" placeholder="Enter lobby name">
-                </div>
-
-                <div class="input-row">
-                    <label for="maxPlayersInput">Max Players: </label>
-                    <input type="number" id="maxPlayersInput" value="4" min="2" max="16">
+                <div>
+                    <div class="input-row">
+                        <label for="lobbyNameInput">Lobby Name: </label>
+                        <input type="text" id="lobbyNameInput" placeholder="Enter lobby name">
+                    </div>
+                    <div class="input-row">
+                        <label for="maxPlayersInput">Max Players: </label>
+                        <input type="number" id="maxPlayersInput" value="4" min="2" max="16">
+                    </div>
                 </div>
 
                 <div class="modal-buttons">
-                    <button id="cancelHostbutton">Cancel</button>
-                    <button id="createLobbybutton" disabled>Create</button>
+                    <div>
+                        <button id="cancelHostbutton">Cancel</button>
+                        <button id="createLobbybutton" disabled>Create</button>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- ControlsMenu -->
+        <div id="controlsMenu" class="modal hidden">
+            <div class="modal-content">
+                <span>Controls</span>
+                <div class="controls-grid">
+                    <div class="input-row"><label for="jumpInput">Jump:</label><input id="jumpInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="leftInput">Left:</label><input id="leftInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="rightInput">Right:</label><input id="rightInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="downInput">Down:</label><input id="downInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="upInput">Up:</label><input id="upInput" type="text" type="text">
+                    </div>
+                    <div class="input-row"><label for="shootInput">Shoot:</label><input id="shootInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="pickupInput">Pickup:</label><input id="pickupInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="ragdollInput">Ragdoll:</label><input id="ragdollInput"
+                            type="text"></div>
+                    <div class="input-row"><label for="strafeInput">Strafe:</label><input id="strafeInput" type="text">
+                    </div>
+                    <div class="input-row"><label for="quackInput">Quack:</label><input id="quackInput" type="text">
+                    </div>
+                </div>
+
+                <span>Appearance</span>
+                <div id="wideControlInput">
+                    <div class="input-row">
+                        <label for="displayNameInput">Name:</label>
+                        <input id="displayNameInput" type="text" placeholder="...enter name" maxlength="15">
+                    </div>
+
+                    <div class="input-row">
+                        <label for="colorInput">Color:</label>
+                        <input id="colorInput" type="color">
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <div>
+                        <button id="cancelControlsButton">Cancel</button>
+                        <button id="resetControlsButton">Reset</button>
+                        <button id="saveControlsButton" class="saveButton">Save</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="lobbySettings" class="modal hidden">
+            <div class="modal-content">
+                <span>Maps</span>
+                <div>
+                    <div class="input-row">
+                        <input type="file" id="loadInput" accept=".json" multiple hidden>
+                        <button id="loadButton">Load Maps</button>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <div>
+                            <button id="cancelLobbyButton">Cancel</button>
+                            <button id="resetLobbyButton">Reset</button>
+                            <button id="saveLobbyButton">Save</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Extra -->
         <div id="scoreBoard">
             <div id="scores">
             </div>

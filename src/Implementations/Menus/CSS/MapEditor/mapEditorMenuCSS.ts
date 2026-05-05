@@ -92,7 +92,6 @@ class MapEditorMenuCSS implements IMapEditorMenu {
             this.settings.appendChild(spawnerSettingsHeader);
             this.settings.appendChild(spawnerSettingsContent);
         }
-
         div.classList.add("selected");
         this.selectedItem = item;
     }

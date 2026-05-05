@@ -128,8 +128,7 @@ canvas {
 .controls-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2px 60px;
-    margin-bottom: 50px;
+    gap: 2px 20px;
 }
 
 .serverlist-footer {
@@ -147,6 +146,7 @@ canvas {
     display: flex;
     padding: 0px 10px;
     gap: 14px;
+    flex-wrap: wrap;
 }
 
 button {
@@ -201,7 +201,7 @@ button:disabled:hover {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 20px;
     border-radius: 5px;
 }
 
@@ -211,47 +211,60 @@ button:disabled:hover {
 }
 
 #controlsMenu input {
-    width: 120px;
+    width: 140px;
 }
 
-#displayNameInput {
-    flex: 0 0 200px
+#controlsMenu label {
+    font-size: 30px;
+    text-align: right;
+    margin-right: 20px;
+    width: 90px;
+}
+
+#wideControlInput input {
+    width: 240px;
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 1rem;
     width: 100%;
-    gap: 0;
+    flex-wrap: wrap;
+    flex-direction: column;
+    display: flex;
+}
+
+.modal-buttons>div:first-child {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-buttons>div:last-child {
+    margin-top: 10px;
 }
 
 .modal-buttons button {
     flex: 1;
-    padding: 12px 0;
-    margin: 0 5px;
+    width: 100%;
 }
 
-.modal h2 {
+.modal span {
     margin: 0;
-    margin-bottom: 20px;
+    font-size: 50px;
 }
 
 .input-row {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .input-row label {
     text-align: left;
-    width: 120px;
-    margin: 0;
-    padding: 0;
+    width: 160px;
+    margin-right: 20px;
+    text-align: right;
 }
 
 .input-row input {
-    flex: 1;
     padding: 8px 12px;
     background: var(--bg);
     box-shadow: var(--shadow-inset);
@@ -261,38 +274,6 @@ button:disabled:hover {
     font-size: 1em;
     box-sizing: border-box;
     outline: none;
-}
-
-input:focus {
-    background: var(--bg-selected);
-    box-shadow: var(--shadow-inset-selected);
-}
-
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type="color"] {
-    appearance: none;
-    border: none;
-    padding: 0;
-    background: transparent;
-    cursor: pointer;
-    border: var(--border);
-    height: 40px;
-    }
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 0;
-    border: none;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    box-shadow: inset -4px -4px 0 #12121260, inset 4px 4px 0 #cecece68;
-    border: none;
-    padding: 0;
 }
 
 .hidden {
@@ -458,6 +439,15 @@ input[type="color"]::-webkit-color-swatch {
     box-shadow: var(--shadow-inset);
 }
 
+.menu-group-content input[type="number"] {
+    width: 40px;
+}
+
+.menu-group-content input[type="text"] {
+    width: 220px;
+}
+
+
 .menu-icon-wrapper {
     height: 40px;
     width: 60px;
@@ -505,7 +495,7 @@ input[type="color"]::-webkit-color-swatch {
     border-bottom: var(--border);
 }
 
-.menu-item input[type="checkbox"] {
+input[type="checkbox"] {
     appearance: none;
     width: 24px;
     height: 24px;
@@ -519,17 +509,17 @@ input[type="color"]::-webkit-color-swatch {
     cursor: pointer;
 }
 
-.menu-item input[type="checkbox"]:checked {
+input[type="checkbox"]:checked {
     background: var(--bg-selected);
     box-shadow: var(--shadow-inset-selected);
 }
 
-.menu-item input[type="text"],
-.menu-item input[type="number"] {
+input[type="text"],
+input[type="number"] {
     flex: 1;
-    width: 30px;
     text-align: center;
     padding: 4px;
+    padding-left: 10px;
 
     background: var(--bg-dark);
     color: white;
@@ -542,17 +532,39 @@ input[type="color"]::-webkit-color-swatch {
     font-size: 28px;
 }
 
-.menu-item input[type="text"] {
-    width: 200px;
+input[type="text"] {
     text-align: left;
 }
 
-input:focus {
-    outline: none;
+input[type="color"] {
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border: var(--border);
+    height: 40px;
 }
 
-.menu-item input[type="number"]:focus,
-.menu-item input[type="text"]:focus {
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border: none;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    box-shadow: inset -4px -4px 0 #12121260, inset 4px 4px 0 #cecece68;
+    border: none;
+    padding: 0;
+}
+
+
+input:focus {
+    outline: none;
     background: var(--bg-selected);
     box-shadow: var(--shadow-inset-selected);
 }

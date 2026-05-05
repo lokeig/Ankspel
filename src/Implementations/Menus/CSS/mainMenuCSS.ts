@@ -4,6 +4,7 @@ import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@share
 import { ControlsMenu } from "./controlsMenu";
 import { Controls } from "@common";
 import { IMainMenu } from "@menu";
+import { LobbySettingsMenu } from "./lobbysettingsMenu";
 
 class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
@@ -11,12 +12,14 @@ class MainMenuCSS implements IMainMenu {
     private selectedLobbyId: string | null = null;
     private hostMenu = new HostMenu();
     private controlsMenu = new ControlsMenu;
+    private lobbySettingsMenu = new LobbySettingsMenu();
 
     private joinbutton: HTMLButtonElement;
     private hostbutton: HTMLButtonElement;
     private startbutton: HTMLButtonElement;
     private leavebutton: HTMLButtonElement;
     private settingsButton: HTMLButtonElement;
+    private lobbyButton: HTMLButtonElement;
 
     private lastLobbies: LobbyMessageData[] = [];
 
@@ -54,6 +57,9 @@ class MainMenuCSS implements IMainMenu {
 
         this.settingsButton = document.getElementById("settingsButton") as HTMLButtonElement;
         this.settingsButton.addEventListener("click", () => this.onControls());
+
+        this.lobbyButton = document.getElementById("lobbySettingsButton") as HTMLButtonElement;
+        this.lobbyButton.addEventListener("click", () => this.lobbySettingsMenu.show());
 
         this.startbutton.disabled = true;
         this.leavebutton.disabled = true;
@@ -117,6 +123,9 @@ class MainMenuCSS implements IMainMenu {
 
     public hide(): void {
         this.mainDiv.style.display = "none";
+        this.controlsMenu.hide();
+        this.hostMenu.hide();
+        this.lobbySettingsMenu.hide();
     }
 
     public getName(player: number): string {
