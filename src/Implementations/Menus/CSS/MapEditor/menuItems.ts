@@ -24,6 +24,7 @@ const MenuItems: Record<string, MenuEntry[]> = {
         ["mine", Images.mine, new Frame(), SelectionType.Item],
         ["grenade", Images.grenade, new Frame(), SelectionType.Item],
         ["bazooka", Images.bazooka, new Frame(), SelectionType.Item],
+        ["netGun", Images.netGun, new Frame(), SelectionType.Item],
     ],
     props: [
         ["rock", Images.rock, new Frame(), SelectionType.Item],
