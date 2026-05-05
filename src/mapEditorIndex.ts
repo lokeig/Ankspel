@@ -37,7 +37,7 @@ saveButton.addEventListener("click", async () => {
     const map = mapEditor.getMap();
     const json = JSON.stringify(map, null, 2);
 
-    const handle = await window.showSaveFilePicker({
+    const handle = await (window as any).window.showSaveFilePicker({
         suggestedName: "map.json",
         types: [
             {

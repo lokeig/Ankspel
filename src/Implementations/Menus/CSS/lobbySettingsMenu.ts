@@ -23,10 +23,7 @@ class LobbySettingsMenu {
 
     }
 
-
-
     private save(): void {
-
         this.hide();
     }
 
