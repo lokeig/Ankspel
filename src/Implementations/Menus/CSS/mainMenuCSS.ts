@@ -4,7 +4,7 @@ import { ClientMessage, LobbyMessageData, CMsgType, ServerMessage } from "@share
 import { ControlsMenu } from "./controlsMenu";
 import { Controls } from "@common";
 import { IMainMenu } from "@menu";
-import { LobbySettingsMenu } from "./lobbysettingsMenu";
+import { LobbySettingsMenu } from "./lobbySettingsMenu";
 
 class MainMenuCSS implements IMainMenu {
     private mainDiv: HTMLElement;
